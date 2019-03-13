@@ -36,7 +36,9 @@ rightGoal;
   }
 
   function mouseClicked() {
-    imageBalls[0].body.isStatic = false;
+    let addedBall = new ImageBall(imgs[0],mouseX,mouseY);
+    addedBall.body.isStatic = false;
+    addedBall.show();
   }
 
   function setDisplaySize() {
