@@ -10,7 +10,9 @@ gridCurentY,
 playfield,
 engine,
 world,
-launchArrow;
+launchArrow,
+power;
+let clicked = false;
 
   function preload() {
     imgs.push(loadImage('assets/images/cellman.jpg'));
@@ -24,6 +26,7 @@ launchArrow;
     engine = Matter.Engine.create();
     world = engine.world;
     loadAssets();
+    power = 0;
     
   }
 
@@ -40,14 +43,29 @@ launchArrow;
         goal.show();
       }
     });
+    if(launchArrow) {
+        launchArrow.show();
+    }
   }
 
 
+// function mouseDragged(event) {
+//   print(event);
+//   power += 1;
+//   stroke(255);
+//   strokeWeight(7);
+//   playfield.line(mouseX,mouseY,mouseX-power,mouseY-power);
+// }
 
   function mousePressed() {
-    console.log(this);
-    console.log(event);
-    //launchArrow = new LaunchArrow(mouse)
+    if(!clicked) {
+      createLaunchArrow();
+      clicked = true;
+    }
+  }
+
+  function mouseReleased() {
+    Matter.Body.setStatic(imageBalls[0].body, false);
   }
 
   function setDisplaySize() {
@@ -71,23 +89,10 @@ launchArrow;
     for(let i = 0; i < 2; i++){
       goals[i] = new Goal(iconSize/(2-i) + iconSize*i, gridStartY, iconSize/10);
     };
-    createLaunchArrow();
   }
 
   function createLaunchArrow() {
-    const mouse = Matter.Mouse.create(playfield.elt);
-    const options = {
-      mouse: mouse
-    }
-    launchArrow = Matter.MouseConstraint.create({
-      pointA: imageBalls[0],
-      bodyB: mouse,
-      render: {
-        lineWidth: 1,
-      }  
-    });
-    console.log(launchArrow);
-    Matter.World.add(world, launchArrow);
+    launchArrow = new LaunchArrow(mouseX, mouseY, imageBalls[0].body);
   }
 
   
@@ -95,11 +100,7 @@ launchArrow;
 
 
 
-// function mouseDragged(event) {
-//   print(event);
-//   power += 1;
-//   line(mouseX,mouseY,mouseX-power,mouseY-power);
-// }
+
 
 // function mouseReleased() {
 //   background(map(power,0,100,0,255));

@@ -16,8 +16,8 @@ class LaunchArrow {
 
     show() {
         stroke(255);
-        const start = this.launchArrow.PointA;
-        const end = this.launchArrow.body.position;
+        const start = this.launchArrow.pointA;
+        const end = this.launchArrow.bodyB.position;
         line(start.x, start.y, end.x, end.y);
     }
 }
