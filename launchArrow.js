@@ -14,10 +14,16 @@ class LaunchArrow {
 
     }
 
+    launch() {
+        this.launchArrow.pointA = null;
+    }
+
     show() {
-        stroke(255);
-        const start = this.launchArrow.pointA;
-        const end = this.launchArrow.bodyB.position;
-        line(start.x, start.y, end.x, end.y);
+        if(this.launchArrow.bodyB && this.launchArrow.pointA) {
+            stroke(255);
+            const start = this.launchArrow.pointA;
+            const end = this.launchArrow.bodyB.position;
+            line(start.x, start.y, end.x, end.y);
+        }
     }
 }

@@ -66,6 +66,10 @@ let clicked = false;
 
   function mouseReleased() {
     Matter.Body.setStatic(imageBalls[0].body, false);
+    console.log(launchArrow);
+    setTimeout(() => {
+      launchArrow.launch();
+    }, 50);
   }
 
   function setDisplaySize() {
