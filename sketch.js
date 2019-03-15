@@ -1,16 +1,16 @@
 let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
+let goals = [];
 let iconSize, 
 gridStartX, 
 gridStartY, 
 gridCurrentX, 
 gridCurentY,
-imageLayer,
+playfield,
 engine,
 world,
-leftGoal,
-rightGoal;
+launchArrow;
 
   function preload() {
     imgs.push(loadImage('assets/images/cellman.jpg'));
@@ -18,27 +18,36 @@ rightGoal;
   }
 
   function setup() {
-    createCanvas(windowWidth, windowHeight);
-    background(17,51,153);
+    playfield = createCanvas(windowWidth, windowHeight);
+    background(111);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
     loadAssets();
+    
   }
 
   function draw() {
     Matter.Engine.update(engine);
+    background(111);
     imageBalls.forEach(function(ball) {
       if(ball) {
         ball.show();
       }
     });
+    goals.forEach(function(goal) {
+      if(goal) {
+        goal.show();
+      }
+    });
   }
 
-  function mouseClicked() {
-    let addedBall = new ImageBall(imgs[0],mouseX,mouseY);
-    addedBall.body.isStatic = false;
-    addedBall.show();
+
+
+  function mousePressed() {
+    console.log(this);
+    console.log(event);
+    //launchArrow = new LaunchArrow(mouse)
   }
 
   function setDisplaySize() {
@@ -50,8 +59,8 @@ rightGoal;
   }
 
   function loadAssets() {
-      imgs.forEach(function(img,i) {
-        imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY);
+    imgs.forEach(function(img,i) {
+        imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, true);
         if(gridCurrentX + iconSize*3 <= windowWidth) {
           gridCurrentX += iconSize*2;
         } else {
@@ -59,20 +68,29 @@ rightGoal;
           gridCurrentY += icons*2;
         }
     });
-    drawGoal();
+    for(let i = 0; i < 2; i++){
+      goals[i] = new Goal(iconSize/(2-i) + iconSize*i, gridStartY, iconSize/10);
+    };
+    createLaunchArrow();
   }
 
-  function drawGoal() {
-    leftGoal = Matter.Bodies.circle(windowWidth/50, gridStartY/3, iconSize/10,{isStatic: true});
-    rightGoal = Matter.Bodies.circle(windowWidth/50 + iconSize, gridStartY/3, iconSize/10,{isStatic: true});
-    //Matter.Body.setStatic(goal.body,true);
-    Matter.World.add(world, leftGoal);
-    Matter.World.add(world, rightGoal);
-    fill(128);
-    ellipseMode(CENTER);
-    circle(iconSize/5, gridStartY, iconSize/10);
-    circle(iconSize + iconSize, gridStartY, iconSize/10);
+  function createLaunchArrow() {
+    const mouse = Matter.Mouse.create(playfield.elt);
+    const options = {
+      mouse: mouse
+    }
+    launchArrow = Matter.MouseConstraint.create({
+      pointA: imageBalls[0],
+      bodyB: mouse,
+      render: {
+        lineWidth: 1,
+      }  
+    });
+    console.log(launchArrow);
+    Matter.World.add(world, launchArrow);
   }
+
+  
   
 
 
