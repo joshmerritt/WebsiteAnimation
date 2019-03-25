@@ -5,7 +5,7 @@ class LaunchArrow {
                 x: x,
                 y: y
             },
-            bodyB: body,
+            pointB: body,
             stiffness: 0.5,
         }
         this.launchArrow = Matter.Constraint.create(options);

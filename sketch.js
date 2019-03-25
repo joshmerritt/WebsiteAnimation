@@ -21,55 +21,46 @@ let clicked = false;
 
   function setup() {
     playfield = createCanvas(windowWidth, windowHeight);
-    background(111);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
+    background(111);
     loadAssets();
-    power = 0;
-    
   }
 
   function draw() {
     Matter.Engine.update(engine);
     background(111);
+    drawBalls();
+    drawGoals();
+
+  }
+
+  function drawBalls() {
     imageBalls.forEach(function(ball) {
       if(ball) {
         ball.show();
+        if(ball.onBall(mouseX, mouseY)) {
+          ball.hover();
+        }
+        if(mouseIsPressed) {
+          if(ball.clicked) {
+            ball.aim();
+          }
+        } else {
+          ball.xPower = 0;
+          ball.yPower = 0;
+        }
       }
     });
+  }
+
+  function drawGoals() {
     goals.forEach(function(goal) {
       if(goal) {
         goal.show();
       }
     });
-    if(launchArrow) {
-        launchArrow.show();
-    }
-  }
-
-
-// function mouseDragged(event) {
-//   print(event);
-//   power += 1;
-//   stroke(255);
-//   strokeWeight(7);
-//   playfield.line(mouseX,mouseY,mouseX-power,mouseY-power);
-// }
-
-  function mousePressed() {
-    if(!clicked) {
-      createLaunchArrow();
-      clicked = true;
-    }
-  }
-
-  function mouseReleased() {
-    Matter.Body.setStatic(imageBalls[0].body, false);
-    console.log(launchArrow);
-    setTimeout(() => {
-      launchArrow.launch();
-    }, 50);
   }
 
   function setDisplaySize() {
@@ -90,22 +81,49 @@ let clicked = false;
           gridCurrentY += icons*2;
         }
     });
+
     for(let i = 0; i < 2; i++){
       goals[i] = new Goal(iconSize/(2-i) + iconSize*i, gridStartY, iconSize/10);
     };
   }
 
-  function createLaunchArrow() {
-    launchArrow = new LaunchArrow(mouseX, mouseY, imageBalls[0].body);
+
+  function mouseDragged(event) {
+    // imageBalls.forEach(function(ball) {
+    //   if(ball.clicked) {
+    //     ball.aim();
+    //   }
+    // });
+    
   }
 
-  
-  
-
-
-
-
-
+  function mouseClicked() {
+    imageBalls.forEach(function(ball) {
+      if(ball.onBall(mouseX, mouseY)) {
+        ball.clicked = true;
+        print("ball", ball);
+      }
+    });
+  }
+  //
+  // function mousePressed() {
+  //   if(!clicked) {
+  //     createLaunchArrow();
+  //     clicked = true;
+  //   }
+  // }
+  //
+  // function mouseReleased() {
+  //   Matter.Body.setStatic(imageBalls[0].body, false);
+  //   console.log(launchArrow);
+  //   setTimeout(() => {
+  //     launchArrow.launch();
+  //   }, 50);
+  // }
+  //
+  // function createLaunchArrow() {
+  //   launchArrow = new LaunchArrow(mouseX, mouseY, imageBalls[0].body);
+  // }
 // function mouseReleased() {
 //   background(map(power,0,100,0,255));
 //   power = 0;
