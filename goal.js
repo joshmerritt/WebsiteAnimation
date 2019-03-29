@@ -6,15 +6,11 @@ class Goal {
     }
 
     show() {
-      const currentPos = this.body.position;
-      const currentAngle = this.body.angle;
       push();
-      translate(currentPos.x, currentPos.y);
-      rotate(currentAngle);
       fill(55);
       ellipseMode(CENTER);
-      circle(0, 0, this.radius);
-      pop();  
+      circle(this.body.position.x, this.body.position.y, this.radius);
+      pop();
     }
 
 }

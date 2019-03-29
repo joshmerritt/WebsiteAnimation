@@ -18,7 +18,7 @@ class LaunchArrow {
     launch() {
         // Matter.World.remove(world, this.launchArrow);
         // delete this;
-        launchArrow.pointA = null;
+        launchArrow.bodyB = null;
     }
 
     show() {

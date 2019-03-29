@@ -11,7 +11,8 @@ playfield,
 engine,
 world,
 launchArrow,
-power;
+power,
+ground;
 let clicked = false;
 
   function preload() {
@@ -24,6 +25,10 @@ let clicked = false;
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
+    world.bounds = {
+      min: {x: 0, y: 0},
+      max: {x: windowWidth, y: windowHeight}
+    };
     background(111);
     loadAssets();
   }
@@ -33,6 +38,7 @@ let clicked = false;
     background(111);
     drawBalls();
     drawGoals();
+    ground.show();
 
   }
 
@@ -85,6 +91,7 @@ let clicked = false;
     for(let i = 0; i < 2; i++){
       goals[i] = new Goal(iconSize/(2-i) + iconSize*i, gridStartY, iconSize/10);
     };
+    ground = new Ground(windowWidth, windowHeight, iconSize);
   }
 
 

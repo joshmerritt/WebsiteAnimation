@@ -2,6 +2,7 @@ class ImageBall {
     constructor(img, xPos, yPos, staticState) {
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2);
       Matter.Body.setStatic(this.body, staticState);
+      this.body.restitution = 0.5;
       Matter.World.add(world, this.body);
       this.img = img;
       this.x = xPos;
@@ -29,12 +30,14 @@ class ImageBall {
     }
 
     hover() {
-        rectMode(CENTER);
-        rect(this.x, this.y, this.r*2, this.r*2, this.r);
-        stroke(255);
-        strokeWeight(5);
-        line(this.x, this.y, this.x - iconSize, this.y - iconSize);
-        triangle(this.x - iconSize, this.y - iconSize, this.x - iconSize, this.y - iconSize + iconSize/8, this.x - iconSize + iconSize/8, this.y - iconSize);        
+      push();  
+      rectMode(CENTER);
+      rect(this.x, this.y, this.r*2, this.r*2, this.r);
+      stroke(255);
+      strokeWeight(5);
+      line(this.x, this.y, this.x - iconSize, this.y - iconSize);
+      triangle(this.x - iconSize, this.y - iconSize, this.x - iconSize, this.y - iconSize + iconSize/8, this.x - iconSize + iconSize/8, this.y - iconSize);        
+      pop();
     }
 
     aim() {
@@ -51,10 +54,12 @@ class ImageBall {
       // print("y", this.yPower);
       // rectMode(CENTER);
       // rect(this.x, this.y, this.r*2, this.r*2, this.r);
+      push();
       stroke(255);
       strokeWeight(5);
       line(this.x, this.y, currentPosX, currentPosY);
       triangle(currentPosX, currentPosY, currentPosX - arrowOffsetX, currentPosY + arrowOffsetY, currentPosX + arrowOffsetX, currentPosY + arrowOffsetY);
+      pop();
     }
 
   }
