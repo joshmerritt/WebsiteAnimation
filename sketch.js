@@ -40,14 +40,14 @@ let clicked = false;
     imageBalls.forEach(function(ball) {
       if(ball) {
         ball.show();
-        if(ball.onBall(mouseX, mouseY)) {
-          ball.hover();
-        }
         if(mouseIsPressed) {
           if(ball.clicked) {
             ball.aim();
           }
         } else {
+          if(ball.onBall(mouseX, mouseY)) {
+            ball.hover();
+          }
           ball.xPower = 0;
           ball.yPower = 0;
         }
@@ -89,43 +89,36 @@ let clicked = false;
 
 
   function mouseDragged(event) {
-    // imageBalls.forEach(function(ball) {
-    //   if(ball.clicked) {
-    //     ball.aim();
-    //   }
-    // });
-    
-  }
-
-  function mouseClicked() {
     imageBalls.forEach(function(ball) {
-      if(ball.onBall(mouseX, mouseY)) {
-        ball.clicked = true;
-        print("ball", ball);
+      if(ball.clicked) {
+        ball.aim();
       }
     });
   }
-  //
-  // function mousePressed() {
-  //   if(!clicked) {
-  //     createLaunchArrow();
-  //     clicked = true;
-  //   }
-  // }
-  //
-  // function mouseReleased() {
-  //   Matter.Body.setStatic(imageBalls[0].body, false);
-  //   console.log(launchArrow);
-  //   setTimeout(() => {
-  //     launchArrow.launch();
-  //   }, 50);
-  // }
-  //
-  // function createLaunchArrow() {
-  //   launchArrow = new LaunchArrow(mouseX, mouseY, imageBalls[0].body);
-  // }
-// function mouseReleased() {
-//   background(map(power,0,100,0,255));
-//   power = 0;
 
-// }
+  function mousePressed() {
+    imageBalls.forEach(function(ball) {
+      if(ball.onBall(mouseX, mouseY)) {
+        ball.clicked = true;
+      } else {
+        ball.clicked = false;
+      }
+    });
+  }
+
+  function mouseReleased() {
+    createLaunchArrow();
+    console.log(launchArrow);
+    setTimeout(() => {
+      launchArrow.launch();
+    }, 50);
+  }
+  
+  function createLaunchArrow() {
+    imageBalls.forEach(function(ball) {
+      if(ball.clicked) {
+        launchArrow = new LaunchArrow(ball.x - ball.xPower, ball.y - ball.yPower, ball.body);
+        Matter.Body.setStatic(ball.body, false);
+      }
+    });
+  }

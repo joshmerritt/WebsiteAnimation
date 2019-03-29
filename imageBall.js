@@ -45,8 +45,8 @@ class ImageBall {
       let arrowLength = iconSize/8;
       let arrowOffsetX = Math.sqrt(Math.pow(arrowLength, 2))/2;
       let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
-      let currentPosX = endPosX - this.xPower;
-      let currentPosY = endPosY - this.yPower;
+      let currentPosX = this.x - this.xPower;
+      let currentPosY = this.y - this.yPower;
       // print("x", this.xPower);
       // print("y", this.yPower);
       // rectMode(CENTER);
@@ -54,12 +54,7 @@ class ImageBall {
       stroke(255);
       strokeWeight(5);
       line(this.x, this.y, currentPosX, currentPosY);
-      push();
-      //var angle =  atan2(this.x, this.y, endPosX - this.xPower, endPosY - this.yPower);
-      // translate(endPosX - this.xPower, endPosY - this.yPower);
-      // rotate(angle - HALF_PI);
       triangle(currentPosX, currentPosY, currentPosX - arrowOffsetX, currentPosY + arrowOffsetY, currentPosX + arrowOffsetX, currentPosY + arrowOffsetY);
-      pop();
     }
 
   }
