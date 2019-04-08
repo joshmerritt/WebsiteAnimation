@@ -114,11 +114,30 @@ let clicked = false;
   }
 
   function mouseReleased() {
-    createLaunchArrow();
-    console.log(launchArrow);
-    setTimeout(() => {
-      launchArrow.launch();
-    }, 50);
+    imageBalls.forEach(function(ball) {
+      if(ball.clicked) {
+        let strength = dist(ball.x, ball.y, ball.body.position.x, ball.body.position.y);
+        const options = {
+            pointA: {
+                x: (ball.x-ball.xPower),
+                y: (ball.y-ball.yPower)
+            },
+            bodyB: ball.body,
+            stiffness: 0.5,
+            length: strength
+        };
+        launchArrow = Matter.Constraint.create(options);
+        Matter.World.add(world, launchArrow);
+        Matter.Body.setStatic(ball.body, false);
+        setTimeout(() => {
+          launchArrow.pointA = null;
+        }, 25);
+      }
+    });
+
+    // createLaunchArrow();
+    // console.log(launchArrow);
+    
   }
   
   function createLaunchArrow() {
