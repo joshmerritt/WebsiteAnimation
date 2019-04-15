@@ -116,22 +116,23 @@ let clicked = false;
   function mouseReleased() {
     imageBalls.forEach(function(ball) {
       if(ball.clicked) {
-        let strength = dist(ball.x, ball.y, ball.body.position.x, ball.body.position.y);
-        const options = {
-            pointA: {
-                x: (ball.x-ball.xPower),
-                y: (ball.y-ball.yPower)
-            },
-            bodyB: ball.body,
-            stiffness: 0.5,
-            length: strength
-        };
-        launchArrow = Matter.Constraint.create(options);
-        Matter.World.add(world, launchArrow);
+        // let strength = dist(ball.x, ball.y, ball.body.position.x, ball.body.position.y);
+        // const options = {
+        //     pointA: {
+        //         x: (ball.x-ball.xPower),
+        //         y: (ball.y-ball.yPower)
+        //     },
+        //     bodyB: ball.body,
+        //     stiffness: 0.5,
+        //     length: strength
+        // };
+        // launchArrow = Matter.Constraint.create(options);
+        // Matter.World.add(world, launchArrow);
+        let strength = Matter.Vector.create(ball.xPower, ball.yPower);
+        let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
-        setTimeout(() => {
-          launchArrow.pointA = null;
-        }, 25);
+        Matter.Body.applyForce(ball.body, ballPos, strength);
+        
       }
     });
 
