@@ -128,7 +128,7 @@ let clicked = false;
         // };
         // launchArrow = Matter.Constraint.create(options);
         // Matter.World.add(world, launchArrow);
-        let strength = Matter.Vector.create(ball.xPower, ball.yPower);
+        let strength = Matter.Vector.create(-ball.xPower, -ball.yPower);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
@@ -141,11 +141,11 @@ let clicked = false;
     
   }
   
-  function createLaunchArrow() {
-    imageBalls.forEach(function(ball) {
-      if(ball.clicked) {
-        launchArrow = new LaunchArrow(ball.x - ball.xPower, ball.y - ball.yPower, ball.body);
-        Matter.Body.setStatic(ball.body, false);
-      }
-    });
-  }
+  // function createLaunchArrow() {
+  //   imageBalls.forEach(function(ball) {
+  //     if(ball.clicked) {
+  //       launchArrow = new LaunchArrow(ball.x - ball.xPower, ball.y - ball.yPower, ball.body);
+  //       Matter.Body.setStatic(ball.body, false);
+  //     }
+  //   });
+  //}

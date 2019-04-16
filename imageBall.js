@@ -41,15 +41,15 @@ class ImageBall {
     }
 
     aim() {
-      this.xPower += mouseX - pmouseX;
-      this.yPower += mouseY - pmouseY;
+      this.xPower += (mouseX - pmouseX)/300;
+      this.yPower += (mouseY - pmouseY)/300;
       let endPosX = this.x - iconSize;
       let endPosY = this.y - iconSize;
       let arrowLength = iconSize/8;
       let arrowOffsetX = Math.sqrt(Math.pow(arrowLength, 2))/2;
       let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
-      let currentPosX = this.x - this.xPower;
-      let currentPosY = this.y - this.yPower;
+      let currentPosX = this.x - (this.xPower*100);
+      let currentPosY = this.y - (this.yPower*100);
       // print("x", this.xPower);
       // print("y", this.yPower);
       // rectMode(CENTER);
