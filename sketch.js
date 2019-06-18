@@ -61,7 +61,6 @@ let clicked = false;
         }
         if(ball.body.angularVelocity < 0.000001 && ball.launched) {
           ball.reset();
-          console.log("ball stopped after launch");
         }
       }
     });
