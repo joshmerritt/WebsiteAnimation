@@ -4,6 +4,8 @@ class ImageBall {
       Matter.Body.setStatic(this.body, staticState);
       this.body.restitution = 0.5;
       Matter.World.add(world, this.body);
+      this.originalX = xPos;
+      this.originalY = yPos;
       this.img = img;
       this.x = xPos;
       this.y = yPos;
@@ -11,6 +13,7 @@ class ImageBall {
       this.xPower = 0;
       this.yPower = 0;
       this.clicked = false;
+      this.launched = false;
     }
 
     onBall(x, y) {
@@ -60,6 +63,11 @@ class ImageBall {
       line(this.x, this.y, currentPosX, currentPosY);
       triangle(currentPosX, currentPosY, currentPosX - arrowOffsetX, currentPosY + arrowOffsetY, currentPosX + arrowOffsetX, currentPosY + arrowOffsetY);
       pop();
+    }
+
+    reset() {
+      //this.originalPos = {this.originalX, this.originalY}
+      Matter.Body.setPosition(this.body, {x:25,y:25});
     }
 
   }

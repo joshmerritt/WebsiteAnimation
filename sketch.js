@@ -12,6 +12,7 @@ engine,
 world,
 launchArrow,
 power,
+backboard,
 ground;
 let clicked = false;
 
@@ -39,6 +40,7 @@ let clicked = false;
     drawBalls();
     drawGoals();
     ground.show();
+    backboard.show();
 
   }
 
@@ -56,6 +58,10 @@ let clicked = false;
           }
           ball.xPower = 0;
           ball.yPower = 0;
+        }
+        if(ball.body.angularVelocity < 0.000001 && ball.launched) {
+          ball.reset();
+          console.log("ball stopped after launch");
         }
       }
     });
@@ -92,6 +98,7 @@ let clicked = false;
       goals[i] = new Goal(iconSize/(2-i) + iconSize*i, gridStartY, iconSize/10);
     };
     ground = new Ground(windowWidth, windowHeight, iconSize);
+    backboard = new Backboard(gridStartY);
   }
 
 
@@ -132,6 +139,7 @@ let clicked = false;
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
+        ball.launched = true;
         
       }
     });
