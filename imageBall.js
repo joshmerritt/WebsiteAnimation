@@ -4,8 +4,7 @@ class ImageBall {
       Matter.Body.setStatic(this.body, staticState);
       this.body.restitution = 0.5;
       Matter.World.add(world, this.body);
-      this.originalX = xPos;
-      this.originalY = yPos;
+      this.originalPos = {x:xPos, y:yPos};
       this.img = img;
       this.x = xPos;
       this.y = yPos;
@@ -13,8 +12,8 @@ class ImageBall {
       this.xPower = 0;
       this.yPower = 0;
       this.clicked = false;
-      this.launched = false;
-    }
+      this.launchTime = 0;
+       }
 
     onBall(x, y) {
       let distance = dist(x, y, this.x, this.y);
@@ -22,6 +21,7 @@ class ImageBall {
     }
 
     show() {
+      this.reset();
       const currentPos = this.body.position;
       const currentAngle = this.body.angle;
       push();
@@ -44,19 +44,15 @@ class ImageBall {
     }
 
     aim() {
-      this.xPower += (mouseX - pmouseX)/300;
-      this.yPower += (mouseY - pmouseY)/300;
+      this.xPower += (mouseX - pmouseX)/3000;
+      this.yPower += (mouseY - pmouseY)/3000;
       let endPosX = this.x - iconSize;
       let endPosY = this.y - iconSize;
       let arrowLength = iconSize/8;
       let arrowOffsetX = Math.sqrt(Math.pow(arrowLength, 2))/2;
       let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
-      let currentPosX = this.x - (this.xPower*100);
-      let currentPosY = this.y - (this.yPower*100);
-      // print("x", this.xPower);
-      // print("y", this.yPower);
-      // rectMode(CENTER);
-      // rect(this.x, this.y, this.r*2, this.r*2, this.r);
+      let currentPosX = this.x - (this.xPower*500);
+      let currentPosY = this.y - (this.yPower*500);
       push();
       stroke(255);
       strokeWeight(5);
@@ -66,8 +62,13 @@ class ImageBall {
     }
 
     reset() {
-      //this.originalPos = {this.originalX, this.originalY}
-      Matter.Body.setPosition(this.body, {x:25,y:25});
+      let currentTime = new Date;
+      let timeElapsed = currentTime - this.launchTime;
+      if((this.body.angularVelocity <= 0.01) && (timeElapsed>5000) && (this.launchTime)) {
+        Matter.Body.setPosition(this.body, this.originalPos);
+        this.launchTime = 0;
+        Matter.Body.setStatic(this.body, true);
+      }
     }
 
   }
