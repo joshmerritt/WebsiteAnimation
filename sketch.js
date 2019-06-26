@@ -23,6 +23,8 @@ clicked = false;
   function preload() {
     imgs.push(loadImage('assets/images/cellman.jpg'));
     imgs.push(loadImage('assets/images/antbw.jpg'));
+    imgs.push(loadImage('assets/images/bball.jpeg'));
+    imgs.push(loadImage('assets/images/disc.jpg'));
   }
 
   function setup() {

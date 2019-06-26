@@ -66,6 +66,7 @@ class ImageBall {
       let timeElapsed = currentTime - this.launchTime;
       if((this.body.angularVelocity <= 0.01) && (timeElapsed>5000) && (this.launchTime)) {
         Matter.Body.setPosition(this.body, this.originalPos);
+        Matter.Body.setAngle(this.body, 0);
         this.launchTime = 0;
         Matter.Body.setStatic(this.body, true);
       }
