@@ -13,7 +13,7 @@ class ImageBall {
       this.yPower = 0;
       this.clicked = false;
       this.launchTime = 0;
-       }
+    }
 
     onBall(x, y) {
       let distance = dist(x, y, this.x, this.y);
