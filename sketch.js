@@ -2,6 +2,8 @@ let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
 let goals = [];
+let menus = [];
+let menuCategories = ['creating', 'growing', 'enjoying'];
 let iconSize, 
 gridStartX, 
 gridStartY, 
@@ -13,8 +15,10 @@ world,
 launchArrow,
 power,
 backboard,
-ground;
-let clicked = false;
+ground,
+goalPosition,
+clicked = false;
+
 
   function preload() {
     imgs.push(loadImage('assets/images/cellman.jpg'));
@@ -39,6 +43,7 @@ let clicked = false;
     background(111);
     drawBalls();
     drawGoals();
+    drawMenu();
     ground.show();
     backboard.show();
 
@@ -71,10 +76,17 @@ let clicked = false;
     });
   }
 
+  function drawMenu() {
+    menuCategories.forEach(function(category, index) {
+      menus[index] = new Menu(category, index);
+    });
+  }
+
   function setDisplaySize() {
+    goalPosition = {x:windowWidth/4, y:windowHeight/4};
     iconSize =  Math.min(windowWidth/7, windowHeight/7);
-    gridStartX = windowWidth/4;
-    gridStartY = windowHeight/4;
+    gridStartX = goalPosition.x;
+    gridStartY = goalPosition.y;
     gridCurrentX = gridStartX;
     gridCurrentY = gridStartY;
   }
