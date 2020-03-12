@@ -43,7 +43,7 @@ let clicked = false;
   }
 
   function drawBalls() {
-    imageBalls.forEach(function(ball) {
+    imageBalls.forEach(function(ball, index) {
       if(ball) {
         ball.show();
         if(mouseIsPressed) {
@@ -57,12 +57,13 @@ let clicked = false;
           ball.xPower = 0;
           ball.yPower = 0;
         }
+        console.log(index, ball);
       }
     });
   }
 
   function drawGoals() {
-    goals.forEach(function(goal) {
+    goals.forEach(function(goal, index) {
       if(goal) {
         goal.show();
       }

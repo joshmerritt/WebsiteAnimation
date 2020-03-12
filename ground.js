@@ -2,7 +2,7 @@ class Ground {
     constructor(displayWidth, displayHeight, groundHeight) {
         let options = {
             isStatic: true, 
-            restitution: 0.5
+            restitution: 1
         };
         this.body = Matter.Bodies.rectangle(0, displayHeight - groundHeight, displayWidth, groundHeight, options);
         Matter.World.add(world, this.body);
