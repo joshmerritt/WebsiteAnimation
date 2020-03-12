@@ -2,10 +2,11 @@ class ImageBall {
     constructor(img, xPos, yPos, staticState) {
       let defaultOptions = {
         friction: 0.333,
+        restitution: 0.9,
+        isStatic: staticState
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
       console.log(this.body);
-      Matter.Body.setStatic(this.body, staticState);
       Matter.World.add(world, this.body);
       this.img = img;
       this.x = xPos;

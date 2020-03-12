@@ -24,11 +24,10 @@ let clicked = false;
     playfield = createCanvas(windowWidth, windowHeight);
     setDisplaySize();
     engine = Matter.Engine.create();
+    engine.world.bounds = {min: {x:-(0.2*windowWidth), y:-(0.2*windowHeight)}, max:{x:(1.2*windowWidth), y:(1.2*windowHeight)}}; 
     world = engine.world;
-    world.bounds = {
-      min: {x: 0, y: 0},
-      max: {x: windowWidth, y: windowHeight}
-    };
+    console.log(world);  
+
     background(111);
     loadAssets();
   }
@@ -57,7 +56,6 @@ let clicked = false;
           ball.xPower = 0;
           ball.yPower = 0;
         }
-        console.log(index, ball);
       }
     });
   }
