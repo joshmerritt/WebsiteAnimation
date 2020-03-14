@@ -24,10 +24,7 @@ let clicked = false;
     playfield = createCanvas(windowWidth, windowHeight);
     setDisplaySize();
     engine = Matter.Engine.create();
-    engine.world.bounds = {min: {x:-(0.2*windowWidth), y:-(0.2*windowHeight)}, max:{x:(1.2*windowWidth), y:(1.2*windowHeight)}}; 
-    world = engine.world;
-    console.log(world);  
-
+    world = engine.world; 
     background(111);
     loadAssets();
   }
@@ -75,6 +72,14 @@ let clicked = false;
     gridCurrentX = gridStartX;
     gridCurrentY = gridStartY;
   }
+
+  // function buildBoundary() {
+  //   console.log(windowWidth, windowHeight);
+  //   let boundaryRadius = Math.sqrt(Math.pow(windowWidth, 2) + Math.pow(windowHeight, 2));
+  //   console.log(boundaryRadius);
+  //   let boundary = Matter.Bodies.circle(windowWidth/2, windowHeight/2, boundaryRadius/2);
+  //   Matter.World.add(world, boundary);
+  // }
 
   function loadAssets() {
     imgs.forEach(function(img,i) {

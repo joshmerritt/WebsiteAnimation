@@ -24,6 +24,7 @@ class ImageBall {
 
     show() {
       const currentPos = this.body.position;
+      //console.log(this.body.id, currentPos);
       const currentAngle = this.body.angle;
       push();
       translate(currentPos.x, currentPos.y);
@@ -54,10 +55,6 @@ class ImageBall {
       let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
       let currentPosX = this.x - (this.xPower*100);
       let currentPosY = this.y - (this.yPower*100);
-      // print("x", this.xPower);
-      // print("y", this.yPower);
-      // rectMode(CENTER);
-      // rect(this.x, this.y, this.r*2, this.r*2, this.r);
       push();
       stroke(255);
       strokeWeight(5);
