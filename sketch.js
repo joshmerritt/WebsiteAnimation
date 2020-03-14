@@ -24,7 +24,8 @@ let clicked = false;
     playfield = createCanvas(windowWidth, windowHeight);
     setDisplaySize();
     engine = Matter.Engine.create();
-    world = engine.world; 
+    world = engine.world;
+    console.log(world); 
     background(111);
     loadAssets();
   }

@@ -6,7 +6,7 @@ class ImageBall {
         isStatic: staticState
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
-      console.log(this.body);
+      //console.log(this.body);
       Matter.World.add(world, this.body);
       this.img = img;
       this.x = xPos;
