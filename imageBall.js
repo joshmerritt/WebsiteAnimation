@@ -46,9 +46,10 @@ class ImageBall {
     }
 
     aim() {
-      this.xPower += (mouseX - pmouseX)/200;
-      this.yPower += (mouseY - pmouseY)/200;
-      console.log("x - y power ", this.xPower, " - ", this.yPower);
+      this.xPower += (mouseX - pmouseX)/300;
+      this.yPower += (mouseY - pmouseY)/300;
+      this.xPower = Math.min(this.xPower, 1);
+      this.yPower = Math.min(this.yPower, 1);
       let endPosX = this.x - iconSize;
       let endPosY = this.y - iconSize;
       let arrowLength = iconSize/8;

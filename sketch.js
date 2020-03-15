@@ -135,7 +135,7 @@ let clicked = false;
         // Matter.World.add(world, launchArrow);
         Matter.World.add(world, ball.body);
         console.log("ball", ball);
-        let strength = Matter.Vector.create(-ball.xPower/4, -ball.yPower/4);
+        let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
