@@ -7,7 +7,7 @@ class ImageBall {
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
       //console.log(this.body);
-      Matter.World.add(world, this.body);
+      //Matter.World.add(world, this.body);
       this.img = img;
       this.x = xPos;
       this.y = yPos;
@@ -46,8 +46,9 @@ class ImageBall {
     }
 
     aim() {
-      this.xPower += (mouseX - pmouseX)/300;
-      this.yPower += (mouseY - pmouseY)/300;
+      this.xPower += (mouseX - pmouseX)/200;
+      this.yPower += (mouseY - pmouseY)/200;
+      console.log("x - y power ", this.xPower, " - ", this.yPower);
       let endPosX = this.x - iconSize;
       let endPosY = this.y - iconSize;
       let arrowLength = iconSize/8;
