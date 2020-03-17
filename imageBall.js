@@ -65,4 +65,9 @@ class ImageBall {
       pop();
     }
 
+    launched() {
+      this.x = this.body.position.x;
+      this.y = this.body.position.y;
+    }
+
   }

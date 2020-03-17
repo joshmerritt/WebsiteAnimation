@@ -74,14 +74,6 @@ let clicked = false;
     gridCurrentY = gridStartY;
   }
 
-  // function buildBoundary() {
-  //   console.log(windowWidth, windowHeight);
-  //   let boundaryRadius = Math.sqrt(Math.pow(windowWidth, 2) + Math.pow(windowHeight, 2));
-  //   console.log(boundaryRadius);
-  //   let boundary = Matter.Bodies.circle(windowWidth/2, windowHeight/2, boundaryRadius/2);
-  //   Matter.World.add(world, boundary);
-  // }
-
   function loadAssets() {
     imgs.forEach(function(img,i) {
         imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, true);
@@ -121,38 +113,14 @@ let clicked = false;
   function mouseReleased() {
     imageBalls.forEach(function(ball) {
       if(ball.clicked) {
-        // let strength = dist(ball.x, ball.y, ball.body.position.x, ball.body.position.y);
-        // const options = {
-        //     pointA: {
-        //         x: (ball.x-ball.xPower),
-        //         y: (ball.y-ball.yPower)
-        //     },
-        //     bodyB: ball.body,
-        //     stiffness: 0.5,
-        //     length: strength
-        // };
-        // launchArrow = Matter.Constraint.create(options);
-        // Matter.World.add(world, launchArrow);
         Matter.World.add(world, ball.body);
-        console.log("ball", ball);
         let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
-        
-      }
-    });
-
-    // createLaunchArrow();
-    // console.log(launchArrow);
-    
+        console.log("ball", ball);
+        ball.launched();
+      } 
+    });    
   }
   
-  // function createLaunchArrow() {
-  //   imageBalls.forEach(function(ball) {
-  //     if(ball.clicked) {
-  //       launchArrow = new LaunchArrow(ball.x - ball.xPower, ball.y - ball.yPower, ball.body);
-  //       Matter.Body.setStatic(ball.body, false);
-  //     }
-  //   });
-  //}
