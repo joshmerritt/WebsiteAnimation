@@ -119,7 +119,6 @@ let clicked = false;
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
         console.log("ball", ball);
-        ball.launched();
       } 
     });    
   }

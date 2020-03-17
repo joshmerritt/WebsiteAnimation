@@ -32,6 +32,8 @@ class ImageBall {
       imageMode(CENTER);
       image(this.img, 0, 0, iconSize, iconSize);    
       pop();
+      this.x = this.body.position.x;
+      this.y = this.body.position.y;
     }
 
     hover() {
@@ -63,11 +65,6 @@ class ImageBall {
       line(this.x, this.y, currentPosX, currentPosY);
       triangle(currentPosX, currentPosY, currentPosX - arrowOffsetX, currentPosY + arrowOffsetY, currentPosX + arrowOffsetX, currentPosY + arrowOffsetY);
       pop();
-    }
-
-    launched() {
-      this.x = this.body.position.x;
-      this.y = this.body.position.y;
     }
 
   }
