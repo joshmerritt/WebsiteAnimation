@@ -15,6 +15,15 @@ class ImageBall {
       this.xPower = 0;
       this.yPower = 0;
       this.clicked = false;
+      this.launchCount = 0;
+      this.originalX = xPos;
+      this.originalY = yPos; 
+    }
+
+    reset() {
+      this.x = this.originalX;
+      this.y = this.originalY;
+      Matter.World.remove(world, this.body);
     }
 
     onBall(x, y) {
@@ -50,8 +59,8 @@ class ImageBall {
     aim() {
       this.xPower += (mouseX - pmouseX)/300;
       this.yPower += (mouseY - pmouseY)/300;
-      this.xPower = Math.min(this.xPower, 1);
-      this.yPower = Math.min(this.yPower, 1);
+      this.xPower = Math.min(this.xPower, 1.5);
+      this.yPower = Math.min(this.yPower, 1.5);
       let endPosX = this.x - iconSize;
       let endPosY = this.y - iconSize;
       let arrowLength = iconSize/8;
@@ -65,6 +74,10 @@ class ImageBall {
       line(this.x, this.y, currentPosX, currentPosY);
       triangle(currentPosX, currentPosY, currentPosX - arrowOffsetX, currentPosY + arrowOffsetY, currentPosX + arrowOffsetX, currentPosY + arrowOffsetY);
       pop();
+    }
+
+    launched() {
+      this.launchCount++;
     }
 
   }

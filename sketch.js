@@ -113,13 +113,16 @@ let clicked = false;
   function mouseReleased() {
     imageBalls.forEach(function(ball) {
       if(ball.clicked) {
-        Matter.World.add(world, ball.body);
+        if(ball.launchCount===0) Matter.World.add(world, ball.body);
         let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
         console.log("ball", ball);
-      } 
+        ball.launched();
+      } else {
+          ball.reset();
+      }
     });    
   }
   
