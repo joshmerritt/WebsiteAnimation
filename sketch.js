@@ -66,6 +66,11 @@ let clicked = false;
     });
   }
 
+  function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    setDisplaySize();
+  }
+
   function setDisplaySize() {
     iconSize =  Math.min(windowWidth/7, windowHeight/7);
     gridStartX = windowWidth/4;
@@ -121,7 +126,7 @@ let clicked = false;
         console.log("ball", ball);
         ball.launched();
       } else {
-          ball.reset();
+          //ball.reset();
       }
     });    
   }

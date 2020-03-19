@@ -20,11 +20,11 @@ class ImageBall {
       this.originalY = yPos; 
     }
 
-    reset() {
-      this.x = this.originalX;
-      this.y = this.originalY;
-      Matter.World.remove(world, this.body);
-    }
+    // reset() {
+    //   this.x = this.originalX;
+    //   this.y = this.originalY;
+    //   Matter.World.remove(world, this.body);
+    // }
 
     onBall(x, y) {
       let distance = dist(x, y, this.x, this.y);
