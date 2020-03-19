@@ -68,10 +68,13 @@ class ImageBall {
       let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
       let currentPosX = this.x - (this.xPower*100);
       let currentPosY = this.y - (this.yPower*100);
+      let arrow = new p5.Vector(currentPosX, currentPosY);
+      console.log("arrow", arrow);
       push();
       stroke(255);
       strokeWeight(5);
       line(this.x, this.y, currentPosX, currentPosY);
+      rotate(arrow.heading());
       triangle(currentPosX, currentPosY, currentPosX - arrowOffsetX, currentPosY + arrowOffsetY, currentPosX + arrowOffsetX, currentPosY + arrowOffsetY);
       pop();
     }
