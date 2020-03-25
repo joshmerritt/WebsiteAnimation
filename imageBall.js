@@ -56,6 +56,9 @@ class ImageBall {
       pop();
     }
 
+// Aim takes the mouse position when the mouse is dragged and creates a visual arrow to indicate direction and power.
+// Needs to be cleaned up to properly rotate the arrow around the end point of the line
+
     aim() {
       this.xPower += (mouseX - pmouseX)/300;
       this.yPower += (mouseY - pmouseY)/300;
@@ -69,16 +72,19 @@ class ImageBall {
       let currentPosX = this.x - (this.xPower*100);
       let currentPosY = this.y - (this.yPower*100);
       let arrow = new p5.Vector(endPosX, endPosY);
-      console.log("arrow", arrow);
-      console.log("this", this);
-      console.log("currX, currY: ", currentPosX, ", ", currentPosY);
+      let startVec = createVector(endPosX, endPosY);
+      let endVec = createVector(currentPosX, currentPosY);
+      let arrowHeight = arrowLength * Math.sqrt(3);
+      let tempAngle = endVec.angleBetween(startVec);
       push();
       stroke(255);
       strokeWeight(5);
-      line(this.x, this.y, currentPosX, currentPosY);
-      translate(endPosX, endPosY);
-      rotate(arrow.heading());
-      triangle(-currentPosX, 0, 0, currentPosX/2, 0, -currentPosX/2);
+      line(this.x, this.y, endVec.x, endVec.y);
+      translate(endVec);
+      angleMode(DEGREES);
+      rotate(endVec.heading()); 
+      triangle(-arrowLength/2, 0, arrowLength/2, 0, 0, arrowHeight);
+
       pop();
     }
 
