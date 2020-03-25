@@ -21,7 +21,7 @@ let clicked = false;
   }
 
   function setup() {
-    playfield = createCanvas(windowWidth, windowHeight);
+    playfield = createCanvas(windowWidth*0.99, windowHeight*0.97);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
@@ -67,14 +67,14 @@ let clicked = false;
   }
 
   function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
+    resizeCanvas(windowWidth*0.99, windowHeight*0.97);
     setDisplaySize();
   }
 
   function setDisplaySize() {
     iconSize =  Math.min(windowWidth/7, windowHeight/7);
-    gridStartX = windowWidth/4;
-    gridStartY = windowHeight/4;
+    gridStartX = windowWidth/3;
+    gridStartY = windowHeight/3;
     gridCurrentX = gridStartX;
     gridCurrentY = gridStartY;
   }
