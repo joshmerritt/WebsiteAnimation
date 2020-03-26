@@ -2,6 +2,7 @@ let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
 let goals = [];
+let categories = [];
 let iconSize, 
 gridStartX, 
 gridStartY, 
@@ -37,6 +38,23 @@ let clicked = false;
     drawGoals();
     ground.show();
 
+  }
+
+  function loadAssets() {
+    imgs.forEach(function(img,i) {
+        imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, true);
+        if(gridCurrentX + iconSize*3 <= windowWidth) {
+          gridCurrentX += iconSize*2;
+        } else {
+          gridCurrentX = gridStartX;
+          gridCurrentY += icons*2;
+        }
+    });
+
+    for(let i = 0; i < 2; i++){
+      goals[i] = new Goal(iconSize/(2-i) + iconSize*i, gridStartY, iconSize/10);
+    };
+    ground = new Ground(windowWidth, windowHeight, iconSize);
   }
 
   function drawBalls() {
@@ -79,22 +97,7 @@ let clicked = false;
     gridCurrentY = gridStartY;
   }
 
-  function loadAssets() {
-    imgs.forEach(function(img,i) {
-        imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, true);
-        if(gridCurrentX + iconSize*3 <= windowWidth) {
-          gridCurrentX += iconSize*2;
-        } else {
-          gridCurrentX = gridStartX;
-          gridCurrentY += icons*2;
-        }
-    });
 
-    for(let i = 0; i < 2; i++){
-      goals[i] = new Goal(iconSize/(2-i) + iconSize*i, gridStartY, iconSize/10);
-    };
-    ground = new Ground(windowWidth, windowHeight, iconSize);
-  }
 
 
   function mouseDragged(event) {

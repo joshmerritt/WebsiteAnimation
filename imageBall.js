@@ -17,14 +17,11 @@ class ImageBall {
       this.clicked = false;
       this.launchCount = 0;
       this.originalX = xPos;
-      this.originalY = yPos; 
+      this.originalY = yPos;
+      this.originalPos = {x: xPos, y: yPos}; 
     }
 
-    // reset() {
-    //   this.x = this.originalX;
-    //   this.y = this.originalY;
-    //   Matter.World.remove(world, this.body);
-    // }
+ 
 
     onBall(x, y) {
       let distance = dist(x, y, this.x, this.y);
@@ -32,8 +29,8 @@ class ImageBall {
     }
 
     show() {
+      if(this.launchCount) this.checkForReset();
       const currentPos = this.body.position;
-      //console.log(this.body.id, currentPos);
       const currentAngle = this.body.angle;
       push();
       translate(currentPos.x, currentPos.y);
@@ -43,6 +40,41 @@ class ImageBall {
       pop();
       this.x = this.body.position.x;
       this.y = this.body.position.y;
+    }
+
+    // Checks if speed is near zero
+    //  if so, checks if ball is off screen
+    //    if so, resets the ball to the original position
+
+    checkForReset() {
+      console.log('checkForReset', this);
+      console.log('this.offScreen', this.offScreen());
+      if(this.body.velocity.x < 0.03) {
+        if(this.offScreen){
+          console.log('****** triggering reset', this)
+          //this.reset();
+        }
+      }
+    }
+
+    offScreen() {
+      let x = this.x;
+      let y = this.y;
+      let radius = this.body.circleRadius;
+      console.log("wW - wH", windowWidth, " - ", windowHeight);
+      console.log("x - y - radius", x, " - ", y, " - ", radius);
+      let offX = ((x + radius) < 0 || (x - radius) > windowWidth);
+      let offY = (y + radius) > windowHeight;
+      console.log("offX - offY", offX, " - ", offY);
+      if(offX || offY) return true;
+       else return false;
+    }
+
+    reset() {
+      console.log("reset - body ", this.body);
+      Matter.Body.setStatic(this.body, true);
+      Matter.Body.setVelocity(this.body, {x: 0, y: 0});
+      Matter.Body.setPosition(this.body, this.originalPos);
     }
 
     hover() {
@@ -62,8 +94,8 @@ class ImageBall {
     aim() {
       this.xPower += (mouseX - pmouseX)/300;
       this.yPower += (mouseY - pmouseY)/300;
-      this.xPower = Math.min(this.xPower, 1.5);
-      this.yPower = Math.min(this.yPower, 1.5);
+      this.xPower = Math.min(this.xPower, 3);
+      this.yPower = Math.min(this.yPower, 3);
       let endPosX = this.x - iconSize;
       let endPosY = this.y - iconSize;
       let arrowLength = iconSize/8;
@@ -74,7 +106,7 @@ class ImageBall {
       let arrow = new p5.Vector(endPosX, endPosY);
       let startVec = createVector(endPosX, endPosY);
       let endVec = createVector(currentPosX, currentPosY);
-      let arrowHeight = arrowLength * Math.sqrt(3);
+      let arrowHeight = arrowLength/2 * Math.sqrt(3);
       let tempAngle = endVec.angleBetween(startVec);
       push();
       stroke(255);
@@ -84,12 +116,15 @@ class ImageBall {
       angleMode(DEGREES);
       rotate(endVec.heading()); 
       triangle(-arrowLength/2, 0, arrowLength/2, 0, 0, arrowHeight);
-
       pop();
     }
 
     launched() {
       this.launchCount++;
+    }
+
+    checkGoal() {
+
     }
 
   }

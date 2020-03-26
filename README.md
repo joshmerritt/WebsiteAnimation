@@ -7,6 +7,8 @@
     - Releasing the mouse sends the thumbnail in the applicable direction
     - A "goal" is created by the menu
     - A successful attempt will result in the applicable thumbnail launching it's info page
+    - The thumbnail will only load the page if it passes through the goal posts
+    - An invisible barrier will surround the menu/goal in order to only allow access through the goalposts
     - Each thumbnail will have an information page
     - Each subcategory for the menu will be clickable
     - The names of the subcategories should be ordered in descending length
