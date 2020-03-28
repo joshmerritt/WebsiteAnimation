@@ -47,10 +47,10 @@ class ImageBall {
     //    if so, resets the ball to the original position
 
     checkForReset() {
-      console.log('checkForReset', this);
-      console.log('this.offScreen', this.offScreen());
-      if(this.body.velocity.x < 0.03) {
-        if(this.offScreen){
+    //  console.log('checkForReset', this);
+    //  console.log('this.offScreen', this.offScreen());
+      if(this.offScreen) {
+        if(this.body.velocity.x < 0.01){
           console.log('****** triggering reset', this)
           //this.reset();
         }
@@ -61,17 +61,17 @@ class ImageBall {
       let x = this.x;
       let y = this.y;
       let radius = this.body.circleRadius;
-      console.log("wW - wH", windowWidth, " - ", windowHeight);
-      console.log("x - y - radius", x, " - ", y, " - ", radius);
+      // console.log("wW - wH", windowWidth, " - ", windowHeight);
+      // console.log("x - y - radius", x, " - ", y, " - ", radius);
       let offX = ((x + radius) < 0 || (x - radius) > windowWidth);
       let offY = (y + radius) > windowHeight;
-      console.log("offX - offY", offX, " - ", offY);
+      // console.log("offX - offY", offX, " - ", offY);
       if(offX || offY) return true;
        else return false;
     }
 
     reset() {
-      console.log("reset - body ", this.body);
+      //console.log("reset - body ", this.body);
       Matter.Body.setStatic(this.body, true);
       Matter.Body.setVelocity(this.body, {x: 0, y: 0});
       Matter.Body.setPosition(this.body, this.originalPos);

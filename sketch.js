@@ -40,9 +40,17 @@ let clicked = false;
 
   }
 
+// Creates a 'ball' for each image that is spaced intelligently across the screen
+// Each image has a category that is added to the categories array, if not already present
+// Categories are ordered by descending length and displayed below the 'goal posts'
+// Goal posts are created about the menu items which are used to mark the 'goal'
+// Invisible barriers are in place to prevent reaching the menu except from above
+
   function loadAssets() {
-    imgs.forEach(function(img,i) {
+    imgs.forEach(function(img, i) {
+        console.log('img -', img);
         imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, true);
+        console.log('imageBall -', imageBalls[i]);
         if(gridCurrentX + iconSize*3 <= windowWidth) {
           gridCurrentX += iconSize*2;
         } else {
@@ -50,10 +58,10 @@ let clicked = false;
           gridCurrentY += icons*2;
         }
     });
-
     for(let i = 0; i < 2; i++){
       goals[i] = new Goal(iconSize/(2-i) + iconSize*i, gridStartY, iconSize/10);
     };
+
     ground = new Ground(windowWidth, windowHeight, iconSize);
   }
 
@@ -126,7 +134,7 @@ let clicked = false;
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
-        console.log("ball", ball);
+//        console.log("ball", ball);
         ball.launched();
       } else {
           //ball.reset();
