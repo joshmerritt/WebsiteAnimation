@@ -42,36 +42,34 @@ class ImageBall {
       this.y = this.body.position.y;
     }
 
-    // Checks if speed is near zero
-    //  if so, checks if ball is off screen
-    //    if so, resets the ball to the original position
+    // Checks if if ball is off screen
+    // if true, checks if horizontal speed is near zero
+    // if true, resets the ball to the original position
 
     checkForReset() {
-    //  console.log('checkForReset', this);
-    //  console.log('this.offScreen', this.offScreen());
-      if(this.offScreen) {
-        if(this.body.velocity.x < 0.01){
-          console.log('****** triggering reset', this)
-          //this.reset();
+      if(this.offScreen()) {
+        if(Math.abs(this.body.velocity.x) < 0.05){
+          this.reset();
         }
       }
     }
+
+    // Uses the object's radius and the screen size
+    // to determine if the object is still visible
 
     offScreen() {
       let x = this.x;
       let y = this.y;
       let radius = this.body.circleRadius;
-      // console.log("wW - wH", windowWidth, " - ", windowHeight);
-      // console.log("x - y - radius", x, " - ", y, " - ", radius);
       let offX = ((x + radius) < 0 || (x - radius) > windowWidth);
       let offY = (y + radius) > windowHeight;
-      // console.log("offX - offY", offX, " - ", offY);
       if(offX || offY) return true;
        else return false;
     }
 
+    // Returns the body to the original launch position and settings
+
     reset() {
-      //console.log("reset - body ", this.body);
       Matter.Body.setStatic(this.body, true);
       Matter.Body.setVelocity(this.body, {x: 0, y: 0});
       Matter.Body.setPosition(this.body, this.originalPos);
