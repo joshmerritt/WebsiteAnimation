@@ -22,4 +22,4 @@
     - There should be an about footer
     - Info pages should contain images, descriptions, and/or links
     - There should be a boundary outside the playfield to deflect the ball back
-    - The thumbnail resets to it's position if another thumbnail is launched
+    - The thumbnail resets to it's position if it remains offscreen

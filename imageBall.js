@@ -1,3 +1,7 @@
+// ImageBall is designed to create standalone balls that can be displayed, launched, and interacted with independently.
+// The class uses the matter.js physics engine to handle interactions
+// Visuals are created using p5.js, which are tied to specific bodies in the world
+
 class ImageBall {
     constructor(img, xPos, yPos, staticState) {
       let defaultOptions = {
@@ -6,8 +10,6 @@ class ImageBall {
         isStatic: staticState
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
-      //console.log(this.body);
-      //Matter.World.add(world, this.body);
       this.img = img;
       this.x = xPos;
       this.y = yPos;
@@ -21,12 +23,14 @@ class ImageBall {
       this.originalPos = {x: xPos, y: yPos}; 
     }
 
- 
+    // Used to check if the mouse is hovering over the ball
 
     onBall(x, y) {
       let distance = dist(x, y, this.x, this.y);
       return (distance < (this.r));
     }
+
+    // Displays the ball if it is on screen
 
     show() {
       if(this.launchCount) this.checkForReset();
@@ -75,19 +79,22 @@ class ImageBall {
       Matter.Body.setPosition(this.body, this.originalPos);
     }
 
+    //Displays an arrow when a ball is hovered over
+
     hover() {
       push();  
       rectMode(CENTER);
       rect(this.x, this.y, this.r*2, this.r*2, this.r);
-      stroke(255);
+      stroke(155);
       strokeWeight(5);
       line(this.x, this.y, this.x - iconSize, this.y - iconSize);
       triangle(this.x - iconSize, this.y - iconSize, this.x - iconSize, this.y - iconSize + iconSize/8, this.x - iconSize + iconSize/8, this.y - iconSize);        
       pop();
     }
 
-// Aim takes the mouse position when the mouse is dragged and creates a visual arrow to indicate direction and power.
-// Needs to be cleaned up to properly rotate the arrow around the end point of the line
+    // Aim takes the mouse position when the mouse is dragged and creates a visual arrow to indicate direction and power.
+    // Needs to be cleaned up to properly rotate the arrow around the end point of the line
+    // To keep the launch from being too powerful, limits the maximum power registered
 
     aim() {
       this.xPower += (mouseX - pmouseX)/300;
@@ -101,13 +108,12 @@ class ImageBall {
       let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
       let currentPosX = this.x - (this.xPower*100);
       let currentPosY = this.y - (this.yPower*100);
-      let arrow = new p5.Vector(endPosX, endPosY);
       let startVec = createVector(endPosX, endPosY);
       let endVec = createVector(currentPosX, currentPosY);
       let arrowHeight = arrowLength/2 * Math.sqrt(3);
-      let tempAngle = endVec.angleBetween(startVec);
+      // let tempAngle = endVec.angleBetween(startVec);
       push();
-      stroke(255);
+      stroke(155);
       strokeWeight(5);
       line(this.x, this.y, endVec.x, endVec.y);
       translate(endVec);

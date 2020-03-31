@@ -65,6 +65,11 @@ let clicked = false;
     ground = new Ground(windowWidth, windowHeight, iconSize);
   }
 
+  // Checks each ball to decide to show it, 
+  // determine if the mouse is hovering on it, or
+  // create a launch arrow if the mouse is clicked
+  // for each applicable ball
+
   function drawBalls() {
     imageBalls.forEach(function(ball, index) {
       if(ball) {
@@ -84,6 +89,8 @@ let clicked = false;
     });
   }
 
+  // Displays the goals
+
   function drawGoals() {
     goals.forEach(function(goal, index) {
       if(goal) {
@@ -92,10 +99,15 @@ let clicked = false;
     });
   }
 
+  // Resizes the playfield whenever the window is resized
+  // Uses built in p5.js methods
+
   function windowResized() {
-    resizeCanvas(windowWidth*0.99, windowHeight*0.97);
+    resizeCanvas(windowWidth, windowHeight);
     setDisplaySize();
   }
+
+  // Calculates the appropriate sized grid based upon the window size
 
   function setDisplaySize() {
     iconSize =  Math.min(windowWidth/7, windowHeight/7);
@@ -105,8 +117,7 @@ let clicked = false;
     gridCurrentY = gridStartY;
   }
 
-
-
+  // If the mouse is being dragged, create and display a launch arrow
 
   function mouseDragged(event) {
     imageBalls.forEach(function(ball) {
@@ -115,6 +126,8 @@ let clicked = false;
       }
     });
   }
+
+  // If the mouse is pressed, toggle the clicked property for all balls
 
   function mousePressed() {
     imageBalls.forEach(function(ball) {
@@ -126,6 +139,10 @@ let clicked = false;
     });
   }
 
+  // When the mouse is release the ball is added to the world
+  // The launch arrow is applied to the ball and the body is made moveable
+
+
   function mouseReleased() {
     imageBalls.forEach(function(ball) {
       if(ball.clicked) {
@@ -134,7 +151,6 @@ let clicked = false;
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
-//        console.log("ball", ball);
         ball.launched();
       } else {
           //ball.reset();
