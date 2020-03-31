@@ -13,12 +13,17 @@ engine,
 world,
 launchArrow,
 power,
-ground;
-let clicked = false;
+backboard,
+ground,
+goalPosition,
+clicked = false;
+
 
   function preload() {
     imgs.push(loadImage('assets/images/cellman.jpg'));
     imgs.push(loadImage('assets/images/antbw.jpg'));
+    imgs.push(loadImage('assets/images/bball.jpeg'));
+    imgs.push(loadImage('assets/images/disc.jpg'));
   }
 
   function setup() {
@@ -36,7 +41,9 @@ let clicked = false;
     background(111);
     drawBalls();
     drawGoals();
+    drawMenu();
     ground.show();
+    backboard.show();
 
   }
 
@@ -110,6 +117,7 @@ let clicked = false;
   // Calculates the appropriate sized grid based upon the window size
 
   function setDisplaySize() {
+    goalPosition = {x:windowWidth/4, y:windowHeight/4};
     iconSize =  Math.min(windowWidth/7, windowHeight/7);
     gridStartX = windowWidth/3;
     gridStartY = windowHeight/3;
