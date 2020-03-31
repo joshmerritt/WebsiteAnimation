@@ -1,12 +1,12 @@
-### WebsiteAnimation
+## WebsiteAnimation
 
-## Overview
+#### Overview
     My aim is to create an interactive personal website to display my portfolio and development skills.
     Each "project" has an image and an about file with details. When an image is hovered over, the user is
     prompted to "aim," if they click and drag they can launch the "ball" towards the "goal" which is actually the menu.
     If the ball goes through the goal, the selected project is loaded full screen. 
 
-## Requirements
+#### Requirements
     - Accepts 1 or more images to display as thumbnails/balls
     - Shows direction and power arrow when user hovers over thumbnail
     - Allows for user to "launch" the thumbnail by clicking on it
