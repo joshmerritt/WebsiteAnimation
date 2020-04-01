@@ -41,9 +41,8 @@ clicked = false;
     background(111);
     drawBalls();
     drawGoals();
-    drawMenu();
     ground.show();
-    backboard.show();
+    //backboard.show();
 
   }
 
