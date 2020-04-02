@@ -40,7 +40,9 @@ class ImageBall {
       translate(currentPos.x, currentPos.y);
       rotate(currentAngle);
       imageMode(CENTER);
-      image(this.img, 0, 0, iconSize, iconSize);    
+      image(this.img, 0, 0, this.r*2, this.r*2);
+      noFill();
+      circle(0, 0, iconSize);    
       pop();
       this.x = this.body.position.x;
       this.y = this.body.position.y;
@@ -99,8 +101,8 @@ class ImageBall {
     aim() {
       this.xPower += (mouseX - pmouseX)/300;
       this.yPower += (mouseY - pmouseY)/300;
-      this.xPower = Math.min(this.xPower, 3);
-      this.yPower = Math.min(this.yPower, 3);
+      this.xPower = Math.min(this.xPower, 5);
+      this.yPower = Math.min(this.yPower, 5);
       let endPosX = this.x - iconSize;
       let endPosY = this.y - iconSize;
       let arrowLength = iconSize/8;

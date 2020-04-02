@@ -1,0 +1,3 @@
+Name: Scoreboard
+Link: https://github.com/joshmerritt/arduinoScoreboard
+Description: A basic two team scoreboard with a 20 minute per game timer. Users can add or subtract from their score, reset the game, toggle sound, and toggle between 15 and 21 point games.

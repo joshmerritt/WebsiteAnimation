@@ -61,7 +61,7 @@ clicked = false;
           gridCurrentX += iconSize*2;
         } else {
           gridCurrentX = gridStartX;
-          gridCurrentY += icons*2;
+          gridCurrentY += iconSize*2;
         }
     });
     for(let i = 0; i < 2; i++){
@@ -148,7 +148,6 @@ clicked = false;
 
   // When the mouse is release the ball is added to the world
   // The launch arrow is applied to the ball and the body is made moveable
-
 
   function mouseReleased() {
     imageBalls.forEach(function(ball) {
