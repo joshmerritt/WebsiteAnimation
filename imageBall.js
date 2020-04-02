@@ -7,7 +7,7 @@ class ImageBall {
       let defaultOptions = {
         friction: 0.333,
         restitution: 0.9,
-        isStatic: staticState
+        isStatic: staticState,
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
       this.img = img;
@@ -21,6 +21,7 @@ class ImageBall {
       this.originalX = xPos;
       this.originalY = yPos;
       this.originalPos = {x: xPos, y: yPos}; 
+      this.inOriginalPosition = true;
     }
 
     // Used to check if the mouse is hovering over the ball
@@ -42,7 +43,9 @@ class ImageBall {
       imageMode(CENTER);
       image(this.img, 0, 0, this.r*2, this.r*2);
       noFill();
-      circle(0, 0, iconSize);    
+      stroke(111);
+      strokeWeight(35);
+      circle(0, 0, iconSize*1.25);    
       pop();
       this.x = this.body.position.x;
       this.y = this.body.position.y;
@@ -79,16 +82,17 @@ class ImageBall {
       Matter.Body.setStatic(this.body, true);
       Matter.Body.setVelocity(this.body, {x: 0, y: 0});
       Matter.Body.setPosition(this.body, this.originalPos);
+      Matter.World.remove(world, this.body);
+      this.inOriginalPosition = true;
     }
 
     //Displays an arrow when a ball is hovered over
 
     hover() {
       push();  
-      rectMode(CENTER);
-      rect(this.x, this.y, this.r*2, this.r*2, this.r);
       stroke(155);
       strokeWeight(5);
+      fill(155);
       line(this.x, this.y, this.x - iconSize, this.y - iconSize);
       triangle(this.x - iconSize, this.y - iconSize, this.x - iconSize, this.y - iconSize + iconSize/8, this.x - iconSize + iconSize/8, this.y - iconSize);        
       pop();
@@ -117,6 +121,7 @@ class ImageBall {
       push();
       stroke(155);
       strokeWeight(5);
+      fill(155);
       line(this.x, this.y, endVec.x, endVec.y);
       translate(endVec);
       angleMode(DEGREES);
@@ -127,6 +132,7 @@ class ImageBall {
 
     launched() {
       this.launchCount++;
+      this.inOriginalPosition = false;
     }
 
     checkGoal() {
