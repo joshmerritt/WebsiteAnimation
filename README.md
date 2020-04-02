@@ -23,3 +23,11 @@
     - Info pages should contain images, descriptions, and/or links
     - There should be a boundary outside the playfield to deflect the ball back
     - The thumbnail resets to it's position if it remains offscreen
+
+###### In progress notes
+    - Add text descriptions of images
+    - Add categories to array
+    - Add menu item for each category
+    - Add invisible side bars to prevent reaching menu other than through goal
+    - Add in collision filtering so ball bounces on applicable menu item when made
+    - Need to fix arrow rotation
