@@ -1,8 +1,10 @@
+let itemsToDisplay = [scoreboard, disc, antbw];
 let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
 let goals = [];
 let categories = [];
+let pages = [];
 let iconSize, 
 gridStartX, 
 gridStartY, 
@@ -18,12 +20,20 @@ ground,
 goalPosition,
 clicked = false;
 
+function preLoadAssets() {
+  for (const item of itemsToDisplay) {
+    if(`assets/images/${item}.jpg`) imgs.push(loadImage(`assets/images/${item}.jpg`))
+  }
+}
 
   function preload() {
-    imgs.push(loadImage('assets/images/cellman.jpg'));
-    imgs.push(loadImage('assets/images/antbw.jpg'));
+    preLoadAssets();
+    imgs.push(loadImage('assets/images/scoreboard.jpg'));
     imgs.push(loadImage('assets/images/bball.jpeg'));
     imgs.push(loadImage('assets/images/disc.jpg'));
+    imgs.push(loadImage('assets/images/cellman.jpg'));
+    imgs.push(loadImage('assets/images/antbw.jpg'));
+
   }
 
   function setup() {
