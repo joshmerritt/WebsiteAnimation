@@ -1,4 +1,4 @@
-let itemsToDisplay = [scoreboard, disc, antbw];
+let itemsToDisplay = ["scoreboard", "disc", "antbw"];
 let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
