@@ -37,14 +37,15 @@ class ImageBall {
       if(this.launchCount) this.checkForReset();
       const currentPos = this.body.position;
       const currentAngle = this.body.angle;
+      let dynamicStrokeWeight = Math.ceil(iconSize/4);
       push();
       translate(currentPos.x, currentPos.y);
       rotate(currentAngle);
       imageMode(CENTER);
-      image(this.img, 0, 0, this.r*2, this.r*2);
+      image(this.img, 0, 0, iconSize, iconSize);
       noFill();
       stroke(111);
-      strokeWeight(35);
+      strokeWeight(dynamicStrokeWeight);
       circle(0, 0, iconSize*1.25);    
       pop();
       this.x = this.body.position.x;

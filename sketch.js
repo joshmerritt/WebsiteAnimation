@@ -1,4 +1,4 @@
-let itemsToDisplay = ["scoreboard", "disc", "antbw"];
+let itemsToDisplay = ['scoreboard', 'disc', 'antbw'];
 let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
@@ -20,20 +20,19 @@ ground,
 goalPosition,
 clicked = false;
 
-function preLoadAssets() {
-  for (const item of itemsToDisplay) {
-    if(`assets/images/${item}.jpg`) imgs.push(loadImage(`assets/images/${item}.jpg`))
+// Loads images and text for use in building the website
+
+  function preLoadAssets() {
+    for (const item of itemsToDisplay) {
+      imgs.push(loadImage(`assets/images/${item}.jpg`));
+      let tempString = loadStrings(`assets/${item}.txt`, item => console.log('success for ', item), item => console.log('failed for ', item));
+      //pages.push(tempString);
+      //console.log(tempString);
+    }
   }
-}
 
   function preload() {
     preLoadAssets();
-    imgs.push(loadImage('assets/images/scoreboard.jpg'));
-    imgs.push(loadImage('assets/images/bball.jpeg'));
-    imgs.push(loadImage('assets/images/disc.jpg'));
-    imgs.push(loadImage('assets/images/cellman.jpg'));
-    imgs.push(loadImage('assets/images/antbw.jpg'));
-
   }
 
   function setup() {
@@ -41,7 +40,7 @@ function preLoadAssets() {
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
-    console.log(world); 
+    //console.log(world); 
     background(111);
     loadAssets();
   }
@@ -53,7 +52,7 @@ function preLoadAssets() {
     drawGoals();
     ground.show();
     //backboard.show();
-
+    //createP(`window width: ${windowWidth}, window height: ${windowHeight}`);
   }
 
 // Creates a 'ball' for each image that is spaced intelligently across the screen
@@ -63,22 +62,25 @@ function preLoadAssets() {
 // Invisible barriers are in place to prevent reaching the menu except from above
 
   function loadAssets() {
-    imgs.forEach(function(img, i) {
-        console.log('img -', img);
-        imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, true);
-        console.log('imageBall -', imageBalls[i]);
-        if(gridCurrentX + iconSize*3 <= windowWidth) {
-          gridCurrentX += iconSize*2;
-        } else {
-          gridCurrentX = gridStartX;
-          gridCurrentY += iconSize*2;
-        }
-    });
+    loadImages();
     for(let i = 0; i < 2; i++){
-      goals[i] = new Goal(iconSize/(2-i) + iconSize*i, gridStartY, iconSize/10);
+      goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/20);
     };
-
     ground = new Ground(windowWidth, windowHeight, iconSize);
+  }
+
+  function loadImages() {
+    imgs.forEach(function(img, i) {
+      //console.log('img -', img);
+      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, true);
+      //console.log('imageBall -', imageBalls[i]);
+      if(gridCurrentX + iconSize*3 <= windowWidth) {
+        gridCurrentX += iconSize*2;
+      } else {
+        gridCurrentX = gridStartX;
+        gridCurrentY += iconSize*2;
+      }
+  });
   }
 
   // Checks each ball to decide to show it, 
@@ -126,12 +128,13 @@ function preLoadAssets() {
   // Calculates the appropriate sized grid based upon the window size
 
   function setDisplaySize() {
-    goalPosition = {x:windowWidth/4, y:windowHeight/4};
+    goalPosition = {x:windowWidth/20, y:windowHeight/3};
     iconSize =  Math.min(windowWidth/7, windowHeight/7);
-    gridStartX = windowWidth/3;
-    gridStartY = windowHeight/3;
+    gridStartX = goalPosition.x + iconSize*3;
+    gridStartY = goalPosition.y;
     gridCurrentX = gridStartX;
     gridCurrentY = gridStartY;
+    console.log("icon size: ", iconSize);
   }
 
   // If the mouse is being dragged, create and display a launch arrow
