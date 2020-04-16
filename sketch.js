@@ -26,8 +26,8 @@ clicked = false;
     for (const item of itemsToDisplay) {
       imgs.push(loadImage(`assets/images/${item}.jpg`));
       let tempString = loadStrings(`assets/${item}.txt`, item => console.log('success for ', item), item => console.log('failed for ', item));
-      //pages.push(tempString);
-      //console.log(tempString);
+      pages.push(tempString);
+      console.log(pages);
     }
   }
 
