@@ -25,7 +25,7 @@ clicked = false;
   function preLoadAssets() {
     for (const item of itemsToDisplay) {
       imgs.push(loadImage(`assets/images/${item}.jpg`));
-      let tempString = loadStrings(`assets/${item}.txt`, item => console.log('success for ', item), item => console.log('failed for ', item));
+      let tempString = loadStrings(`assets/${item}.txt`);
       pages.push(tempString);
       console.log(pages);
     }
@@ -72,7 +72,8 @@ clicked = false;
   function loadImages() {
     imgs.forEach(function(img, i) {
       //console.log('img -', img);
-      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, true);
+      console.log('load function: ', pages[i]);
+      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pages[i]);
       //console.log('imageBall -', imageBalls[i]);
       if(gridCurrentX + iconSize*3 <= windowWidth) {
         gridCurrentX += iconSize*2;

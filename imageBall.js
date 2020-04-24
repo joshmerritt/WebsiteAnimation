@@ -3,13 +3,23 @@
 // Visuals are created using p5.js, which are tied to specific bodies in the world
 
 class ImageBall {
-    constructor(img, xPos, yPos, staticState) {
+    constructor(img, xPos, yPos, info) {
       let defaultOptions = {
         friction: 0.333,
         restitution: 0.9,
-        isStatic: staticState,
+        isStatic: true,
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
+      console.log('constructor info', info);
+      this.parseInfo = function() {
+        console.log('constructor info', info);
+        let tempInfo = info[0].split(": ");
+        console.log("tempinfo:", tempInfo);
+        this.name = tempInfo[1];
+        //console.log("this.name: ". this.name);
+      }
+      this.name = 'placeholder';
+      this.parseInfo = this.parseInfo.bind(this)();
       this.img = img;
       this.x = xPos;
       this.y = yPos;
