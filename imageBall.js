@@ -54,6 +54,8 @@ class ImageBall {
       if(this.launchCount) this.checkForReset();
       const currentPos = this.body.position;
       const currentAngle = this.body.angle;
+      const currentTorque = this.body.torque;
+      console.log('current torque', currentTorque);
       let dynamicStrokeWeight = Math.ceil(iconSize/4);
       push();
       translate(currentPos.x, currentPos.y);

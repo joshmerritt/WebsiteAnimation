@@ -92,6 +92,7 @@ clicked = false;
       console.log('imageBall ',i, " : ",imageBalls[i]);
       if(categories.indexOf(imageBalls[i].category) === -1) categories.push(imageBalls[i].category);
   });
+  categories.sort((a, b) => a.length - b.length);
   console.log('categories', categories);
   }
 
