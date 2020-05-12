@@ -10,15 +10,22 @@ class ImageBall {
         isStatic: true,
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
-      console.log('constructor info', info);
-      this.parseInfo = function() {
-        console.log('constructor info', info);
-        let tempInfo = info[0].split(": ");
-        console.log("tempinfo:", tempInfo);
-        this.name = tempInfo[1];
-        //console.log("this.name: ". this.name);
-      }
+      //console.log('constructor info', info);
+
       this.name = 'placeholder';
+      this.link = 'placeholder';
+      this.category = 'placeholder';
+      this.description = 'placeholder';
+      this.parseInfo = function() {
+        let tempInfo = [];
+        info.forEach(function(item, index){
+          tempInfo.push(item.split(": "));
+        });
+        this.name = tempInfo[0][1];
+        this.link = tempInfo[1][1];
+        this.category = tempInfo[2][1];
+        this.description = tempInfo[3][1];        
+      };
       this.parseInfo = this.parseInfo.bind(this)();
       this.img = img;
       this.x = xPos;
@@ -52,7 +59,8 @@ class ImageBall {
       translate(currentPos.x, currentPos.y);
       rotate(currentAngle);
       imageMode(CENTER);
-      image(this.img, 0, 0, iconSize, iconSize);
+      let thumbnail = this.img.get(this.img.width/2, this.img.height/2, this.img.width/4, this.img.width/4);
+      image(thumbnail, 0, 0, iconSize, iconSize);
       noFill();
       stroke(111);
       strokeWeight(dynamicStrokeWeight);

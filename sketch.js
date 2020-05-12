@@ -1,10 +1,10 @@
-let itemsToDisplay = ['scoreboard', 'disc', 'antbw'];
+let itemsToDisplay = ['scoreboard', 'disc', 'antbw', 'flowchart'];
 let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
 let goals = [];
 let categories = [];
-let pages = [];
+let pageInfo = [];
 let iconSize, 
 gridStartX, 
 gridStartY, 
@@ -26,8 +26,8 @@ clicked = false;
     for (const item of itemsToDisplay) {
       imgs.push(loadImage(`assets/images/${item}.jpg`));
       let tempString = loadStrings(`assets/${item}.txt`);
-      pages.push(tempString);
-      console.log(pages);
+      pageInfo.push(tempString);
+      //console.log(pages);
     }
   }
 
@@ -40,7 +40,7 @@ clicked = false;
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
-    //console.log(world); 
+    console.log("world", world); 
     background(111);
     loadAssets();
   }
@@ -55,11 +55,13 @@ clicked = false;
     //createP(`window width: ${windowWidth}, window height: ${windowHeight}`);
   }
 
-// Creates a 'ball' for each image that is spaced intelligently across the screen
-// Each image has a category that is added to the categories array, if not already present
-// Categories are ordered by descending length and displayed below the 'goal posts'
-// Goal posts are created about the menu items which are used to mark the 'goal'
-// Invisible barriers are in place to prevent reaching the menu except from above
+ /* 
+    Creates a 'ball' for each image that is spaced intelligently across the screen
+    Each image has a category that is added to the categories array, if not already present
+    Categories are ordered by descending length and displayed below the 'goal posts'
+    Goal posts are created about the menu items which are used to mark the 'goal'
+    Invisible barriers are in place to prevent reaching the menu except from above
+  */
 
   function loadAssets() {
     loadImages();
@@ -69,11 +71,17 @@ clicked = false;
     ground = new Ground(windowWidth, windowHeight, iconSize);
   }
 
+/*
+    Loops through all images that were pre-loaded
+    Creates an "ImageBall" for each, passing in its image, location, and text info
+    For each ball created, add its category to the category array
+*/
+
   function loadImages() {
     imgs.forEach(function(img, i) {
       //console.log('img -', img);
-      console.log('load function: ', pages[i]);
-      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pages[i]);
+      //console.log('load function: ', pages[i]);
+      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pageInfo[i]);
       //console.log('imageBall -', imageBalls[i]);
       if(gridCurrentX + iconSize*3 <= windowWidth) {
         gridCurrentX += iconSize*2;
@@ -81,7 +89,10 @@ clicked = false;
         gridCurrentX = gridStartX;
         gridCurrentY += iconSize*2;
       }
+      console.log('imageBall ',i, " : ",imageBalls[i]);
+      if(categories.indexOf(imageBalls[i].category) === -1) categories.push(imageBalls[i].category);
   });
+  console.log('categories', categories);
   }
 
   // Checks each ball to decide to show it, 
@@ -135,7 +146,6 @@ clicked = false;
     gridStartY = goalPosition.y;
     gridCurrentX = gridStartX;
     gridCurrentY = gridStartY;
-    console.log("icon size: ", iconSize);
   }
 
   // If the mouse is being dragged, create and display a launch arrow
