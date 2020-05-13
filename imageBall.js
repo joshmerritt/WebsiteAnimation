@@ -5,8 +5,9 @@
 class ImageBall {
     constructor(img, xPos, yPos, info) {
       let defaultOptions = {
-        friction: 0.333,
-        restitution: 0.9,
+        friction: 0.5,
+        frictionAir: 0.001,
+        restitution: 0.66,
         isStatic: true,
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
@@ -18,7 +19,7 @@ class ImageBall {
       this.description = 'placeholder';
       this.parseInfo = function() {
         let tempInfo = [];
-        info.forEach(function(item, index){
+        info.forEach((item) => {
           tempInfo.push(item.split(": "));
         });
         this.name = tempInfo[0][1];
@@ -54,8 +55,7 @@ class ImageBall {
       if(this.launchCount) this.checkForReset();
       const currentPos = this.body.position;
       const currentAngle = this.body.angle;
-      const currentTorque = this.body.torque;
-      console.log('current torque', currentTorque);
+      //const currentTorque = this.body.torque;
       let dynamicStrokeWeight = Math.ceil(iconSize/4);
       push();
       translate(currentPos.x, currentPos.y);

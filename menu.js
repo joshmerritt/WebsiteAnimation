@@ -4,23 +4,26 @@ Balls will bounce and open the page when it goes through the goal
 */
 
 class Menu {
-    constructor(categoryName, index) {
-        fill(0, 102, 153); 
-        text(categoryName, iconSize, goalPosition.y + iconSize*(index+1));
-        // let options = {
-        //     isStatic: true, 
-        //     restitution: 0.5
-        // };
-        // this.body = Matter.Bodies.rectangle(0, displayHeight - groundHeight, displayWidth, groundHeight, options);
+    constructor(position, category, index) {
+        let options = {
+            isStatic: true, 
+            restitution: 0.5
+        };
+        this.category = category;
+        this.position = position;
+        this.index = index;
+        this.body = Matter.Bodies.rectangle(position.x, position.y + (index + 1) * iconSize/3, iconSize, iconSize/3, options);
         // Matter.World.add(world, this.body);
         // this.height = groundHeight;
     }
 
-    // show() {
-    //   push();
-    //   fill(55);
-    //   rectMode(CENTER);
-    //   rect(this.body.position.x, this.body.position.y, windowWidth, this.height);
-    //   pop();
-    // }
+    show() {
+      push();
+      rectMode(CENTER);
+      textAlign(CENTER);
+      textSize(iconSize/4)
+      fill(151); 
+      text(this.category, this.position.x + 0.7*iconSize, this.position.y + (this.index + 1) * 0.7*iconSize);
+      pop();
+    }
 }

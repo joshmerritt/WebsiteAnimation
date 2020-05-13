@@ -5,6 +5,7 @@ let imageBuffers = [];
 let goals = [];
 let categories = [];
 let pageInfo = [];
+let menu = [];
 let iconSize, 
 gridStartX, 
 gridStartY, 
@@ -51,6 +52,9 @@ clicked = false;
     drawBalls();
     drawGoals();
     ground.show();
+    menu.forEach((item) => {
+      item.show();
+    });
     //backboard.show();
     //createP(`window width: ${windowWidth}, window height: ${windowHeight}`);
   }
@@ -66,8 +70,11 @@ clicked = false;
   function loadAssets() {
     loadImages();
     for(let i = 0; i < 2; i++){
-      goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/20);
+      goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10);
     };
+    categories.forEach((category, index) => {
+      menu.push(new Menu(goalPosition, category, index));
+    });
     ground = new Ground(windowWidth, windowHeight, iconSize);
   }
 
@@ -92,7 +99,7 @@ clicked = false;
       console.log('imageBall ',i, " : ",imageBalls[i]);
       if(categories.indexOf(imageBalls[i].category) === -1) categories.push(imageBalls[i].category);
   });
-  categories.sort((a, b) => a.length - b.length);
+  categories.sort((a, b) => b.length - a.length);
   console.log('categories', categories);
   }
 
