@@ -24,6 +24,13 @@
     - There should be a boundary outside the playfield to deflect the ball back
     - The thumbnail resets to it's position if it remains offscreen
 
+##### Collision Rules
+    - All balls will collide with the boundary.
+    - All balls will collide with other balls
+    - All balls will collide with the goal posts
+    - All balls will collide with the invisible boundaries
+    - Balls will only collide with the menu category that matches their own category
+
 ###### In progress notes
     X Add text descriptions of images
     X Add categories to array

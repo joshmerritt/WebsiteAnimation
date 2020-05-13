@@ -3,7 +3,11 @@
 
 class Goal {
     constructor(xPos, yPos, radius) {
-        this.body = Matter.Bodies.circle(xPos, yPos, radius, {isStatic: true});
+        let options = {
+          isStatic: true,
+          restitution: 0.99,
+        };
+        this.body = Matter.Bodies.circle(xPos, yPos, radius, options);
         Matter.World.add(world, this.body);
         this.radius = radius;
     }

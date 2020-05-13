@@ -2,10 +2,10 @@ class Ground {
     constructor(displayWidth, displayHeight, groundHeight) {
         let options = {
             isStatic: true, 
-            restitution: 1,
+            restitution: .5,
             id: "boundary"
         };
-        this.body = Matter.Bodies.rectangle(displayWidth/4, 0.9*displayHeight, 1.5*displayWidth, groundHeight, options);
+        this.body = Matter.Bodies.rectangle(displayWidth/4, displayHeight, 1.5*displayWidth, groundHeight, options);
         this.height = groundHeight;
         let ceiling = Matter.Bodies.rectangle(displayWidth/4, -displayHeight, 1.5*displayWidth, groundHeight*2, options);
         let leftWall = Matter.Bodies.rectangle(-displayWidth/2, displayHeight/4, groundHeight*2, 1.5*displayHeight, options);

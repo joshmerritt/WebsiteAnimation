@@ -1,4 +1,5 @@
 let itemsToDisplay = ['scoreboard', 'disc', 'antbw', 'flowchart'];
+const categoryBits = [0x0001, 0x0002, 0x0004, 0x0008, 0x0016, 0x0032, 0x0064, 0x0128];
 let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
@@ -37,7 +38,7 @@ clicked = false;
   }
 
   function setup() {
-    playfield = createCanvas(windowWidth*0.99, windowHeight*0.97);
+    playfield = createCanvas(windowWidth*0.99, windowHeight*0.95);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
@@ -69,13 +70,25 @@ clicked = false;
 
   function loadAssets() {
     loadImages();
+    createGoals();
+    createMenu();
+    ground = new Ground(width, height, iconSize);
+  }
+
+  function createMenu() {
+    categories.forEach((category, index) => {
+      let menuPos = {
+        x: goalPosition.x + 0.7*iconSize,
+        y: goalPosition.y + (index+1)*0.7*iconSize
+      };
+      menu.push(new Menu(menuPos, category, index));
+    });
+  }
+
+  function createGoals() {
     for(let i = 0; i < 2; i++){
       goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10);
     };
-    categories.forEach((category, index) => {
-      menu.push(new Menu(goalPosition, category, index+1));
-    });
-    ground = new Ground(windowWidth, windowHeight, iconSize);
   }
 
 /*
@@ -101,15 +114,22 @@ clicked = false;
   });
   categories.sort((a, b) => b.length - a.length);
   console.log('categories', categories);
+
   imageBalls.forEach((ball) => {
-    ball.body.collisionFilter.category = categories.findIndex(category => category === ball.category);
+    ball.body.collisionFilter = {
+      'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
+      'mask': categoryBits[0] | categoryBits[1] | categoryBits[2] | categoryBits[3] | categoryBits[4] | categoryBits[5] | categoryBits[6],
+    };
+    //console.log("ball cat & ball mask", ball.body.collisionFilter.category & ball.body.collisionFilter.mask);
   });
   }
 
-  // Checks each ball to decide to show it, 
-  // determine if the mouse is hovering on it, or
-  // create a launch arrow if the mouse is clicked
-  // for each applicable ball
+  /*
+      Checks each ball to decide to show it, 
+      determine if the mouse is hovering on it, or
+      create a launch arrow if the mouse is clicked
+      for each applicable ball
+  */
 
   function drawBalls() {
     imageBalls.forEach(function(ball, index) {
@@ -188,6 +208,7 @@ clicked = false;
     imageBalls.forEach(function(ball) {
       if(ball.clicked) {
         if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
+        console.log("launched ball: ", ball);
         let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
