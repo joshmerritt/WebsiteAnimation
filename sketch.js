@@ -1,5 +1,5 @@
 let itemsToDisplay = ['scoreboard', 'disc', 'antbw', 'flowchart'];
-const categoryBits = [0x0001, 0x0002, 0x0004, 0x0008, 0x0016, 0x0032, 0x0064, 0x0128];
+let categoryBits = [0x0001, 0x0002, 0x0004, 0x0008, 0x0016, 0x0032, 0x0064, 0x0128];
 let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
@@ -18,6 +18,7 @@ world,
 launchArrow,
 power,
 backboard,
+goalLine,
 ground,
 goalPosition,
 clicked = false;
@@ -89,6 +90,21 @@ clicked = false;
     for(let i = 0; i < 2; i++){
       goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10);
     };
+    let goalLineOptions = {
+      isStatic: true, 
+      restitution: 0.5,
+      collisionFilter:
+      {
+          // 'group': -1
+          'category': Math.pow(2, categories.length),
+          // 'mask': Math.pow(2, index)
+      }
+    }
+    goalLine = Matter.Bodies.rectangle(goalPosition.x, goalPosition.y, iconSize*1.4, iconSize/10, goalLineOptions);
+    Matter.World.add(world, goalLine);
+    console.log('goalline', goalLine);
+    // fill(55);
+    // rect(goalLine.position.x, goalLine.position.y, iconSize/10, iconSize*1.4);
   }
 
 /*
@@ -117,8 +133,9 @@ clicked = false;
 
   imageBalls.forEach((ball) => {
     ball.body.collisionFilter = {
+      'group': 1,
       'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
-      'mask': categoryBits[0] | categoryBits[1] | categoryBits[2] | categoryBits[3] | categoryBits[4] | categoryBits[5] | categoryBits[6],
+      'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
     };
     //console.log("ball cat & ball mask", ball.body.collisionFilter.category & ball.body.collisionFilter.mask);
   });
