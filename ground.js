@@ -8,7 +8,7 @@ class Ground {
         this.body = Matter.Bodies.rectangle(displayWidth/4, displayHeight, 1.5*displayWidth, groundHeight, options);
         this.height = groundHeight;
         let ceiling = Matter.Bodies.rectangle(displayWidth/4, -displayHeight, 1.5*displayWidth, groundHeight*2, options);
-        let leftWall = Matter.Bodies.rectangle(-displayWidth/2, displayHeight/4, groundHeight*2, 1.5*displayHeight, options);
+        let leftWall = Matter.Bodies.rectangle(-groundHeight*2, height/2, 2*groundHeight, 2*height, options);
         let rightWall = Matter.Bodies.rectangle(displayWidth+groundHeight, displayHeight/4, groundHeight*2, 1.5*displayHeight, options)
         let cornerWedge = Matter.Bodies.polygon(-displayWidth/3, displayHeight*0.75, 3, displayWidth/4, options);
         Matter.Body.setAngle(cornerWedge, -30);
