@@ -12,7 +12,6 @@ class ImageBall {
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
       //console.log('constructor info', info);
-
       this.name = 'placeholder';
       this.link = 'placeholder';
       this.category = 'placeholder';
@@ -28,6 +27,7 @@ class ImageBall {
         this.description = tempInfo[3][1];        
       };
       this.parseInfo = this.parseInfo.bind(this)();
+      this.body.id = this.name;
       this.img = img;
       this.x = xPos;
       this.y = yPos;

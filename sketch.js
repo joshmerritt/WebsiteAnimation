@@ -73,7 +73,7 @@ clicked = false;
       goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10);
     };
     categories.forEach((category, index) => {
-      menu.push(new Menu(goalPosition, category, index));
+      menu.push(new Menu(goalPosition, category, index+1));
     });
     ground = new Ground(windowWidth, windowHeight, iconSize);
   }
@@ -101,6 +101,9 @@ clicked = false;
   });
   categories.sort((a, b) => b.length - a.length);
   console.log('categories', categories);
+  imageBalls.forEach((ball) => {
+    ball.body.collisionFilter.category = categories.findIndex(category => category === ball.category);
+  });
   }
 
   // Checks each ball to decide to show it, 
