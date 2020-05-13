@@ -7,6 +7,7 @@ let goals = [];
 let categories = [];
 let pageInfo = [];
 let menu = [];
+let net = [];
 let iconSize, 
 gridStartX, 
 gridStartY, 
@@ -88,7 +89,8 @@ clicked = false;
 
   function createGoals() {
     for(let i = 0; i < 2; i++){
-      goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10);
+      goals.push(new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10));
+      net.push(new Net(goalPosition.x + iconSize*i*1.4, goalPosition.y, categories.length*0.7*iconSize));
     };
     let goalLineOptions = {
       isStatic: true, 
@@ -105,6 +107,7 @@ clicked = false;
     console.log('goalline', goalLine);
     // fill(55);
     // rect(goalLine.position.x, goalLine.position.y, iconSize/10, iconSize*1.4);
+
   }
 
 /*
