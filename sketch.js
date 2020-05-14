@@ -8,7 +8,8 @@ let categories = [];
 let pageInfo = [];
 let menu = [];
 let net = [];
-let iconSize, 
+let goalSize,
+iconSize, 
 gridStartX, 
 gridStartY, 
 gridCurrentX, 
@@ -31,7 +32,6 @@ clicked = false;
       imgs.push(loadImage(`assets/images/${item}.jpg`));
       let tempString = loadStrings(`assets/${item}.txt`);
       pageInfo.push(tempString);
-      //console.log(pages);
     }
   }
 
@@ -40,7 +40,7 @@ clicked = false;
   }
 
   function setup() {
-    playfield = createCanvas(windowWidth*0.99, windowHeight*0.95);
+    playfield = createCanvas(document.documentElement.clientWidth*.99, document.documentElement.clientHeight*.955);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
@@ -58,24 +58,54 @@ clicked = false;
     menu.forEach((item) => {
       item.show();
     });
+    net.forEach((item) => {
+      item.show();
+    });
     //backboard.show();
-    //createP(`window width: ${windowWidth}, window height: ${windowHeight}`);
   }
 
- /* 
+/*
+  Resizes the playfield whenever the window is resized
+  Uses built in p5.js methods
+*/
+  function windowResized() {
+    resizeCanvas(document.documentElement.clientWidth*.99, document.documentElement.clientHeight*.955);
+    setDisplaySize();
+  }
+
+  // Calculates the appropriate sized grid based upon the window size
+
+  function setDisplaySize() {
+    goalSize = iconSize/10;
+    goalPosition = {x:windowWidth/20, y:windowHeight/3};
+    iconSize =  Math.min(windowWidth/7, windowHeight/7);
+    gridStartX = goalPosition.x + iconSize*3;
+    gridStartY = goalPosition.y;
+    gridCurrentX = gridStartX;
+    gridCurrentY = gridStartY;
+  }
+
+/* 
+  loadAssets()
     Creates a 'ball' for each image that is spaced intelligently across the screen
     Each image has a category that is added to the categories array, if not already present
     Categories are ordered by descending length and displayed below the 'goal posts'
     Goal posts are created about the menu items which are used to mark the 'goal'
     Invisible barriers are in place to prevent reaching the menu except from above
-  */
+*/
 
   function loadAssets() {
     loadImages();
-    createGoals();
+    createGoal();
     createMenu();
     ground = new Ground(width, height, iconSize);
   }
+
+/*
+  createMenu()
+    calculates a the appropriate position and creates a new menu item
+    for each item in the categories array. It adds the items to the menu array to use later.
+*/
 
   function createMenu() {
     categories.forEach((category, index) => {
@@ -87,30 +117,34 @@ clicked = false;
     });
   }
 
-  function createGoals() {
+
+  function createGoal() {
+    let netHeight = 0.7*categories.length*iconSize;
     for(let i = 0; i < 2; i++){
-      goals.push(new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10));
-      net.push(new Net(goalPosition.x + iconSize*i*1.4, goalPosition.y, categories.length*0.7*iconSize));
+      goals.push(new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, goalSize));
+      net.push(new Net(goalPosition.x + iconSize*i*1.4, goalPosition.y + netHeight/2, netHeight));
     };
-    let goalLineOptions = {
-      isStatic: true, 
-      restitution: 0.5,
-      collisionFilter:
-      {
-          // 'group': -1
-          'category': Math.pow(2, categories.length),
-          // 'mask': Math.pow(2, index)
-      }
-    }
-    goalLine = Matter.Bodies.rectangle(goalPosition.x, goalPosition.y, iconSize*1.4, iconSize/10, goalLineOptions);
-    Matter.World.add(world, goalLine);
-    console.log('goalline', goalLine);
+    // initial code to create a way to tell if the ball has passed through the goal posts
+    // let goalLineOptions = {
+    //   isStatic: true, 
+    //   restitution: 0.5,
+    //   collisionFilter:
+    //   {
+    //       // 'group': -1
+    //       'category': Math.pow(2, categories.length),
+    //       // 'mask': Math.pow(2, index)
+    //   }
+    // }
+    // goalLine = Matter.Bodies.rectangle(goalPosition.x, goalPosition.y, iconSize*1.4, iconSize/10, goalLineOptions);
+    // Matter.World.add(world, goalLine);
+    // console.log('goalline', goalLine);
     // fill(55);
     // rect(goalLine.position.x, goalLine.position.y, iconSize/10, iconSize*1.4);
 
   }
 
 /*
+  loadImages()
     Loops through all images that were pre-loaded
     Creates an "ImageBall" for each, passing in its image, location, and text info
     For each ball created, add its category to the category array
@@ -145,12 +179,12 @@ clicked = false;
   }
 
   /*
+    drawBalls()
       Checks each ball to decide to show it, 
-      determine if the mouse is hovering on it, or
-      create a launch arrow if the mouse is clicked
+      determine if the mouse is hovering on it to show the launch arrow, 
+      or create and display a scalable launch arrow if the mouse is clicked
       for each applicable ball
   */
-
   function drawBalls() {
     imageBalls.forEach(function(ball, index) {
       if(ball) {
@@ -170,8 +204,10 @@ clicked = false;
     });
   }
 
-  // Displays the goals
-
+  /*
+    drawGoals()
+      Displays the goals
+  */
   function drawGoals() {
     goals.forEach(function(goal, index) {
       if(goal) {
@@ -180,24 +216,7 @@ clicked = false;
     });
   }
 
-  // Resizes the playfield whenever the window is resized
-  // Uses built in p5.js methods
 
-  function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
-    setDisplaySize();
-  }
-
-  // Calculates the appropriate sized grid based upon the window size
-
-  function setDisplaySize() {
-    goalPosition = {x:windowWidth/20, y:windowHeight/3};
-    iconSize =  Math.min(windowWidth/7, windowHeight/7);
-    gridStartX = goalPosition.x + iconSize*3;
-    gridStartY = goalPosition.y;
-    gridCurrentX = gridStartX;
-    gridCurrentY = gridStartY;
-  }
 
   // If the mouse is being dragged, create and display a launch arrow
 
