@@ -24,6 +24,7 @@ class ImageBall {
         this.name = tempInfo[0][1];
         this.link = tempInfo[1][1];
         this.category = tempInfo[2][1];
+        this.body.category = this.category;
         this.description = tempInfo[3][1];        
       };
       this.parseInfo = this.parseInfo.bind(this)();

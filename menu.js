@@ -1,5 +1,5 @@
 /*
-Provided a name of the category and the order it appears, construct menu links
+Provid locatiopn, name of the category, and the order it appears, construct menu item
 Balls will bounce and open the page when it goes through the goal
 */
 
@@ -19,6 +19,8 @@ class Menu {
         this.position = position;
         this.index = index;
         this.body = Matter.Bodies.rectangle(position.x, this.position.y, iconSize, iconSize/3, options);
+        this.body.id = category;
+        this.body.category = category;
         Matter.World.add(world, this.body);
     }
 
@@ -28,7 +30,7 @@ class Menu {
       //rect(this.position.x, this.position.y, iconSize, iconSize/3);
       textAlign(CENTER);
       textSize(iconSize/4)
-      fill(151); 
+      fill(22); 
       text(this.category, this.position.x, this.position.y);
       pop();
     }

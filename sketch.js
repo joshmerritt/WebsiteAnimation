@@ -73,14 +73,36 @@ clicked = false;
     createGoals();
     createMenu();
     ground = new Ground(width, height, iconSize);
+    trackCollisions();
   }
 
+  /*
+    trackCollisions()
+      Creates an event listener for when two bodies are actively colliding
+      Checks to see if any of the balls are currently touching their menu item
+  */
+  function trackCollisions() {
+    Matter.Events.on(engine, 'collisionActive', function(event) {
+      //console.log("event - a - b", event);
+      event.source.pairs.collisionActive.forEach((collision) => {
+        //console.log('collision', collision);
+        if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category=== collision.bodyB.category) {
+          console.log("Success!!!");
+        };
+      });
+      // let a = event.source.pairs.collisionActive[0].bodyA;
+      // let b = event.source.pairs.collisionActive[0].bodyB;
+      // console.log( a, " - ", b);
+  
+      // check bodies, do whatever...
+    });
+  }
+  
 /*
   createMenu()
     calculates a the appropriate position and creates a new menu item
     for each item in the categories array. It adds the items to the menu array to use later.
 */
-
   function createMenu() {
     categories.forEach((category, index) => {
       let menuPos = {
@@ -91,11 +113,15 @@ clicked = false;
     });
   }
 
-
+/*
+  createGoals()
+    Adds 2 visible "goalposts" to the field
+    Adds 2 invisible nets below the goal posts to prevent menu collision from the side
+*/
   function createGoals() {
     const netHeight = 0.7*categories.length*iconSize;
     for(let i = 0; i < 2; i++){
-      goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10);
+      goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10, i);
       net.push(new Net(goalPosition.x + iconSize*i*1.4, goalPosition.y + netHeight/2, netHeight));
     };
   }
@@ -141,11 +167,15 @@ clicked = false;
     setDisplaySize();
   }
 
-  // Calculates the appropriate sized grid based upon the window size
-
+/* 
+  setDisplaySize()
+    Calculates the appropriate sized grid based upon the window size
+    Called during set up or when the window is resized
+*/
   function setDisplaySize() {
-    goalPosition = {x:windowWidth/20, y:windowHeight/3};
     iconSize =  Math.min(windowWidth/7, windowHeight/7);
+    goalPosition = {x: 1.1*iconSize, y:windowHeight/3};
+    console.log('goal positon - iconSize', goalPosition, ' - ', iconSize);
     gridStartX = goalPosition.x + iconSize*3;
     gridStartY = goalPosition.y;
     gridCurrentX = gridStartX;
