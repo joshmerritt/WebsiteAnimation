@@ -3,7 +3,7 @@ class Ground {
         let options = {
             isStatic: true, 
             restitution: .5,
-            id: "ground"
+            id: "ground",
         };
         this.body = Matter.Bodies.rectangle(displayWidth/4, displayHeight, 1.5*displayWidth, groundHeight, options);
         this.height = groundHeight;
@@ -23,7 +23,7 @@ class Ground {
       push();
       fill(55);
       rectMode(CENTER);
-      rect(this.body.position.x, this.body.position.y, 1.5*width, this.height);
+      rect(this.body.position.x, this.body.position.y, 1.5*windowWidth, this.height);
       pop();
     }
 }

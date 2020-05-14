@@ -1,5 +1,5 @@
 class Goal {
-  constructor(xPos, yPos, radius) {
+    constructor(xPos, yPos, radius) {
       let options = {
         isStatic: true,
         restitution: 0.99,
@@ -8,6 +8,7 @@ class Goal {
       Matter.World.add(world, this.body);
       this.radius = radius;
   }
+
 
   show() {
     push();
@@ -18,3 +19,5 @@ class Goal {
   }
 
 }
+
+

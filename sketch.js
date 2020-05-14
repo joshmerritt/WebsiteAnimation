@@ -8,8 +8,7 @@ let categories = [];
 let pageInfo = [];
 let menu = [];
 let net = [];
-let goalSize,
-iconSize, 
+let iconSize, 
 gridStartX, 
 gridStartY, 
 gridCurrentX, 
@@ -96,7 +95,7 @@ clicked = false;
   function createGoals() {
     const netHeight = 0.7*categories.length*iconSize;
     for(let i = 0; i < 2; i++){
-      goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, goalSize);
+      goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10);
       net.push(new Net(goalPosition.x + iconSize*i*1.4, goalPosition.y + netHeight/2, netHeight));
     };
   }
@@ -145,7 +144,6 @@ clicked = false;
   // Calculates the appropriate sized grid based upon the window size
 
   function setDisplaySize() {
-    goalSize = iconSize/10;
     goalPosition = {x:windowWidth/20, y:windowHeight/3};
     iconSize =  Math.min(windowWidth/7, windowHeight/7);
     gridStartX = goalPosition.x + iconSize*3;
