@@ -58,10 +58,6 @@ clicked = false;
     menu.forEach((item) => {
       item.show();
     });
-    net.forEach((item) => {
-      item.show();
-    });
-    //backboard.show();
   }
 
 /* 
@@ -98,9 +94,9 @@ clicked = false;
 
 
   function createGoals() {
-    let netHeight = 0.7*categories.length*iconSize;
+    const netHeight = 0.7*categories.length*iconSize;
     for(let i = 0; i < 2; i++){
-      goals.push(new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, goalSize));
+      goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, goalSize);
       net.push(new Net(goalPosition.x + iconSize*i*1.4, goalPosition.y + netHeight/2, netHeight));
     };
   }
