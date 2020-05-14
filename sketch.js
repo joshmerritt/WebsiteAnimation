@@ -253,6 +253,7 @@ clicked = false;
         if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
         console.log("launched ball: ", ball);
         let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
+        console.log("strength - area (width * height) - iconSize:  ", strength, " - ", height*width, " - ", iconSize);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
