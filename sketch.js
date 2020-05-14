@@ -64,27 +64,6 @@ clicked = false;
     //backboard.show();
   }
 
-/*
-  Resizes the playfield whenever the window is resized
-  Uses built in p5.js methods
-*/
-  function windowResized() {
-    resizeCanvas(document.documentElement.clientWidth*.99, document.documentElement.clientHeight*.955);
-    setDisplaySize();
-  }
-
-  // Calculates the appropriate sized grid based upon the window size
-
-  function setDisplaySize() {
-    goalSize = iconSize/10;
-    goalPosition = {x:windowWidth/20, y:windowHeight/3};
-    iconSize =  Math.min(windowWidth/7, windowHeight/7);
-    gridStartX = goalPosition.x + iconSize*3;
-    gridStartY = goalPosition.y;
-    gridCurrentX = gridStartX;
-    gridCurrentY = gridStartY;
-  }
-
 /* 
   loadAssets()
     Creates a 'ball' for each image that is spaced intelligently across the screen
@@ -96,7 +75,7 @@ clicked = false;
 
   function loadAssets() {
     loadImages();
-    createGoal();
+    createGoals();
     createMenu();
     ground = new Ground(width, height, iconSize);
   }
@@ -118,29 +97,12 @@ clicked = false;
   }
 
 
-  function createGoal() {
+  function createGoals() {
     let netHeight = 0.7*categories.length*iconSize;
     for(let i = 0; i < 2; i++){
       goals.push(new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, goalSize));
       net.push(new Net(goalPosition.x + iconSize*i*1.4, goalPosition.y + netHeight/2, netHeight));
     };
-    // initial code to create a way to tell if the ball has passed through the goal posts
-    // let goalLineOptions = {
-    //   isStatic: true, 
-    //   restitution: 0.5,
-    //   collisionFilter:
-    //   {
-    //       // 'group': -1
-    //       'category': Math.pow(2, categories.length),
-    //       // 'mask': Math.pow(2, index)
-    //   }
-    // }
-    // goalLine = Matter.Bodies.rectangle(goalPosition.x, goalPosition.y, iconSize*1.4, iconSize/10, goalLineOptions);
-    // Matter.World.add(world, goalLine);
-    // console.log('goalline', goalLine);
-    // fill(55);
-    // rect(goalLine.position.x, goalLine.position.y, iconSize/10, iconSize*1.4);
-
   }
 
 /*
@@ -149,7 +111,6 @@ clicked = false;
     Creates an "ImageBall" for each, passing in its image, location, and text info
     For each ball created, add its category to the category array
 */
-
   function loadImages() {
     imgs.forEach(function(img, i) {
       //console.log('img -', img);
@@ -164,19 +125,38 @@ clicked = false;
       }
       console.log('imageBall ',i, " : ",imageBalls[i]);
       if(categories.indexOf(imageBalls[i].category) === -1) categories.push(imageBalls[i].category);
-  });
-  categories.sort((a, b) => b.length - a.length);
-  console.log('categories', categories);
-
-  imageBalls.forEach((ball) => {
-    ball.body.collisionFilter = {
-      'group': 1,
-      'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
-      'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
-    };
-    //console.log("ball cat & ball mask", ball.body.collisionFilter.category & ball.body.collisionFilter.mask);
-  });
+    });
+    categories.sort((a, b) => b.length - a.length);
+    imageBalls.forEach((ball) => {
+      ball.body.collisionFilter = {
+        'group': 1,
+        'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
+        'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
+      };
+    });
   }
+
+/*
+  windowResized()
+    Resizes the playfield whenever the window is resized
+    Uses built in p5.js methods
+*/
+  function windowResized() {
+    resizeCanvas(document.documentElement.clientWidth*.99, document.documentElement.clientHeight*.955);
+    setDisplaySize();
+  }
+
+  // Calculates the appropriate sized grid based upon the window size
+
+  function setDisplaySize() {
+    goalSize = iconSize/10;
+    goalPosition = {x:windowWidth/20, y:windowHeight/3};
+    iconSize =  Math.min(windowWidth/7, windowHeight/7);
+    gridStartX = goalPosition.x + iconSize*3;
+    gridStartY = goalPosition.y;
+    gridCurrentX = gridStartX;
+    gridCurrentY = gridStartY;
+  } 
 
   /*
     drawBalls()
