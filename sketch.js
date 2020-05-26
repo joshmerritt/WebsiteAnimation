@@ -22,6 +22,7 @@ backboard,
 goalLine,
 ground,
 goalPosition,
+detailPageOpen = false,
 clicked = false;
 
 // Loads images and text for use in building the website
@@ -86,8 +87,16 @@ clicked = false;
       //console.log("event - a - b", event);
       event.source.pairs.collisionActive.forEach((collision) => {
         //console.log('collision', collision);
-        if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category=== collision.bodyB.category) {
-          console.log("Success!!!");
+        if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
+          // console.log("Success!!!");
+          // console.log("body a", collision.bodyA);
+          // console.log("body b", collision.bodyB);
+          if(collision.bodyA.label === 'Image Ball') {
+            imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
+          } else if(collision.bodyB.label === 'Image Ball') {
+
+          }
+
         };
       });
       // let a = event.source.pairs.collisionActive[0].bodyA;

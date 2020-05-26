@@ -29,6 +29,7 @@ class ImageBall {
       };
       this.parseInfo = this.parseInfo.bind(this)();
       this.body.id = this.name;
+      this.body.label = 'Image Ball';
       this.img = img;
       this.x = xPos;
       this.y = yPos;
@@ -41,6 +42,16 @@ class ImageBall {
       this.originalY = yPos;
       this.originalPos = {x: xPos, y: yPos}; 
       this.inOriginalPosition = true;
+    }
+
+/*
+
+*/
+    showDetail() {
+      console.log('showDetail for:', this.body.id);      
+      let tempScreenSize = Math.min(windowWidth, windowHeight);
+      fill(44);
+      circle(0, 0, tempScreenSize);
     }
 
     // Used to check if the mouse is hovering over the ball

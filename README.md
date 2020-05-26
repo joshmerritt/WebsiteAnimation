@@ -35,8 +35,8 @@
     X Add text descriptions of images
     X Add categories to array
     X Add menu item for each category
-    - Add invisible rectangle for each menu item
-    - Add in collision filtering so ball bounces on applicable menu item when made
-    - Add invisible side bars to prevent reaching menu other than through goal
+    X Add invisible rectangle for each menu item
+    X Add in collision filtering so ball bounces on applicable menu item when made
+    X Add invisible side bars to prevent reaching menu other than through goal
     - Build display page to appear like the imageball is simply expanded to allow for full view of the page
     - Need to fix arrow rotation
