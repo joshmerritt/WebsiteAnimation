@@ -42,16 +42,24 @@ class ImageBall {
       this.originalY = yPos;
       this.originalPos = {x: xPos, y: yPos}; 
       this.inOriginalPosition = true;
+      this.pageOpen = false;
     }
 
 /*
 
 */
     showDetail() {
-      console.log('showDetail for:', this.body.id);      
-      let tempScreenSize = Math.min(windowWidth, windowHeight);
-      fill(44);
-      circle(0, 0, tempScreenSize);
+      if(detailPageOpen === false) {
+        detailPageOpen = true;
+        this.pageOpen = true;
+        console.log('showDetail for:', this.body.id);      
+        let tempScreenSize = Math.min(windowWidth, windowHeight);
+        push();
+        fill(55);
+        ellipseMode(CENTER);
+        circle(0, 0, tempScreenSize);
+        pop();
+      }
     }
 
     // Used to check if the mouse is hovering over the ball
