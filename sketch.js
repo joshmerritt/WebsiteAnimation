@@ -75,6 +75,10 @@ clicked = false;
     createMenu();
     ground = new Ground(width, height, iconSize);
     trackCollisions();
+    drawingContext.shadowOffsetX = 3;
+    drawingContext.shadowOffsetY = -3;
+    drawingContext.shadowBlur = 5;
+    drawingContext.shadowColor = 'white';
   }
 
   /*

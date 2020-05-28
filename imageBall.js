@@ -52,14 +52,16 @@ class ImageBall {
       if(detailPageOpen === false) {
         detailPageOpen = true;
         this.pageOpen = true;
-        console.log('showDetail for:', this.body.id);      
-        let tempScreenSize = Math.min(windowWidth, windowHeight);
-        push();
-        fill(55);
-        ellipseMode(CENTER);
-        circle(0, 0, tempScreenSize);
-        pop();
       }
+      console.log('showDetail for:', this.body.id);      
+      let tempScreenSize = Math.min(windowWidth, windowHeight);
+      push();
+      //imageMode(CENTER);
+      image(this.img, 0, 0, tempScreenSize/2, tempScreenSize/2);
+      fill(55);
+      //ellipseMode(CENTER);
+      circle(windowWidth/2, windowHeight/2, tempScreenSize);
+      pop();
     }
 
     // Used to check if the mouse is hovering over the ball
