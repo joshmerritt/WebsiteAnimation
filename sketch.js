@@ -52,12 +52,13 @@ clicked = false;
   function draw() {
     Matter.Engine.update(engine);
     background(111);
-    drawBalls();
     drawGoals();
     ground.show();
     menu.forEach((item) => {
       item.show();
     });
+    drawBalls();
+    displayDetailPage();
   }
 
 /* 
@@ -88,13 +89,8 @@ clicked = false;
   */
   function trackCollisions() {
     Matter.Events.on(engine, 'collisionActive', function(event) {
-      //console.log("event - a - b", event);
       event.source.pairs.collisionActive.forEach((collision) => {
-        //console.log('collision', collision);
         if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
-          // console.log("Success!!!");
-          // console.log("body a", collision.bodyA);
-          // console.log("body b", collision.bodyB);
           if(collision.bodyA.label === 'Image Ball') {
             imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
           } else if(collision.bodyB.label === 'Image Ball') {
@@ -103,11 +99,6 @@ clicked = false;
 
         };
       });
-      // let a = event.source.pairs.collisionActive[0].bodyA;
-      // let b = event.source.pairs.collisionActive[0].bodyB;
-      // console.log( a, " - ", b);
-  
-      // check bodies, do whatever...
     });
   }
   
@@ -196,6 +187,20 @@ clicked = false;
   } 
 
   /*
+    displayDetailPage()
+      Checks to see if any balls should display detail page
+      If so, draws the detail page on top of the existing canvas
+  */
+
+  function displayDetailPage() {
+    imageBalls.forEach(ball => {
+      if(ball.pageOpen) {
+        ball.showDetail();
+      };
+    });
+  }
+
+  /*
     drawBalls()
       Checks each ball to decide to show it, 
       determine if the mouse is hovering on it to show the launch arrow, 
@@ -203,32 +208,22 @@ clicked = false;
       for each applicable ball
   */
   function drawBalls() {
-    if(detailPageOpen === false) {
-      imageBalls.forEach(function(ball, index) {
-        if(ball) {
-          ball.show();
-          if(mouseIsPressed) {
-            if(ball.clicked) {
-              ball.aim();
-            }
-          } else {
-            if(ball.onBall(mouseX, mouseY)) {
-              ball.hover();
-            }
-            ball.xPower = 0;
-            ball.yPower = 0;
+    imageBalls.forEach(function(ball, index) {
+      if(ball) {
+        ball.show();
+        if(mouseIsPressed) {
+          if(ball.clicked) {
+            ball.aim();
           }
-        }
-      });
-    } else {
-      imageBalls.forEach(ball => {
-        if(ball.pageOpen) {
-          ball.showDetail();
         } else {
-          ball.show();
+          if(ball.onBall(mouseX, mouseY)) {
+            ball.hover();
+          }
+          ball.xPower = 0;
+          ball.yPower = 0;
         }
-      });
-    }
+      }
+    });
   }
 
   /*

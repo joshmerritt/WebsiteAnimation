@@ -22,7 +22,7 @@ class ImageBall {
           tempInfo.push(item.split(": "));
         });
         this.name = tempInfo[0][1];
-        this.link = tempInfo[1][1];
+        this.link = createA(`${tempInfo[1][1]}`, "See more details", "_blank");
         this.category = tempInfo[2][1];
         this.body.category = this.category;
         this.description = tempInfo[3][1];        
@@ -46,6 +46,10 @@ class ImageBall {
     }
 
 /*
+    showDetail()
+      Called when the ball has made contact with the correct menu item
+      Translates the existing ball to a larger size, filling the smallest h/w dimension
+      Displays the image, along with the name, description, and link
 
 */
     showDetail() {
@@ -56,12 +60,18 @@ class ImageBall {
       console.log('showDetail for:', this.body.id);      
       let tempScreenSize = Math.min(windowWidth, windowHeight);
       push();
-      //imageMode(CENTER);
-      image(this.img, 0, 0, tempScreenSize/2, tempScreenSize/2);
       fill(55);
-      //ellipseMode(CENTER);
+      ellipseMode(CENTER);
       circle(windowWidth/2, windowHeight/2, tempScreenSize);
+      image(this.img, 0, 0, tempScreenSize/2, tempScreenSize/2);
+      textSize(iconSize/3);
+      fill(0, 102, 153);
+      this.link.position(windowWidth/2 - this.link.width/2, windowHeight/4);
       pop();
+    }
+
+    createDetail() {
+
     }
 
     // Used to check if the mouse is hovering over the ball
@@ -77,7 +87,6 @@ class ImageBall {
       if(this.launchCount) this.checkForReset();
       const currentPos = this.body.position;
       const currentAngle = this.body.angle;
-      //const currentTorque = this.body.torque;
       let dynamicStrokeWeight = Math.ceil(iconSize/4);
       push();
       translate(currentPos.x, currentPos.y);
