@@ -76,10 +76,10 @@ clicked = false;
     createMenu();
     ground = new Ground(width, height, iconSize);
     trackCollisions();
-    drawingContext.shadowOffsetX = 3;
-    drawingContext.shadowOffsetY = -3;
-    drawingContext.shadowBlur = 5;
-    drawingContext.shadowColor = 'white';
+    // drawingContext.shadowOffsetX = 3;
+    // drawingContext.shadowOffsetY = -3;
+    // drawingContext.shadowBlur = 5;
+    // drawingContext.shadowColor = 'white';
   }
 
   /*
@@ -87,6 +87,7 @@ clicked = false;
       Creates an event listener for when two bodies are actively colliding
       Checks to see if any of the balls are currently touching their menu item
   */
+ 
   function trackCollisions() {
     Matter.Events.on(engine, 'collisionActive', function(event) {
       event.source.pairs.collisionActive.forEach((collision) => {
