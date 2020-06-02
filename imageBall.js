@@ -12,6 +12,7 @@ class ImageBall {
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
       //console.log('constructor info', info);
+      this.content = createElement('section',['content']);
       this.name = 'placeholder';
       this.link = 'placeholder';
       this.category = 'placeholder';
@@ -21,14 +22,15 @@ class ImageBall {
         info.forEach((item) => {
           tempInfo.push(item.split(": "));
         });
-        this.name = tempInfo[0][1];
+        this.content.hide();
+        this.name = createElement('h2',`${tempInfo[0][1]}`);
         this.link = createA(`${tempInfo[1][1]}`, "See more details", "_blank");
-        this.link.hide();
+        this.description = createP(tempInfo[3][1]);
+        this.content.child(this.name);
+        this.content.child(this.link);
+        this.content.child(this.description);
         this.category = tempInfo[2][1];
         this.body.category = this.category;
-        this.description = createP(tempInfo[3][1]);
-        this.description.width = Math.min(windowWidth, windowHeight)/4;
-        this.description.hide();        
       };
       this.parseInfo = this.parseInfo.bind(this)();
       this.body.id = this.name;
@@ -79,6 +81,9 @@ class ImageBall {
       // circle(windowWidth/2, windowHeight/4, imageDetails.size*1.25);
       textSize(iconSize/3);
       fill(0, 102, 153);
+      this.content.position(0.2*windowWidth, 0.4*windowHeight);
+      this.content.size(tempScreenSize/2, tempScreenSize/2);
+      this.content.show();
       this.link.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
       this.link.show();
       this.description.position(windowWidth/2 - this.description.width/4, windowHeight * 0.7);
