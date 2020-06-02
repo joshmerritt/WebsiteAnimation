@@ -51,13 +51,13 @@ clicked = false;
 
   function draw() {
     Matter.Engine.update(engine);
-    background(111);
-    drawGoals();
+    background(192, 192, 192);
     ground.show();
+    drawBalls();
     menu.forEach((item) => {
       item.show();
     });
-    drawBalls();
+    drawGoals();
     displayDetailPage();
   }
 
@@ -95,9 +95,8 @@ clicked = false;
           if(collision.bodyA.label === 'Image Ball') {
             imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
           } else if(collision.bodyB.label === 'Image Ball') {
-
+            imageBalls.find(imageBall => imageBall.body.id === collision.bodyB.id).showDetail();
           }
-
         };
       });
     });

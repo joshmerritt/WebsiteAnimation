@@ -12,7 +12,7 @@ class ImageBall {
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
       //console.log('constructor info', info);
-      this.content = createElement('section',['content']);
+      this.content = createElement('section');
       this.name = 'placeholder';
       this.link = 'placeholder';
       this.category = 'placeholder';
@@ -67,7 +67,7 @@ class ImageBall {
         detailPageOpen = true;
         this.pageOpen = true;
       }
-      console.log('showDetail for:', this.body.id);
+      console.log('showDetail for this:', this);
       console.log('imageDetails', imageDetails);      
       push();
       fill(55);
@@ -81,13 +81,13 @@ class ImageBall {
       // circle(windowWidth/2, windowHeight/4, imageDetails.size*1.25);
       textSize(iconSize/3);
       fill(0, 102, 153);
-      this.content.position(0.2*windowWidth, 0.4*windowHeight);
       this.content.size(tempScreenSize/2, tempScreenSize/2);
+      this.content.position(windowWidth/2 - this.content.width/2, windowHeight/2);
       this.content.show();
-      this.link.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
-      this.link.show();
-      this.description.position(windowWidth/2 - this.description.width/4, windowHeight * 0.7);
-      this.description.show();
+      // this.link.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
+      // this.link.show();
+      // this.description.position(windowWidth/2 - this.description.width/4, windowHeight * 0.7);
+      // this.description.show();
       pop();
     }
 
@@ -116,7 +116,7 @@ class ImageBall {
       let thumbnail = this.img.get(this.img.width/2, this.img.height/2, this.img.width/4, this.img.width/4);
       image(thumbnail, 0, 0, iconSize, iconSize);
       noFill();
-      stroke(111);
+      stroke('silver');
       strokeWeight(dynamicStrokeWeight);
       circle(0, 0, iconSize*1.25);    
       pop();
