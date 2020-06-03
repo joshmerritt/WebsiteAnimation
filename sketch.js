@@ -1,4 +1,4 @@
-let itemsToDisplay = ['scoreboard', 'disc', 'antbw', 'flowchart'];
+let itemsToDisplay = ['scoreboard', 'chickenDoor', 'antbw', 'flowchart'];
 let categoryBits = [0x0001, 0x0002, 0x0004, 0x0008, 0x0016, 0x0032, 0x0064, 0x0128];
 let imageBalls = [];
 let imgs = [];
