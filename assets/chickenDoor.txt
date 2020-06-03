@@ -1,0 +1,6 @@
+Name: Chicken Coop Door Opener
+Link: https://github.com/joshmerritt/arduinoChickenCoopDoor
+Category: Farm
+Technology: C++, Arduino, Motors, Photoresistors, Switches
+Inspiration/Learned from: Arduino.cc, Jeremy Smith
+Description: Using an arduino, a motor shield, and a car door window motor, I created a door that opens and closes automatically based upon a photoresistor's realtime readings. Originally installed in July 2017, it has worked without fail for nearly 3 years. I've also built an identical model for my neighbors coop. 
