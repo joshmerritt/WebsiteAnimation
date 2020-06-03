@@ -1,5 +1,4 @@
 let itemsToDisplay = ['scoreboard', 'chickenDoor', 'antbw', 'flowchart'];
-let categoryBits = [0x0001, 0x0002, 0x0004, 0x0008, 0x0016, 0x0032, 0x0064, 0x0128];
 let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
@@ -22,6 +21,7 @@ backboard,
 goalLine,
 ground,
 goalPosition,
+fontAwesome,
 detailPageOpen = false,
 clicked = false;
 
@@ -37,6 +37,7 @@ clicked = false;
 
   function preload() {
     preLoadAssets();
+    fontAwesome = loadFont('assets/fa.otf')
   }
 
   function setup() {
@@ -156,7 +157,7 @@ clicked = false;
       ball.body.collisionFilter = {
         'group': 1,
         'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
-        'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
+        'mask': 1 | 2 | 4,
       };
     });
   }
