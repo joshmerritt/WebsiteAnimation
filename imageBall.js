@@ -84,16 +84,9 @@ class ImageBall {
       this.content.size(tempScreenSize/2, tempScreenSize/2);
       this.content.position(windowWidth/2 - this.content.width/2, windowHeight/2);
       this.content.show();
-      // this.link.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
-      // this.link.show();
-      // this.description.position(windowWidth/2 - this.description.width/4, windowHeight * 0.7);
-      // this.description.show();
       pop();
     }
 
-    createDetail() {
-
-    }
 
     // Used to check if the mouse is hovering over the ball
 

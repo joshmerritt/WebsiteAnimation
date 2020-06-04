@@ -21,9 +21,12 @@ backboard,
 goalLine,
 ground,
 goalPosition,
-fontAwesome,
-detailPageOpen = false,
-clicked = false;
+resetButton,
+fontAwesome;
+let detailPageOpen = false;
+let clicked = false;
+let resetIcon = '/uf01e';
+let closeIcon = '/uf057';
 
 // Loads images and text for use in building the website
 
@@ -37,17 +40,19 @@ clicked = false;
 
   function preload() {
     preLoadAssets();
-    fontAwesome = loadFont('assets/fa.otf')
+    fontAwesome = loadFont('assets/fa.otf');
   }
 
   function setup() {
     playfield = createCanvas(document.documentElement.clientWidth*.99, document.documentElement.clientHeight*.955);
+    console.log('canvas playfield', playfield);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
     console.log("world", world); 
     background(111);
     loadAssets();
+    addReset();
   }
 
   function draw() {
@@ -62,6 +67,24 @@ clicked = false;
     displayDetailPage();
   }
 
+/*
+  addReset()
+    Function to display the reset button 
+*/
+function addReset() {
+    resetButton = createButton('');
+    resetButton.position(playfield.width - resetButton.width-iconSize, playfield.height - resetButton.height - iconSize);
+    resetButton.mousePressed(resetBalls);
+}
+
+function resetBalls() {
+    imageBalls.forEach((ball) => {
+      if(ball.launched) {
+        ball.reset();
+      }
+    });
+}
+
 /* 
   loadAssets()
     Creates a 'ball' for each image that is spaced intelligently across the screen
@@ -75,7 +98,7 @@ clicked = false;
     loadImages();
     createGoals();
     createMenu();
-    ground = new Ground(width, height, iconSize);
+    ground = new Ground(playfield.width, playfield.height, iconSize);
     trackCollisions();
     // drawingContext.shadowOffsetX = 3;
     // drawingContext.shadowOffsetY = -3;
