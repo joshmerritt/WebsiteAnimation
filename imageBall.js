@@ -67,8 +67,8 @@ class ImageBall {
         detailPageOpen = true;
         this.pageOpen = true;
       }
-      console.log('showDetail for this:', this);
-      console.log('imageDetails', imageDetails);      
+      // console.log('showDetail for this:', this);
+      // console.log('imageDetails', imageDetails);      
       push();
       fill(55);
       strokeWeight(0);
@@ -123,8 +123,9 @@ class ImageBall {
 
     checkForReset() {
       if(this.offScreen()) {
-        if(Math.abs(this.body.velocity.x) < 0.05){
+        if(Math.abs(this.body.velocity.x + this.body.velocity.y) < 0.05){
           this.reset();
+          console.log("check for reset, offscreen, low velocity");
         }
       }
     }
@@ -133,11 +134,11 @@ class ImageBall {
     // to determine if the object is still visible
 
     offScreen() {
-      let x = this.x;
-      let y = this.y;
+      let tempX = this.body.position.x;
+      let tempY = this.body.position.y;
       let radius = this.body.circleRadius;
-      let offX = ((x + radius) < 0 || (x - radius) > windowWidth);
-      let offY = (y + radius) > windowHeight;
+      let offX = ((tempX + radius) < 0 || (tempX - radius) > windowWidth);
+      let offY = (tempY + radius) > windowHeight;
       if(offX || offY) return true;
        else return false;
     }
