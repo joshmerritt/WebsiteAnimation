@@ -26,8 +26,6 @@ class Menu {
 
     show() {
       push();
-      //rectMode(CENTER);
-      //rect(this.position.x, this.position.y, iconSize, iconSize/3);
       textAlign(CENTER);
       textSize(iconSize/4)
       fill(22); 

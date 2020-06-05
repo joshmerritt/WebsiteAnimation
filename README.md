@@ -38,5 +38,8 @@
     X Add invisible rectangle for each menu item
     X Add in collision filtering so ball bounces on applicable menu item when made
     X Add invisible side bars to prevent reaching menu other than through goal
-    - Build display page to appear like the imageball is simply expanded to allow for full view of the page
+    - Build display page to appear like the imageball is simply expanded to allow for full view of the page (aka transform the ball from current position to center of page positon)
+    - Add in reset button to main page
+    - Add in close button to detail page
+    - Add footer
     - Need to fix arrow rotation
