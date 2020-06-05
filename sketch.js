@@ -78,11 +78,11 @@ function addReset() {
 }
 
 function resetBalls() {
-    imageBalls.forEach((ball) => {
-      if(ball.launched) {
-        ball.reset();
-      }
-    });
+    // imageBalls.forEach((ball) => {
+    //   if(ball.launched) {
+    //     ball.reset();
+    //   }
+    // });
 }
 
 /* 
