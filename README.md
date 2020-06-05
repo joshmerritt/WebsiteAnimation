@@ -42,4 +42,5 @@
     - Add in reset button to main page
     - Add in close button to detail page
     - Add footer
+    - Refactor screen resize function to reposition every element
     - Need to fix arrow rotation
