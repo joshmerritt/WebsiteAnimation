@@ -11,7 +11,6 @@ class ImageBall {
         isStatic: true,
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
-      //console.log('constructor info', info);
       this.name = 'placeholder';
       this.link = 'placeholder';
       this.category = 'placeholder';
