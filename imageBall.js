@@ -75,11 +75,6 @@ class ImageBall {
       ellipseMode(CENTER);
       circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
       image(this.img, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
-      // noFill();
-      // stroke(55);
-      // strokeWeight(iconSize);
-      // circle(windowWidth/2, windowHeight/4, imageDetails.size*1.25);
-      textSize(iconSize/3);
       fill(0, 102, 153);
       this.content.size(tempScreenSize/2, tempScreenSize/2);
       this.content.position(windowWidth/2 - this.content.width/2, windowHeight/2);
@@ -200,10 +195,6 @@ class ImageBall {
     launched() {
       this.launchCount++;
       this.inOriginalPosition = false;
-    }
-
-    checkGoal() {
-
     }
 
   }

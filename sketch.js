@@ -1,4 +1,5 @@
 let itemsToDisplay = ['scoreboard', 'chickenDoor', 'antbw', 'flowchart'];
+let categoryBits = [0x0001, 0x0002, 0x0004, 0x0008, 0x0016, 0x0032, 0x0064, 0x0128];
 let imageBalls = [];
 let imgs = [];
 let imageBuffers = [];
@@ -64,7 +65,7 @@ let closeIcon = '/uf057';
       item.show();
     });
     drawGoals();
-    displayDetailPage();
+    //displayDetailPage();
   }
 
 /*
@@ -115,7 +116,7 @@ function resetBalls() {
   function trackCollisions() {
     Matter.Events.on(engine, 'collisionActive', function(event) {
       event.source.pairs.collisionActive.forEach((collision) => {
-        if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
+        if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category && (collision.bodyA.label !== collision.bodyB.label)) {
           if(collision.bodyA.label === 'Image Ball') {
             imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
           } else if(collision.bodyB.label === 'Image Ball') {
@@ -180,7 +181,7 @@ function resetBalls() {
       ball.body.collisionFilter = {
         'group': 1,
         'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
-        'mask': 1 | 2 | 4,
+        'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
       };
     });
   }
