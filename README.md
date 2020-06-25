@@ -21,38 +21,38 @@ If you are interested in using my code to run your website, you'll need to:
 
 #### Requirements
 
-- Accepts 1 or more images to display as thumbnails/balls
-- Scales responsively based upon screen size and the number of projects
-- Shows direction and power arrow when user hovers over thumbnail
-- Allows for user to "launch" the thumbnail by clicking on it
-- Releasing the mouse sends the thumbnail in the applicable direction
-- A "goal" is created by the menu
-- A successful attempt will result in the applicable thumbnail launching it's info page
-- The thumbnail will only load the page if it passes through the goal posts
-- An invisible barrier will surround the menu/goal in order to only allow access through the goalposts
-- Each thumbnail will have an information page
-= Categories will be dynamically derived from the project text files
-- Each category for the menu will be clickable
-- The names of the subcategories should be ordered in descending length
-- The playfield should always fill the screen
-- There should be an about footer
-- Info pages should contain images, descriptions, and/or links
-- There should be a boundary outside the playfield to deflect the ball back
-- The thumbnail resets to it's position if it remains offscreen
+    - Accepts 1 or more images to display as thumbnails/balls
+    - Scales responsively based upon screen size and the number of projects
+    - Shows direction and power arrow when user hovers over thumbnail
+    - Allows for user to "launch" the thumbnail by clicking on it
+    - Releasing the mouse sends the thumbnail in the applicable direction
+    - A "goal" is created by the menu
+    - A successful attempt will result in the applicable thumbnail launching it's info page
+    - The thumbnail will only load the page if it passes through the goal posts
+    - An invisible barrier will surround the menu/goal in order to only allow access through the goalposts
+    - Each thumbnail will have an information page
+    = Categories will be dynamically derived from the project text files
+    - Each category for the menu will be clickable
+    - The names of the subcategories should be ordered in descending length
+    - The playfield should always fill the screen
+    - There should be an about footer
+    - Info pages should contain images, descriptions, and/or links
+    - There should be a boundary outside the playfield to deflect the ball back
+    - The thumbnail resets to it's position if it remains offscreen
 
 ##### Collision Rules
-- All balls will collide with the boundary.
-- All balls will collide with other balls
-- All balls will collide with the goal posts
-- All balls will collide with the invisible boundaries
-- Balls will only collide with the menu category that matches their own category
+    - All balls will collide with the boundary.
+    - All balls will collide with other balls
+    - All balls will collide with the goal posts
+    - All balls will collide with the invisible boundaries
+    - Balls will only collide with the menu category that matches their own category
 
 ###### In progress notes
-X Add text descriptions of images
-X Add categories to array
-X Add menu item for each category
-X Add invisible rectangle for each menu item
-X Add in collision filtering so ball bounces on applicable menu item when made
-X Add invisible side bars to prevent reaching menu other than through goal
-- Build display page to appear like the imageball is simply expanded to allow for full view of the page
-- Need to fix arrow rotation
+    X Add text descriptions of images
+    X Add categories to array
+    X Add menu item for each category
+    X Add invisible rectangle for each menu item
+    X Add in collision filtering so ball bounces on applicable menu item when made
+    X Add invisible side bars to prevent reaching menu other than through goal
+    - Build display page to appear like the imageball is simply expanded to allow for full view of the page
+    - Need to fix arrow rotation
