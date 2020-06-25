@@ -1,13 +1,25 @@
-## WebsiteAnimation
+## Portfolio Website
 
 #### Overview
-    My aim is to create an interactive personal website to display my portfolio and development skills.
+    <p> My aim is to create an interactive personal website to display my portfolio and development skills.
     Each "project" has an image and an about file with details. When an image is hovered over, the user is
     prompted to "aim," if they click and drag they can launch the "ball" towards the "goal" which is actually the menu.
-    If the ball goes through the goal, the selected project is loaded full screen. 
+    If the ball goes through the goal, the selected project is loaded full screen. </p>
+
+### Creating your own website
+    If you are interested in using my code to run your website, you'll need to:
+        - Clone this repository
+        - Update the sketch.js file to set your desired project display order
+        - Create your description files for each project (see template)
+        - Add your image and text files
+        - Host on a server of your choosing (I use namecheap linked to github for seemless deployment)
+        - Send prospective employers and colleagues your site to show off your skills
+
+## Project Plan
 
 #### Requirements
     - Accepts 1 or more images to display as thumbnails/balls
+    - Scales responsively based upon screen size and the number of projects
     - Shows direction and power arrow when user hovers over thumbnail
     - Allows for user to "launch" the thumbnail by clicking on it
     - Releasing the mouse sends the thumbnail in the applicable direction
@@ -16,9 +28,10 @@
     - The thumbnail will only load the page if it passes through the goal posts
     - An invisible barrier will surround the menu/goal in order to only allow access through the goalposts
     - Each thumbnail will have an information page
-    - Each subcategory for the menu will be clickable
+    = Categories will be dynamically derived from the project text files
+    - Each category for the menu will be clickable
     - The names of the subcategories should be ordered in descending length
-    - The playfield should adjust to screensize
+    - The playfield should always fill the screen
     - There should be an about footer
     - Info pages should contain images, descriptions, and/or links
     - There should be a boundary outside the playfield to deflect the ball back
