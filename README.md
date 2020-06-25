@@ -1,6 +1,6 @@
-## Portfolio Website
+## Portfolio Website by Josh Merritt
 
-#### Overview
+### Overview
 
 My aim is to create an interactive personal website to display my portfolio and development skills.
 Each "project" has an image and an about file with details. When an image is hovered over, the user is
