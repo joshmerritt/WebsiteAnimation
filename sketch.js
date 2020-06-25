@@ -18,15 +18,20 @@ engine,
 world,
 launchArrow,
 power,
-backboard,
-goalLine,
 ground,
 goalPosition,
 detailPageOpen = false,
 clicked = false;
 
-// Loads images and text for use in building the website
 
+/*
+  preLoadAssets()
+    Called by preload(), which ensures that the data is read 
+    and available to the system before attempting to build the page.
+    Loops through itemsToDisplay array to load images and text description files.
+    Stores the images in the imgs array and the descriptions in the pageInfo array.
+
+*/
   function preLoadAssets() {
     for (const item of itemsToDisplay) {
       imgs.push(loadImage(`assets/images/${item}.jpg`));
@@ -58,7 +63,6 @@ clicked = false;
       item.show();
     });
     drawBalls();
-    displayDetailPage();
   }
 
 /* 
@@ -69,17 +73,12 @@ clicked = false;
     Goal posts are created about the menu items which are used to mark the 'goal'
     Invisible barriers are in place to prevent reaching the menu except from above
 */
-
   function loadAssets() {
     loadImages();
     createGoals();
     createMenu();
     ground = new Ground(width, height, iconSize);
     trackCollisions();
-    // drawingContext.shadowOffsetX = 3;
-    // drawingContext.shadowOffsetY = -3;
-    // drawingContext.shadowBlur = 5;
-    // drawingContext.shadowColor = 'white';
   }
 
   /*
@@ -87,7 +86,6 @@ clicked = false;
       Creates an event listener for when two bodies are actively colliding
       Checks to see if any of the balls are currently touching their menu item
   */
- 
   function trackCollisions() {
     Matter.Events.on(engine, 'collisionActive', function(event) {
       event.source.pairs.collisionActive.forEach((collision) => {
@@ -149,7 +147,6 @@ clicked = false;
         gridCurrentX = gridStartX;
         gridCurrentY += iconSize*2;
       }
-      console.log('imageBall ',i, " : ",imageBalls[i]);
       if(categories.indexOf(imageBalls[i].category) === -1) categories.push(imageBalls[i].category);
     });
     categories.sort((a, b) => b.length - a.length);
@@ -180,34 +177,19 @@ clicked = false;
   function setDisplaySize() {
     iconSize =  Math.min(windowWidth/7, windowHeight/7);
     goalPosition = {x: 1.1*iconSize, y:windowHeight/3};
-    console.log('goal positon - iconSize', goalPosition, ' - ', iconSize);
     gridStartX = goalPosition.x + iconSize*3;
     gridStartY = goalPosition.y;
     gridCurrentX = gridStartX;
     gridCurrentY = gridStartY;
   } 
 
-  /*
-    displayDetailPage()
-      Checks to see if any balls should display detail page
-      If so, draws the detail page on top of the existing canvas
-  */
-
-  function displayDetailPage() {
-    imageBalls.forEach(ball => {
-      if(ball.pageOpen) {
-        ball.showDetail();
-      };
-    });
-  }
-
-  /*
-    drawBalls()
-      Checks each ball to decide to show it, 
-      determine if the mouse is hovering on it to show the launch arrow, 
-      or create and display a scalable launch arrow if the mouse is clicked
-      for each applicable ball
-  */
+/*
+  drawBalls()
+    Checks each ball to decide to show it, 
+    determine if the mouse is hovering on it to show the launch arrow, 
+    or create and display a scalable launch arrow if the mouse is clicked
+    for each applicable ball
+*/
   function drawBalls() {
     imageBalls.forEach(function(ball, index) {
       if(ball) {
@@ -240,10 +222,14 @@ clicked = false;
   }
 
 
-
-  // If the mouse is being dragged, create and display a launch arrow
-
-  function mouseDragged(event) {
+/*
+  mouseDragged()
+    When the user drags the mouse (clicks and holds),
+    if the user clicked on a ball, 
+    call the aim() function on that ball, 
+    which displays a dynamically sized directional arrow.
+*/
+  function mouseDragged() {
     imageBalls.forEach(function(ball) {
       if(ball.clicked) {
         ball.aim();
@@ -251,8 +237,13 @@ clicked = false;
     });
   }
 
-  // If the mouse is pressed, toggle the clicked property for all balls
 
+/*
+  mousePressed()
+    Checks to see where the mouse was pressed.
+    If it is on a given ball, set clicked=true,
+    otherwise set clicked=false
+*/
   function mousePressed() {
     imageBalls.forEach(function(ball) {
       if(ball.onBall(mouseX, mouseY)) {
@@ -263,17 +254,18 @@ clicked = false;
     });
   }
 
-  // When the mouse is release the ball is added to the world
-  // The launch arrow is applied to the ball and the body is made moveable
-
+/*
+  mouseReleased()
+    When the mouse is released, the ball that was clicked is
+    checked to see if it's already been launched, if not it's added to the world.
+    The ball is made moveable and the strength vector is applied as a force.
+*/
   function mouseReleased() {
     imageBalls.forEach(function(ball) {
       if(ball.clicked) {
-        if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
-        console.log("launched ball: ", ball);
         let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
-        console.log("strength - area (width * height) - iconSize:  ", strength, " - ", height*width, " - ", iconSize);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
+        if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
         ball.launched();
@@ -282,4 +274,3 @@ clicked = false;
       }
     });    
   }
-  

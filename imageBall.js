@@ -1,6 +1,8 @@
-// ImageBall is designed to create standalone balls that can be displayed, launched, and interacted with independently.
-// The class uses the matter.js physics engine to handle interactions
-// Visuals are created using p5.js, which are tied to specific bodies in the world
+/*
+  ImageBall class is designed to create standalone balls that can be displayed, launched, and interacted with independently.
+    The class uses the matter.js physics engine to handle interactions and movement
+    Visuals are created using p5.js, leveraging the matter.js world/body data
+*/
 
 class ImageBall {
     constructor(img, xPos, yPos, info) {
@@ -11,7 +13,6 @@ class ImageBall {
         isStatic: true,
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
-      //console.log('constructor info', info);
       this.name = 'placeholder';
       this.link = 'placeholder';
       this.category = 'placeholder';
@@ -49,10 +50,10 @@ class ImageBall {
     }
 
 /*
-    showDetail()
-      Called when the ball has made contact with the correct menu item
-      Translates the existing ball to a larger size, filling the smallest h/w dimension
-      Displays the image, along with the name, description, and link
+  showDetail()
+    Called when the ball has made contact with the correct menu item
+    Translates the existing ball to a larger size, filling the smallest h/w dimension
+    Displays the image, along with the name, description, and link
 */
     showDetail() {
       let tempScreenSize = Math.min(windowWidth, windowHeight);
@@ -65,24 +66,18 @@ class ImageBall {
         detailPageOpen = true;
         this.pageOpen = true;
       }
-      console.log('showDetail for:', this.body.id);
-      console.log('imageDetails', imageDetails);      
       push();
       fill(55);
       strokeWeight(0);
       ellipseMode(CENTER);
       circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
       image(this.img, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
-      // noFill();
-      // stroke(55);
-      // strokeWeight(iconSize);
-      // circle(windowWidth/2, windowHeight/4, imageDetails.size*1.25);
       textSize(iconSize/3);
       fill(0, 102, 153);
-      this.link.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
-      this.link.show();
-      this.description.position(windowWidth/2 - this.description.width/4, windowHeight * 0.7);
-      this.description.show();
+      // this.link.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
+      // this.link.show();
+      // this.description.position(windowWidth/2 - this.description.width/4, windowHeight * 0.7);
+      // this.description.show();
       pop();
     }
 
