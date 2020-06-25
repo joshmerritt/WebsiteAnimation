@@ -1,12 +1,14 @@
 ## Portfolio Website
 
 #### Overview
-    <My aim is to create an interactive personal website to display my portfolio and development skills.
+
+    My aim is to create an interactive personal website to display my portfolio and development skills.
     Each "project" has an image and an about file with details. When an image is hovered over, the user is
     prompted to "aim," if they click and drag they can launch the "ball" towards the "goal" which is actually the menu.
     If the ball goes through the goal, the selected project is loaded full screen.
 
 ### Creating your own website
+
     If you are interested in using my code to run your website, you'll need to:
         - Clone this repository
         - Update the sketch.js file to set your desired project display order
@@ -18,6 +20,7 @@
 ## Project Plan
 
 #### Requirements
+
     - Accepts 1 or more images to display as thumbnails/balls
     - Scales responsively based upon screen size and the number of projects
     - Shows direction and power arrow when user hovers over thumbnail
