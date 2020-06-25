@@ -18,8 +18,6 @@ engine,
 world,
 launchArrow,
 power,
-backboard,
-goalLine,
 ground,
 goalPosition,
 resetButton,
@@ -65,7 +63,6 @@ let closeIcon = '/uf057';
       item.show();
     });
     drawGoals();
-    //displayDetailPage();
   }
 
 /*
@@ -101,10 +98,6 @@ function resetBalls() {
     createMenu();
     ground = new Ground(playfield.width, playfield.height, iconSize);
     trackCollisions();
-    // drawingContext.shadowOffsetX = 3;
-    // drawingContext.shadowOffsetY = -3;
-    // drawingContext.shadowBlur = 5;
-    // drawingContext.shadowColor = 'white';
   }
 
   /*
@@ -163,17 +156,13 @@ function resetBalls() {
 */
   function loadImages() {
     imgs.forEach(function(img, i) {
-      //console.log('img -', img);
-      //console.log('load function: ', pages[i]);
       imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pageInfo[i]);
-      //console.log('imageBall -', imageBalls[i]);
       if(gridCurrentX + iconSize*3 <= windowWidth) {
         gridCurrentX += iconSize*2;
       } else {
         gridCurrentX = gridStartX;
         gridCurrentY += iconSize*2;
       }
-      console.log('imageBall ',i, " : ",imageBalls[i]);
       if(categories.indexOf(imageBalls[i].category) === -1) categories.push(imageBalls[i].category);
     });
     categories.sort((a, b) => b.length - a.length);
@@ -204,7 +193,6 @@ function resetBalls() {
   function setDisplaySize() {
     iconSize =  Math.min(windowWidth/7, windowHeight/7);
     goalPosition = {x: 1.1*iconSize, y:windowHeight/3};
-    console.log('goal positon - iconSize', goalPosition, ' - ', iconSize);
     gridStartX = goalPosition.x + iconSize*3;
     gridStartY = goalPosition.y;
     gridCurrentX = gridStartX;
@@ -288,15 +276,13 @@ function resetBalls() {
   }
 
   // When the mouse is release the ball is added to the world
-  // The launch arrow is applied to the ball and the body is made moveable
+  // The body is made moveable and the strength vector is applied to the ball 
 
   function mouseReleased() {
     imageBalls.forEach(function(ball) {
       if(ball.clicked) {
         if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
-        console.log("launched ball: ", ball);
         let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
-        console.log("strength - area (width * height) - iconSize:  ", strength, " - ", height*width, " - ", iconSize);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
