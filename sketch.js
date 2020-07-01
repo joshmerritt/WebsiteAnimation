@@ -137,10 +137,7 @@ clicked = false;
 */
   function loadImages() {
     imgs.forEach(function(img, i) {
-      //console.log('img -', img);
-      //console.log('load function: ', pages[i]);
       imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pageInfo[i]);
-      //console.log('imageBall -', imageBalls[i]);
       if(gridCurrentX + iconSize*3 <= windowWidth) {
         gridCurrentX += iconSize*2;
       } else {
@@ -220,7 +217,6 @@ clicked = false;
       }
     });
   }
-
 
 /*
   mouseDragged()

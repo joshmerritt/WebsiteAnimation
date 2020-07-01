@@ -23,13 +23,10 @@ class ImageBall {
           tempInfo.push(item.split(": "));
         });
         this.name = tempInfo[0][1];
-        this.link = createA(`${tempInfo[1][1]}`, "See more details", "_blank");
-        this.link.hide();
+        this.link = tempInfo[1][1];
         this.category = tempInfo[2][1];
         this.body.category = this.category;
-        this.description = createP(tempInfo[3][1]);
-        this.description.width = Math.min(windowWidth, windowHeight)/4;
-        this.description.hide();        
+        this.description = tempInfo[3][1];   
       };
       this.parseInfo = this.parseInfo.bind(this)();
       this.body.id = this.name;
@@ -65,6 +62,7 @@ class ImageBall {
       if ( detailPageOpen === false ) {
         detailPageOpen = true;
         this.pageOpen = true;
+        this.createDetailElements();
       }
       push();
       fill(55);
@@ -74,15 +72,17 @@ class ImageBall {
       image(this.img, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
       textSize(iconSize/3);
       fill(0, 102, 153);
-      // this.link.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
-      // this.link.show();
-      // this.description.position(windowWidth/2 - this.description.width/4, windowHeight * 0.7);
-      // this.description.show();
       pop();
     }
 
-    createDetail() {
-
+    createDetailElements() {
+      this.descriptionElement = createP(this.description);
+      this.linkElement = createA(`${this.link}`, "See more details", "_blank");
+      this.descriptionElement.width = Math.min(windowWidth, windowHeight)/4;  
+      this.linkElement.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
+      this.linkElement.show();
+      this.descriptionElement.position(windowWidth/2 - this.description.width/4, windowHeight * 0.7);
+      this.descriptionElement.show();
     }
 
     // Used to check if the mouse is hovering over the ball
