@@ -190,17 +190,22 @@ clicked = false;
   function drawBalls() {
     imageBalls.forEach(function(ball, index) {
       if(ball) {
-        ball.show();
-        if(mouseIsPressed) {
-          if(ball.clicked) {
-            ball.aim();
+        if(ball.pageOpen) {
+          ball.showDetail();
+        } 
+        else {
+          ball.show();
+          if(mouseIsPressed) {
+            if(ball.clicked) {
+              ball.aim();
+            }
+          } else {
+            if(ball.onBall(mouseX, mouseY)) {
+              ball.hover();
+            }
+            ball.xPower = 0;
+            ball.yPower = 0;
           }
-        } else {
-          if(ball.onBall(mouseX, mouseY)) {
-            ball.hover();
-          }
-          ball.xPower = 0;
-          ball.yPower = 0;
         }
       }
     });

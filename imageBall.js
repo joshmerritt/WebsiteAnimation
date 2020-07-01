@@ -44,6 +44,7 @@ class ImageBall {
       this.originalPos = {x: xPos, y: yPos}; 
       this.inOriginalPosition = true;
       this.pageOpen = false;
+      this.removeDetailPage = this.removeDetailPage.bind(this);
     }
 
 /*
@@ -76,13 +77,25 @@ class ImageBall {
     }
 
     createDetailElements() {
-      this.descriptionElement = createP(this.description);
-      this.linkElement = createA(`${this.link}`, "See more details", "_blank");
-      this.descriptionElement.width = Math.min(windowWidth, windowHeight)/4;  
+      this.exitButton = createButton("X");
+      this.exitButton.position(windowWidth/2 + Math.min(windowWidth, windowHeight)/4, iconSize);
+      this.exitButton.mousePressed(this.removeDetailPage);
+      this.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
       this.linkElement.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
       this.linkElement.show();
+      this.descriptionElement = createP(this.description);
+      this.descriptionElement.width = Math.min(windowWidth, windowHeight)/4; 
       this.descriptionElement.position(windowWidth/2 - this.description.width/4, windowHeight * 0.7);
       this.descriptionElement.show();
+    }
+
+    removeDetailPage() {
+      console.log('this', this);
+      this.descriptionElement.remove();
+      this.linkElement.remove();
+      this.exitButton.remove();
+      this.pageOpen = false;
+      //detailPageOpen = false;
     }
 
     // Used to check if the mouse is hovering over the ball
