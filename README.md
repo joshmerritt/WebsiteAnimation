@@ -55,8 +55,15 @@ If you are interested in using my code to run your website, you'll need to:
     X Add invisible rectangle for each menu item
     X Add in collision filtering so ball bounces on applicable menu item when made
     X Add invisible side bars to prevent reaching menu other than through goal
-    _ Refactor HTML elements to be added when they are displayed, rather than having multiple elements hidden
+    X Refactor HTML elements to be added when they are displayed, rather than having multiple elements hidden
+    _ Add in close button
+    _ Add in reset button
+    _ When detail page is closed, reset all balls
+    _ Add doubleclick to allow for opening of item
     _ Test side wall permibility
     _ Refactor Reset logic
     _ Build display page to appear like the imageball is simply expanded to allow for full view of the page
     _ Need to fix arrow rotation
+    _ Add double click ability to menu, display applicable subset of balls
+    _ Prompt that double clicking is okay
+    _ Add some special effect when a ball is made

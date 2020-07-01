@@ -19,9 +19,7 @@ world,
 launchArrow,
 power,
 ground,
-goalPosition,
-detailPageOpen = false,
-clicked = false;
+goalPosition;
 
 
 /*

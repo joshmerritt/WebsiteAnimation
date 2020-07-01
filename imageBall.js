@@ -60,8 +60,7 @@ class ImageBall {
         y: (windowHeight/2 - tempScreenSize/2),
         size: tempScreenSize/2
       };
-      if ( detailPageOpen === false ) {
-        detailPageOpen = true;
+      if ( this.pageOpen === false ) {
         this.pageOpen = true;
         this.createDetailElements();
       }
@@ -90,12 +89,12 @@ class ImageBall {
     }
 
     removeDetailPage() {
-      console.log('this', this);
+      this.reset();
+      this.pageOpen = false;
       this.descriptionElement.remove();
       this.linkElement.remove();
       this.exitButton.remove();
-      this.pageOpen = false;
-      //detailPageOpen = false;
+      
     }
 
     // Used to check if the mouse is hovering over the ball
