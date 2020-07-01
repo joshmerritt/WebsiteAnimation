@@ -10,11 +10,17 @@ If the ball goes through the goal, the selected project is loaded full screen.
 ### Creating your own website
 
 If you are interested in using my code to run your website, you'll need to:
+
     - Clone this repository
+
     - Update the sketch.js file to set your desired project display order
+
     - Create your description files for each project (see template)
+
     - Add your image and text files
+
     - Host on a server of your choosing (I use namecheap linked to github for seemless deployment)
+    
     - Send prospective employers and colleagues your site to show off your skills
 
 ## Project Plan
