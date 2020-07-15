@@ -62,6 +62,7 @@ class ImageBall {
       };
       if ( this.pageOpen === false ) {
         this.pageOpen = true;
+        detailPageOpen = true;
         this.createDetailElements();
       }
       push();
@@ -90,6 +91,7 @@ class ImageBall {
 
     removeDetailPage() {
       this.reset();
+      detailPageOpen = false;
       this.pageOpen = false;
       this.descriptionElement.remove();
       this.linkElement.remove();

@@ -19,7 +19,8 @@ world,
 launchArrow,
 power,
 ground,
-goalPosition;
+goalPosition,
+detailPageOpen;
 
 
 /*
@@ -186,12 +187,17 @@ goalPosition;
     for each applicable ball
 */
   function drawBalls() {
-    imageBalls.forEach(function(ball, index) {
-      if(ball) {
-        if(ball.pageOpen) {
-          ball.showDetail();
-        } 
-        else {
+    if(detailPageOpen) {
+      imageBalls.forEach(function(ball, index) {
+        if(ball) {
+          if(ball.pageOpen) {
+            ball.showDetail();
+          }
+        }
+      }); 
+    } else {
+      imageBalls.forEach(function(ball, index) {
+        if(ball) {
           ball.show();
           if(mouseIsPressed) {
             if(ball.clicked) {
@@ -203,10 +209,10 @@ goalPosition;
             }
             ball.xPower = 0;
             ball.yPower = 0;
+            }
           }
-        }
-      }
-    });
+      });
+    }
   }
 
   /*
