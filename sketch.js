@@ -20,7 +20,8 @@ launchArrow,
 power,
 ground,
 goalPosition,
-detailPageOpen;
+detailPageOpen,
+resetButton;
 
 
 /*
@@ -64,6 +65,7 @@ detailPageOpen;
     drawBalls();
   }
 
+
 /* 
   loadAssets()
     Creates a 'ball' for each image that is spaced intelligently across the screen
@@ -78,7 +80,28 @@ detailPageOpen;
     createMenu();
     ground = new Ground(width, height, iconSize);
     trackCollisions();
+    addResetButton();
   }
+
+/*
+  addResetButton()
+    Creates a button on the screen in the lower right corner to reset
+    all balls to their original position
+*/
+  function addResetButton() {
+    resetButton = createButton("↻");
+    resetButton.position(windowWidth - iconSize, windowHeight - iconSize);
+    resetButton.mousePressed(resetBalls);
+  }
+
+  function resetBalls() {
+    imageBalls.forEach(function(ball) {
+      if(ball) {
+        ball.reset();
+      }
+    }); 
+  }
+
 
   /*
     trackCollisions()
