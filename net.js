@@ -10,7 +10,7 @@ class Net {
           restitution: 0.99,
         };
         this.netHeight = netHeight;
-        this.width = iconSize;
+        this.width = iconSize/2;
         this.body = Matter.Bodies.rectangle(xPos, yPos, this.width, netHeight, options);
         this.body.id = "Net"
         Matter.World.add(world, this.body);

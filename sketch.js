@@ -96,7 +96,7 @@ resetButton;
 
   function resetBalls() {
     imageBalls.forEach(function(ball) {
-      if(ball) {
+      if(ball && !ball.inOriginalPosition) {
         ball.reset();
       }
     }); 

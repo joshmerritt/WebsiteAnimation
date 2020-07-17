@@ -135,7 +135,7 @@ class ImageBall {
     checkForReset() {
       if(this.offScreen()) {
         if(Math.abs(this.body.velocity.x) < 0.05){
-          this.reset();
+          //this.reset();
         }
       }
     }
@@ -156,9 +156,9 @@ class ImageBall {
     // Returns the body to the original launch position and settings
 
     reset() {
-      Matter.Body.setStatic(this.body, true);
       Matter.Body.setVelocity(this.body, {x: 0, y: 0});
       Matter.Body.setPosition(this.body, this.originalPos);
+      Matter.Body.setStatic(this.body, true);
       Matter.World.remove(world, this.body);
       this.inOriginalPosition = true;
     }
@@ -210,6 +210,7 @@ class ImageBall {
     launched() {
       this.launchCount++;
       this.inOriginalPosition = false;
+      console.log("this ball", this);
     }
 
     checkGoal() {
