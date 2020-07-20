@@ -65,6 +65,15 @@ resetButton;
     drawBalls();
   }
 
+function doubleClicked(event) {
+  console.log(event);
+  imageBalls.forEach(function(ball) {
+    if(ball.onBall(mouseX, mouseY)) {
+      ball.showDetail();
+    } 
+  });
+}
+
 
 /* 
   loadAssets()
@@ -90,7 +99,7 @@ resetButton;
 */
   function addResetButton() {
     resetButton = createButton("↻");
-    resetButton.position(windowWidth - iconSize, windowHeight - iconSize);
+    resetButton.position(windowWidth - iconSize/2, windowHeight - iconSize/2);
     resetButton.mousePressed(resetBalls);
   }
 
@@ -102,12 +111,11 @@ resetButton;
     }); 
   }
 
-
-  /*
-    trackCollisions()
-      Creates an event listener for when two bodies are actively colliding
-      Checks to see if any of the balls are currently touching their menu item
-  */
+/*
+  trackCollisions()
+    Creates an event listener for when two bodies are actively colliding
+    Checks to see if any of the balls are currently touching their menu item
+*/
   function trackCollisions() {
     Matter.Events.on(engine, 'collisionActive', function(event) {
       event.source.pairs.collisionActive.forEach((collision) => {
@@ -290,15 +298,14 @@ resetButton;
 */
   function mouseReleased() {
     imageBalls.forEach(function(ball) {
-      if(ball.clicked) {
+      if(ball.clicked && (ball.xPower || ball.yPower)) {
+        console.log(ball);
         let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
         ball.launched();
-      } else {
-          //ball.reset();
-      }
+      } 
     });    
   }

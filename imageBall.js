@@ -90,12 +90,16 @@ class ImageBall {
     }
 
     removeDetailPage() {
-      this.reset();
       detailPageOpen = false;
       this.pageOpen = false;
       this.descriptionElement.remove();
       this.linkElement.remove();
       this.exitButton.remove();
+      imageBalls.forEach(function(ball) {
+        if(ball && !ball.inOriginalPosition) {
+          ball.reset();
+        }
+      }); 
       
     }
 

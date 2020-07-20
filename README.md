@@ -58,8 +58,8 @@ If you are interested in using my code to run your website, you'll need to:
     X Refactor HTML elements to be added when they are displayed, rather than having multiple elements hidden
     X Add in close button
     X Disable launching when detail page is open
-    _ Add in reset button
-    _ When detail page is closed, reset all balls
+    X Add in reset button
+    X When detail page is closed, reset all balls
     _ Add doubleclick to allow for opening of item
     _ Styling with CSS
     _ Test side wall permibility
