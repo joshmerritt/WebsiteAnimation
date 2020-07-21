@@ -7,9 +7,9 @@ class Ground {
         };
         this.body = Matter.Bodies.rectangle(displayWidth/4, displayHeight, 1.5*displayWidth, groundHeight, options);
         this.height = groundHeight;
-        let ceiling = Matter.Bodies.rectangle(displayWidth/4, -displayHeight, 1.5*displayWidth, groundHeight*2, options);
-        let leftWall = Matter.Bodies.rectangle(-groundHeight, height/2, 2*groundHeight, 2*height, options);
-        let rightWall = Matter.Bodies.rectangle(displayWidth+groundHeight, displayHeight/4, groundHeight*2, 1.5*displayHeight, options)
+        let ceiling = Matter.Bodies.rectangle(displayWidth/4, -displayHeight*2, displayWidth*1.5, displayHeight*3, options);
+        let leftWall = Matter.Bodies.rectangle(-groundHeight, -displayHeight/2, groundHeight*2, displayHeight*3, options);
+        let rightWall = Matter.Bodies.rectangle(displayWidth+groundHeight, -displayHeight/2, groundHeight*2, displayHeight*3, options)
         ceiling.id = 'ceiling';
         leftWall.id = 'leftWall';
         rightWall.id = 'rightWall';

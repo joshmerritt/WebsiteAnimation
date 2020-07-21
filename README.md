@@ -60,12 +60,14 @@ If you are interested in using my code to run your website, you'll need to:
     X Disable launching when detail page is open
     X Add in reset button
     X When detail page is closed, reset all balls
-    _ Add doubleclick to allow for opening of item
+    X Add doubleclick to allow for opening of item
+    X Add configuration object
+    X Refactor Reset logic
     _ Styling with CSS
     _ Test side wall permibility
-    _ Refactor Reset logic
     _ Build display page to appear like the imageball is simply expanded to allow for full view of the page
     _ Need to fix arrow rotation
     _ Add double click ability to menu, display applicable subset of balls
     _ Prompt that double clicking is okay
     _ Add some special effect when a ball is made
+    

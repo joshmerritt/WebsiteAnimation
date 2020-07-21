@@ -44,8 +44,27 @@ class ImageBall {
       this.originalPos = {x: xPos, y: yPos}; 
       this.inOriginalPosition = true;
       this.pageOpen = false;
+      this.ballExpanded = false;
       this.removeDetailPage = this.removeDetailPage.bind(this);
+      this.checkForReset = this.checkForReset.bind(this);
     }
+
+/*
+  expandBall()
+    Used to give appearence of ball slowly expanding to fill the screen
+    Called after the ball is made
+*/
+    expandBall() {
+      console.log('expandBall this', this);
+      if(this.x < playfield.width/2 || this.y < playfield.height/2) {
+        let expansionRatio = (playfield.width/2 - this.x) / (playfield.height/2 - this.y);
+        this.x += 1,
+        this.y += expansionRatio
+      } else {
+        this.ballExpanded = true;
+      }
+    }
+
 
 /*
   showDetail()
@@ -54,31 +73,42 @@ class ImageBall {
     Displays the image, along with the name, description, and link
 */
     showDetail() {
-      let tempScreenSize = Math.min(windowWidth, windowHeight);
-      let imageDetails = {
-        x: (windowWidth/2 - tempScreenSize/4),
-        y: (windowHeight/2 - tempScreenSize/2),
-        size: tempScreenSize/2
-      };
-      if ( this.pageOpen === false ) {
-        this.pageOpen = true;
-        detailPageOpen = true;
-        this.createDetailElements();
+      Matter.World.remove(world, this.body);
+      if(!this.ballExpanded) {
+        this.expandBall();
+      } else {
+        let tempScreenSize = Math.min(playfield.width, playfield.height);
+        let imageDetails = {
+          x: (windowWidth/2 - tempScreenSize/4),
+          y: (windowHeight/2 - tempScreenSize/2),
+          size: tempScreenSize/2
+        };
+        if ( this.pageOpen === false ) {
+          this.pageOpen = true;
+          detailPageOpen = true;
+          this.createDetailElements();
+        }
+        push();
+        fill(55);
+        strokeWeight(0);
+        ellipseMode(CENTER);
+        circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
+        image(this.img, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
+        textSize(iconSize/3);
+        fill(0, 102, 153);
+        pop();
       }
-      push();
-      fill(55);
-      strokeWeight(0);
-      ellipseMode(CENTER);
-      circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
-      image(this.img, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
-      textSize(iconSize/3);
-      fill(0, 102, 153);
-      pop();
     }
 
     createDetailElements() {
+      let tempOffset = Math.sin(QUARTER_PI)*Math.min(playfield.width, playfield.height)/1.5;
+      let buttonPosition = {
+        x: playfield.width/2 + tempOffset,
+        y: playfield.height/2 - tempOffset
+      }
+      console.log('tempOffset, buttonPos', tempOffset, ", ", buttonPosition);
       this.exitButton = createButton("X");
-      this.exitButton.position(windowWidth/2 + Math.min(windowWidth, windowHeight)/4, iconSize);
+      this.exitButton.position(buttonPosition.x, buttonPosition.y);
       this.exitButton.mousePressed(this.removeDetailPage);
       this.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
       this.linkElement.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
@@ -138,9 +168,7 @@ class ImageBall {
 
     checkForReset() {
       if(this.offScreen()) {
-        if(Math.abs(this.body.velocity.x) < 0.05){
-          //this.reset();
-        }
+          this.reset();
       }
     }
 
@@ -148,13 +176,17 @@ class ImageBall {
     // to determine if the object is still visible
 
     offScreen() {
-      let x = this.x;
-      let y = this.y;
+      let x = this.body.position.x;
+      let y = this.body.position.y;
       let radius = this.body.circleRadius;
       let offX = ((x + radius) < 0 || (x - radius) > windowWidth);
-      let offY = (y + radius) > windowHeight;
-      if(offX || offY) return true;
-       else return false;
+      let offY = (((y + radius) < -windowHeight*2) || ((y - radius) > windowHeight));
+      if(offY) {
+        return true;
+      } else if(offX) {
+        return true;
+      }
+      return false;
     }
 
     // Returns the body to the original launch position and settings
@@ -214,11 +246,7 @@ class ImageBall {
     launched() {
       this.launchCount++;
       this.inOriginalPosition = false;
-      console.log("this ball", this);
     }
 
-    checkGoal() {
-
-    }
 
   }

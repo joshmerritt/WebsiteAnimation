@@ -22,6 +22,11 @@ ground,
 goalPosition,
 detailPageOpen,
 resetButton;
+let configurationObjection = {
+  xScale: 0.99,
+  yScale: 0.965,
+  iconScale: 7,
+};
 
 
 /*
@@ -45,7 +50,7 @@ resetButton;
   }
 
   function setup() {
-    playfield = createCanvas(document.documentElement.clientWidth*.99, document.documentElement.clientHeight*.955);
+    playfield = createCanvas(document.documentElement.clientWidth*configurationObjection.xScale, document.documentElement.clientHeight*configurationObjection.yScale);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
@@ -87,7 +92,7 @@ function doubleClicked(event) {
     loadImages();
     createGoals();
     createMenu();
-    ground = new Ground(width, height, iconSize);
+    ground = new Ground(playfield.width, playfield.height, iconSize);
     trackCollisions();
     addResetButton();
   }
@@ -99,7 +104,9 @@ function doubleClicked(event) {
 */
   function addResetButton() {
     resetButton = createButton("↻");
-    resetButton.position(windowWidth - iconSize/2, windowHeight - iconSize/2);
+    console.log('resetButton', resetButton);
+    console.log('iconSize', iconSize);
+    resetButton.position(playfield.width - iconSize/(configurationObjection.iconScale/2.1), playfield.height - iconSize/(configurationObjection.iconScale/2.1));
     resetButton.mousePressed(resetBalls);
   }
 
@@ -192,7 +199,7 @@ function doubleClicked(event) {
     Uses built in p5.js methods
 */
   function windowResized() {
-    resizeCanvas(document.documentElement.clientWidth*.99, document.documentElement.clientHeight*.955);
+    resizeCanvas(document.documentElement.clientWidth*configurationObjection.xScale, document.documentElement.clientHeight*configurationObjection.yScale);
     setDisplaySize();
   }
 
@@ -202,7 +209,7 @@ function doubleClicked(event) {
     Called during set up or when the window is resized
 */
   function setDisplaySize() {
-    iconSize =  Math.min(windowWidth/7, windowHeight/7);
+    iconSize =  Math.min(playfield.width/configurationObjection.iconScale, playfield.height/configurationObjection.iconScale);
     goalPosition = {x: 1.1*iconSize, y:windowHeight/3};
     gridStartX = goalPosition.x + iconSize*3;
     gridStartY = goalPosition.y;
@@ -246,10 +253,10 @@ function doubleClicked(event) {
     }
   }
 
-  /*
-    drawGoals()
-      Displays the goals
-  */
+/*
+  drawGoals()
+    Displays the goals
+*/
   function drawGoals() {
     goals.forEach(function(goal, index) {
       if(goal) {
@@ -272,7 +279,6 @@ function doubleClicked(event) {
       }
     });
   }
-
 
 /*
   mousePressed()
@@ -299,7 +305,6 @@ function doubleClicked(event) {
   function mouseReleased() {
     imageBalls.forEach(function(ball) {
       if(ball.clicked && (ball.xPower || ball.yPower)) {
-        console.log(ball);
         let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
