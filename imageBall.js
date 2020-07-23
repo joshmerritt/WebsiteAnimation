@@ -87,6 +87,7 @@ class ImageBall {
 */
     showDetail() {
       //Matter.World.remove(world, this.body);
+      console.log("this.show detail - this", this);
       let tempScreenSize = Math.min(playfield.width, playfield.height);
       let imageDetails = {
         x: (windowWidth/2 - tempScreenSize/4),
@@ -171,9 +172,12 @@ class ImageBall {
       Also uses a border width hack to make square images appear round 
   */
     show() {
-      if(this.launchCount) this.checkForReset();
-      let currentPos = this.body.position;
-      let currentAngle = this.body.angle;
+      if(this.launchCount) {
+        this.checkForReset();
+        console.log("show ball", this);
+      }
+      const currentPos = this.body.position;
+      const currentAngle = this.body.angle;
       let dynamicStrokeWeight = Math.ceil(iconSize/4);
       push();
       translate(currentPos.x, currentPos.y);
