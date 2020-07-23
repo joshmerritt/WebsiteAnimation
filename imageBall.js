@@ -32,21 +32,26 @@ class ImageBall {
       this.body.id = this.name;
       this.body.label = 'Image Ball';
       this.img = img;
-      this.x = xPos;
-      this.y = yPos;
+      this.position = {
+        x: xPos,
+        y: yPos
+      };
       this.r = iconSize/2;
       this.xPower = 0;
       this.yPower = 0;
       this.clicked = false;
       this.launchCount = 0;
-      this.originalX = xPos;
-      this.originalY = yPos;
-      this.originalPos = {x: xPos, y: yPos}; 
+      this.originalPos = {
+        x: xPos, 
+        y: yPos
+      }; 
+      this.transitionRadius = this.r;
       this.inOriginalPosition = true;
       this.pageOpen = false;
       this.ballExpanded = false;
       this.removeDetailPage = this.removeDetailPage.bind(this);
       this.checkForReset = this.checkForReset.bind(this);
+      this.expandBall = this.expandBall.bind(this);
     }
 
 /*
@@ -55,11 +60,19 @@ class ImageBall {
     Called after the ball is made
 */
     expandBall() {
-      console.log('expandBall this', this);
-      if(this.x < playfield.width/2 || this.y < playfield.height/2) {
-        let expansionRatio = (playfield.width/2 - this.x) / (playfield.height/2 - this.y);
-        this.x += 1,
-        this.y += expansionRatio
+      let distanceToGo = {
+        x: playfield.width/2 - this.position.x,
+        y: playfield.height/2 - this.position.y,
+      }
+      console.log('expandBall this - distanceToGo', this, "-", distanceToGo);
+      if(distanceToGo.x > 0 || distanceToGo.y > 0) {
+        if(this.transitionRadius < 1.5*Math.min(playfield.width, playfield.height)){
+          this.transitionRadius += 5;
+        }
+        let expansionRatio = Math.abs(distanceToGo.x / distanceToGo.y);
+        console.log("distance togo - expansion ratio", distanceToGo, " - ", expansionRatio);
+        this.position.x += expansionRatio;
+        this.position.y += 1;
       } else {
         this.ballExpanded = true;
       }
@@ -73,16 +86,26 @@ class ImageBall {
     Displays the image, along with the name, description, and link
 */
     showDetail() {
-      Matter.World.remove(world, this.body);
+      //Matter.World.remove(world, this.body);
+      let tempScreenSize = Math.min(playfield.width, playfield.height);
+      let imageDetails = {
+        x: (windowWidth/2 - tempScreenSize/4),
+        y: (windowHeight/2 - tempScreenSize/2),
+        size: tempScreenSize/2
+      };
       if(!this.ballExpanded) {
         this.expandBall();
+        console.log("showDetail expandball loop this", this);
+        push();
+        fill(55);
+        strokeWeight(0);
+        ellipseMode(CENTER);
+        circle(this.position.x, this.position.y, this.transitionRadius);
+        //image(this.img, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
+        //textSize(iconSize/3);
+        fill(0, 102, 153);
+        pop();
       } else {
-        let tempScreenSize = Math.min(playfield.width, playfield.height);
-        let imageDetails = {
-          x: (windowWidth/2 - tempScreenSize/4),
-          y: (windowHeight/2 - tempScreenSize/2),
-          size: tempScreenSize/2
-        };
         if ( this.pageOpen === false ) {
           this.pageOpen = true;
           detailPageOpen = true;
@@ -106,7 +129,6 @@ class ImageBall {
         x: playfield.width/2 + tempOffset,
         y: playfield.height/2 - tempOffset
       }
-      console.log('tempOffset, buttonPos', tempOffset, ", ", buttonPosition);
       this.exitButton = createButton("X");
       this.exitButton.position(buttonPosition.x, buttonPosition.y);
       this.exitButton.mousePressed(this.removeDetailPage);
@@ -130,13 +152,14 @@ class ImageBall {
           ball.reset();
         }
       }); 
-      
     }
 
-    // Used to check if the mouse is hovering over the ball
-
-    onBall(x, y) {
-      let distance = dist(x, y, this.x, this.y);
+  /*
+    onBall()
+      Used to check if the mouse is hovering over the ball
+  */
+      onBall(x, y) {
+      let distance = dist(x, y, this.position.x, this.position.y);
       return (distance < (this.r));
     }
 
@@ -144,8 +167,8 @@ class ImageBall {
 
     show() {
       if(this.launchCount) this.checkForReset();
-      const currentPos = this.body.position;
-      const currentAngle = this.body.angle;
+      let currentPos = this.position;
+      let currentAngle = this.body.angle;
       let dynamicStrokeWeight = Math.ceil(iconSize/4);
       push();
       translate(currentPos.x, currentPos.y);
@@ -158,8 +181,7 @@ class ImageBall {
       strokeWeight(dynamicStrokeWeight);
       circle(0, 0, iconSize*1.25);    
       pop();
-      this.x = this.body.position.x;
-      this.y = this.body.position.y;
+      this.position = this.body.position;
     }
 
     // Checks if if ball is off screen
@@ -206,8 +228,8 @@ class ImageBall {
       stroke(155);
       strokeWeight(5);
       fill(155);
-      line(this.x, this.y, this.x - iconSize, this.y - iconSize);
-      triangle(this.x - iconSize, this.y - iconSize, this.x - iconSize, this.y - iconSize + iconSize/8, this.x - iconSize + iconSize/8, this.y - iconSize);        
+      line(this.position.x, this.position.y, this.position.x - iconSize, this.position.y - iconSize);
+      triangle(this.position.x - iconSize, this.position.y - iconSize, this.position.x - iconSize, this.position.y - iconSize + iconSize/8, this.position.x - iconSize + iconSize/8, this.position.y - iconSize);        
       pop();
     }
 
@@ -220,13 +242,13 @@ class ImageBall {
       this.yPower += (mouseY - pmouseY)/300;
       this.xPower = Math.min(this.xPower, 5);
       this.yPower = Math.min(this.yPower, 5);
-      let endPosX = this.x - iconSize;
-      let endPosY = this.y - iconSize;
+      let endPosX = this.position.x - iconSize;
+      let endPosY = this.position.y - iconSize;
       let arrowLength = iconSize/8;
       let arrowOffsetX = Math.sqrt(Math.pow(arrowLength, 2))/2;
       let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
-      let currentPosX = this.x - (this.xPower*100);
-      let currentPosY = this.y - (this.yPower*100);
+      let currentPosX = this.position.x - (this.xPower*100);
+      let currentPosY = this.position.y - (this.yPower*100);
       let startVec = createVector(endPosX, endPosY);
       let endVec = createVector(currentPosX, currentPosY);
       let arrowHeight = arrowLength/2 * Math.sqrt(3);
@@ -235,7 +257,7 @@ class ImageBall {
       stroke(155);
       strokeWeight(5);
       fill(155);
-      line(this.x, this.y, endVec.x, endVec.y);
+      line(this.position.x, this.position.y, endVec.x, endVec.y);
       translate(endVec);
       angleMode(DEGREES);
       rotate(endVec.heading()); 

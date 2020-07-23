@@ -64,10 +64,13 @@ If you are interested in using my code to run your website, you'll need to:
     X Add configuration object
     X Refactor Reset logic
     _ Styling with CSS
-    _ Test side wall permibility
+    X Test side wall permibility
+    _ Fix screen resizing to resize everything properly
     _ Build display page to appear like the imageball is simply expanded to allow for full view of the page
     _ Need to fix arrow rotation
     _ Add double click ability to menu, display applicable subset of balls
     _ Prompt that double clicking is okay
     _ Add some special effect when a ball is made
     
+Notes:
+    Need to rethink how ball is expanded
