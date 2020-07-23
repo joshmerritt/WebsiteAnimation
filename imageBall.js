@@ -37,6 +37,7 @@ class ImageBall {
         y: yPos
       };
       this.r = iconSize/2;
+      this.transitionRadius = iconSize/2;
       this.xPower = 0;
       this.yPower = 0;
       this.clicked = false;
@@ -45,7 +46,6 @@ class ImageBall {
         x: xPos, 
         y: yPos
       }; 
-      this.transitionRadius = this.r;
       this.inOriginalPosition = true;
       this.pageOpen = false;
       this.ballExpanded = false;
@@ -163,11 +163,16 @@ class ImageBall {
       return (distance < (this.r));
     }
 
-    // Displays the ball if it is on screen
-
+  /*
+    show()
+      If ball has been launched, checks for reset
+      Uses the current position and angle of the body
+      to display the imageBall.
+      Also uses a border width hack to make square images appear round 
+  */
     show() {
       if(this.launchCount) this.checkForReset();
-      let currentPos = this.position;
+      let currentPos = this.body.position;
       let currentAngle = this.body.angle;
       let dynamicStrokeWeight = Math.ceil(iconSize/4);
       push();
@@ -184,23 +189,26 @@ class ImageBall {
       this.position = this.body.position;
     }
 
-    // Checks if if ball is off screen
-    // if true, checks if horizontal speed is near zero
-    // if true, resets the ball to the original position
-
+  /*
+    checkForReset()
+      Checks if if ball is off the playfield
+      if true, resets the ball to the original position
+  */  
     checkForReset() {
       if(this.offScreen()) {
           this.reset();
       }
     }
 
-    // Uses the object's radius and the screen size
-    // to determine if the object is still visible
-
+  /*
+    offScreen()
+      Uses the object's radius and the playfield size
+      to determine if the object is still visible
+  */
     offScreen() {
-      let x = this.body.position.x;
-      let y = this.body.position.y;
-      let radius = this.body.circleRadius;
+      let x = this.position.x;
+      let y = this.position.y;
+      let radius = this.r;
       let offX = ((x + radius) < 0 || (x - radius) > windowWidth);
       let offY = (((y + radius) < -windowHeight*2) || ((y - radius) > windowHeight));
       if(offY) {
@@ -211,8 +219,10 @@ class ImageBall {
       return false;
     }
 
-    // Returns the body to the original launch position and settings
-
+  /* 
+    reset()
+      Returns the body to the original launch position and settings
+  */
     reset() {
       Matter.Body.setVelocity(this.body, {x: 0, y: 0});
       Matter.Body.setPosition(this.body, this.originalPos);
@@ -221,8 +231,10 @@ class ImageBall {
       this.inOriginalPosition = true;
     }
 
-    //Displays an arrow when a ball is hovered over
-
+  /*
+    hover()
+      Displays an arrow when a ball is hovered over
+  */
     hover() {
       push();  
       stroke(155);
@@ -233,25 +245,27 @@ class ImageBall {
       pop();
     }
 
-    // Aim takes the mouse position when the mouse is dragged and creates a visual arrow to indicate direction and power.
-    // Needs to be cleaned up to properly rotate the arrow around the end point of the line
-    // To keep the launch from being too powerful, limits the maximum power registered
-
+  /*
+    aim()
+      Aim takes the mouse position when the mouse is dragged and creates a visual arrow to indicate direction and power.
+      Needs to be cleaned up to properly rotate the arrow around the end point of the line
+      To keep the launch from being too powerful, limits the maximum power registered
+  */
     aim() {
       this.xPower += (mouseX - pmouseX)/300;
       this.yPower += (mouseY - pmouseY)/300;
       this.xPower = Math.min(this.xPower, 5);
       this.yPower = Math.min(this.yPower, 5);
-      let endPosX = this.position.x - iconSize;
-      let endPosY = this.position.y - iconSize;
       let arrowLength = iconSize/8;
-      let arrowOffsetX = Math.sqrt(Math.pow(arrowLength, 2))/2;
-      let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
       let currentPosX = this.position.x - (this.xPower*100);
       let currentPosY = this.position.y - (this.yPower*100);
-      let startVec = createVector(endPosX, endPosY);
       let endVec = createVector(currentPosX, currentPosY);
       let arrowHeight = arrowLength/2 * Math.sqrt(3);
+      // let endPosX = this.position.x - iconSize;
+      // let endPosY = this.position.y - iconSize;
+      // let arrowOffsetX = Math.sqrt(Math.pow(arrowLength, 2))/2;
+      // let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
+      // let startVec = createVector(endPosX, endPosY);
       // let tempAngle = endVec.angleBetween(startVec);
       push();
       stroke(155);
@@ -265,6 +279,10 @@ class ImageBall {
       pop();
     }
 
+  /*
+    launched()
+      Increments launchCount, used to calculate metrics
+  */
     launched() {
       this.launchCount++;
       this.inOriginalPosition = false;
