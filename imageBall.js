@@ -50,8 +50,9 @@ class ImageBall {
       this.pageOpen = false;
       this.ballExpanded = false;
       this.removeDetailPage = this.removeDetailPage.bind(this);
-      this.checkForReset = this.checkForReset.bind(this);
+      //this.checkForReset = this.checkForReset.bind(this);
       this.expandBall = this.expandBall.bind(this);
+      this.show = this.show.bind(this);
     }
 
 /*
@@ -124,6 +125,11 @@ class ImageBall {
       }
     }
 
+  /*
+    createDetailElements()
+      Called when a user makes a ball or double clicks it.
+      Creates and displays the various elements of the detail page
+  */
     createDetailElements() {
       let tempOffset = Math.sin(QUARTER_PI)*Math.min(playfield.width, playfield.height)/1.5;
       let buttonPosition = {
@@ -210,9 +216,9 @@ class ImageBall {
       to determine if the object is still visible
   */
     offScreen() {
-      let x = this.position.x;
-      let y = this.position.y;
-      let radius = this.r;
+      let x = this.body.position.x;
+      let y = this.body.position.y;
+      let radius = this.body.circleRadius;
       let offX = ((x + radius) < 0 || (x - radius) > windowWidth);
       let offY = (((y + radius) < -windowHeight*2) || ((y - radius) > windowHeight));
       if(offY) {
