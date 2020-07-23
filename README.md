@@ -71,6 +71,7 @@ If you are interested in using my code to run your website, you'll need to:
     _ Add double click ability to menu, display applicable subset of balls
     _ Prompt that double clicking is okay
     _ Add some special effect when a ball is made
+    X Fix angular rotation issue
     
 Notes:
-    Need to rethink how ball is expanded
+    Fixed the rotation issue with imageBalls, however introduced a bug for motion

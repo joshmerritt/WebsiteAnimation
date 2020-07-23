@@ -1,19 +1,18 @@
 /*
-Provid locatiopn, name of the category, and the order it appears, construct menu item
-Balls will bounce and open the page when it goes through the goal
+  Provided location, name of the category, and the order it appears, construct menu item
+  Balls will bounce and open the page when it goes through the goal
 */
 
 class Menu {
     constructor(position, category, index) {
         let options = {
-            isStatic: true, 
-            restitution: 0.5,
-            collisionFilter:
-            {
-                // 'group': -1,
-                'category': Math.pow(2, index),
-                'mask': Math.pow(2, index)
-            }
+          isStatic: true, 
+          restitution: 0.5,
+          collisionFilter:
+          {
+            'category': Math.pow(2, index),
+            'mask': categoryBits[index]
+          }
         }
         this.category = category;
         this.position = position;

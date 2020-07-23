@@ -7,7 +7,7 @@ class Net {
     constructor(xPos, yPos, netHeight) {
         let options = {
           isStatic: true,
-          restitution: 0.99,
+          restitution: 0.5,
         };
         this.netHeight = netHeight;
         this.width = iconSize/2;
