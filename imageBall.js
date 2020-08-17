@@ -55,14 +55,14 @@ class ImageBall {
     Called after the ball is made
 */
     expandBall() {
-      console.log('expandBall this', this);
-      if(this.x < playfield.width/2 || this.y < playfield.height/2) {
-        let expansionRatio = (playfield.width/2 - this.x) / (playfield.height/2 - this.y);
-        this.x += 1,
-        this.y += expansionRatio
-      } else {
-        this.ballExpanded = true;
-      }
+      // console.log('expandBall this', this);
+      // if(this.x < playfield.width/2 || this.y < playfield.height/2) {
+      //   let expansionRatio = (playfield.width/2 - this.x) / (playfield.height/2 - this.y);
+      //   this.x += 1,
+      //   this.y += expansionRatio
+      // } else {
+      //   this.ballExpanded = true;
+      // }
     }
 
 
@@ -74,9 +74,9 @@ class ImageBall {
 */
     showDetail() {
       Matter.World.remove(world, this.body);
-      if(!this.ballExpanded) {
-        this.expandBall();
-      } else {
+      // if(!this.ballExpanded) {
+      //   this.expandBall();
+      // } else {
         let tempScreenSize = Math.min(playfield.width, playfield.height);
         let imageDetails = {
           x: (windowWidth/2 - tempScreenSize/4),
@@ -97,16 +97,21 @@ class ImageBall {
         textSize(iconSize/3);
         fill(0, 102, 153);
         pop();
-      }
+      //}
     }
 
+
+/*
+  createDetailElements()
+    Called when a user makes a ball or double clicks it.
+    Creates and displays the various elements of the detail page
+*/
     createDetailElements() {
       let tempOffset = Math.sin(QUARTER_PI)*Math.min(playfield.width, playfield.height)/1.5;
       let buttonPosition = {
         x: playfield.width/2 + tempOffset,
         y: playfield.height/2 - tempOffset
       }
-      console.log('tempOffset, buttonPos', tempOffset, ", ", buttonPosition);
       this.exitButton = createButton("X");
       this.exitButton.position(buttonPosition.x, buttonPosition.y);
       this.exitButton.mousePressed(this.removeDetailPage);
@@ -133,15 +138,23 @@ class ImageBall {
       
     }
 
-    // Used to check if the mouse is hovering over the ball
-
+/*
+  onball()
+    Used to check if the mouse is hovering over the ball
+*/
     onBall(x, y) {
       let distance = dist(x, y, this.x, this.y);
       return (distance < (this.r));
     }
 
-    // Displays the ball if it is on screen
+/*
 
+  show()
+    If ball has been launched, checks for reset
+    Uses the current position and angle of the body
+    to display the imageBall.
+    Also uses a border width hack to make square images appear round 
+*/
     show() {
       if(this.launchCount) this.checkForReset();
       const currentPos = this.body.position;
@@ -162,19 +175,22 @@ class ImageBall {
       this.y = this.body.position.y;
     }
 
-    // Checks if if ball is off screen
-    // if true, checks if horizontal speed is near zero
-    // if true, resets the ball to the original position
-
+/*
+  checksForReset()    
+    Checks if if ball is off the playfield
+    if true, resets the ball to the original position
+*/ 
     checkForReset() {
       if(this.offScreen()) {
           this.reset();
       }
     }
 
-    // Uses the object's radius and the screen size
-    // to determine if the object is still visible
-
+/*
+  offScreen()
+    Uses the object's radius and the playfield size
+    to determine if the object is still visible
+*/
     offScreen() {
       let x = this.body.position.x;
       let y = this.body.position.y;
@@ -189,8 +205,10 @@ class ImageBall {
       return false;
     }
 
-    // Returns the body to the original launch position and settings
-
+ /* 
+  reset()
+    Returns the body to the original launch position and settings
+*/
     reset() {
       Matter.Body.setVelocity(this.body, {x: 0, y: 0});
       Matter.Body.setPosition(this.body, this.originalPos);
@@ -199,8 +217,10 @@ class ImageBall {
       this.inOriginalPosition = true;
     }
 
-    //Displays an arrow when a ball is hovered over
-
+/*
+  hover()
+    Displays an arrow when a ball is hovered over
+*/
     hover() {
       push();  
       stroke(155);
@@ -211,26 +231,28 @@ class ImageBall {
       pop();
     }
 
-    // Aim takes the mouse position when the mouse is dragged and creates a visual arrow to indicate direction and power.
-    // Needs to be cleaned up to properly rotate the arrow around the end point of the line
-    // To keep the launch from being too powerful, limits the maximum power registered
-
+/*
+  aim()
+      Aim takes the mouse position when the mouse is dragged and creates a visual arrow to indicate direction and power.
+      Needs to be cleaned up to properly rotate the arrow around the end point of the line
+      To keep the launch from being too powerful, limits the maximum power registered
+*/
     aim() {
       this.xPower += (mouseX - pmouseX)/300;
       this.yPower += (mouseY - pmouseY)/300;
       this.xPower = Math.min(this.xPower, 5);
       this.yPower = Math.min(this.yPower, 5);
-      let endPosX = this.x - iconSize;
-      let endPosY = this.y - iconSize;
-      let arrowLength = iconSize/8;
-      let arrowOffsetX = Math.sqrt(Math.pow(arrowLength, 2))/2;
-      let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
       let currentPosX = this.x - (this.xPower*100);
       let currentPosY = this.y - (this.yPower*100);
-      let startVec = createVector(endPosX, endPosY);
       let endVec = createVector(currentPosX, currentPosY);
+      let arrowLength = iconSize/8;
       let arrowHeight = arrowLength/2 * Math.sqrt(3);
+      // let endPosX = this.x - iconSize;
+      // let endPosY = this.y - iconSize;
+      // let arrowOffsetX = Math.sqrt(Math.pow(arrowLength, 2))/2;
+      // let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
       // let tempAngle = endVec.angleBetween(startVec);
+      // let startVec = createVector(endPosX, endPosY);
       push();
       stroke(155);
       strokeWeight(5);
@@ -243,6 +265,10 @@ class ImageBall {
       pop();
     }
 
+/*
+  launched()
+    Increments launchCount, used to calculate metrics
+*/    
     launched() {
       this.launchCount++;
       this.inOriginalPosition = false;

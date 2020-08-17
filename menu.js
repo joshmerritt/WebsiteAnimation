@@ -1,5 +1,5 @@
 /*
-Provid locatiopn, name of the category, and the order it appears, construct menu item
+Provided location, name of the category, and the order it appears, construct menu item
 Balls will bounce and open the page when it goes through the goal
 */
 

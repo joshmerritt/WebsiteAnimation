@@ -50,7 +50,7 @@ let configurationObjection = {
   }
 
   function setup() {
-    playfield = createCanvas(document.documentElement.clientWidth*configurationObjection.xScale, document.documentElement.clientHeight*configurationObjection.yScale);
+    playfield = createCanvas(windowWidth*configurationObjection.xScale, windowHeight*configurationObjection.yScale);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
@@ -70,14 +70,14 @@ let configurationObjection = {
     drawBalls();
   }
 
-function doubleClicked(event) {
-  console.log(event);
-  imageBalls.forEach(function(ball) {
-    if(ball.onBall(mouseX, mouseY)) {
-      ball.showDetail();
-    } 
-  });
-}
+// function doubleClicked(event) {
+//   console.log(event);
+//   imageBalls.forEach(function(ball) {
+//     if(ball.onBall(mouseX, mouseY)) {
+//       ball.showDetail();
+//     } 
+//   });
+// }
 
 
 /* 
@@ -104,8 +104,6 @@ function doubleClicked(event) {
 */
   function addResetButton() {
     resetButton = createButton("↻");
-    console.log('resetButton', resetButton);
-    console.log('iconSize', iconSize);
     resetButton.position(playfield.width - iconSize/(configurationObjection.iconScale/2.1), playfield.height - iconSize/(configurationObjection.iconScale/2.1));
     resetButton.mousePressed(resetBalls);
   }
