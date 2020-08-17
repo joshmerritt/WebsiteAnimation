@@ -21,11 +21,14 @@ power,
 ground,
 goalPosition,
 detailPageOpen,
-resetButton;
+resetButton,
+titleFont;
 let configurationObjection = {
   xScale: 0.99,
   yScale: 0.965,
   iconScale: 7,
+  fontName: "Gidolinya-Regular",
+  itemsToDisplay: ['scoreboard', 'disc', 'antbw', 'flowchart'],
 };
 
 
@@ -43,6 +46,7 @@ let configurationObjection = {
       let tempString = loadStrings(`assets/${item}.txt`);
       pageInfo.push(tempString);
     }
+    titleFont = loadFont(`assets/fonts/${configurationObjection.fontName}.otf`);
   }
 
   function preload() {
@@ -70,14 +74,13 @@ let configurationObjection = {
     drawBalls();
   }
 
-// function doubleClicked(event) {
-//   console.log(event);
-//   imageBalls.forEach(function(ball) {
-//     if(ball.onBall(mouseX, mouseY)) {
-//       ball.showDetail();
-//     } 
-//   });
-// }
+function doubleClicked(event) {
+  imageBalls.forEach(function(ball) {
+    if(ball.onBall(mouseX, mouseY)) {
+      ball.showDetail();
+    } 
+  });
+}
 
 
 /* 

@@ -13,20 +13,23 @@ class ImageBall {
         isStatic: true,
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
-      this.name = 'placeholder';
-      this.link = 'placeholder';
-      this.category = 'placeholder';
-      this.description = 'placeholder';
+      this.detailPage = {
+        name: 'placeholder',
+        link: 'placeholder',
+        category: 'placeholder',
+        description: 'placeholder',
+        element: 'placeholder',
+      };
       this.parseInfo = function() {
         let tempInfo = [];
         info.forEach((item) => {
           tempInfo.push(item.split(": "));
         });
-        this.name = tempInfo[0][1];
-        this.link = tempInfo[1][1];
-        this.category = tempInfo[2][1];
-        this.body.category = this.category;
-        this.description = tempInfo[3][1];   
+        this.detailPage.name = tempInfo[0][1];
+        this.detailPage.link = tempInfo[1][1];
+        this.detailPage.category = tempInfo[2][1];
+        this.detailPage.description = tempInfo[3][1];
+        this.body.category = this.category;   
       };
       this.parseInfo = this.parseInfo.bind(this)();
       this.body.id = this.name;
@@ -107,29 +110,21 @@ class ImageBall {
     Creates and displays the various elements of the detail page
 */
     createDetailElements() {
-      let tempOffset = Math.sin(QUARTER_PI)*Math.min(playfield.width, playfield.height)/1.5;
-      let buttonPosition = {
-        x: playfield.width/2 + tempOffset,
-        y: playfield.height/2 - tempOffset
-      }
-      this.exitButton = createButton("X");
-      this.exitButton.position(buttonPosition.x, buttonPosition.y);
-      this.exitButton.mousePressed(this.removeDetailPage);
-      this.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
-      this.linkElement.position(windowWidth/2 - this.link.width/2, windowHeight * 0.6);
-      this.linkElement.show();
-      this.descriptionElement = createP(this.description);
-      this.descriptionElement.width = Math.min(windowWidth, windowHeight)/4; 
-      this.descriptionElement.position(windowWidth/2 - this.description.width/4, windowHeight * 0.7);
-      this.descriptionElement.show();
+      this.detailPage.element = createDiv("DetailPage");
+      this.detailPage.element.size(windowWidth/2, windowHeight/2);
+      this.detailPage.exitButton = createButton("X");
+      this.detailPage.exitButton.mousePressed(this.removeDetailPage);
+      this.detailPage.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
+      this.detailPage.descriptionElement = createP(this.detailPage.description);
+      this.detailPage.element.child(this.detailPage.exitButton);
+      this.detailPage.element.child(this.detailPage.linkElement);
+      this.detailPage.element.child(this.detailPage.descriptionElement);
     }
 
     removeDetailPage() {
       detailPageOpen = false;
       this.pageOpen = false;
-      this.descriptionElement.remove();
-      this.linkElement.remove();
-      this.exitButton.remove();
+      this.detailPage.element.remove();
       imageBalls.forEach(function(ball) {
         if(ball && !ball.inOriginalPosition) {
           ball.reset();
