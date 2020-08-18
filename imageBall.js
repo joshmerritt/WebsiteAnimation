@@ -111,7 +111,8 @@ class ImageBall {
 */
     createDetailElements() {
       this.detailPage.element = createDiv("DetailPage");
-      this.detailPage.element.size(windowWidth/2, windowHeight/2);
+      this.detailPage.element.size(windowWidth/3, windowHeight/3);
+      this.detailPage.element.position(windowWidth/3, windowHeight/2);
       this.detailPage.exitButton = createButton("X");
       this.detailPage.exitButton.mousePressed(this.removeDetailPage);
       this.detailPage.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
