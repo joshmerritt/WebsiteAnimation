@@ -50,6 +50,7 @@ class ImageBall {
       this.ballExpanded = false;
       this.removeDetailPage = this.removeDetailPage.bind(this);
       this.checkForReset = this.checkForReset.bind(this);
+
     }
 
 /*
