@@ -29,7 +29,7 @@ class ImageBall {
         this.detailPage.link = tempInfo[1][1];
         this.detailPage.category = tempInfo[2][1];
         this.detailPage.description = tempInfo[3][1];
-        this.body.category = this.category;   
+        this.body.category = this.detailPage.category;   
       };
       this.parseInfo = this.parseInfo.bind(this)();
       this.body.id = this.name;

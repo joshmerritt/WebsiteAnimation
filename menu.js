@@ -18,7 +18,7 @@ class Menu {
         this.category = category;
         this.position = position;
         this.index = index;
-        this.body = Matter.Bodies.rectangle(position.x, this.position.y, iconSize, iconSize/3, options);
+        this.body = Matter.Bodies.rectangle(position.x, position.y, iconSize, iconSize/3, options);
         this.body.id = category;
         this.body.category = category;
         Matter.World.add(world, this.body);

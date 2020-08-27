@@ -41,7 +41,7 @@ let configurationObjection = {
 
 */
   function preLoadAssets() {
-    for (const item of itemsToDisplay) {
+    for (const item of configurationObjection.itemsToDisplay) {
       imgs.push(loadImage(`assets/images/${item}.jpg`));
       let tempString = loadStrings(`assets/${item}.txt`);
       pageInfo.push(tempString);
@@ -94,8 +94,8 @@ function doubleClicked(event) {
   function loadAssets() {
     loadImages();
     createGoals();
-    createMenu();
     ground = new Ground(playfield.width, playfield.height, iconSize);
+    createMenu();
     trackCollisions();
     addResetButton();
   }
@@ -145,6 +145,7 @@ function doubleClicked(event) {
     for each item in the categories array. It adds the items to the menu array to use later.
 */
   function createMenu() {
+    console.log('cats', categories);
     categories.forEach((category, index) => {
       let menuPos = {
         x: goalPosition.x + 0.7*iconSize,
@@ -182,7 +183,10 @@ function doubleClicked(event) {
         gridCurrentX = gridStartX;
         gridCurrentY += iconSize*2;
       }
-      if(categories.indexOf(imageBalls[i].category) === -1) categories.push(imageBalls[i].category);
+      console.log()
+      if(categories.indexOf(imageBalls[i].detailPage.category) === -1) {
+        categories.push(imageBalls[i].detailPage.category);
+      };
     });
     categories.sort((a, b) => b.length - a.length);
     imageBalls.forEach((ball) => {
