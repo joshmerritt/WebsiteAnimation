@@ -4,6 +4,9 @@ class Ground {
             isStatic: true, 
             restitution: .5,
             id: "ground",
+            collisionFilter: {
+                group: 1,
+            },
         };
         this.body = Matter.Bodies.rectangle(displayWidth/4, displayHeight, 1.5*displayWidth, groundHeight, options);
         this.height = groundHeight;
