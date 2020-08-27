@@ -145,7 +145,6 @@ function doubleClicked(event) {
     for each item in the categories array. It adds the items to the menu array to use later.
 */
   function createMenu() {
-    console.log('cats', categories);
     categories.forEach((category, index) => {
       let menuPos = {
         x: goalPosition.x + 0.7*iconSize,
@@ -190,9 +189,10 @@ function doubleClicked(event) {
     });
     categories.sort((a, b) => b.length - a.length);
     imageBalls.forEach((ball) => {
+      console.log("loadImages - cat index:", categories.findIndex(category => category === ball.detailPage.category));
       ball.body.collisionFilter = {
         'group': 1,
-        'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
+        'category': Math.pow(2, categories.findIndex(category => category === ball.detailPage.category)),
         'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
       };
     });
