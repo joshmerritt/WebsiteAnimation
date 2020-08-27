@@ -59,7 +59,7 @@ class ImageBall {
     Called after the ball is made
 */
     expandBall() {
-      // console.log('expandBall this', this);
+      console.log('expandBall this', this);
       // if(this.x < playfield.width/2 || this.y < playfield.height/2) {
       //   let expansionRatio = (playfield.width/2 - this.x) / (playfield.height/2 - this.y);
       //   this.x += 1,
@@ -267,6 +267,7 @@ class ImageBall {
     Increments launchCount, used to calculate metrics
 */    
     launched() {
+      console.log('launched() ball/this', this);
       this.launchCount++;
       this.inOriginalPosition = false;
     }
