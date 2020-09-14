@@ -77,6 +77,7 @@ class ImageBall {
     Displays the image, along with the name, description, and link
 */
     showDetail() {
+      console.log('showDetail(), this:', this);
       Matter.World.remove(world, this.body);
       // if(!this.ballExpanded) {
       //   this.expandBall();
