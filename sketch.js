@@ -18,7 +18,7 @@ engine,
 world,
 launchArrow,
 power,
-ground,
+boundary,
 goalPosition,
 detailPageOpen,
 resetButton,
@@ -67,7 +67,6 @@ let configurationObjection = {
     Matter.Engine.update(engine);
     background(111);
     drawGoals();
-    ground.show();
     menu.forEach((item) => {
       item.show();
     });
@@ -94,7 +93,7 @@ function doubleClicked(event) {
   function loadAssets() {
     loadImages();
     createGoals();
-    ground = new Ground(playfield.width, playfield.height, iconSize);
+    boundary = new Boundary(playfield.width, playfield.height, iconSize*2);
     createMenu();
     trackCollisions();
     addResetButton();
@@ -127,6 +126,7 @@ function doubleClicked(event) {
   function trackCollisions() {
     Matter.Events.on(engine, 'collisionActive', function(event) {
       event.source.pairs.collisionActive.forEach((collision) => {
+        console.log("track Collisions event", event);
         if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
           if(collision.bodyA.label === 'Image Ball') {
             imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
@@ -188,8 +188,10 @@ function doubleClicked(event) {
       };
     });
     categories.sort((a, b) => b.length - a.length);
+    console.log("categories", categories);
     imageBalls.forEach((ball) => {
       console.log("loadImages - cat index:", categories.findIndex(category => category === ball.detailPage.category));
+      console.log("ball detail page:", ball.detailPage);
       ball.body.collisionFilter = {
         'group': 1,
         'category': Math.pow(2, categories.findIndex(category => category === ball.detailPage.category)),
@@ -215,7 +217,7 @@ function doubleClicked(event) {
 */
   function setDisplaySize() {
     iconSize =  Math.min(playfield.width/configurationObjection.iconScale, playfield.height/configurationObjection.iconScale);
-    goalPosition = {x: 1.1*iconSize, y:windowHeight/3};
+    goalPosition = {x: 0.22*iconSize, y:windowHeight/3};
     gridStartX = goalPosition.x + iconSize*3;
     gridStartY = goalPosition.y;
     gridCurrentX = gridStartX;
