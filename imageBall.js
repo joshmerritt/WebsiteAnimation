@@ -192,7 +192,7 @@ class ImageBall {
     offScreen() {
       let x = this.body.position.x;
       let y = this.body.position.y;
-      let radius = this.body.circleRadius;
+      let radius = this.body.circleRadius*2;
       let offX = ((x + radius) < 0 || (x - radius) > windowWidth);
       let offY = (((y + radius) < -windowHeight*2) || ((y - radius) > windowHeight));
       if(offY) {

@@ -64,10 +64,15 @@ If you are interested in using my code to run your website, you'll need to:
     X Add configuration object
     X Refactor Reset logic
     _ Styling with CSS
+    _ Implement detail page opening
+    _ Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
+    _ Need to fix arrow rotation
+    _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
+
     _ Test side wall permibility
     _ Build display page to appear like the imageball is simply expanded to allow for full view of the page
-    _ Need to fix arrow rotation
     _ Add double click ability to menu, display applicable subset of balls
     _ Prompt that double clicking is okay
     _ Add some special effect when a ball is made
+    _ Troubleshoot simultaneous collision issues
     
