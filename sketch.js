@@ -24,11 +24,14 @@ detailPageOpen,
 resetButton,
 titleFont;
 let configurationObjection = {
+  itemsToDisplay: ['scoreboard', 'disc', 'antbw', 'flowchart'],
+  backgroundColor: 	"rgb(96, 117, 134)", 
+  mainColor: "rgb(242, 250, 255)", 
+  accentColor: "rgb(3, 27, 81)",
   xScale: 0.99,
   yScale: 0.965,
   iconScale: 7,
   fontName: "Gidolinya-Regular",
-  itemsToDisplay: ['scoreboard', 'disc', 'antbw', 'flowchart'],
 };
 
 
@@ -59,13 +62,13 @@ let configurationObjection = {
     engine = Matter.Engine.create();
     world = engine.world;
     console.log("world", world); 
-    background(111);
+    background(configurationObjection.backgroundColor);
     loadAssets();
   }
 
   function draw() {
     Matter.Engine.update(engine);
-    background(111);
+    background(configurationObjection.backgroundColor);
     drawGoals();
     menu.forEach((item) => {
       item.show();
@@ -106,7 +109,10 @@ function doubleClicked(event) {
 */
   function addResetButton() {
     resetButton = createButton("↻");
-    resetButton.position(playfield.width - iconSize/(configurationObjection.iconScale/2.1), playfield.height - iconSize/(configurationObjection.iconScale/2.1));
+    console.log('resetButton', resetButton);
+    resetButton.size(iconSize/2, iconSize/2);
+    resetButton.addClass("reset");
+    //resetButton.position(playfield.width - iconSize/(configurationObjection.iconScale/2.1), playfield.height - iconSize/(configurationObjection.iconScale/2.1));
     resetButton.mousePressed(resetBalls);
   }
 
@@ -126,7 +132,6 @@ function doubleClicked(event) {
   function trackCollisions() {
     Matter.Events.on(engine, 'collisionActive', function(event) {
       event.source.pairs.collisionActive.forEach((collision) => {
-        console.log("track Collisions event", event);
         if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
           if(collision.bodyA.label === 'Image Ball') {
             imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();

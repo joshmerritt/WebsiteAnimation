@@ -31,7 +31,7 @@ class Menu {
       textFont(titleFont);
       textAlign(CENTER);
       textSize(iconSize/4)
-      fill(22); 
+      fill(configurationObjection.mainColor); 
       text(this.category, this.position.x, this.position.y);
       pop();
     }

@@ -165,7 +165,7 @@ class ImageBall {
       let thumbnail = this.img.get(this.img.width/2, this.img.height/2, this.img.width/4, this.img.width/4);
       image(thumbnail, 0, 0, iconSize, iconSize);
       noFill();
-      stroke(111);
+      stroke(configurationObjection.backgroundColor);
       strokeWeight(dynamicStrokeWeight);
       circle(0, 0, iconSize*1.25);    
       pop();
