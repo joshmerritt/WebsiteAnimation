@@ -63,10 +63,12 @@ If you are interested in using my code to run your website, you'll need to:
     X Add doubleclick to allow for opening of item
     X Add configuration object
     X Refactor Reset logic
+    _ Add a mimic'd version of the website as the first ball
     _ Styling with CSS
     _ Implement detail page opening
     _ Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
     _ Need to fix arrow rotation
+    _ Implement round png images for balls to remove thick border effect
     _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 
     _ Test side wall permibility

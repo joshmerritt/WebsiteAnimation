@@ -154,15 +154,24 @@ class ImageBall {
     Also uses a border width hack to make square images appear round 
 */
     show() {
+      // let thisWebsite = get(windowWidth*.3, windowHeight*.3, windowWidth*.5, windowHeight*.5);
+      // image(thisWebsite, windowWidth/3, windowHeight/3, iconSize*windowWidth/windowHeight, iconSize);
+      // 0, windowHeight/10, windowWidth/3, windowWidth/3
+      // if(this.detailPage.name === "Portfolio Website") {
+      //   let thisWebsite = get(windowWidth*.3, windowHeight*.3, windowWidth*.5, windowHeight*.5);
+      //   console.log('thisWebsite', thisWebsite);
+      //   image(thisWebsite, windowWidth/3, windowHeight/3, iconSize*windowWidth/windowHeight, iconSize);
+      //   //this.img = get();
+      // };
       if(this.launchCount) this.checkForReset();
-      const currentPos = this.body.position;
-      const currentAngle = this.body.angle;
+      let currentPos = this.body.position;
+      let currentAngle = this.body.angle;
       let dynamicStrokeWeight = Math.ceil(iconSize/4);
       push();
       translate(currentPos.x, currentPos.y);
       rotate(currentAngle);
       imageMode(CENTER);
-      let thumbnail = this.img.get(this.img.width/2, this.img.height/2, this.img.width/4, this.img.width/4);
+      let thumbnail = this.img.get(this.img.width/20, this.img.height/3.5, this.img.width/2, this.img.width/2);
       image(thumbnail, 0, 0, iconSize, iconSize);
       noFill();
       stroke(configurationObjection.backgroundColor);

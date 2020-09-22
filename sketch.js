@@ -16,15 +16,17 @@ gridCurentY,
 playfield,
 engine,
 world,
-launchArrow,
+thisCanvasImage,
 power,
 boundary,
 goalPosition,
 detailPageOpen,
 resetButton,
+bufferCanvas,
 titleFont;
 let configurationObjection = {
-  itemsToDisplay: ['scoreboard', 'disc', 'antbw', 'flowchart'],
+  //  itemsToDisplay: ['thisWebsite', 'scoreboard', 'swingBet', 'coopDoor', 'googleDataStudio', 'powerBI', 'financialModels', 'flowchart'],
+  itemsToDisplay: ['scoreboard', 'thisWebsite', 'flowchart'],
   backgroundColor: 	"rgb(96, 117, 134)", 
   mainColor: "rgb(242, 250, 255)", 
   accentColor: "rgb(3, 27, 81)",
@@ -58,6 +60,7 @@ let configurationObjection = {
 
   function setup() {
     playfield = createCanvas(windowWidth*configurationObjection.xScale, windowHeight*configurationObjection.yScale);
+    //bufferCanvas = createGraphics();
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
@@ -74,6 +77,11 @@ let configurationObjection = {
       item.show();
     });
     drawBalls();
+    let thisWebsite = get(windowWidth/50, windowHeight/50, windowHeight/1.5, windowHeight/1.5);
+    imageBalls[1].img = thisWebsite;
+    
+    //image(thisWebsite, windowWidth/3, windowHeight/3, iconSize*windowWidth/windowHeight, iconSize);
+
   }
 
 function doubleClicked(event) {
