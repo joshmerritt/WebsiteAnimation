@@ -79,9 +79,6 @@ let configurationObjection = {
     drawBalls();
     let thisWebsite = get(windowWidth/50, windowHeight/50, windowHeight/1.5, windowHeight/1.5);
     imageBalls[1].img = thisWebsite;
-    
-    //image(thisWebsite, windowWidth/3, windowHeight/3, iconSize*windowWidth/windowHeight, iconSize);
-
   }
 
 function doubleClicked(event) {
@@ -117,10 +114,8 @@ function doubleClicked(event) {
 */
   function addResetButton() {
     resetButton = createButton("↻");
-    console.log('resetButton', resetButton);
     resetButton.size(iconSize/2, iconSize/2);
     resetButton.addClass("reset");
-    //resetButton.position(playfield.width - iconSize/(configurationObjection.iconScale/2.1), playfield.height - iconSize/(configurationObjection.iconScale/2.1));
     resetButton.mousePressed(resetBalls);
   }
 
@@ -201,10 +196,7 @@ function doubleClicked(event) {
       };
     });
     categories.sort((a, b) => b.length - a.length);
-    console.log("categories", categories);
     imageBalls.forEach((ball) => {
-      console.log("loadImages - cat index:", categories.findIndex(category => category === ball.detailPage.category));
-      console.log("ball detail page:", ball.detailPage);
       ball.body.collisionFilter = {
         'group': 1,
         'category': Math.pow(2, categories.findIndex(category => category === ball.detailPage.category)),

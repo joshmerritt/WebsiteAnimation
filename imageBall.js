@@ -230,9 +230,11 @@ class ImageBall {
 */
     hover() {
       push();  
-      stroke(155);
+      stroke(configurationObjection.accentColor);
       strokeWeight(5);
-      fill(155);
+      noFill();
+      circle(this.x, this.y, this.r*2)
+      fill(configurationObjection.accentColor);
       line(this.x, this.y, this.x - iconSize, this.y - iconSize);
       triangle(this.x - iconSize, this.y - iconSize, this.x - iconSize, this.y - iconSize + iconSize/8, this.x - iconSize + iconSize/8, this.y - iconSize);        
       pop();
@@ -261,9 +263,9 @@ class ImageBall {
       // let tempAngle = endVec.angleBetween(startVec);
       // let startVec = createVector(endPosX, endPosY);
       push();
-      stroke(155);
+      stroke(configurationObjection.accentColor);
       strokeWeight(5);
-      fill(155);
+      fill(configurationObjection.accentColor);
       line(this.x, this.y, endVec.x, endVec.y);
       translate(endVec);
       angleMode(DEGREES);
@@ -277,7 +279,6 @@ class ImageBall {
     Increments launchCount, used to calculate metrics
 */    
     launched() {
-      console.log('launched() ball/this', this);
       this.launchCount++;
       this.inOriginalPosition = false;
     }
