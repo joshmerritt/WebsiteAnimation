@@ -86,45 +86,6 @@ let configurationObjection = {
     imageBalls[1].img = thisWebsite;
   }
 
-/*
-  displayTitle()
-    Shows the page creator's name with a brief description of the site
-*/
-function displayTitle() {
-  push();
-  //textFont(titleFont);
-  //textAlign(CENTER);
-  textSize(iconSize/2)
-  fill(configurationObjection.mainColor); 
-  text(configurationObjection.titleText, windowWidth/8, windowHeight/6);
-  text(configurationObjection.subTitleText, windowWidth/8, windowHeight/4)
-  pop();
-}
-
-/*
-  createContactLink()
-    Creates contact link element on initial load
-*/
-function createContactLink() {
-  contactUsElement = createA(configurationObjection.contactLinkAddress, configurationObjection.contactLinkText, "_blank");
-  contactUsElement.addClass("contactLink");
-  contactUsElement.position(windowWidth/8, windowHeight/1.1)
-}
-
-
-
-
-/*
-  doubleClicked()
-    Allows for viewing projects without having to make the ball
-*/
-function doubleClicked(event) {
-  imageBalls.forEach(function(ball) {
-    if(ball.onBall(mouseX, mouseY)) {
-      ball.showDetail();
-    } 
-  });
-}
 
 /* 
   loadAssets()
@@ -141,7 +102,8 @@ function doubleClicked(event) {
     createMenu();
     trackCollisions();
     addResetButton();
-    createContactLink();
+    contactUsElement = new ContactUs({x: windowWidth/8, y: windowHeight/1.1}, configurationObjection.contactLinkText, configurationObjection.contactLinkAddress);
+    contactUsElement.add();
   }
 
 /*
@@ -314,6 +276,33 @@ function doubleClicked(event) {
       }
     });
   }
+
+/*
+  displayTitle()
+    Shows the page creator's name with a brief description of the site
+*/
+function displayTitle() {
+  push();
+  //textFont(titleFont);
+  //textAlign(CENTER);
+  textSize(iconSize/2)
+  fill(configurationObjection.mainColor); 
+  text(configurationObjection.titleText, windowWidth/8, windowHeight/6);
+  text(configurationObjection.subTitleText, windowWidth/8, windowHeight/4)
+  pop();
+}
+
+/*
+  doubleClicked()
+    Allows for viewing projects without having to make the ball
+*/
+function doubleClicked(event) {
+  imageBalls.forEach(function(ball) {
+    if(ball.onBall(mouseX, mouseY)) {
+      ball.showDetail();
+    } 
+  });
+}
 
 /*
   mouseDragged()
