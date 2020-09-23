@@ -1,4 +1,3 @@
-let itemsToDisplay = ['scoreboard', 'disc', 'antbw', 'flowchart'];
 let categoryBits = [0x0001, 0x0002, 0x0004, 0x0008, 0x0016, 0x0032, 0x0064, 0x0128];
 let imageBalls = [];
 let imgs = [];
@@ -27,12 +26,12 @@ contactUsElement,
 titleFont;
 let configurationObjection = {
   //  itemsToDisplay: ['thisWebsite', 'scoreboard', 'swingBet', 'coopDoor', 'googleDataStudio', 'powerBI', 'financialModels', 'flowchart'],
-  itemsToDisplay: ['scoreboard', 'thisWebsite', 'flowchart'],
+  itemsToDisplay: ['arduinoScoreboard', 'thisWebsite', 'arduinoCoopDoor', 'flowchart'],
   backgroundColor: 	"rgb(96, 117, 134)", 
   mainColor: "rgb(242, 250, 255)", 
   accentColor: "rgb(3, 27, 81)",
   xScale: 0.99,
-  yScale: 0.965,
+  yScale: 0.995,
   iconScale: 7,
   fontName: "Gidolinya-Regular",
   titleText: "My name is Josh Merritt.",
@@ -68,7 +67,7 @@ let configurationObjection = {
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
-    console.log("world", world); 
+    console.log("physics engine", world); 
     background(configurationObjection.backgroundColor);
     loadAssets();
   }
@@ -106,73 +105,8 @@ let configurationObjection = {
     contactUsElement.add();
   }
 
-/*
-  addResetButton()
-    Creates a button on the screen in the lower right corner to reset
-    all balls to their original position
-*/
-  function addResetButton() {
-    resetButton = createButton("↻");
-    resetButton.size(iconSize/2, iconSize/2);
-    resetButton.addClass("reset");
-    resetButton.mousePressed(resetBalls);
-  }
+ 
 
-  function resetBalls() {
-    imageBalls.forEach(function(ball) {
-      if(ball && !ball.inOriginalPosition) {
-        ball.reset();
-      }
-    }); 
-  }
-
-/*
-  trackCollisions()
-    Creates an event listener for when two bodies are actively colliding
-    Checks to see if any of the balls are currently touching their menu item
-*/
-  function trackCollisions() {
-    Matter.Events.on(engine, 'collisionActive', function(event) {
-      event.source.pairs.collisionActive.forEach((collision) => {
-        if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
-          if(collision.bodyA.label === 'Image Ball') {
-            imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
-          } else if(collision.bodyB.label === 'Image Ball') {
-
-          }
-
-        };
-      });
-    });
-  }
-  
-/*
-  createMenu()
-    calculates a the appropriate position and creates a new menu item
-    for each item in the categories array. It adds the items to the menu array to use later.
-*/
-  function createMenu() {
-    categories.forEach((category, index) => {
-      let menuPos = {
-        x: goalPosition.x + 0.7*iconSize,
-        y: goalPosition.y + (index+1)*0.7*iconSize
-      };
-      menu.push(new Menu(menuPos, category, index));
-    });
-  }
-
-/*
-  createGoals()
-    Adds 2 visible "goalposts" to the field
-    Adds 2 invisible nets below the goal posts to prevent menu collision from the side
-*/
-  function createGoals() {
-    const netHeight = 0.7*categories.length*iconSize;
-    for(let i = 0; i < 2; i++){
-      goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10, i);
-      net.push(new Net(goalPosition.x + iconSize*i*1.4, goalPosition.y + netHeight/2, netHeight));
-    };
-  }
 
 /*
   loadImages()
@@ -189,7 +123,6 @@ let configurationObjection = {
         gridCurrentX = gridStartX;
         gridCurrentY += iconSize*2;
       }
-      console.log()
       if(categories.indexOf(imageBalls[i].detailPage.category) === -1) {
         categories.push(imageBalls[i].detailPage.category);
       };
@@ -228,6 +161,54 @@ let configurationObjection = {
     gridCurrentX = gridStartX;
     gridCurrentY = gridStartY;
   } 
+
+/*
+  trackCollisions()
+    Creates an event listener for when two bodies are actively colliding
+    Checks to see if any of the balls are currently touching their menu item
+*/
+function trackCollisions() {
+  Matter.Events.on(engine, 'collisionActive', function(event) {
+    event.source.pairs.collisionActive.forEach((collision) => {
+      if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
+        if(collision.bodyA.label === 'Image Ball') {
+          imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
+        } else if(collision.bodyB.label === 'Image Ball') {
+          imageBalls.find(imageBall => imageBall.body.id === collision.bodyB.id).showDetail();
+        }
+
+      };
+    });
+  });
+}
+
+/*
+createMenu()
+  calculates a the appropriate position and creates a new menu item
+  for each item in the categories array. It adds the items to the menu array to use later.
+*/
+function createMenu() {
+  categories.forEach((category, index) => {
+    let menuPos = {
+      x: goalPosition.x + 0.7*iconSize,
+      y: goalPosition.y + (index+1)*0.7*iconSize
+    };
+    menu.push(new Menu(menuPos, category, index));
+  });
+}
+
+/*
+createGoals()
+  Adds 2 visible "goalposts" to the field
+  Adds 2 invisible nets below the goal posts to prevent menu collision from the side
+*/
+function createGoals() {
+  const netHeight = 0.7*categories.length*iconSize;
+  for(let i = 0; i < 2; i++){
+    goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10, i);
+    net.push(new Net(goalPosition.x + iconSize*i*1.4, goalPosition.y + netHeight/2, netHeight));
+  };
+}
 
 /*
   drawBalls()
@@ -290,6 +271,30 @@ function displayTitle() {
   text(configurationObjection.titleText, windowWidth/8, windowHeight/6);
   text(configurationObjection.subTitleText, windowWidth/8, windowHeight/4)
   pop();
+}
+
+/*
+  addResetButton()
+    Creates a button on the screen in the lower right corner to reset
+    all balls to their original position
+*/
+function addResetButton() {
+  resetButton = createButton("↻");
+  resetButton.size(iconSize/2, iconSize/2);
+  resetButton.addClass("reset");
+  resetButton.mousePressed(resetBalls);
+}
+
+/*
+  resetBalls()
+    Resets each ball to it's original position
+ */
+function resetBalls() {
+  imageBalls.forEach(function(ball) {
+    if(ball && !ball.inOriginalPosition) {
+      ball.reset();
+    }
+  }); 
 }
 
 /*

@@ -77,7 +77,7 @@ class ImageBall {
     Displays the image, along with the name, description, and link
 */
     showDetail() {
-      console.log('showDetail(), this:', this);
+      //console.log('showDetail(), this:', this);
       Matter.World.remove(world, this.body);
       // if(!this.ballExpanded) {
       //   this.expandBall();
@@ -94,7 +94,7 @@ class ImageBall {
           this.createDetailElements();
         }
         push();
-        fill(55);
+        fill(configurationObjection.accentColor);
         strokeWeight(0);
         ellipseMode(CENTER);
         circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
