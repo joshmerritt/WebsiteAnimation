@@ -36,7 +36,8 @@ If you are interested in using my code to run your website, you'll need to:
     - Each category for the menu will be clickable
     - The names of the subcategories should be ordered in descending length
     - The playfield should always fill the screen
-    - There should be an about footer
+    - There should be a title
+    - There should be an about footer, with links to contact
     - Info pages should contain images, descriptions, and/or links
     - There should be a boundary outside the playfield to deflect the ball back
     - The thumbnail resets to it's position if it remains offscreen
@@ -63,15 +64,21 @@ If you are interested in using my code to run your website, you'll need to:
     X Add doubleclick to allow for opening of item
     X Add configuration object
     X Refactor Reset logic
-    _ Add a mimic'd version of the website as the first ball
+    X Test side wall permibility
+    X Add a mimic'd version of the website as the first ball
+    X Add title
+    X Add footer with contact links
     _ Styling with CSS
+    _ Add invisible box around contact link to have balls bounce off
+    _ Add thin border to balls, only have thick border for 'Portfolio Website' ball
     _ Implement detail page opening
     _ Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
     _ Need to fix arrow rotation
     _ Implement round png images for balls to remove thick border effect
     _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 
-    _ Test side wall permibility
+    _ Reorg codebase and complete documentation
+    _ Add some visual of the stats for number of shots and number made, % of projects opened
     _ Build display page to appear like the imageball is simply expanded to allow for full view of the page
     _ Add double click ability to menu, display applicable subset of balls
     _ Prompt that double clicking is okay

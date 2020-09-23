@@ -22,7 +22,8 @@ boundary,
 goalPosition,
 detailPageOpen,
 resetButton,
-bufferCanvas,
+totalShots,
+contactUsElement,
 titleFont;
 let configurationObjection = {
   //  itemsToDisplay: ['thisWebsite', 'scoreboard', 'swingBet', 'coopDoor', 'googleDataStudio', 'powerBI', 'financialModels', 'flowchart'],
@@ -34,6 +35,10 @@ let configurationObjection = {
   yScale: 0.965,
   iconScale: 7,
   fontName: "Gidolinya-Regular",
+  titleText: "My name is Josh Merritt.",
+  subTitleText: "I am a builder.",
+  contactLinkText: "What problem can I help you solve?",
+  contactLinkAddress: "mailto:josh@wayfarerfarms.com"
 };
 
 
@@ -60,7 +65,6 @@ let configurationObjection = {
 
   function setup() {
     playfield = createCanvas(windowWidth*configurationObjection.xScale, windowHeight*configurationObjection.yScale);
-    //bufferCanvas = createGraphics();
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
@@ -72,6 +76,7 @@ let configurationObjection = {
   function draw() {
     Matter.Engine.update(engine);
     background(configurationObjection.backgroundColor);
+    displayTitle();      
     drawGoals();
     menu.forEach((item) => {
       item.show();
@@ -81,6 +86,38 @@ let configurationObjection = {
     imageBalls[1].img = thisWebsite;
   }
 
+/*
+  displayTitle()
+    Shows the page creator's name with a brief description of the site
+*/
+function displayTitle() {
+  push();
+  //textFont(titleFont);
+  //textAlign(CENTER);
+  textSize(iconSize/2)
+  fill(configurationObjection.mainColor); 
+  text(configurationObjection.titleText, windowWidth/8, windowHeight/6);
+  text(configurationObjection.subTitleText, windowWidth/8, windowHeight/4)
+  pop();
+}
+
+/*
+  createContactLink()
+    Creates contact link element on initial load
+*/
+function createContactLink() {
+  contactUsElement = createA(configurationObjection.contactLinkAddress, configurationObjection.contactLinkText, "_blank");
+  contactUsElement.addClass("contactLink");
+  contactUsElement.position(windowWidth/8, windowHeight/1.1)
+}
+
+
+
+
+/*
+  doubleClicked()
+    Allows for viewing projects without having to make the ball
+*/
 function doubleClicked(event) {
   imageBalls.forEach(function(ball) {
     if(ball.onBall(mouseX, mouseY)) {
@@ -88,7 +125,6 @@ function doubleClicked(event) {
     } 
   });
 }
-
 
 /* 
   loadAssets()
@@ -105,6 +141,7 @@ function doubleClicked(event) {
     createMenu();
     trackCollisions();
     addResetButton();
+    createContactLink();
   }
 
 /*
@@ -211,8 +248,9 @@ function doubleClicked(event) {
     Uses built in p5.js methods
 */
   function windowResized() {
-    resizeCanvas(document.documentElement.clientWidth*configurationObjection.xScale, document.documentElement.clientHeight*configurationObjection.yScale);
+    resizeCanvas(windowWidth*configurationObjection.xScale, windowHeight*configurationObjection.yScale);
     setDisplaySize();
+    // Remove all imageBalls[], goals[], net[], menu[], then create them again with the new dimensions or adjust all their dimensions
   }
 
 /* 
@@ -222,7 +260,7 @@ function doubleClicked(event) {
 */
   function setDisplaySize() {
     iconSize =  Math.min(playfield.width/configurationObjection.iconScale, playfield.height/configurationObjection.iconScale);
-    goalPosition = {x: 0.22*iconSize, y:windowHeight/3};
+    goalPosition = {x: 0.22*iconSize, y:windowHeight/2.2};
     gridStartX = goalPosition.x + iconSize*3;
     gridStartY = goalPosition.y;
     gridCurrentX = gridStartX;
@@ -323,6 +361,7 @@ function doubleClicked(event) {
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
         ball.launched();
+        totalShots++;
       } 
     });    
   }
