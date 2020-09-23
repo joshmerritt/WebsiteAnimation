@@ -119,9 +119,9 @@ class ImageBall {
       this.detailPage.exitButton.mousePressed(this.removeDetailPage);
       this.detailPage.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
       this.detailPage.descriptionElement = createP(this.detailPage.description);
-      this.detailPage.element.child(this.detailPage.exitButton);
       this.detailPage.element.child(this.detailPage.linkElement);
       this.detailPage.element.child(this.detailPage.descriptionElement);
+      this.detailPage.element.child(this.detailPage.exitButton);
     }
 
     removeDetailPage() {
