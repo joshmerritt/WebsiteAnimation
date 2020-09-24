@@ -50,6 +50,15 @@ class ImageBall {
       this.ballExpanded = false;
       this.removeDetailPage = this.removeDetailPage.bind(this);
       this.checkForReset = this.checkForReset.bind(this);
+      this.showDetail = this.showDetail.bind(this);
+      this.show = this.show.bind(this);
+      this.createDetailElements = this.createDetailElements.bind(this);
+      this.onBall = this.onBall.bind(this);
+      this.expandBall = this.expandBall.bind(this);
+      this.hover = this.hover.bind(this);
+      this.launched = this.launched.bind(this);
+      this.reset = this.reset.bind(this);
+      
 
     }
 
@@ -77,7 +86,7 @@ class ImageBall {
     Displays the image, along with the name, description, and link
 */
     showDetail() {
-      //console.log('showDetail(), this:', this);
+      console.log('showDetail(), this:', this);
       Matter.World.remove(world, this.body);
       // if(!this.ballExpanded) {
       //   this.expandBall();

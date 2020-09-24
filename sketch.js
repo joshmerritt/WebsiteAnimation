@@ -169,6 +169,7 @@ let configurationObjection = {
 */
 function trackCollisions() {
   Matter.Events.on(engine, 'collisionActive', function(event) {
+    console.log("collision event", event);
     event.source.pairs.collisionActive.forEach((collision) => {
       if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
         if(collision.bodyA.label === 'Image Ball') {
