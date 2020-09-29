@@ -105,7 +105,38 @@ let configurationObjection = {
     contactUsElement.add();
   }
 
- 
+ /*
+  addResetButton()
+    Creates a button on the screen in the lower right corner to reset
+    all balls to their original position
+*/
+function addResetButton() {
+  resetButton = createButton("↻");
+  resetButton.size(iconSize/2, iconSize/2);
+  resetButton.addClass("reset");
+  resetButton.mousePressed(resetBalls);
+}
+
+/*
+  trackCollisions()
+    Creates an event listener for when two bodies are actively colliding
+    Checks to see if any of the balls are currently touching their menu item
+*/
+function trackCollisions() {
+  Matter.Events.on(engine, 'collisionActive', function(event) {
+    console.log("collision event", event);
+    event.source.pairs.collisionActive.forEach((collision) => {
+      if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
+        if(collision.bodyA.label === 'Image Ball') {
+          imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
+        } else if(collision.bodyB.label === 'Image Ball') {
+          imageBalls.find(imageBall => imageBall.body.id === collision.bodyB.id).showDetail();
+        }
+
+      };
+    });
+  });
+}
 
 
 /*
@@ -162,26 +193,6 @@ let configurationObjection = {
     gridCurrentY = gridStartY;
   } 
 
-/*
-  trackCollisions()
-    Creates an event listener for when two bodies are actively colliding
-    Checks to see if any of the balls are currently touching their menu item
-*/
-function trackCollisions() {
-  Matter.Events.on(engine, 'collisionActive', function(event) {
-    console.log("collision event", event);
-    event.source.pairs.collisionActive.forEach((collision) => {
-      if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
-        if(collision.bodyA.label === 'Image Ball') {
-          imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
-        } else if(collision.bodyB.label === 'Image Ball') {
-          imageBalls.find(imageBall => imageBall.body.id === collision.bodyB.id).showDetail();
-        }
-
-      };
-    });
-  });
-}
 
 /*
 createMenu()
@@ -274,17 +285,6 @@ function displayTitle() {
   pop();
 }
 
-/*
-  addResetButton()
-    Creates a button on the screen in the lower right corner to reset
-    all balls to their original position
-*/
-function addResetButton() {
-  resetButton = createButton("↻");
-  resetButton.size(iconSize/2, iconSize/2);
-  resetButton.addClass("reset");
-  resetButton.mousePressed(resetBalls);
-}
 
 /*
   resetBalls()
