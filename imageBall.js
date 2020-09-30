@@ -13,23 +13,21 @@ class ImageBall {
         isStatic: true,
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
-      this.detailPage = {
-        name: 'placeholder',
-        link: 'placeholder',
-        category: 'placeholder',
-        description: 'placeholder',
-        element: 'placeholder',
-      };
+      this.name = 'placeholder';
+      this.link = 'placeholder';
+      this.category = 'placeholder';
+      this.description = 'placeholder';
+      this.element = 'placeholder';
       this.parseInfo = function() {
         let tempInfo = [];
         info.forEach((item) => {
           tempInfo.push(item.split(": "));
         });
-        this.detailPage.name = tempInfo[0][1];
-        this.detailPage.link = tempInfo[1][1];
-        this.detailPage.category = tempInfo[2][1];
-        this.detailPage.description = tempInfo[3][1];
-        this.body.category = this.detailPage.category;   
+        this.name = tempInfo[0][1];
+        this.link = tempInfo[1][1];
+        this.category = tempInfo[2][1];
+        this.description = tempInfo[3][1];
+        this.body.category = this.category;   
       };
       this.parseInfo = this.parseInfo.bind(this)();
       this.body.id = this.name;
@@ -103,7 +101,7 @@ class ImageBall {
           this.createDetailElements();
         }
         push();
-        fill(configurationObjection.accentColor);
+        fill(config.accentColor);
         strokeWeight(0);
         ellipseMode(CENTER);
         circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
@@ -121,22 +119,22 @@ class ImageBall {
     Creates and displays the various elements of the detail page
 */
     createDetailElements() {
-      this.detailPage.element = createDiv("DetailPage");
-      this.detailPage.element.size(windowWidth/3, windowHeight/3);
-      this.detailPage.element.position(windowWidth/3, windowHeight/2);
-      this.detailPage.exitButton = createButton("X");
-      this.detailPage.exitButton.mousePressed(this.removeDetailPage);
-      this.detailPage.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
-      this.detailPage.descriptionElement = createP(this.detailPage.description);
-      this.detailPage.element.child(this.detailPage.linkElement);
-      this.detailPage.element.child(this.detailPage.descriptionElement);
-      this.detailPage.element.child(this.detailPage.exitButton);
+      this.element = createDiv("DetailPage");
+      this.element.size(windowWidth/3, windowHeight/3);
+      this.element.position(windowWidth/3, windowHeight/2);
+      this.exitButton = createButton("X");
+      this.exitButton.mousePressed(this.removeDetailPage);
+      this.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
+      this.descriptionElement = createP(this.description);
+      this.element.child(this.linkElement);
+      this.element.child(this.descriptionElement);
+      this.element.child(this.exitButton);
     }
 
     removeDetailPage() {
       detailPageOpen = false;
       this.pageOpen = false;
-      this.detailPage.element.remove();
+      this.element.remove();
       imageBalls.forEach(function(ball) {
         if(ball && !ball.inOriginalPosition) {
           ball.reset();
@@ -166,7 +164,7 @@ class ImageBall {
       // let thisWebsite = get(windowWidth*.3, windowHeight*.3, windowWidth*.5, windowHeight*.5);
       // image(thisWebsite, windowWidth/3, windowHeight/3, iconSize*windowWidth/windowHeight, iconSize);
       // 0, windowHeight/10, windowWidth/3, windowWidth/3
-      // if(this.detailPage.name === "Portfolio Website") {
+      // if(this.name === "Portfolio Website") {
       //   let thisWebsite = get(windowWidth*.3, windowHeight*.3, windowWidth*.5, windowHeight*.5);
       //   console.log('thisWebsite', thisWebsite);
       //   image(thisWebsite, windowWidth/3, windowHeight/3, iconSize*windowWidth/windowHeight, iconSize);
@@ -183,7 +181,7 @@ class ImageBall {
       let thumbnail = this.img.get(this.img.width/20, this.img.height/3.5, this.img.width/2, this.img.width/2);
       image(thumbnail, 0, 0, iconSize, iconSize);
       noFill();
-      stroke(configurationObjection.backgroundColor);
+      stroke(config.backgroundColor);
       strokeWeight(dynamicStrokeWeight);
       circle(0, 0, iconSize*1.25);    
       pop();
@@ -239,11 +237,11 @@ class ImageBall {
 */
     hover() {
       push();  
-      stroke(configurationObjection.accentColor);
+      stroke(config.accentColor);
       strokeWeight(5);
       noFill();
       circle(this.x, this.y, this.r*2)
-      fill(configurationObjection.accentColor);
+      fill(config.accentColor);
       line(this.x, this.y, this.x - iconSize, this.y - iconSize);
       triangle(this.x - iconSize, this.y - iconSize, this.x - iconSize, this.y - iconSize + iconSize/8, this.x - iconSize + iconSize/8, this.y - iconSize);        
       pop();
@@ -272,9 +270,9 @@ class ImageBall {
       // let tempAngle = endVec.angleBetween(startVec);
       // let startVec = createVector(endPosX, endPosY);
       push();
-      stroke(configurationObjection.accentColor);
+      stroke(config.accentColor);
       strokeWeight(5);
-      fill(configurationObjection.accentColor);
+      fill(config.accentColor);
       line(this.x, this.y, endVec.x, endVec.y);
       translate(endVec);
       angleMode(DEGREES);

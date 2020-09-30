@@ -13,7 +13,7 @@ class Goal {
 
   show() {
     push();
-    fill(configurationObjection.accentColor);
+    fill(config.accentColor);
     ellipseMode(CENTER);
     circle(this.body.position.x, this.body.position.y, this.radius);
     pop();
