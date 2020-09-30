@@ -15,7 +15,7 @@ gridCurentY,
 playfield,
 engine,
 world,
-thisCanvasImage,
+imageMask,
 power,
 boundary,
 goalPosition,
@@ -35,7 +35,7 @@ let config = {
   iconScale: 7,
   fontName: "Gidolinya-Regular",
   titleText: "Hello world, I am Josh Merritt.",
-  subTitleText: "Data-driven product development and project management is what I do.",
+  subTitleText: "Honest, Data-driven, Product Management & Development.",
   contactLinkText: "What problem can I help you solve?",
   contactLinkAddress: "mailto:josh@wayfarerfarms.com"
 };
@@ -103,9 +103,24 @@ let config = {
     addResetButton();
     contactUsElement = new ContactUs({x: windowWidth/8, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
     contactUsElement.add();
+    createOutline();
   }
 
- /*
+/*
+  createOutline()
+    Uses a second p5 graphics object to make images appear circular
+*/ 
+function createOutline() {
+  imageMask = createGraphics(iconSize, iconSize);
+  //imageMask.ellipseMode(CENTER);
+  //imageMask.noFill();
+  //imageMask.fill(config.mainColor);
+  // imageMask.stroke(config.accentColor);
+  // imageMask.strokeWeight(0.1);
+  imageMask.circle(iconSize/2, iconSize/2, iconSize);
+}
+ 
+  /*
   addResetButton()
     Creates a button on the screen in the lower right corner to reset
     all balls to their original position
@@ -137,7 +152,6 @@ function trackCollisions() {
     });
   });
 }
-
 
 /*
   loadImages()
