@@ -72,6 +72,10 @@ let config = {
     loadAssets();
   }
 
+/*
+  draw()
+    Native p5.js function used to continually loop the program
+*/
   function draw() {
     Matter.Engine.update(engine);
     background(config.backgroundColor);
@@ -82,7 +86,8 @@ let config = {
     });
     drawBalls();
     let thisWebsite = get(windowWidth/50, windowHeight/50, windowHeight/1.5, windowHeight/1.5);
-    imageBalls[1].img = thisWebsite;
+    imageBalls[1].ballImage = thisWebsite;
+    imageBalls[1].fullImage = thisWebsite;
   }
 
 
@@ -112,11 +117,6 @@ let config = {
 */ 
 function createOutline() {
   imageMask = createGraphics(iconSize, iconSize);
-  //imageMask.ellipseMode(CENTER);
-  //imageMask.noFill();
-  //imageMask.fill(config.mainColor);
-  // imageMask.stroke(config.accentColor);
-  // imageMask.strokeWeight(0.1);
   imageMask.circle(iconSize/2, iconSize/2, iconSize);
 }
  
@@ -139,7 +139,7 @@ function addResetButton() {
 */
 function trackCollisions() {
   Matter.Events.on(engine, 'collisionActive', function(event) {
-    console.log("collision event", event);
+    //console.log("collision event", event);
     event.source.pairs.collisionActive.forEach((collision) => {
       if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
         if(collision.bodyA.label === 'Image Ball') {
@@ -161,7 +161,7 @@ function trackCollisions() {
 */
   function loadImages() {
     imgs.forEach(function(img, i) {
-      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pageInfo[i]);
+      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pageInfo[i], i);
       if(gridCurrentX + iconSize*3 <= windowWidth) {
         gridCurrentX += iconSize*2;
       } else {

@@ -5,7 +5,7 @@
 */
 
 class ImageBall {
-    constructor(img, xPos, yPos, info) {
+    constructor(img, xPos, yPos, info, index) {
       let defaultOptions = {
         friction: 0.5,
         frictionAir: 0.001,
@@ -13,6 +13,7 @@ class ImageBall {
         isStatic: true,
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
+      this.index = index;
       this.name = 'placeholder';
       this.link = 'placeholder';
       this.category = 'placeholder';
@@ -32,7 +33,8 @@ class ImageBall {
       this.parseInfo = this.parseInfo.bind(this)();
       this.body.id = this.name;
       this.body.label = 'Image Ball';
-      this.img = img;
+      this.fullImage = img;
+      this.ballImage = img;  
       this.x = xPos;
       this.y = yPos;
       this.r = iconSize/2;
@@ -84,11 +86,12 @@ class ImageBall {
     Displays the image, along with the name, description, and link
 */
     showDetail() {
-      console.log('showDetail(), this:', this);
-      Matter.World.remove(world, this.body);
+      // console.log('showDetail(), this:', this);
+      // Matter.World.remove(world, this.body);
       // if(!this.ballExpanded) {
       //   this.expandBall();
       // } else {
+        let detailImage = imgs[this.index];
         let tempScreenSize = Math.min(playfield.width, playfield.height);
         let imageDetails = {
           x: (windowWidth/2 - tempScreenSize/4),
@@ -105,9 +108,8 @@ class ImageBall {
         strokeWeight(0);
         ellipseMode(CENTER);
         circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
-        image(this.img, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
+        image(detailImage, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
         textSize(iconSize/3);
-        fill(0, 102, 153);
         pop();
       //}
     }
@@ -157,29 +159,23 @@ class ImageBall {
   show()
     If ball has been launched, checks for reset
     Uses the current position and angle of the body
-    to display the imageBall.
-    Also uses a border width hack to make square images appear round 
+    to display the imageBall, using a round image mask overlay
 */
     show() {
-      // let thisWebsite = get(windowWidth*.3, windowHeight*.3, windowWidth*.5, windowHeight*.5);
-      // image(thisWebsite, windowWidth/3, windowHeight/3, iconSize*windowWidth/windowHeight, iconSize);
-      // 0, windowHeight/10, windowWidth/3, windowWidth/3
-      // if(this.name === "Portfolio Website") {
-      //   let thisWebsite = get(windowWidth*.3, windowHeight*.3, windowWidth*.5, windowHeight*.5);
-      //   console.log('thisWebsite', thisWebsite);
-      //   image(thisWebsite, windowWidth/3, windowHeight/3, iconSize*windowWidth/windowHeight, iconSize);
-      //   //this.img = get();
-      // };
       if(this.launchCount) this.checkForReset();
       push();
-      angleMode(DEGREES);
       imageMode(CENTER);
+      ellipseMode(CENTER);
       let currentPos = this.body.position;
       let currentAngle = this.body.angle;
       translate(currentPos.x, currentPos.y);
       rotate(currentAngle);
-      this.img.mask(imageMask);
-      image(this.img, 0, 0, iconSize, iconSize);  
+      this.ballImage.mask(imageMask);
+      image(this.ballImage, 0, 0, iconSize, iconSize);
+      noFill();
+      stroke(config.mainColor);
+      strokeWeight(iconSize/50); 
+      circle(0, 0, iconSize*.99, iconSize*.99); 
       pop();
       this.x = this.body.position.x;
       this.y = this.body.position.y;
@@ -223,6 +219,7 @@ class ImageBall {
       Matter.Body.setVelocity(this.body, {x: 0, y: 0});
       Matter.Body.setPosition(this.body, this.originalPos);
       Matter.Body.setStatic(this.body, true);
+      Matter.Body.setAngle(this.body, 0);
       Matter.World.remove(world, this.body);
       this.inOriginalPosition = true;
     }
@@ -271,7 +268,6 @@ class ImageBall {
       fill(config.accentColor);
       line(this.x, this.y, endVec.x, endVec.y);
       translate(endVec);
-      angleMode(DEGREES);
       rotate(endVec.heading()); 
       triangle(-arrowLength/2, 0, arrowLength/2, 0, 0, arrowHeight);
       pop();
