@@ -69,12 +69,12 @@ If you are interested in using my code to run your website, you'll need to:
     X Add title
     X Add footer with contact links
     _ Styling with CSS
-    _ Add invisible box around contact link to have balls bounce off
-    _ Add thin border to balls, only have thick border for 'Portfolio Website' ball
-    _ Implement detail page opening
+    X Add invisible box around contact link to have balls bounce off
+    X Add thin border to balls
+    X Implement detail page opening
     _ Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
     _ Need to fix arrow rotation
-    _ Implement round png images for balls to remove thick border effect
+    X Implement round png images for balls to remove thick border effect
     _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 
     _ Reorg codebase and complete documentation
