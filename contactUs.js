@@ -26,4 +26,9 @@ class ContactUs {
         this.body.category = "Link";
         Matter.World.add(world, this.body);
     }
+
+    remove() {
+        this.element.remove();
+        Matter.World.remove(world, this.body)
+    }
 }

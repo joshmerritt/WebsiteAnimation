@@ -1,10 +1,16 @@
 class Boundary {
     constructor(displayWidth, displayHeight, boundaryWidth) {
+        this.displayWidth = displayWidth;
+        this.displayHeight = displayHeight;
+        this.width = boundaryWidth;
+  
+    }
+
+    add() {
         let options = {
             isStatic: true, 
             restitution: .5
         };
-        this.width = boundaryWidth;
         let ceiling = Matter.Bodies.rectangle(displayWidth/4, -displayHeight*2, boundaryWidth, displayHeight*3, options);
         let leftWall = Matter.Bodies.rectangle(-boundaryWidth/2, -displayHeight/2, boundaryWidth, displayHeight*3, options);
         let rightWall = Matter.Bodies.rectangle(displayWidth+boundaryWidth, -displayHeight/2, boundaryWidth, displayHeight*3, options)
@@ -13,9 +19,14 @@ class Boundary {
         rightWall.id = 'rightWall';
         Matter.World.add(world, ceiling);
         Matter.World.add(world, leftWall);
-        Matter.World.add(world, rightWall);    
+        Matter.World.add(world, rightWall);  
     }
 
+    remove() {
+        Matter.World.remove(world, ceiling);
+        Matter.World.remove(world, leftWall);
+        Matter.World.remove(world, rightWall);
+    }
     // show() {
     //   push();
     //   fill(55);
