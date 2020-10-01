@@ -121,10 +121,12 @@ class ImageBall {
     Creates and displays the various elements of the detail page
 */
     createDetailElements() {
-      this.element = createDiv("DetailPage");
+      this.element = createDiv(this.name);
+      this.element.addClass("DetailPage");
       this.element.size(windowWidth/3, windowHeight/3);
       this.element.position(windowWidth/3, windowHeight/2);
       this.exitButton = createButton("X");
+      this.exitButton.addClass("ExitButton");
       this.exitButton.mousePressed(this.removeDetailPage);
       this.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
       this.descriptionElement = createP(this.description);

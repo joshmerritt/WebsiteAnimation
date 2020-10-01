@@ -70,6 +70,11 @@ div {
   padding: 10px;
 }
 
+.ExitButton {
+  align-items: flex-start;
+  right: 1vw;
+}
+
 .reset {
   position: absolute;
   right: 1vw;

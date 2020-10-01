@@ -69,7 +69,7 @@ If you are interested in using my code to run your website, you'll need to:
     X Add title
     X Add footer with contact links
     _ Improve title responsiveness
-    _ Rework screen size function to resize everything
+    X Rework screen size function to resize everything
     _ Make sure refresh button is centered
     _ Styling with CSS
     X Add invisible box around contact link to have balls bounce off
