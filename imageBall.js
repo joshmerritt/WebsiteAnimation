@@ -247,29 +247,33 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
     aim() {
+      angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/300;
       this.yPower += (mouseY - pmouseY)/300;
       this.xPower = Math.min(this.xPower, 5);
       this.yPower = Math.min(this.yPower, 5);
       let currentPosX = this.x - (this.xPower*100);
       let currentPosY = this.y - (this.yPower*100);
-      let endVec = createVector(currentPosX, currentPosY);
       let arrowLength = iconSize/8;
-      let arrowHeight = arrowLength/2 * Math.sqrt(3);
-      // let endPosX = this.x - iconSize;
-      // let endPosY = this.y - iconSize;
-      // let arrowOffsetX = Math.sqrt(Math.pow(arrowLength, 2))/2;
-      // let arrowOffsetY = Math.sqrt((Math.pow(arrowLength, 2) - (Math.pow(arrowOffsetX, 2))), 2);
-      // let tempAngle = endVec.angleBetween(startVec);
-      // let startVec = createVector(endPosX, endPosY);
+      let angle = atan2(this.xPower, this.yPower);
+      let pointA = {
+        x: currentPosX - sin(angle)*arrowLength*2,
+        y: currentPosY - cos(angle)*arrowLength*2
+      };
+      let pointB = {
+        x: currentPosX + cos(angle)*arrowLength,
+        y: currentPosY - sin(angle)*arrowLength
+      };
+      let pointC = {
+        x: currentPosX - cos(angle)*arrowLength,
+        y: currentPosY + sin(angle)*arrowLength
+      };
       push();
       stroke(config.accentColor);
       strokeWeight(5);
       fill(config.accentColor);
-      line(this.x, this.y, endVec.x, endVec.y);
-      translate(endVec);
-      rotate(endVec.heading()); 
-      triangle(-arrowLength/2, 0, arrowLength/2, 0, 0, arrowHeight);
+      line(this.x, this.y, currentPosX, currentPosY);
+      triangle(pointA.x, pointA.y, pointB.x, pointB.y, pointC.x, pointC.y);
       pop();
     }
 
