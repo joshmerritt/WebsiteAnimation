@@ -67,15 +67,18 @@ div {
   align-items: center;
   justify-content: center;
   color: rgb(242, 250, 255);
-  margin: 10px;
-  padding: 10px;
+  padding: 1em;
+}
+
+td {
+  padding: 0.5em;
 }
 
 .DetailPage {
   position: absolute;
   width: 50vw;
   right: 23.66vw;
-  top: 65vh;
+  top: 50vh;
 }
 
 .ExitButton {
