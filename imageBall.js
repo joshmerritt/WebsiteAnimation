@@ -257,6 +257,7 @@ class ImageBall {
       line(this.x, this.y, lineEnd.x , lineEnd.y);
       triangle(pointA.x, pointA.y, pointB.x, pointB.y, pointC.x, pointC.y);
       pop();
+      angleMode(RADIANS);
     }
 
 /*
@@ -294,6 +295,7 @@ class ImageBall {
       line(this.x, this.y, currentPosX, currentPosY);
       triangle(pointA.x, pointA.y, pointB.x, pointB.y, pointC.x, pointC.y);
       pop();
+      angleMode(RADIANS);
     }
 
 /*
