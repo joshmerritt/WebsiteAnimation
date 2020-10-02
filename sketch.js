@@ -219,7 +219,7 @@ function trackCollisions() {
     resetButton.remove();
     addResetButton();
     contactUsElement.remove();
-    contactUsElement = new ContactUs({x: windowWidth/8, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
+    contactUsElement = new ContactUs({x: gridStartX, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
     contactUsElement.add();
     createOutline();
   }
