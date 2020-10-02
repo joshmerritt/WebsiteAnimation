@@ -89,8 +89,6 @@ class ImageBall {
       // if(!this.ballExpanded) {
       //   this.expandBall();
       // } else {
-        //let detailImage = imgs[this.index];
-        //let tempScreenSize = Math.max(playfield.width, playfield.height);
         let tempScreenSize = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
         let imageDetails = {
           x: (windowWidth/2 - tempScreenSize/4),
@@ -103,7 +101,7 @@ class ImageBall {
           this.createDetailElements();
         }
         let tempImage = this.fullImage;
-        console.log(tempImage);
+        //console.log(tempImage);
         push();
         fill(config.accentColor);
         strokeWeight(0);
@@ -326,6 +324,7 @@ class ImageBall {
     Increments launchCount, used to calculate metrics
 */    
     launched() {
+      contactUsElement.remove(); 
       this.launchCount++;
       this.inOriginalPosition = false;
     }

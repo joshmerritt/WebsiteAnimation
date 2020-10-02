@@ -65,6 +65,8 @@ let config = {
   }
 
   function setup() {
+    console.log(window);
+    history.pushState({'page_id': 1}, document.title, location.href);
     playfield = createCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
     setDisplaySize();
     engine = Matter.Engine.create();
@@ -434,6 +436,5 @@ function doubleClicked(event) {
         ball.launched();
         totalShots++;
       } 
-    });
-    contactUsElement.remove();    
+    });   
   }

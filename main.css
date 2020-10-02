@@ -92,3 +92,11 @@ td {
   bottom: 1vw;
   background-color: #F2FAFF;
 }
+
+/* Use a media query to add a breakpoint at 800px: */
+@media screen and (max-width: 800px) {
+  .DetailPage {
+    width: 75vw;
+    right: 10.5vw;
+  }
+}
