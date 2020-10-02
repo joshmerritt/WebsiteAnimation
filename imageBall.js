@@ -31,8 +31,8 @@ class ImageBall {
       this.parseInfo = this.parseInfo.bind(this)();
       this.body.id = this.name;
       this.body.label = 'Image Ball';
-      this.fullImage = img.get();
-      this.ballImage = img;  
+      this.fullImage = img;
+      this.ballImage = img.get();  
       this.x = xPos;
       this.y = yPos;
       this.r = iconSize/2;
@@ -56,9 +56,7 @@ class ImageBall {
       this.hover = this.hover.bind(this);
       this.launched = this.launched.bind(this);
       this.reset = this.reset.bind(this);
-      
-
-    }
+   }
 
 /*
   expandBall()
@@ -89,26 +87,34 @@ class ImageBall {
       // if(!this.ballExpanded) {
       //   this.expandBall();
       // } else {
+        contactUsElement.remove(); 
         let tempScreenSize = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
+        let tempImage = this.fullImage;
         let imageDetails = {
-          x: (windowWidth/2 - tempScreenSize/4),
-          y: (windowHeight/2 - tempScreenSize/2),
-          size: tempScreenSize/2
+          xSize: windowHeight/2,
+          ySize: windowHeight/2,
+          y: 0,
         };
+        if(tempImage.width > tempImage.height) {
+          imageDetails.xSize = (windowHeight/2) * (tempImage.width/tempImage.height);
+          imageDetails.ySize = windowHeight/2;
+          imageDetails.x = windowWidth/2 - imageDetails.xSize/2;
+        } else {
+          imageDetails.xSize = (windowHeight/2) * (tempImage.height/tempImage.width);
+          imageDetails.ySize = windowHeight/2;
+          imageDetails.x = windowWidth/2 - imageDetails.xSize/2;
+        }
         if ( this.pageOpen === false ) {
           this.pageOpen = true;
           detailPageOpen = true;
           this.createDetailElements();
         }
-        let tempImage = this.fullImage;
-        //console.log(tempImage);
         push();
         fill(config.accentColor);
         strokeWeight(0);
         ellipseMode(CENTER);
         circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
-        image(tempImage, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size*(tempImage.height/tempImage.width));
-        textSize(iconSize/3);
+        image(tempImage, imageDetails.x, imageDetails.y, imageDetails.xSize, imageDetails.ySize);
         pop();
       //}
     }
@@ -324,7 +330,6 @@ class ImageBall {
     Increments launchCount, used to calculate metrics
 */    
     launched() {
-      contactUsElement.remove(); 
       this.launchCount++;
       this.inOriginalPosition = false;
     }

@@ -76,12 +76,12 @@ If you are interested in using my code to run your website, you'll need to:
     X Improve title responsiveness
     X Rework screen size function to resize everything
     _ Make sure refresh button is centered
-    _ Styling with CSS
+    X Styling with CSS
     X Implement detail page opening
-    _ Remove old masks when resizing
+    X Remove old masks when resizing
     _ Improve "launch" sensitivity based upon screen size
     X Resize contact us div to be 2/3rds of screen
-    _ Add Josh tile with headshot and about me blurb
+    X Add Josh tile with headshot and about me blurb
     _ Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
     _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 

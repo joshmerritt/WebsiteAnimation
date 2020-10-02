@@ -67,11 +67,12 @@ div {
   align-items: center;
   justify-content: center;
   color: rgb(242, 250, 255);
-  padding: 1em;
+  padding: 0.4em;
 }
 
 td {
-  padding: 0.5em;
+  padding: 0.2em;
+  font-size: .85em;
 }
 
 .DetailPage {
@@ -79,11 +80,18 @@ td {
   width: 50vw;
   right: 23.66vw;
   top: 50vh;
+  font-size: 1.3em;
 }
 
 .ExitButton {
-  align-items: flex-start;
-  right: 1vw;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+td:first-child {
+  font-weight: bold;
+  font-size: 1em;
 }
 
 .reset {
@@ -91,6 +99,10 @@ td {
   right: 1vw;
   bottom: 1vw;
   background-color: #F2FAFF;
+}
+
+a {
+  padding: 0.5em;
 }
 
 /* Use a media query to add a breakpoint at 800px: */

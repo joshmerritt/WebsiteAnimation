@@ -1,0 +1,7 @@
+Name: Josh Merritt
+Link: https://www.linkedin.com/in/josh-merritt
+Category: Me
+Goal: Leave things better than I found them. 
+My Role: Analyst, Creator, Designer, Developer, Engineer, Project Manager
+Technology: SQL, Javascript, React.js, HTML, CSS, Dax, Spreadsheets, C++, Git
+Description: I am a builder with integrity, who not only understands complex data sets, but also knows how to convey their relevance in an elegant, effective manner. As a born problem-solver with a passion for efficiency and a history of success in a host of diverse roles, I’ve juggled competing stakeholder interests and communicated efficient solutions to coaches, customers, and colleagues alike to help them get more done and be smarter about it.

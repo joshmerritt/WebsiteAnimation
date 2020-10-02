@@ -28,7 +28,7 @@ contactUsElement,
 titleFont;
 let config = {
   //  itemsToDisplay: ['thisWebsite', 'scoreboard', 'swingBet', 'coopDoor', 'googleDataStudio', 'powerBI', 'financialModels', 'flowchart'],
-  itemsToDisplay: ['arduinoScoreboard', 'thisWebsite', 'arduinoCoopDoor', 'flowchart'],
+  itemsToDisplay: ['aboutMe', 'thisWebsite', 'arduinoScoreboard', 'arduinoCoopDoor', 'flowchart'],
   backgroundColor: 	"rgb(96, 117, 134)", 
   mainColor: "rgb(242, 250, 255)", 
   accentColor: "rgb(3, 27, 81)",
@@ -36,8 +36,8 @@ let config = {
   yScale: 0.99,
   iconScale: 7,
   fontName: "Gidolinya-Regular",
-  titleText: "Hello world, I am Josh Merritt",
-  subTitleText: "Honest, Data-driven, Product Management & Development",
+  titleText: "Hello world, I am Josh Merritt.",
+  subTitleText: "Honest. Data-driven. Product Management & Development.",
   contactLinkText: "What problem can I help you solve?",
   contactLinkAddress: "mailto:josh@wayfarerfarms.com"
 };
@@ -125,6 +125,7 @@ let config = {
     Uses a second p5 graphics object to make images appear circular
 */ 
 function createOutline() {
+  if(imageMask) imageMask.remove();
   imageMask = createGraphics(iconSize, iconSize);
   imageMask.circle(iconSize/2, iconSize/2, iconSize);
 }
@@ -233,6 +234,7 @@ function addResetButton() {
   resetButton.mousePressed(resetBalls);
 }
 
+
 /* 
   setDisplaySize()
     Calculates the appropriate sized grid based upon the window size
@@ -319,6 +321,7 @@ function createGoals() {
     }
   }
 
+
 /*
   drawGoals()
     Displays the goals
@@ -330,6 +333,7 @@ function createGoals() {
       }
     });
   }
+
 
 /*
   displayTitle()
@@ -370,6 +374,7 @@ function resetBalls() {
   }); 
 }
 
+
 /*
   doubleClicked()
     Allows for viewing projects without having to make the ball
@@ -380,8 +385,8 @@ function doubleClicked(event) {
       ball.showDetail();
     } 
   });
-  contactUsElement.remove();
 }
+
 
 /*
   mouseDragged()
@@ -398,6 +403,7 @@ function doubleClicked(event) {
     });
   }
 
+
 /*
   mousePressed()
     Checks to see where the mouse was pressed.
@@ -413,6 +419,7 @@ function doubleClicked(event) {
       }
     });
   }
+
 
 /*
   mouseReleased()
