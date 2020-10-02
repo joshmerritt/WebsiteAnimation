@@ -103,12 +103,14 @@ class ImageBall {
           detailPageOpen = true;
           this.createDetailElements();
         }
+        let tempImage = this.fullImage;
+        console.log(tempImage);
         push();
         fill(config.accentColor);
         strokeWeight(0);
         ellipseMode(CENTER);
         circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
-        image(this.fullImage, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
+        image(tempImage, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size*(tempImage.height/tempImage.width));
         textSize(iconSize/3);
         pop();
       //}
@@ -123,8 +125,8 @@ class ImageBall {
     createDetailElements() {
       this.element = createDiv(this.name);
       this.element.addClass("DetailPage");
-      this.element.size(windowWidth/3, windowHeight/3);
-      this.element.position(windowWidth/3, windowHeight/2);
+      //this.element.size(windowWidth/3, windowHeight/3);
+      //this.element.position(windowWidth/3, windowHeight/2);
       this.exitButton = createButton("X");
       this.exitButton.addClass("ExitButton");
       this.exitButton.mousePressed(this.removeDetailPage);
@@ -143,8 +145,8 @@ class ImageBall {
         if(ball && !ball.inOriginalPosition) {
           ball.reset();
         }
-      }); 
-      
+      });
+      contactUsElement.add();      
     }
 
 /*
@@ -204,7 +206,7 @@ class ImageBall {
       let y = this.body.position.y;
       let radius = this.body.circleRadius*2;
       let offX = ((x + radius) < 0 || (x - radius) > windowWidth);
-      let offY = (((y + radius) < -windowHeight*2) || ((y - radius) > windowHeight));
+      let offY = (((y + radius) < -windowHeight*4) || ((y - radius) > windowHeight));
       if(offY) {
         return true;
       } else if(offX) {

@@ -16,6 +16,10 @@ class Net {
         Matter.World.add(world, this.body);
     }
 
+    remove() {
+        Matter.World.remove(world, this.body);
+    }
+
     show() {
         //console.log("net.show()", this.body.position.x, this.body.position.y, this.width, this.height);
         // push();

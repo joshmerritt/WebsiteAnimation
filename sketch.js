@@ -33,11 +33,11 @@ let config = {
   mainColor: "rgb(242, 250, 255)", 
   accentColor: "rgb(3, 27, 81)",
   xScale: 0.99,
-  yScale: 0.995,
+  yScale: 0.99,
   iconScale: 7,
   fontName: "Gidolinya-Regular",
-  titleText: "Hello world, I am Josh Merritt.",
-  subTitleText: "Honest, Data-driven, Product Management & Development.",
+  titleText: "Hello world, I am Josh Merritt",
+  subTitleText: "Honest, Data-driven, Product Management & Development",
   contactLinkText: "What problem can I help you solve?",
   contactLinkAddress: "mailto:josh@wayfarerfarms.com"
 };
@@ -58,6 +58,7 @@ let config = {
       pageInfo.push(tempString);
     }
     titleFont = loadFont(`assets/fonts/${config.fontName}.otf`);
+    textAlign(CENTER, CENTER);
   }
 
   function preload() {
@@ -83,9 +84,8 @@ let config = {
     background(config.backgroundColor); 
     displayTitle();   
     drawGoals();
-    menu.forEach((item) => {
-      item.show();
-    });
+    menu.forEach((item) => item.show());
+    net.forEach((item) => item.show());
     drawBalls();
     let thisWebsite = get(windowWidth/50, windowHeight/50, windowHeight/1.5, windowHeight/1.5);
     imageBalls[1].ballImage = thisWebsite;
@@ -102,7 +102,7 @@ let config = {
     Invisible barriers are in place to prevent reaching the menu except from above
 */
   function loadAssets() {
-    loadImages();
+    createBalls();
     createGoals();
     createMenu();
     addResetButton();
@@ -131,7 +131,7 @@ function trackCollisions() {
   Matter.Events.on(engine, 'collisionActive', function(event) {
     //console.log("collision event", event);
     event.source.pairs.collisionActive.forEach((collision) => {
-      if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category) {
+      if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category && collision.bodyA.id !== collision.bodyB.id) {
         if(collision.bodyA.label === 'Image Ball') {
           imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
         } else if(collision.bodyB.label === 'Image Ball') {
@@ -150,6 +150,11 @@ function trackCollisions() {
     For each ball created, add its category to the category array
 */
   function loadImages() {
+    createBalls();
+    }
+
+  function createBalls() {
+    imageBalls = [];
     imgs.forEach(function(img, i) {
       imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pageInfo[i], i);
       if(gridCurrentX + iconSize*3 <= windowWidth) {
@@ -163,18 +168,6 @@ function trackCollisions() {
       };
     });
     categories.sort((a, b) => b.length - a.length);
-    }
-
-  function createBalls() {
-    imgs.forEach(function(img, i) {
-      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pageInfo[i], i);
-      if(gridCurrentX + iconSize*3 <= windowWidth) {
-        gridCurrentX += iconSize*2;
-      } else {
-        gridCurrentX = gridStartX;
-        gridCurrentY += iconSize*2;
-      }
-    });
   }
 
 /*
@@ -188,10 +181,6 @@ function trackCollisions() {
     imageBalls.forEach(function(ball){
       if(ball.body) ball.reset();
     });
-    imageBalls = [];
-    goals = [];
-    net = [];
-    menu = [];
     createBalls();
     createGoals();
     createMenu();
@@ -261,6 +250,8 @@ createMenu()
   for each item in the categories array. It adds the items to the menu array to use later.
 */
 function createMenu() {
+  menu.forEach((menu) => Matter.World.remove(world, menu.body));
+  menu = [];
   categories.forEach((category, index) => {
     let menuPos = {
       x: goalPosition.x + 0.7*iconSize,
@@ -276,10 +267,14 @@ createGoals()
   Adds 2 invisible nets below the goal posts to prevent menu collision from the side
 */
 function createGoals() {
-  const netHeight = 0.7*categories.length*iconSize;
+  goals.forEach((goal) => Matter.World.remove(world, goal.body));
+  net.forEach((net) => Matter.World.remove(world, net.body));
+  goals = [];
+  net = [];
+  const netHeight = 0.8*categories.length*iconSize;
   for(let i = 0; i < 2; i++){
     goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10, i);
-    net.push(new Net(goalPosition.x + iconSize*i*1.4, goalPosition.y + netHeight/2, netHeight));
+    net.push(new Net(goalPosition.x + i*(iconSize*1.4), goalPosition.y + netHeight/2, netHeight));
   };
 }
 
@@ -336,15 +331,25 @@ function createGoals() {
     Shows the page creator's name with a brief description of the site
 */
 function displayTitle() {
-  push();
-  //textFont(titleFont);
-  //textAlign(CENTER);
-  textSize(iconSize/2);
-  fill(config.mainColor); 
-  text(config.titleText, windowWidth/8, windowHeight/6);
-  textSize(iconSize/4);
-  text(config.subTitleText, windowWidth/8, windowHeight/4)
-  pop();
+  if(windowHeight > windowWidth) {
+    let splitTitle = config.titleText.split(", ");
+    let splitSubtitle = config.subTitleText.split(", ")
+    push();
+    textSize(iconSize/2.5);
+    fill(config.mainColor); 
+    splitTitle.forEach((item, index) => text(item, windowWidth/8, windowHeight/(8-index*2.5)));
+    textSize(iconSize/4);
+    splitSubtitle.forEach((item, index) => text(item, windowWidth/8, windowHeight/4.3 + index*iconSize/3))
+    pop();
+  } else {
+    push();
+    textSize(iconSize/2.5);
+    fill(config.mainColor); 
+    text(config.titleText, windowWidth/8, windowHeight/6);
+    textSize(iconSize/4);
+    text(config.subTitleText, windowWidth/8, windowHeight/4.2);
+    pop();
+  }
 }
 
 
@@ -370,6 +375,7 @@ function doubleClicked(event) {
       ball.showDetail();
     } 
   });
+  contactUsElement.remove();
 }
 
 /*
@@ -425,5 +431,6 @@ function doubleClicked(event) {
         ball.launched();
         totalShots++;
       } 
-    });    
+    });
+    contactUsElement.remove();    
   }

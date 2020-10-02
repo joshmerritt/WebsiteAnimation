@@ -71,6 +71,13 @@ div {
   padding: 10px;
 }
 
+.DetailPage {
+  position: absolute;
+  width: 50vw;
+  right: 23.66vw;
+  top: 65vh;
+}
+
 .ExitButton {
   align-items: flex-start;
   right: 1vw;

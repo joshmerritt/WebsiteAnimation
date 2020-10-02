@@ -72,13 +72,15 @@ If you are interested in using my code to run your website, you'll need to:
     X Add thin border to balls, only have thick border for 'Portfolio Website' ball
     X Need to fix arrow rotation
     X Implement round png images for balls to remove thick border effect
-    _ Fix detail page image to be original and square
-    _ Improve title responsiveness
+    X Fix detail page image to be original and square
+    X Improve title responsiveness
     X Rework screen size function to resize everything
     _ Make sure refresh button is centered
     _ Styling with CSS
     _ Implement detail page opening
     _ Improve "launch" sensitivity based upon screen size
+    X Resize contact us div to be 2/3rds of screen
+    _ Add Josh tile with headshot and about me blurb
     _ Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
     _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 
