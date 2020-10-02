@@ -74,7 +74,7 @@ If you are interested in using my code to run your website, you'll need to:
     X Implement round png images for balls to remove thick border effect
     _ Fix detail page image to be original and square
     _ Improve title responsiveness
-    _ Rework screen size function to resize everything
+    X Rework screen size function to resize everything
     _ Make sure refresh button is centered
     _ Styling with CSS
     _ Implement detail page opening

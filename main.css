@@ -71,12 +71,9 @@ div {
   padding: 10px;
 }
 
-h1 {
-  display:flex;
-  align-items: center;
-  position: absolute;
-  left: 10vw;
-  top: 25vh;
+.ExitButton {
+  align-items: flex-start;
+  right: 1vw;
 }
 
 .reset {

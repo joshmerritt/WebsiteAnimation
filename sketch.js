@@ -105,6 +105,7 @@ let config = {
     loadImages();
     createGoals();
     boundary = new Boundary(playfield.width, playfield.height, iconSize*2);
+    boundary.add();
     createMenu();
     trackCollisions();
     addResetButton();
@@ -175,12 +176,17 @@ function trackCollisions() {
       };
     });
     categories.sort((a, b) => b.length - a.length);
-    imageBalls.forEach((ball) => {
-      ball.body.collisionFilter = {
-        'group': 1,
-        'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
-        'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
-      };
+    }
+
+  function createBalls() {
+    imgs.forEach(function(img, i) {
+      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pageInfo[i], i);
+      if(gridCurrentX + iconSize*3 <= windowWidth) {
+        gridCurrentX += iconSize*2;
+      } else {
+        gridCurrentX = gridStartX;
+        gridCurrentY += iconSize*2;
+      }
     });
   }
 
@@ -192,7 +198,30 @@ function trackCollisions() {
   function windowResized() {
     resizeCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
     setDisplaySize();
+    console.log('windowResized - imageBall vs body', imageBalls[1].r, imageBalls[1].body.circleRadius)
     // Remove all imageBalls[], goals[], net[], menu[], then create them again with the new dimensions or adjust all their dimensions
+    imageBalls.forEach(function(ball){
+      if(ball.body) {
+        Matter.World.remove(world, ball.body);
+      }
+    });
+    imageBalls = [];
+    goals = [];
+    net = [];
+    menu = [];
+    createBalls();
+    createGoals();
+    boundary.remove();
+    boundary = new Boundary(playfield.width, playfield.height, iconSize*2);
+    boundary.add();
+    createMenu();
+    trackCollisions();
+    resetButton.remove();
+    addResetButton();
+    contactUsElement.remove();
+    contactUsElement = new ContactUs({x: windowWidth/8, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
+    contactUsElement.add();
+    createOutline();
   }
 
 /* 
@@ -370,6 +399,11 @@ function doubleClicked(event) {
         let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
+        ball.body.collisionFilter = {
+          'group': 1,
+          'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
+          'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
+        };
         Matter.Body.setStatic(ball.body, false);
         Matter.Body.applyForce(ball.body, ballPos, strength);
         ball.launched();
