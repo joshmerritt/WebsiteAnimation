@@ -68,18 +68,21 @@ If you are interested in using my code to run your website, you'll need to:
     X Add a mimic'd version of the website as the first ball
     X Add title
     X Add footer with contact links
+    X Add invisible box around contact link to have balls bounce off
+    X Add thin border to balls, only have thick border for 'Portfolio Website' ball
+    X Need to fix arrow rotation
+    X Implement round png images for balls to remove thick border effect
+    _ Fix detail page image to be original and square
     _ Improve title responsiveness
     _ Rework screen size function to resize everything
     _ Make sure refresh button is centered
     _ Styling with CSS
-    X Add invisible box around contact link to have balls bounce off
-    X Add thin border to balls, only have thick border for 'Portfolio Website' ball
     _ Implement detail page opening
+    _ Improve "launch" sensitivity based upon screen size
     _ Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
-    X Need to fix arrow rotation
-    X Implement round png images for balls to remove thick border effect
     _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 
+Secondary tasks
     _ Reorg codebase and complete documentation
     _ Add some visual of the stats for number of shots and number made, % of projects opened
     _ Build display page to appear like the imageball is simply expanded to allow for full view of the page

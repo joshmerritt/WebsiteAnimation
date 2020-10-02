@@ -229,14 +229,31 @@ class ImageBall {
     Displays an arrow when a ball is hovered over
 */
     hover() {
-      push();  
+      angleMode(DEGREES);
+      let arrowLength = iconSize/8;
+      let angle = 45;
+      let lineEnd = {
+        x: this.x - iconSize/2,
+        y: this.y - iconSize/2
+      };
+      let pointA = {
+        x: lineEnd.x - sin(angle)*arrowLength*2,
+        y: lineEnd.y - cos(angle)*arrowLength*2
+      };
+      let pointB = {
+        x: lineEnd.x + cos(angle)*arrowLength,
+        y: lineEnd.y - sin(angle)*arrowLength
+      };
+      let pointC = {
+        x: lineEnd.x - cos(angle)*arrowLength,
+        y: lineEnd.y + sin(angle)*arrowLength
+      };
+      push();
       stroke(config.accentColor);
       strokeWeight(5);
-      noFill();
-      circle(this.x, this.y, this.r*2)
       fill(config.accentColor);
-      line(this.x, this.y, this.x - iconSize, this.y - iconSize);
-      triangle(this.x - iconSize, this.y - iconSize, this.x - iconSize, this.y - iconSize + iconSize/8, this.x - iconSize + iconSize/8, this.y - iconSize);        
+      line(this.x, this.y, lineEnd.x , lineEnd.y);
+      triangle(pointA.x, pointA.y, pointB.x, pointB.y, pointC.x, pointC.y);
       pop();
     }
 

@@ -48,6 +48,7 @@ table {
   border-collapse: collapse;
   border-spacing: 0;
 }
+/* End of Reset */
 
 @font-face {
   font-family: gidole;
@@ -68,6 +69,14 @@ div {
   color: rgb(242, 250, 255);
   margin: 10px;
   padding: 10px;
+}
+
+h1 {
+  display:flex;
+  align-items: center;
+  position: absolute;
+  left: 10vw;
+  top: 25vh;
 }
 
 .reset {

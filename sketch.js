@@ -22,6 +22,8 @@ goalPosition,
 detailPageOpen,
 resetButton,
 totalShots,
+titleElement,
+subtitleElement,
 contactUsElement,
 titleFont;
 let config = {
@@ -78,8 +80,8 @@ let config = {
 */
   function draw() {
     Matter.Engine.update(engine);
-    background(config.backgroundColor);
-    displayTitle();      
+    background(config.backgroundColor); 
+    displayTitle();   
     drawGoals();
     menu.forEach((item) => {
       item.show();
@@ -106,7 +108,7 @@ let config = {
     createMenu();
     trackCollisions();
     addResetButton();
-    contactUsElement = new ContactUs({x: windowWidth/8, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
+    contactUsElement = new ContactUs({x: gridStartX, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
     contactUsElement.add();
     createOutline();
   }
