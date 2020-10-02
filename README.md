@@ -77,7 +77,8 @@ If you are interested in using my code to run your website, you'll need to:
     X Rework screen size function to resize everything
     _ Make sure refresh button is centered
     _ Styling with CSS
-    _ Implement detail page opening
+    X Implement detail page opening
+    _ Remove old masks when resizing
     _ Improve "launch" sensitivity based upon screen size
     X Resize contact us div to be 2/3rds of screen
     _ Add Josh tile with headshot and about me blurb

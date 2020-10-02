@@ -1,4 +1,7 @@
 Name: Flowchart
 Link: N/A
 Category: Business
-Description: An example of a business flowchart to document the steps for customer fulfillment
+Goal: Provide a visual overview of a business process
+My Role: Capture business process collaboratively and create visual
+Technology: Google Suite (Sheets, Drawing, Drive, Meet)
+Description: An example of a business flowchart to document the steps for customer fulfillment, from the sales process through production, installation, and accounting.

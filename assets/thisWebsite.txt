@@ -1,5 +1,7 @@
 Name: Portfolio Website
-Link: wayfarerfarms.com	
+Link: github.com/joshmerritt/websiteAnimation	
 Category: Technology
-Description: Website I created using Javascript, HTML, and CSS in order to showcase my experience and abilities. 
-Coded with idea that number of tiles is dynamic in regards to the content provided and responsive to the size of the screen it is viewed on.
+Goal: Create a fun and interactive way to showcase my creativity and experience with business and technology
+My Role: Creator, Designer, Developer, Engineer
+Technology: Javascript, CSS, HTML, Git, p5.js, matter.js
+Description: Website I created as a showcase for some of my projects. Coded with idea that number of tiles is dynamic in regards to the content provided and responsive to the size of the screen it is viewed on.

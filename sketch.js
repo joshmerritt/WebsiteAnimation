@@ -58,7 +58,6 @@ let config = {
       pageInfo.push(tempString);
     }
     titleFont = loadFont(`assets/fonts/${config.fontName}.otf`);
-    textAlign(CENTER, CENTER);
   }
 
   function preload() {
@@ -87,6 +86,13 @@ let config = {
     menu.forEach((item) => item.show());
     net.forEach((item) => item.show());
     drawBalls();
+  }
+
+/*
+  captureWebsite()
+    Used to display a copy of the website within the website ball
+*/
+  function captureWebsite() {
     let thisWebsite = get(windowWidth/50, windowHeight/50, windowHeight/1.5, windowHeight/1.5);
     imageBalls[1].ballImage = thisWebsite;
     imageBalls[1].fullImage = thisWebsite;
@@ -144,15 +150,11 @@ function trackCollisions() {
 }
 
 /*
-  loadImages()
+  createBalls()
     Loops through all images that were pre-loaded
     Creates an "ImageBall" for each, passing in its image, location, and text info
     For each ball created, add its category to the category array
 */
-  function loadImages() {
-    createBalls();
-    }
-
   function createBalls() {
     imageBalls = [];
     imgs.forEach(function(img, i) {
@@ -311,6 +313,7 @@ function createGoals() {
             }
           }
       });
+      captureWebsite();
     }
   }
 

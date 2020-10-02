@@ -1,4 +1,7 @@
 Name: Scoreboard
 Link: https://github.com/joshmerritt/arduinoScoreboard
 Category: Technology
-Description: A basic two team scoreboard with a 20 minute per game timer. Users can add or subtract from their score, reset the game, toggle sound, and toggle between 15 and 21 point games.
+Goal: Provide an elegant scoreboard to time games and be visible from anywhere in the room.
+My Role: Creator, Designer, Developer, Engineer.
+Technology: C++, Arduino, Programmable RGB leds, Woodworking
+Description: A two team scoreboard with a 20 minute per game timer with an Arduino Uno and 50+ RGB leds inside a Walnut housing. Users can add or subtract from their score, unique sounds for adding and subtracting, reset the game, toggle sound, and toggle between 15 and 21 point games.

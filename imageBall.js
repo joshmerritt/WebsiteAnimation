@@ -14,11 +14,6 @@ class ImageBall {
       };
       this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
       this.index = index;
-      this.name = 'placeholder';
-      this.link = 'placeholder';
-      this.category = 'placeholder';
-      this.description = 'placeholder';
-      this.element = 'placeholder';
       this.parseInfo = function() {
         let tempInfo = [];
         info.forEach((item) => {
@@ -27,7 +22,10 @@ class ImageBall {
         this.name = tempInfo[0][1];
         this.link = tempInfo[1][1];
         this.category = tempInfo[2][1];
-        this.description = tempInfo[3][1];
+        this.goal = tempInfo[3][1];
+        this.role = tempInfo[4][1];
+        this.technology = tempInfo[5][1]
+        this.description = tempInfo[6][1];
         this.body.category = this.category;   
       };
       this.parseInfo = this.parseInfo.bind(this)();
@@ -92,7 +90,8 @@ class ImageBall {
       //   this.expandBall();
       // } else {
         //let detailImage = imgs[this.index];
-        let tempScreenSize = Math.min(playfield.width, playfield.height);
+        //let tempScreenSize = Math.max(playfield.width, playfield.height);
+        let tempScreenSize = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
         let imageDetails = {
           x: (windowWidth/2 - tempScreenSize/4),
           y: (windowHeight/2 - tempScreenSize/2),
@@ -125,16 +124,38 @@ class ImageBall {
     createDetailElements() {
       this.element = createDiv(this.name);
       this.element.addClass("DetailPage");
-      //this.element.size(windowWidth/3, windowHeight/3);
-      //this.element.position(windowWidth/3, windowHeight/2);
       this.exitButton = createButton("X");
       this.exitButton.addClass("ExitButton");
       this.exitButton.mousePressed(this.removeDetailPage);
       this.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
-      this.descriptionElement = createP(this.description);
+      this.tableElement = createElement("table");
+      this.goalRow = createElement("tr");
+      this.goalTitle = createElement("td", "Goal");
+      this.goalDesc = createElement("td", this.goal);
+      this.roleRow = createElement("tr");
+      this.roleTitle = createElement("td", "My Role");
+      this.roleDesc = createElement("td", this.role);
+      this.techRow = createElement("tr");
+      this.techTitle = createElement("td", "Technology");
+      this.techDesc = createElement("td", this.technology);
+      this.descRow = createElement("tr");
+      this.descTitle = createElement("td", "Summary");
+      this.descDesc = createElement("td", this.description);
+      this.element.child(this.tableElement);
       this.element.child(this.linkElement);
-      this.element.child(this.descriptionElement);
       this.element.child(this.exitButton);
+      this.tableElement.child(this.goalRow);
+      this.tableElement.child(this.roleRow);
+      this.tableElement.child(this.techRow);
+      this.tableElement.child(this.descRow);
+      this.goalRow.child(this.goalTitle);
+      this.goalRow.child(this.goalDesc);
+      this.roleRow.child(this.roleTitle);
+      this.roleRow.child(this.roleDesc);
+      this.techRow.child(this.techTitle);
+      this.techRow.child(this.techDesc);
+      this.descRow.child(this.descTitle);
+      this.descRow.child(this.descDesc);
     }
 
     removeDetailPage() {
