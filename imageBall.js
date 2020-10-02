@@ -33,7 +33,7 @@ class ImageBall {
       this.parseInfo = this.parseInfo.bind(this)();
       this.body.id = this.name;
       this.body.label = 'Image Ball';
-      this.fullImage = img;
+      this.fullImage = img.get();
       this.ballImage = img;  
       this.x = xPos;
       this.y = yPos;
@@ -91,7 +91,7 @@ class ImageBall {
       // if(!this.ballExpanded) {
       //   this.expandBall();
       // } else {
-        let detailImage = imgs[this.index];
+        //let detailImage = imgs[this.index];
         let tempScreenSize = Math.min(playfield.width, playfield.height);
         let imageDetails = {
           x: (windowWidth/2 - tempScreenSize/4),
@@ -108,7 +108,7 @@ class ImageBall {
         strokeWeight(0);
         ellipseMode(CENTER);
         circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
-        image(detailImage, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
+        image(this.fullImage, imageDetails.x, imageDetails.y, imageDetails.size, imageDetails.size);
         textSize(iconSize/3);
         pop();
       //}

@@ -104,13 +104,11 @@ let config = {
   function loadAssets() {
     loadImages();
     createGoals();
-    boundary = new Boundary(playfield.width, playfield.height, iconSize*2);
-    boundary.add();
     createMenu();
-    trackCollisions();
     addResetButton();
-    contactUsElement = new ContactUs({x: gridStartX, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
-    contactUsElement.add();
+    addContactUs();
+    addBoundary();
+    trackCollisions();
     createOutline();
   }
 
@@ -123,17 +121,6 @@ function createOutline() {
   imageMask.circle(iconSize/2, iconSize/2, iconSize);
 }
  
-  /*
-  addResetButton()
-    Creates a button on the screen in the lower right corner to reset
-    all balls to their original position
-*/
-function addResetButton() {
-  resetButton = createButton("↻");
-  resetButton.size(iconSize/2, iconSize/2);
-  resetButton.addClass("reset");
-  resetButton.mousePressed(resetBalls);
-}
 
 /*
   trackCollisions()
@@ -198,12 +185,8 @@ function trackCollisions() {
   function windowResized() {
     resizeCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
     setDisplaySize();
-    console.log('windowResized - imageBall vs body', imageBalls[1].r, imageBalls[1].body.circleRadius)
-    // Remove all imageBalls[], goals[], net[], menu[], then create them again with the new dimensions or adjust all their dimensions
     imageBalls.forEach(function(ball){
-      if(ball.body) {
-        Matter.World.remove(world, ball.body);
-      }
+      if(ball.body) ball.reset();
     });
     imageBalls = [];
     goals = [];
@@ -211,18 +194,51 @@ function trackCollisions() {
     menu = [];
     createBalls();
     createGoals();
-    boundary.remove();
-    boundary = new Boundary(playfield.width, playfield.height, iconSize*2);
-    boundary.add();
     createMenu();
-    trackCollisions();
-    resetButton.remove();
+    addBoundary();
+    addContactUs()
     addResetButton();
-    contactUsElement.remove();
-    contactUsElement = new ContactUs({x: gridStartX, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
-    contactUsElement.add();
     createOutline();
+    trackCollisions();
   }
+
+
+/*
+  addBoundary()
+    Removes any existing boundary and replaces it with a new one
+    Used to resize the screen and in initial setup
+*/
+function addBoundary() {
+  if(boundary) boundary.remove();
+  boundary = new Boundary(playfield.width, playfield.height, iconSize*2);
+  boundary.add();
+}
+
+
+/*
+  addContactUs
+    Removes any existing element and replaces it with a new HTML element and matter.js body
+    Used to resize the screen and in initial setup
+*/
+function addContactUs() {
+  if (contactUsElement) contactUsElement.remove();
+  contactUsElement = new ContactUs({x: gridStartX, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
+  contactUsElement.add();
+}
+
+
+/*
+  addResetButton()
+    Creates a button on the screen in the lower right corner to reset
+    all balls to their original position
+*/
+function addResetButton() {
+  if(resetButton) resetButton.remove();
+  resetButton = createButton("↻");
+  resetButton.size(iconSize/2, iconSize/2);
+  resetButton.addClass("reset");
+  resetButton.mousePressed(resetBalls);
+}
 
 /* 
   setDisplaySize()
