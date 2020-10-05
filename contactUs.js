@@ -15,9 +15,13 @@ class ContactUs {
     add() {
       this.element = createA(this.link, this.text, "_blank");
       this.element.size(windowWidth*2/3);
-      this.element.position(this.position.x, this.position.y);
       this.length = this.element.width;
       this.height = this.element.height;
+      console.log("this.length - windowWidth", this.length, " - ", windowWidth);
+      if(windowWidth < 800) {
+        this.position = {x: 10, y: this.position.y}
+      }
+      this.element.position(this.position.x, this.position.y);
       let options = {
         isStatic: true, 
         restitution: 0.5,

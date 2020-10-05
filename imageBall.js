@@ -299,7 +299,6 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
     aim() {
-      
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/300;
       this.yPower += (mouseY - pmouseY)/300;
@@ -336,6 +335,7 @@ class ImageBall {
     Increments launchCount, used to calculate metrics
 */    
     launched() {
+      console.log('this.body', this.body);
       this.launchCount++;
       this.inOriginalPosition = false;
     }

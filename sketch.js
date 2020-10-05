@@ -110,7 +110,6 @@ let config = {
     Invisible barriers are in place to prevent reaching the menu except from above
 */
   function loadAssets() {
-
     createBalls();
     createGoals();
     createMenu();
