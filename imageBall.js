@@ -210,6 +210,7 @@ class ImageBall {
       this.y = this.body.position.y;
     }
 
+
 /*
   checksForReset()    
     Checks if if ball is off the playfield
@@ -220,6 +221,7 @@ class ImageBall {
           this.reset();
       }
     }
+
 
 /*
   offScreen()
@@ -240,6 +242,7 @@ class ImageBall {
       return false;
     }
 
+
  /* 
   reset()
     Returns the body to the original launch position and settings
@@ -252,6 +255,7 @@ class ImageBall {
       Matter.World.remove(world, this.body);
       this.inOriginalPosition = true;
     }
+
 
 /*
   hover()
@@ -287,6 +291,7 @@ class ImageBall {
       angleMode(RADIANS);
     }
 
+
 /*
   aim()
       Aim takes the mouse position when the mouse is dragged and creates a visual arrow to indicate direction and power.
@@ -294,6 +299,7 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
     aim() {
+      
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/300;
       this.yPower += (mouseY - pmouseY)/300;

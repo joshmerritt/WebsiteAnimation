@@ -19,6 +19,7 @@ imageMask,
 power,
 boundary,
 goalPosition,
+screenArea,
 detailPageOpen,
 resetButton,
 totalShots,
@@ -65,7 +66,6 @@ let config = {
   }
 
   function setup() {
-    console.log(window);
     history.pushState({'page_id': 1}, document.title, location.href);
     playfield = createCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
     setDisplaySize();
@@ -110,6 +110,7 @@ let config = {
     Invisible barriers are in place to prevent reaching the menu except from above
 */
   function loadAssets() {
+
     createBalls();
     createGoals();
     createMenu();
@@ -152,6 +153,7 @@ function trackCollisions() {
   });
 }
 
+
 /*
   createBalls()
     Loops through all images that were pre-loaded
@@ -174,6 +176,7 @@ function trackCollisions() {
     });
     categories.sort((a, b) => b.length - a.length);
   }
+
 
 /*
   windowResized()
@@ -241,6 +244,8 @@ function addResetButton() {
     Called during set up or when the window is resized
 */
   function setDisplaySize() {
+    screenArea = windowWidth * windowHeight;
+    console.log("screenArea", screenArea);
     iconSize =  Math.min(playfield.width/config.iconScale, playfield.height/config.iconScale);
     goalPosition = {x: 0.22*iconSize, y:windowHeight/2.2};
     gridStartX = goalPosition.x + iconSize*3;
