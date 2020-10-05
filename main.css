@@ -99,6 +99,8 @@ td:first-child {
   right: 1vw;
   bottom: 1vw;
   background-color: #F2FAFF;
+  font-size: 1em;
+  font-weight: 900;
 }
 
 a {

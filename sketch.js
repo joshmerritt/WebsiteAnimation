@@ -37,7 +37,7 @@ let config = {
   iconScale: 7,
   fontName: "Gidolinya-Regular",
   titleText: "Hello world, I am Josh Merritt.",
-  subTitleText: "Honest. Data-driven. Product Management & Development.",
+  subTitleText: "Honest. Data-driven. Product Management & Development. ",
   contactLinkText: "What problem can I help you solve?",
   contactLinkAddress: "mailto:josh@wayfarerfarms.com"
 };
@@ -229,7 +229,6 @@ function addContactUs() {
 function addResetButton() {
   if(resetButton) resetButton.remove();
   resetButton = createButton("↻");
-  resetButton.size(iconSize/2, iconSize/2);
   resetButton.addClass("reset");
   resetButton.mousePressed(resetBalls);
 }
@@ -341,8 +340,8 @@ function createGoals() {
 */
 function displayTitle() {
   if(windowHeight > windowWidth) {
-    let splitTitle = config.titleText.split(", ");
-    let splitSubtitle = config.subTitleText.split(", ")
+    let splitTitle = config.titleText.replace(".", "").split(", ");
+    let splitSubtitle = config.subTitleText.split(". ");
     push();
     textSize(iconSize/2.5);
     fill(config.mainColor); 
