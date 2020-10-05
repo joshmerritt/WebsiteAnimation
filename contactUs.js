@@ -22,7 +22,7 @@ class ContactUs {
         isStatic: true, 
         restitution: 0.5,
       };
-      this.body = Matter.Bodies.rectangle(this.position.x + this.length/2, this.position.y + this.height/2, this.length, this.height, options);
+      this.body = Matter.Bodies.rectangle(this.position.x + this.length/2, this.position.y + this.height/2, this.length*0.9, this.height/2, options);
       this.body.id = "ContactUs";
       this.body.category = "Link";
       Matter.World.add(world, this.body);
