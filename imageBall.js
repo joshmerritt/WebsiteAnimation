@@ -330,6 +330,7 @@ class ImageBall {
       angleMode(RADIANS);
     }
 
+    
 /*
   launched()
     Increments launchCount, used to calculate metrics

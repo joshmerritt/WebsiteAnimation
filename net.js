@@ -10,7 +10,7 @@ class Net {
           restitution: 0.99,
         };
         this.netHeight = netHeight;
-        this.width = iconSize/4;
+        this.width = iconSize/3;
         this.body = Matter.Bodies.rectangle(xPos, yPos, this.width, netHeight, options);
         this.body.id = "Net"
         Matter.World.add(world, this.body);
@@ -21,11 +21,11 @@ class Net {
     }
 
     show() {
-        push();
-        fill('red');
-        rectMode(CENTER);
-        rect(this.body.position.x, this.body.position.y, this.width, this.netHeight);
-        pop();
+        // push();
+        // fill('red');
+        // rectMode(CENTER);
+        // rect(this.body.position.x, this.body.position.y, this.width, this.netHeight);
+        // pop();
     }
       
 }

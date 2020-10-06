@@ -431,13 +431,14 @@ function doubleClicked(event) {
     The ball is made moveable and the strength vector is applied as a force.
 */
   function mouseReleased() {
-    imageBalls.forEach(function(ball) {
+    imageBalls.forEach((ball, index) => {
       if(ball.clicked && (ball.xPower || ball.yPower)) {
         let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
+        let ballCatIndex = categories.findIndex((category) => category === ball.category); 
         if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
         ball.body.collisionFilter = {
-          'group': 1,
+          'group': ballCatIndex+1,
           'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
           'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
         };

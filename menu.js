@@ -10,15 +10,17 @@ class Menu {
             restitution: 0.5,
             collisionFilter:
             {
-                // 'group': -1,
+                'group': index+1,
                 'category': Math.pow(2, index),
                 'mask': Math.pow(2, index)
             }
         }
+        this.width = iconSize*1.75;
+        this.height = iconSize/2;
         this.category = category;
         this.position = position;
         this.index = index;
-        this.body = Matter.Bodies.rectangle(position.x, position.y, iconSize, iconSize/3, options);
+        this.body = Matter.Bodies.rectangle(position.x, position.y, this.width, this.height, options);
         this.body.id = category;
         this.body.category = category;
         Matter.World.add(world, this.body);
@@ -26,8 +28,8 @@ class Menu {
 
     show() {
       push();
-      rectMode(CENTER);
-      rect(this.position.x, this.position.y, iconSize, iconSize/3);
+    //   rectMode(CENTER);
+    //   rect(this.position.x, this.position.y, this.width, this.height);
       textFont(titleFont);
       textAlign(CENTER);
       textSize(iconSize/4)
