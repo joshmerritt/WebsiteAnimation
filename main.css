@@ -57,6 +57,7 @@ table {
 
 body {
     background: #607586;
+    overflow: hidden;
     overscroll-behavior: none;
     font-family: gidole, "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
@@ -78,8 +79,8 @@ td {
 .DetailPage {
   position: absolute;
   width: 50vw;
-  right: 23.66vw;
-  top: 50vh;
+  right: 0vw;
+  top: 25vh;
   font-size: 1.3em;
 }
 
@@ -107,10 +108,13 @@ a {
   padding: 0.5em;
 }
 
-/* Use a media query to add a breakpoint at 800px: */
+
 @media screen and (max-width: 800px) {
   .DetailPage {
-    width: 75vw;
-    right: 10.5vw;
+    width: 95vw;
+    top: 50vh;
+    font-size: 1.1em;
+    font-weight: normal;
   }
 }
+

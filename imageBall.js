@@ -87,33 +87,39 @@ class ImageBall {
       // if(!this.ballExpanded) {
       //   this.expandBall();
       // } else {
-        if(contactUsElement) contactUsElement.remove(); 
+        let circleX, circleY, circleR, imageX, imageY, imageSize;
+        
         let tempScreenSize = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
         let tempImage = this.fullImage;
+        let circleDetails = {
+          r: Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2))),
+          x: windowWidth*0.75,
+          y: windowHeight*0.5,
+        }
         let imageDetails = {
-          xSize: windowHeight/2,
-          ySize: windowHeight/2,
-          y: 0,
+          xSize: windowWidth/2.1,
+          ySize: windowWidth/2.1,
+          x: (windowWidth - windowWidth/2.1)/2,
+          y: (windowHeight - windowWidth/2.1)/2,
         };
-        if(tempImage.width > tempImage.height) {
-          imageDetails.xSize = (windowHeight/2) * (tempImage.width/tempImage.height);
-          imageDetails.ySize = windowHeight/2;
-          imageDetails.x = windowWidth/2 - imageDetails.xSize/2;
-        } else {
-          imageDetails.xSize = (windowHeight/2) * (tempImage.height/tempImage.width);
-          imageDetails.ySize = windowHeight/2;
-          imageDetails.x = windowWidth/2 - imageDetails.xSize/2;
+        if(windowHeight > windowWidth) {
+          imageDetails.xSize = Math.min(windowWidth, windowHeight/2);
+          imageDetails.ySize = Math.min(windowWidth, windowHeight/2);
+          imageDetails.y = 0;
+          circleDetails.x = windowWidth*0.5;
+          circleDetails.y = windowHeight*0.75
         }
         if ( this.pageOpen === false ) {
           this.pageOpen = true;
           detailPageOpen = true;
           this.createDetailElements();
+          contactUsElement.element.remove(); 
         }
         push();
         fill(config.accentColor);
         strokeWeight(0);
         ellipseMode(CENTER);
-        circle(windowWidth/2, windowHeight/2, tempScreenSize*1.5);
+        circle(windowWidth/2, windowHeight*0.75, tempScreenSize);
         image(tempImage, imageDetails.x, imageDetails.y, imageDetails.xSize, imageDetails.ySize);
         pop();
       //}

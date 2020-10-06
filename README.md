@@ -83,6 +83,7 @@ If you are interested in using my code to run your website, you'll need to:
     X Resize contact us div to be 2/3rds of screen
     X Add Josh tile with headshot and about me blurb
     X Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
+    _ Refactor detail page sizing and position logic
     _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 
 Secondary tasks
