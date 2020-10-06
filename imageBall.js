@@ -87,7 +87,7 @@ class ImageBall {
       // if(!this.ballExpanded) {
       //   this.expandBall();
       // } else {
-        contactUsElement.remove(); 
+        if(contactUsElement) contactUsElement.remove(); 
         let tempScreenSize = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
         let tempImage = this.fullImage;
         let imageDetails = {
