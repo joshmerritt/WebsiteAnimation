@@ -36,6 +36,7 @@ let config = {
   xScale: 1,
   yScale: 1,
   iconScale: 7,
+  sensitivity: 1,
   fontName: "Gidolinya-Regular",
   titleText: "Hello world, I am Josh Merritt.",
   subTitleText: "Honest. Data-driven. Product Management & Development. ",
@@ -83,10 +84,12 @@ let config = {
   function draw() {
     Matter.Engine.update(engine);
     background(config.backgroundColor); 
-    displayTitle();   
-    drawGoals();
-    menu.forEach((item) => item.show());
-    net.forEach((item) => item.show());
+    if(!detailPageOpen) {
+      displayTitle();   
+      drawGoals();
+      menu.forEach((item) => item.show());
+      net.forEach((item) => item.show());
+    }
     drawBalls();
   }
 
@@ -243,6 +246,7 @@ function addResetButton() {
 */
   function setDisplaySize() {
     screenArea = windowWidth * windowHeight;
+    config.sensitivity = screenArea / 20000;
     console.log("screenArea", screenArea);
     iconSize =  Math.min(playfield.width/config.iconScale, playfield.height/config.iconScale);
     goalPosition = {x: 0.22*iconSize, y:windowHeight/2.2};

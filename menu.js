@@ -16,7 +16,7 @@ class Menu {
             }
         }
         this.width = iconSize*1.75;
-        this.height = iconSize/2;
+        this.height = iconSize/2.5;
         this.category = category;
         this.position = position;
         this.index = index;
@@ -28,8 +28,8 @@ class Menu {
 
     show() {
       push();
-    //   rectMode(CENTER);
-    //   rect(this.position.x, this.position.y, this.width, this.height);
+      // rectMode(CENTER);
+      // rect(this.position.x, this.position.y, this.width, this.height);
       textFont(titleFont);
       textAlign(CENTER);
       textSize(iconSize/4)
