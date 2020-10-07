@@ -313,8 +313,8 @@ class ImageBall {
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/300;
       this.yPower += (mouseY - pmouseY)/300;
-      this.xPower = Math.min(this.xPower, 5);
-      this.yPower = Math.min(this.yPower, 5);
+      this.xPower = Math.min(this.xPower, config.sensitivity);
+      this.yPower = Math.min(this.yPower, config.sensitivity);
       let currentPosX = this.x - (this.xPower*100);
       let currentPosY = this.y - (this.yPower*100);
       let arrowLength = iconSize/8;
