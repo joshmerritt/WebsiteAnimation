@@ -87,27 +87,32 @@ class ImageBall {
       // if(!this.ballExpanded) {
       //   this.expandBall();
       // } else {
-        let circleX, circleY, circleR, imageX, imageY, imageSize;
+        let circleX = windowWidth*0.75;
+        let circleY = windowHeight*0.5;
+        let circleR = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
+        let imageSize = windowWidth/2.1;
+        let imageX = (windowWidth - imageSize)/2;
+        let imageY = (windowHeight - imageSize)/2;
         
         let tempScreenSize = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
         let tempImage = this.fullImage;
-        let circleDetails = {
-          r: Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2))),
-          x: windowWidth*0.75,
-          y: windowHeight*0.5,
-        }
-        let imageDetails = {
-          xSize: windowWidth/2.1,
-          ySize: windowWidth/2.1,
-          x: (windowWidth - windowWidth/2.1)/2,
-          y: (windowHeight - windowWidth/2.1)/2,
-        };
+        // let circleDetails = {
+        //   r: Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2))),
+        //   x: windowWidth*0.75,
+        //   y: windowHeight*0.5,
+        // }
+        // let imageDetails = {
+        //   xSize: windowWidth/2.1,
+        //   ySize: windowWidth/2.1,
+        //   x: (windowWidth - windowWidth/2.1)/2,
+        //   y: (windowHeight - windowWidth/2.1)/2,
+        // };
         if(windowHeight > windowWidth) {
-          imageDetails.xSize = Math.min(windowWidth, windowHeight/2);
-          imageDetails.ySize = Math.min(windowWidth, windowHeight/2);
-          imageDetails.y = 0;
-          circleDetails.x = windowWidth*0.5;
-          circleDetails.y = windowHeight*0.75
+          imageSize = Math.min(windowWidth, windowHeight/2);
+          imageX = 0;
+          imageY = 0;
+          circleX = windowWidth*0.5;
+          circleY = windowHeight*0.75
         }
         if ( this.pageOpen === false ) {
           this.pageOpen = true;
@@ -120,7 +125,7 @@ class ImageBall {
         strokeWeight(0);
         ellipseMode(CENTER);
         circle(windowWidth/2, windowHeight*0.75, tempScreenSize);
-        image(tempImage, imageDetails.x, imageDetails.y, imageDetails.xSize, imageDetails.ySize);
+        image(tempImage, imageX, imageY, imageSize, imageSize);
         pop();
       //}
     }
