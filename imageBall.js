@@ -110,9 +110,12 @@ class ImageBall {
         }
         push();
         fill(config.accentColor);
+        stroke(config.mainColor);
         strokeWeight(0);
         ellipseMode(CENTER);
         circle(circleX, circleY, circleR);
+        strokeWeight(4);
+        rect(imageX, imageY, imageSize, imageSize);
         image(tempImage, imageX, imageY, imageSize, imageSize);
         pop();
       //}
@@ -301,12 +304,10 @@ class ImageBall {
 */
     aim() {
       angleMode(DEGREES);
-      this.xPower += (mouseX - pmouseX)/300;
-      this.yPower += (mouseY - pmouseY)/300;
-      this.xPower = Math.min(this.xPower, config.sensitivity);
-      this.yPower = Math.min(this.yPower, config.sensitivity);
-      let currentPosX = this.x - (this.xPower*100);
-      let currentPosY = this.y - (this.yPower*100);
+      this.xPower += (mouseX - pmouseX)/config.sensitivity*10;
+      this.yPower += (mouseY - pmouseY)/config.sensitivity*10;
+      let currentPosX = this.x - (this.xPower);
+      let currentPosY = this.y - (this.yPower);
       let arrowLength = iconSize/8;
       let angle = atan2(this.xPower, this.yPower);
       let pointA = {

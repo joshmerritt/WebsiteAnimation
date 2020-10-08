@@ -69,8 +69,8 @@ div {
   align-items: center;
   justify-content: center;
   color: rgb(242, 250, 255);
-  padding: 0.4em;
   font-size: 1.5em;
+  margin: 2.5vmin;
 }
 
 h1 {
@@ -87,7 +87,7 @@ td {
 .DetailPage {
   position: absolute;
   width: 50vw;
-  height: 100vh;
+  height: 95vh;
   right: 0vw;
   top: 0vh;
 }
@@ -119,7 +119,7 @@ a {
 
 @media (orientation: portrait) {
   .DetailPage {
-    width: 100vw;
+    width: 95vw;
     height: 50vh;
     top: 50vh;
   }

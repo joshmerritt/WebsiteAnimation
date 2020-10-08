@@ -99,7 +99,8 @@ let config = {
     Used to display a copy of the website within the website ball
 */
   function captureWebsite() {
-    let thisWebsite = get(windowWidth/50, windowHeight/50, windowHeight/1.5, windowHeight/1.5);
+    let minDim = Math.min(windowWidth, windowHeight);
+    let thisWebsite = get(0, 0, minDim, minDim);
     imageBalls[1].ballImage = thisWebsite;
     imageBalls[1].fullImage = thisWebsite;
   }
@@ -190,7 +191,7 @@ function trackCollisions() {
     resizeCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
     setDisplaySize();
     imageBalls.forEach(function(ball){
-      if(ball.detailPageOpen) {
+      if(ball.pageOpen) {
         ball.showDetail();
       } else {
         if(ball.body) ball.reset();
@@ -253,10 +254,10 @@ function addResetButton() {
 */
   function setDisplaySize() {
     screenArea = windowWidth * windowHeight;
-    config.sensitivity = screenArea / 20000;
+    config.sensitivity = Math.pow(screenArea, 1/3);
     iconSize =  Math.min(windowWidth/config.iconScale, windowHeight/config.iconScale);
     goalPosition = {x: 0.22*iconSize, y:windowHeight/2.2};
-    goalWidth = iconSize*1.5;
+    goalWidth = iconSize*1.3;
     gridStartX = goalPosition.x + goalWidth + 2*iconSize;
     gridStartY = goalPosition.y;
     if(windowWidth < windowHeight) gridStartY -= iconSize;
@@ -445,7 +446,7 @@ function doubleClicked(event) {
   function mouseReleased() {
     imageBalls.forEach((ball, index) => {
       if(ball.clicked && (ball.xPower || ball.yPower)) {
-        let strength = Matter.Vector.create(-ball.xPower/3, -ball.yPower/3);
+        let strength = Matter.Vector.create(-ball.xPower*config.sensitivity/30000, -ball.yPower*config.sensitivity/30000);
         let ballPos = Matter.Vector.create(ball.x, ball.y);
         let ballCatIndex = categories.findIndex((category) => category === ball.category); 
         if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
