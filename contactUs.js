@@ -33,6 +33,7 @@ class ContactUs {
     }
 
     remove() {
+      console.log('contact us remove this', this)
         this.element.remove();
         Matter.World.remove(world, this.body)
     }

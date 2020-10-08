@@ -91,10 +91,10 @@ class ImageBall {
         let circleY = windowHeight*0.5;
         let circleR = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
         let imageSize = windowWidth/2.1;
-        let imageX = (windowWidth - imageSize)/2;
-        let imageY = (windowHeight - imageSize)/2;
+        let imageX = 0;
+        let imageY = Math.max((windowHeight - imageSize)/2, 0);
         
-        let tempScreenSize = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
+        //let tempScreenSize = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
         let tempImage = this.fullImage;
         // let circleDetails = {
         //   r: Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2))),
@@ -109,7 +109,7 @@ class ImageBall {
         // };
         if(windowHeight > windowWidth) {
           imageSize = Math.min(windowWidth, windowHeight/2);
-          imageX = 0;
+          imageX = (windowWidth - imageSize)/2;
           imageY = 0;
           circleX = windowWidth*0.5;
           circleY = windowHeight*0.75
@@ -118,13 +118,17 @@ class ImageBall {
           this.pageOpen = true;
           detailPageOpen = true;
           this.createDetailElements();
-          contactUsElement.element.remove(); 
+          
+          console.log("contactUsElement", contactUsElement);
+          console.log("resetButton", resetButton);
+          contactUsElement.element.style("display", "none");
+          resetButton.style("display", "none"); 
         }
         push();
         fill(config.accentColor);
         strokeWeight(0);
         ellipseMode(CENTER);
-        circle(windowWidth/2, windowHeight*0.75, tempScreenSize);
+        circle(circleX, circleY, circleR);
         image(tempImage, imageX, imageY, imageSize, imageSize);
         pop();
       //}
