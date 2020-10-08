@@ -79,14 +79,14 @@ If you are interested in using my code to run your website, you'll need to:
     X Styling with CSS
     X Implement detail page opening
     X Remove old masks when resizing
-    _ Improve "launch" sensitivity based upon screen size
+    X Improve "launch" sensitivity based upon screen size
     X Resize contact us div to be 2/3rds of screen
     X Add Josh tile with headshot and about me blurb
     X Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
-    _ Refactor detail page sizing and position logic
+    X Refactor detail page sizing and position logic
     _ Reset image on detail page when screen resized, or if not Close detail page
-    _ Lower restitution on menu bars, make less bouncy
-    _ Make detail page title it's own h2 element
+    X Lower restitution on menu bars, make less bouncy
+    X Make detail page title it's own h1/2 element
     _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 
 Secondary tasks

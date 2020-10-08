@@ -17,7 +17,6 @@ class ContactUs {
       this.element.size(windowWidth*2/3);
       this.length = this.element.width;
       this.height = this.element.height;
-      console.log("this.length - windowWidth", this.length, " - ", windowWidth);
       if(windowWidth < 800) {
         this.position = {x: 10, y: this.position.y}
       }
@@ -33,8 +32,17 @@ class ContactUs {
     }
 
     remove() {
-      console.log('contact us remove this', this)
-        this.element.remove();
-        Matter.World.remove(world, this.body)
+      this.element.remove();
+      Matter.World.remove(world, this.body)
+    }
+
+    hide() {
+      this.element.style("display", "none");
+      Matter.World.remove(world, this.body);
+    }
+
+    show() {
+      this.element.style("display", "block");
+      Matter.World.add(world, this.body);
     }
 }

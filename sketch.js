@@ -19,6 +19,7 @@ imageMask,
 power,
 boundary,
 goalPosition,
+goalWidth,
 screenArea,
 detailPageOpen,
 resetButton,
@@ -247,11 +248,12 @@ function addResetButton() {
   function setDisplaySize() {
     screenArea = windowWidth * windowHeight;
     config.sensitivity = screenArea / 20000;
-    console.log("screenArea", screenArea);
-    iconSize =  Math.min(playfield.width/config.iconScale, playfield.height/config.iconScale);
+    iconSize =  Math.min(windowWidth/config.iconScale, windowHeight/config.iconScale);
     goalPosition = {x: 0.22*iconSize, y:windowHeight/2.2};
-    gridStartX = goalPosition.x + iconSize*3;
+    goalWidth = iconSize*1.5;
+    gridStartX = goalPosition.x + goalWidth + 2*iconSize;
     gridStartY = goalPosition.y;
+    if(windowWidth < windowHeight) gridStartY -= iconSize;
     gridCurrentX = gridStartX;
     gridCurrentY = gridStartY;
   } 
@@ -267,7 +269,7 @@ function createMenu() {
   menu = [];
   categories.forEach((category, index) => {
     let menuPos = {
-      x: goalPosition.x + 0.7*iconSize,
+      x: goalPosition.x + goalWidth/2,
       y: goalPosition.y + (index+1)*0.7*iconSize
     };
     menu.push(new Menu(menuPos, category, index));
@@ -286,8 +288,8 @@ function createGoals() {
   net = [];
   const netHeight = 0.8*categories.length*iconSize;
   for(let i = 0; i < 2; i++){
-    goals[i] = new Goal(goalPosition.x + iconSize*i*1.4, goalPosition.y, iconSize/10, i);
-    net.push(new Net(goalPosition.x + i*(iconSize*1.4), goalPosition.y + netHeight/2, netHeight));
+    goals[i] = new Goal(goalPosition.x + i * goalWidth, goalPosition.y, iconSize/10, i);
+    net.push(new Net(goalPosition.x + i * goalWidth, goalPosition.y + netHeight/2, netHeight));
   };
 }
 

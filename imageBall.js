@@ -105,7 +105,7 @@ class ImageBall {
           this.pageOpen = true;
           detailPageOpen = true;
           this.createDetailElements();
-          contactUsElement.element.style("display", "none");
+          contactUsElement.hide();
           resetButton.style("display", "none"); 
         }
         push();
@@ -172,11 +172,11 @@ class ImageBall {
           ball.reset();
         }
       });
-      contactUsElement.add();      
+      contactUsElement.show();      
     }
 
 /*
-  onball()
+  onBall()
     Used to check if the mouse is hovering over the ball
 */
     onBall(x, y) {

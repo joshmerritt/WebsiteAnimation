@@ -7,7 +7,7 @@ class Menu {
     constructor(position, category, index) {
         let options = {
             isStatic: true, 
-            restitution: 0.5,
+            restitution: 0.99,
             collisionFilter:
             {
                 'group': index+1,
@@ -15,8 +15,8 @@ class Menu {
                 'mask': Math.pow(2, index)
             }
         }
-        this.width = iconSize*1.75;
-        this.height = iconSize/2.5;
+        this.width = goalWidth;
+        this.height = iconSize/2;
         this.category = category;
         this.position = position;
         this.index = index;
@@ -28,8 +28,8 @@ class Menu {
 
     show() {
       push();
-      // rectMode(CENTER);
-      // rect(this.position.x, this.position.y, this.width, this.height);
+    //   rectMode(CENTER);
+    //   rect(this.position.x, this.position.y, this.width, this.height);
       textFont(titleFont);
       textAlign(CENTER);
       textSize(iconSize/4)
