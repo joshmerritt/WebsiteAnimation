@@ -91,6 +91,7 @@ If you are interested in using my code to run your website, you'll need to:
 
 Secondary tasks
     _ Reorg codebase and complete documentation
+    _ Test slanted net
     _ Add some visual of the stats for number of shots and number made, % of projects opened
     _ Build display page to appear like the imageball is simply expanded to allow for full view of the page
     _ Add double click ability to menu, display applicable subset of balls

@@ -87,9 +87,9 @@ class ImageBall {
       // if(!this.ballExpanded) {
       //   this.expandBall();
       // } else {
-        let circleX = windowWidth*0.75;
+        let circleX = windowWidth*0.733;
         let circleY = windowHeight*0.5;
-        let circleR = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
+        let circleR = Math.sqrt((Math.pow(windowWidth/1.75, 2) + Math.pow(windowHeight/1.75, 2)));
         let imageSize = windowWidth/2.1;
         let imageX = 0;
         let imageY = Math.max((windowHeight - imageSize)/2, 0);
@@ -105,9 +105,6 @@ class ImageBall {
           this.pageOpen = true;
           detailPageOpen = true;
           this.createDetailElements();
-          console.log("typeOf.contactUsElement", typeof contactUsElement.element);
-          console.log("contactUsElement", contactUsElement);
-          console.log("resetButton", resetButton);
           contactUsElement.element.style("display", "none");
           resetButton.style("display", "none"); 
         }
@@ -128,8 +125,9 @@ class ImageBall {
     Creates and displays the various elements of the detail page
 */
     createDetailElements() {
-      this.element = createDiv(this.name);
+      this.element = createDiv();
       this.element.addClass("DetailPage");
+      this.pageTitle = createElement("h1", this.name)
       this.exitButton = createButton("X");
       this.exitButton.addClass("ExitButton");
       this.exitButton.mousePressed(this.removeDetailPage);
@@ -147,6 +145,7 @@ class ImageBall {
       this.descRow = createElement("tr");
       this.descTitle = createElement("td", "Summary");
       this.descDesc = createElement("td", this.description);
+      this.element.child(this.pageTitle);
       this.element.child(this.tableElement);
       this.element.child(this.linkElement);
       this.element.child(this.exitButton);

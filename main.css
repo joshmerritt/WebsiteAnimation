@@ -60,6 +60,7 @@ body {
     overflow: hidden;
     overscroll-behavior: none;
     font-family: gidole, "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-size: 3.3vmin;
 }
 
 div {
@@ -69,6 +70,13 @@ div {
   justify-content: center;
   color: rgb(242, 250, 255);
   padding: 0.4em;
+  font-size: 1.5em;
+}
+
+h1 {
+  font-size: 2em;
+  padding-bottom: 1em;
+  font-weight: 900;
 }
 
 td {
@@ -82,7 +90,6 @@ td {
   height: 100vh;
   right: 0vw;
   top: 0vh;
-  font-size: 1.3em;
 }
 
 .ExitButton {
@@ -112,7 +119,7 @@ a {
 
 @media (orientation: portrait) {
   .DetailPage {
-    width: 95vw;
+    width: 100vw;
     height: 50vh;
     top: 50vh;
   }
@@ -120,9 +127,8 @@ a {
 
 @media screen and (max-width: 1000px)  {
   .DetailPage {
-    font-size: 1.1em;
     font-weight: normal;
   }
 }
-}
+
 
