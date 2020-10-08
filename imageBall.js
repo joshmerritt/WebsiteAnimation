@@ -93,20 +93,7 @@ class ImageBall {
         let imageSize = windowWidth/2.1;
         let imageX = 0;
         let imageY = Math.max((windowHeight - imageSize)/2, 0);
-        
-        //let tempScreenSize = Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2)));
         let tempImage = this.fullImage;
-        // let circleDetails = {
-        //   r: Math.sqrt((Math.pow(windowWidth/2, 2) + Math.pow(windowHeight/2, 2))),
-        //   x: windowWidth*0.75,
-        //   y: windowHeight*0.5,
-        // }
-        // let imageDetails = {
-        //   xSize: windowWidth/2.1,
-        //   ySize: windowWidth/2.1,
-        //   x: (windowWidth - windowWidth/2.1)/2,
-        //   y: (windowHeight - windowWidth/2.1)/2,
-        // };
         if(windowHeight > windowWidth) {
           imageSize = Math.min(windowWidth, windowHeight/2);
           imageX = (windowWidth - imageSize)/2;
@@ -118,7 +105,7 @@ class ImageBall {
           this.pageOpen = true;
           detailPageOpen = true;
           this.createDetailElements();
-          
+          console.log("typeOf.contactUsElement", typeof contactUsElement.element);
           console.log("contactUsElement", contactUsElement);
           console.log("resetButton", resetButton);
           contactUsElement.element.style("display", "none");

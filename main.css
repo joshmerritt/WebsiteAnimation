@@ -79,8 +79,9 @@ td {
 .DetailPage {
   position: absolute;
   width: 50vw;
+  height: 100vh;
   right: 0vw;
-  top: 28vh;
+  top: 0vh;
   font-size: 1.3em;
 }
 
@@ -109,12 +110,19 @@ a {
 }
 
 
-@media screen and (max-width: 800px) {
+@media (orientation: portrait) {
   .DetailPage {
     width: 95vw;
+    height: 50vh;
     top: 50vh;
+  }
+}
+
+@media screen and (max-width: 1000px)  {
+  .DetailPage {
     font-size: 1.1em;
     font-weight: normal;
   }
+}
 }
 

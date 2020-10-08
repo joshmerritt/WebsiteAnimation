@@ -84,6 +84,9 @@ If you are interested in using my code to run your website, you'll need to:
     X Add Josh tile with headshot and about me blurb
     X Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
     _ Refactor detail page sizing and position logic
+    _ Reset image on detail page when screen resized, or if not Close detail page
+    _ Lower restitution on menu bars, make less bouncy
+    _ Make detail page title it's own h2 element
     _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 
 Secondary tasks
