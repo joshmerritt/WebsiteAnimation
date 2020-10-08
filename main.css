@@ -74,7 +74,7 @@ div {
 }
 
 h1 {
-  font-size: 2em;
+  font-size: 1.5em;
   padding-bottom: 1em;
   font-weight: 900;
 }
@@ -128,6 +128,7 @@ a {
 @media screen and (max-width: 1000px)  {
   .DetailPage {
     font-weight: normal;
+    font-size: 2.3vmax;
   }
 }
 

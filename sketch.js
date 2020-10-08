@@ -142,17 +142,17 @@ function createOutline() {
 */
 function trackCollisions() {
   Matter.Events.on(engine, 'collisionActive', function(event) {
-    //console.log("collision event", event);
-    event.source.pairs.collisionActive.forEach((collision) => {
-      if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category && collision.bodyA.id !== collision.bodyB.id) {
-        if(collision.bodyA.label === 'Image Ball') {
-          imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
-        } else if(collision.bodyB.label === 'Image Ball') {
-          imageBalls.find(imageBall => imageBall.body.id === collision.bodyB.id).showDetail();
+    if(!detailPageOpen) {
+      event.source.pairs.collisionActive.forEach((collision) => {
+        if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category && collision.bodyA.id !== collision.bodyB.id) {
+          if(collision.bodyA.label === 'Image Ball') {
+            imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
+          } else if(collision.bodyB.label === 'Image Ball') {
+            imageBalls.find(imageBall => imageBall.body.id === collision.bodyB.id).showDetail();
+          }
         }
-
-      };
-    });
+      });
+    };
   });
 }
 
@@ -190,16 +190,22 @@ function trackCollisions() {
     resizeCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
     setDisplaySize();
     imageBalls.forEach(function(ball){
-      if(ball.body) ball.reset();
+      if(ball.detailPageOpen) {
+        ball.showDetail();
+      } else {
+        if(ball.body) ball.reset();
+      }
     });
-    createBalls();
-    createGoals();
-    createMenu();
-    addBoundary();
-    addContactUs()
-    addResetButton();
-    createOutline();
-    trackCollisions();
+    if(!detailPageOpen) {
+      createBalls();
+      createGoals();
+      createMenu();
+      addBoundary();
+      addContactUs()
+      addResetButton();
+      createOutline();
+      trackCollisions();
+    }
   }
 
 
