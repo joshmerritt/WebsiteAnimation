@@ -87,7 +87,7 @@ If you are interested in using my code to run your website, you'll need to:
     X Reset image on detail page when screen resized, or if not Close detail page
     X Lower restitution on menu bars, make less bouncy
     X Make detail page title it's own h1/2 element
-    _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
+    _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com, dadatadad.com
 
 Secondary tasks
     _ Reorg codebase and complete documentation

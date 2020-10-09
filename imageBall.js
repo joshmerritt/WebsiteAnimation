@@ -46,6 +46,7 @@ class ImageBall {
       this.inOriginalPosition = true;
       this.pageOpen = false;
       this.ballExpanded = false;
+      this.display = true;
       this.removeDetailPage = this.removeDetailPage.bind(this);
       this.checkForReset = this.checkForReset.bind(this);
       this.showDetail = this.showDetail.bind(this);
@@ -167,10 +168,12 @@ class ImageBall {
     }
 
     removeDetailPage() {
+      selectedCategory = "All";
       detailPageOpen = false;
       this.pageOpen = false;
       this.element.remove();
       imageBalls.forEach(function(ball) {
+        ball.display = true;
         if(ball && !ball.inOriginalPosition) {
           ball.reset();
         }

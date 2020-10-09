@@ -24,17 +24,35 @@ class Menu {
         this.body.id = category;
         this.body.category = category;
         Matter.World.add(world, this.body);
+        this.selected = false;
     }
 
     show() {
       push();
       // rectMode(CENTER);
       // rect(this.position.x, this.position.y, this.width, this.height);
+      
       textFont(titleFont);
       textAlign(CENTER);
       textSize(iconSize/4)
       fill(config.mainColor); 
+      if(this.selected) fill(config.accentColor);
       text(this.category, this.position.x, this.position.y);
       pop();
+    }
+
+    onMenu(x, y) {
+        let menuLength = this.category.length;
+        let xMin = this.position.x - (this.position.x*menuLength/20);
+        let xMax = this.position.x + (this.position.x*menuLength/20);
+        let yMin = this.position.y - (iconSize/8);
+        let yMax = this.position.y + (iconSize/8);
+        let onX = (x > xMin && x < xMax);
+        let onY = (y > yMin && y < yMax);
+        return onX && onY;
+    }
+
+    select() {
+
     }
 }

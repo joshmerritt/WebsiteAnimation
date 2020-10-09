@@ -24,11 +24,13 @@ screenArea,
 portraitMode,
 detailPageOpen,
 resetButton,
-totalShots,
 titleElement,
 subtitleElement,
 contactUsElement,
 titleFont;
+let clickedToOpen = false;
+let totalShots = 0;
+let selectedCategory = "All";
 let config = {
   //  itemsToDisplay: ['thisWebsite', 'scoreboard', 'swingBet', 'coopDoor', 'googleDataStudio', 'powerBI', 'financialModels', 'flowchart'],
   itemsToDisplay: ['aboutMe', 'thisWebsite', 'swingBet', 'googleDataStudioOverview', 'powerBIConversionMetrics', 'arduinoScoreboard', 'arduinoCoopDoor', 'googleDataStudioServiceTechs'],
@@ -95,7 +97,24 @@ let config = {
       net.forEach((item) => item.show());
     }
     drawBalls();
+    helpMessage();
   }
+
+
+/*
+  helpMessage();
+*/
+function helpMessage() {
+  if(totalShots === 3 && !clickedToOpen) {
+    push();
+    textFont(titleFont);
+    textAlign(CENTER);
+    textSize(iconSize/4)
+    fill(config.mainColor);
+    text("Double click if you're tired of shooting", gridStartX, windowHeight*0.85);
+    pop();
+  }
+}
 
 /*
   captureWebsite()
@@ -262,7 +281,7 @@ function addResetButton() {
     portraitMode = windowHeight > windowWidth;
     iconSize =  Math.min(windowWidth/config.iconScale, windowHeight/config.iconScale);
     config.gridSpacing = 2*iconSize;
-    goalPosition = {x: 0.4*iconSize, y:windowHeight*0.4};
+    goalPosition = {x: 0.33*iconSize, y:windowHeight*0.4};
     goalWidth = iconSize*1.4;
     gridStartX = goalPosition.x + goalWidth + 2*iconSize;
     gridStartY = goalPosition.y;
@@ -326,7 +345,7 @@ function createGoals() {
       }); 
     } else {
       imageBalls.forEach(function(ball, index) {
-        if(ball) {
+        if(ball && ball.display) {
           ball.show();
           if(mouseIsPressed) {
             if(ball.clicked) {
@@ -407,6 +426,7 @@ function resetBalls() {
 function doubleClicked(event) {
   imageBalls.forEach(function(ball) {
     if(ball.onBall(mouseX, mouseY)) {
+      clickedToOpen = true;
       ball.showDetail();
     } 
   });
@@ -436,13 +456,33 @@ function doubleClicked(event) {
     otherwise set clicked=false
 */
   function mousePressed() {
+    menu.forEach((item) => {
+      if(item.onMenu(mouseX, mouseY)) {
+        if(item.selected) {
+          item.selected = false;
+          selectedCategory = "All";
+        } else {
+          item.selected = true;
+          selectedCategory = item.category;
+        }
+      } else {
+        item.selected = false;
+      }
+    });
     imageBalls.forEach(function(ball) {
+      if(selectedCategory !== "All" && ball.category !== selectedCategory) {
+        ball.display = false;
+      } else {
+        ball.display = true;
+      }
       if(ball.onBall(mouseX, mouseY)) {
         ball.clicked = true;
       } else {
         ball.clicked = false;
       }
     });
+    
+
   }
 
 
