@@ -304,8 +304,8 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
     aim() {
-      let powerScale = 10;
-      if(portraitMode) powerScale = 13;
+      let powerScale = 26;
+      if(portraitMode) powerScale = powerScale/2
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/config.sensitivity*powerScale;
       this.yPower += (mouseY - pmouseY)/config.sensitivity*powerScale;
