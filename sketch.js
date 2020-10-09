@@ -231,7 +231,7 @@ function addBoundary() {
     Used to resize the screen and in initial setup
 */
 function addContactUs() {
-  if (contactUsElement) contactUsElement.remove();
+  //if (contactUsElement) contactUsElement.remove();
   contactUsElement = new ContactUs({x: gridStartX, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
   contactUsElement.add();
 }

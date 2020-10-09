@@ -14,7 +14,6 @@ class ContactUs {
 
     add() {
       this.element = createA(this.link, this.text, "_blank");
-      console.log('contactUs this.element.width', this.element.width);
       this.element.size(this.element.width);
       this.length = this.element.width;
       this.height = this.element.height;
