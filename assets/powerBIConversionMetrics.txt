@@ -1,5 +1,5 @@
 Name: Microsoft PowerBI
-Link: N/A
+Link: https://www.upwork.com/fl/joshuapmerritt
 Category: Business
 Goal: Create a data warehouse, with automated data pipelines and ETL processes, to enable real-time, self-service analytics.
 My Role: Data Architect, Data Engineer, Data Analyst, Business Analyst

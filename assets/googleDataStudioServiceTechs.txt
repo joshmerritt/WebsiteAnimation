@@ -1,5 +1,5 @@
 Name: Google Data Studio
-Link: N/A
+Link: https://www.upwork.com/fl/joshuapmerritt
 Category: Business
 Goal: Educate and motivate employees about their contribution to the business and performance metrics relative to their colleagues.
 My Role: Data Architect, Data Engineer, Data Analyst, Business Analyst

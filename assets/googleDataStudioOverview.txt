@@ -1,5 +1,5 @@
 Name: Google Data Studio
-Link: N/A
+Link: https://www.upwork.com/fl/joshuapmerritt
 Category: Business
 Goal: Allow the combining of silo'd data into a visually appealing dashboard to track company metrics
 My Role: Data Architect, Data Engineer, Data Analyst, Business Analyst
