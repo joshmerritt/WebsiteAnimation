@@ -1,5 +1,5 @@
 Name: Portfolio Website
-Link: github.com/joshmerritt/websiteAnimation	
+Link: https://github.com/joshmerritt/websiteAnimation	
 Category: Technology
 Goal: Create a fun and interactive way to showcase my creativity and experience with business and technology
 My Role: Creator, Designer, Developer, Engineer
