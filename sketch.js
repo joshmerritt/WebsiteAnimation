@@ -30,7 +30,7 @@ contactUsElement,
 titleFont;
 let config = {
   //  itemsToDisplay: ['thisWebsite', 'scoreboard', 'swingBet', 'coopDoor', 'googleDataStudio', 'powerBI', 'financialModels', 'flowchart'],
-  itemsToDisplay: ['aboutMe', 'thisWebsite', 'swingBet', 'powerBIConversionMetrics', 'googleDataStudioOverview', 'arduinoScoreboard', 'arduinoCoopDoor', 'googleDataStudioServiceTechs'],
+  itemsToDisplay: ['aboutMe', 'thisWebsite', 'swingBet', 'googleDataStudioOverview', 'powerBIConversionMetrics', 'arduinoScoreboard', 'arduinoCoopDoor', 'googleDataStudioServiceTechs'],
   backgroundColor: 	"rgb(17, 17, 17)", 
   mainColor: "rgb(242, 250, 255)", 
   accentColor: "rgb(96, 117, 134)",
