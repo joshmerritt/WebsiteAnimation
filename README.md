@@ -87,6 +87,8 @@ If you are interested in using my code to run your website, you'll need to:
     X Reset image on detail page when screen resized, or if not Close detail page
     X Lower restitution on menu bars, make less bouncy
     X Make detail page title it's own h1/2 element
+    X Add double click ability to menu, display applicable subset of balls
+    X Prompt that double clicking is okay
     _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com, dadatadad.com
 
 Secondary tasks
@@ -94,8 +96,7 @@ Secondary tasks
     _ Test slanted net
     _ Add some visual of the stats for number of shots and number made, % of projects opened
     _ Build display page to appear like the imageball is simply expanded to allow for full view of the page
-    _ Add double click ability to menu, display applicable subset of balls
-    _ Prompt that double clicking is okay
+
     _ Add some special effect when a ball is made
     X Troubleshoot simultaneous collision issues
     

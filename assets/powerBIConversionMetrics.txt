@@ -4,4 +4,4 @@ Category: Business
 Goal: Create a data warehouse, with automated data pipelines and ETL processes, to enable real-time, self-service analytics.
 My Role: Data Architect, Data Engineer, Data Analyst, Business Analyst
 Technology: Microsoft PowerBI, REST Apis, Microsoft PowerQuery, DAX, Google Ads
-Description: An example of a management dashboard to help track key performance indicators. By combining data captured by disconnected CRMs, advertising platforms systems, and proprietary processes we can create a robust data warehouse to allow data-driven decision making. 
+Description: I use PowerBI as a data warehouse solution to create management dashboards that track key performance indicators. By combining data captured by disconnected CRMs, advertising platforms systems, and proprietary processes, we can create a robust data warehouse to allow data-driven decision making.

@@ -4,4 +4,4 @@ Category: Business
 Goal: Allow the combining of silo'd data into a visually appealing dashboard to track company metrics
 My Role: Data Architect, Data Engineer, Data Analyst, Business Analyst
 Technology: Google Data Studio, Google Big Query, Data Modeling
-Description: An example of a management dashboard to help track key performance indicators. By combining data captured by disconnected CRM systems, we can create a robust data model to enable real-time and self-service analytics.
+Description: I am adept at developing Google Data Studio dashboards that help managers track key performance indicators. By combining data captured by disconnected CRM systems, we can create a robust data model to enable real-time and self-service analytics.
