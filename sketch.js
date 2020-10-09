@@ -261,7 +261,7 @@ function addResetButton() {
     iconSize =  Math.min(windowWidth/config.iconScale, windowHeight/config.iconScale);
     config.gridSpacing = 2*iconSize;
     goalPosition = {x: 0.4*iconSize, y:windowHeight*0.4};
-    goalWidth = iconSize*1.3;
+    goalWidth = iconSize*1.4;
     gridStartX = goalPosition.x + goalWidth + 2*iconSize;
     gridStartY = goalPosition.y;
     if(windowWidth < windowHeight) gridStartY -= iconSize;
@@ -299,7 +299,7 @@ function createGoals() {
   net = [];
   const netHeight = 0.8*categories.length*iconSize;
   for(let i = 0; i < 2; i++){
-    goals[i] = new Goal(goalPosition.x + i * goalWidth, goalPosition.y, iconSize/10, i);
+    goals[i] = new Goal(goalPosition.x + i * goalWidth, goalPosition.y, iconSize/7.5, i);
     net.push(new Net(goalPosition.x + i * goalWidth, goalPosition.y + netHeight/2, netHeight));
   };
 }

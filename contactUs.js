@@ -15,11 +15,11 @@ class ContactUs {
     add() {
       this.element = createA(this.link, this.text, "_blank");
       console.log('contactUs this.element.width', this.element.width);
-      this.element.size(windowWidth*2/3);
+      this.element.size(this.element.width);
       this.length = this.element.width;
       this.height = this.element.height;
       if(windowWidth < 800) {
-        this.position = {x: 10, y: this.position.y}
+        this.position = {x: (windowWidth-this.element.width)/2, y: this.position.y}
       }
       this.element.position(this.position.x, this.position.y);
       let options = {

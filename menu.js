@@ -7,7 +7,7 @@ class Menu {
     constructor(position, category, index) {
         let options = {
             isStatic: true, 
-            restitution: 0.99,
+            restitution: 1,
             collisionFilter:
             {
                 'group': index+1,

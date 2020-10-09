@@ -88,7 +88,7 @@ td {
   position: absolute;
   width: 50vw;
   height: 95vh;
-  right: 0vw;
+  right: 0.9vw;
   top: 0vh;
 }
 
@@ -138,6 +138,7 @@ a {
 
 @media screen and (max-width: 1000px)  {
   .DetailPage {
+    right: 0;
     font-weight: normal;
     font-size: 2.3vmax;
   }
