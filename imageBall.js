@@ -175,7 +175,8 @@ class ImageBall {
           ball.reset();
         }
       });
-      contactUsElement.show();      
+      contactUsElement.show(); 
+      resetButton.style("display", "block");      
     }
 
 /*

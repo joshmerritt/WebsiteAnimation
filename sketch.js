@@ -369,9 +369,9 @@ function displayTitle() {
     push();
     textSize(tempTextSize);
     fill(config.mainColor); 
-    splitTitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.1 + tempTextSize*index));
+    splitTitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.1 + tempTextSize*1.1*index));
     textSize(iconSize/4);
-    splitSubtitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.1 + tempTextSize*splitTitle.length + index*iconSize/3))
+    splitSubtitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.1 + tempTextSize*splitTitle.length + index*tempTextSize));
     pop();
   } else {
     push();
