@@ -304,9 +304,11 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
     aim() {
+      let powerScale = 10;
+      if(portraitMode) powerScale = 13;
       angleMode(DEGREES);
-      this.xPower += (mouseX - pmouseX)/config.sensitivity*13;
-      this.yPower += (mouseY - pmouseY)/config.sensitivity*13;
+      this.xPower += (mouseX - pmouseX)/config.sensitivity*powerScale;
+      this.yPower += (mouseY - pmouseY)/config.sensitivity*powerScale;
       let currentPosX = this.x - (this.xPower);
       let currentPosY = this.y - (this.yPower);
       let arrowLength = iconSize/8;

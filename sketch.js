@@ -21,6 +21,7 @@ boundary,
 goalPosition,
 goalWidth,
 screenArea,
+portraitMode,
 detailPageOpen,
 resetButton,
 totalShots,
@@ -258,6 +259,7 @@ function addResetButton() {
   function setDisplaySize() {
     screenArea = windowWidth * windowHeight;
     config.sensitivity = Math.pow(screenArea, 1/3);
+    portraitMode = windowHeight > windowWidth;
     iconSize =  Math.min(windowWidth/config.iconScale, windowHeight/config.iconScale);
     config.gridSpacing = 2*iconSize;
     goalPosition = {x: 0.4*iconSize, y:windowHeight*0.4};
