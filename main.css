@@ -60,7 +60,7 @@ body {
     overflow: hidden;
     overscroll-behavior: none;
     font-family: gidole, "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-    font-size: 3.3vmin;
+    
 }
 
 div {
@@ -69,7 +69,7 @@ div {
   align-items: center;
   justify-content: center;
   color: rgb(242, 250, 255);
-  font-size: 1.5em;
+  font-size: 3.3vmin;
   margin: 2.5vmin;
 }
 
