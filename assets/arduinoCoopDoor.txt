@@ -3,5 +3,5 @@ Link: https://github.com/joshmerritt/arduinoChickenCoopDoor
 Category: Farm
 Goal: Build an automated door to allow the chickens to free range from sun-up to sun-down, while keeping them safely enclosed in their coop overnight.
 My Role: Creator, Designer, Developer, Engineer
-Technology: C++, Arduino, Programmable RGB leds, Woodworking
+Technology: C++, Arduino, Motors, Programmable RGB leds, Woodworking
 Description: Using an arduino, a motor shield, and a car door window motor, I created a door that opens and closes automatically based upon a photoresistor's realtime readings.
