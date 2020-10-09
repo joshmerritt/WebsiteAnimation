@@ -1,0 +1,7 @@
+Name: Google Data Studio
+Link: N/A
+Category: Business
+Goal: Educate and motivate employees about their contribution to the business and performance metrics relative to their colleagues.
+My Role: Data Architect, Data Engineer, Data Analyst, Business Analyst
+Technology: Google Data Studio, Google Big Query, Data Modeling, Screencloud, Amazon Firestick
+Description: An example of a TV dashboard to help track key performance indicators and display it within a business. By providing goals and showcasing performance over the year, employees can understand their contribution to the company in real-time.
