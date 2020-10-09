@@ -1,0 +1,7 @@
+Name: Swing Bet Golf Calculator
+Link: https://github.com/joshmerritt/swingBetCalculator
+Category: Technology
+Goal: Create a React Single Page Application to calculate the result of a complex golf game.
+My Role: Creator, Designer, Developer, Engineer, Project Manager
+Technology: React.js, Firebase (Realtime DB, Authentication, Hosting), Javascript, HTML, CSS, Git
+Description: Calculate all the possible 2-player combinations and calculate each pairings result versus the designated "Swingers".  Users can enter hole by hole scores for any number of players, two “Swingers,” and their respecitve handicaps. Also displays all players lifetime stats and winnings.
