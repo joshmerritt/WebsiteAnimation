@@ -90,7 +90,7 @@ class ImageBall {
         let circleX = windowWidth*0.733;
         let circleY = windowHeight*0.5;
         let circleR = Math.sqrt((Math.pow(windowWidth/1.75, 2) + Math.pow(windowHeight/1.75, 2)));
-        let imageSize = windowWidth/2.1 - Math.min(windowHeight, windowWidth)*0.05;
+        let imageSize = Math.min(windowHeight, windowWidth/2)*0.90;
         let imageX = Math.min(windowHeight, windowWidth)*0.025;
         let imageY = Math.max((windowHeight - imageSize)/2, Math.min(windowHeight, windowWidth)*0.025);
         let tempImage = this.fullImage;

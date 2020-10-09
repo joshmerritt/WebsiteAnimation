@@ -102,10 +102,10 @@ let config = {
     Used to display a copy of the website within the website ball
 */
   function captureWebsite() {
-    // let minDim = Math.min(windowWidth, windowHeight);
-    // let thisWebsite = get(0, 0, minDim, minDim);
-    // imageBalls[1].ballImage = thisWebsite;
-    // imageBalls[1].fullImage = thisWebsite;
+    let minDim = Math.min(windowWidth, windowHeight);
+    let thisWebsite = get(0, 0, minDim, minDim);
+    imageBalls[1].ballImage = thisWebsite;
+    imageBalls[1].fullImage = thisWebsite;
   }
 
 
