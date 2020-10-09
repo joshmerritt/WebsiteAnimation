@@ -304,8 +304,8 @@ class ImageBall {
 */
     aim() {
       angleMode(DEGREES);
-      this.xPower += (mouseX - pmouseX)/config.sensitivity*11;
-      this.yPower += (mouseY - pmouseY)/config.sensitivity*11;
+      this.xPower += (mouseX - pmouseX)/config.sensitivity*13;
+      this.yPower += (mouseY - pmouseY)/config.sensitivity*13;
       let currentPosX = this.x - (this.xPower);
       let currentPosY = this.y - (this.yPower);
       let arrowLength = iconSize/8;
