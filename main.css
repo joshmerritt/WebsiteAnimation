@@ -56,7 +56,7 @@ table {
 }
 
 body {
-    background: #607586;
+    background:rgb(17, 17, 17);
     overflow: hidden;
     overscroll-behavior: none;
     font-family: gidole, "Lucida Sans Unicode", "Lucida Grande", sans-serif;
@@ -114,6 +114,7 @@ td:first-child {
 
 a {
   padding: 0.5em;
+  color:  #F2FAFF;
 }
 
 @media screen {
@@ -131,7 +132,7 @@ a {
   .DetailPage {
     width: 95vw;
     height: 50vh;
-    top: 46.5vh;
+    top: 50vh;
   }
 }
 
