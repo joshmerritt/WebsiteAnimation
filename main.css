@@ -116,6 +116,16 @@ a {
   padding: 0.5em;
 }
 
+@media screen {
+  body { 
+    height:100%; 
+    position:fixed; 
+    /* prevent overscroll bounce*/ 
+    overflow-y:scroll; 
+    -webkit-overflow-scrolling: touch; 
+    /* iOS velocity scrolling */ 
+  } 
+}
 
 @media (orientation: portrait) {
   .DetailPage {

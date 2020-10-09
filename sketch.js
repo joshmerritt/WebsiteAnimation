@@ -38,6 +38,7 @@ let config = {
   yScale: 1,
   iconScale: 7,
   sensitivity: 1,
+  gridSpacing: 1,
   fontName: "Gidolinya-Regular",
   titleText: "Hello world, I am Josh Merritt.",
   subTitleText: "Honest. Data-driven. Product Management & Development. ",
@@ -167,12 +168,13 @@ function trackCollisions() {
   function createBalls() {
     imageBalls = [];
     imgs.forEach(function(img, i) {
+      //console.log("gridStartX, Y, gridCurrentX, Y", gridStartX, ", ", gridStartY, ", ", gridCurrentX, ", ", gridCurrentY);
       imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pageInfo[i], i);
-      if(gridCurrentX + iconSize*3 <= windowWidth) {
-        gridCurrentX += iconSize*2;
+      if(gridCurrentX + iconSize + config.gridSpacing <= windowWidth) {
+        gridCurrentX += config.gridSpacing;
       } else {
         gridCurrentX = gridStartX;
-        gridCurrentY += iconSize*2;
+        gridCurrentY += config.gridSpacing;
       }
       if(categories.indexOf(imageBalls[i].category) === -1) {
         categories.push(imageBalls[i].category);
@@ -256,7 +258,8 @@ function addResetButton() {
     screenArea = windowWidth * windowHeight;
     config.sensitivity = Math.pow(screenArea, 1/3);
     iconSize =  Math.min(windowWidth/config.iconScale, windowHeight/config.iconScale);
-    goalPosition = {x: 0.22*iconSize, y:windowHeight/2.2};
+    config.gridSpacing = 2*iconSize;
+    goalPosition = {x: 0.4*iconSize, y:windowHeight*0.4};
     goalWidth = iconSize*1.3;
     gridStartX = goalPosition.x + goalWidth + 2*iconSize;
     gridStartY = goalPosition.y;
@@ -359,12 +362,13 @@ function displayTitle() {
   if(windowHeight > windowWidth) {
     let splitTitle = config.titleText.replace(".", "").split(", ");
     let splitSubtitle = config.subTitleText.split(". ");
+    let tempTextSize = iconSize/2.5;
     push();
-    textSize(iconSize/2.5);
+    textSize(tempTextSize);
     fill(config.mainColor); 
-    splitTitle.forEach((item, index) => text(item, windowWidth/8, windowHeight/(8-index*2.5)));
+    splitTitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.1 + tempTextSize*index));
     textSize(iconSize/4);
-    splitSubtitle.forEach((item, index) => text(item, windowWidth/8, windowHeight/4.3 + index*iconSize/3))
+    splitSubtitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.1 + tempTextSize*splitTitle.length + index*iconSize/3))
     pop();
   } else {
     push();

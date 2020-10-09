@@ -91,7 +91,7 @@ class ImageBall {
         let circleY = windowHeight*0.5;
         let circleR = Math.sqrt((Math.pow(windowWidth/1.75, 2) + Math.pow(windowHeight/1.75, 2)));
         let imageSize = windowWidth/2.1;
-        let imageX = 0;
+        let imageX = Math.min(windowHeight, windowWidth)*0.05;
         let imageY = Math.max((windowHeight - imageSize)/2, 0);
         let tempImage = this.fullImage;
         if(windowHeight > windowWidth) {
@@ -111,9 +111,9 @@ class ImageBall {
         push();
         fill(config.accentColor);
         stroke(config.mainColor);
-        strokeWeight(0);
-        ellipseMode(CENTER);
-        circle(circleX, circleY, circleR);
+        // strokeWeight(0);
+        // ellipseMode(CENTER);
+        // circle(circleX, circleY, circleR);
         strokeWeight(4);
         rect(imageX, imageY, imageSize, imageSize);
         image(tempImage, imageX, imageY, imageSize, imageSize);
