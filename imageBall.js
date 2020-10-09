@@ -338,7 +338,6 @@ class ImageBall {
     Increments launchCount, used to calculate metrics
 */    
     launched() {
-      console.log('this.body', this.body);
       this.launchCount++;
       this.inOriginalPosition = false;
     }

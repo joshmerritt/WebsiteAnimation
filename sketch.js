@@ -101,10 +101,10 @@ let config = {
     Used to display a copy of the website within the website ball
 */
   function captureWebsite() {
-    let minDim = Math.min(windowWidth, windowHeight);
-    let thisWebsite = get(0, 0, minDim, minDim);
-    imageBalls[1].ballImage = thisWebsite;
-    imageBalls[1].fullImage = thisWebsite;
+    // let minDim = Math.min(windowWidth, windowHeight);
+    // let thisWebsite = get(0, 0, minDim, minDim);
+    // imageBalls[1].ballImage = thisWebsite;
+    // imageBalls[1].fullImage = thisWebsite;
   }
 
 
@@ -299,8 +299,10 @@ function createGoals() {
   net = [];
   const netHeight = 0.8*categories.length*iconSize;
   for(let i = 0; i < 2; i++){
+    let netOffset = -iconSize/6;
+    if(i) netOffset = netOffset*-1;
     goals[i] = new Goal(goalPosition.x + i * goalWidth, goalPosition.y, iconSize/7.5, i);
-    net.push(new Net(goalPosition.x + i * goalWidth, goalPosition.y + netHeight/2, netHeight));
+    net.push(new Net(goalPosition.x + i * goalWidth + netOffset, goalPosition.y + netHeight/2, netHeight));
   };
 }
 
