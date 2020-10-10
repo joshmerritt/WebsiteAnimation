@@ -105,7 +105,7 @@ let config = {
   helpMessage();
 */
 function helpMessage() {
-  if(totalShots === 3 && !clickedToOpen) {
+  if(totalShots === 3 && !clickedToOpen && !detailPageOpen) {
     push();
     textFont(titleFont);
     textAlign(CENTER);
