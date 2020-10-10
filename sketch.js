@@ -111,7 +111,7 @@ function helpMessage() {
     textAlign(CENTER);
     textSize(iconSize/4)
     fill(config.mainColor);
-    text("Double click the ball if you're tired of shooting", gridStartX, windowHeight*0.85);
+    text("Double click the ball if you're tired of shooting", gridStartX, windowHeight*0.9);
     pop();
   }
 }
