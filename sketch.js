@@ -423,7 +423,7 @@ function resetBalls() {
   doubleClicked()
     Allows for viewing projects without having to make the ball
 */
-function doubleClicked(event) {
+function doubleClicked() {
   imageBalls.forEach(function(ball) {
     if(ball.onBall(mouseX, mouseY)) {
       clickedToOpen = true;
@@ -455,7 +455,8 @@ function doubleClicked(event) {
     If it is on a given ball, set clicked=true,
     otherwise set clicked=false
 */
-  function mousePressed() {
+  function mousePressed(event) {
+    if(event.type != 'touchstart') return true;
     menu.forEach((item) => {
       if(item.onMenu(mouseX, mouseY)) {
         if(item.selected) {
