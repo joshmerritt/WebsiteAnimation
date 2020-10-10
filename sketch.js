@@ -111,7 +111,7 @@ function helpMessage() {
     textAlign(CENTER);
     textSize(iconSize/4)
     fill(config.mainColor);
-    text("Double click the ball if you're tired of shooting", gridStartX, windowHeight*0.9);
+    text("Double click the ball if you're tired of playing", gridStartX, windowHeight*0.9);
     pop();
   }
 }
@@ -123,7 +123,7 @@ function helpMessage() {
   function captureWebsite() {
     let minDim = Math.min(windowWidth, windowHeight);
     let thisWebsite = get(0, 0, minDim, minDim);
-    imageBalls[1].ballImage = thisWebsite;
+    //imageBalls[1].ballImage = thisWebsite;
     imageBalls[1].fullImage = thisWebsite;
   }
 
@@ -344,7 +344,7 @@ function createGoals() {
         }
       }); 
     } else {
-      imageBalls.forEach(function(ball, index) {
+      imageBalls.forEach(function(ball) {
         if(ball && ball.display) {
           ball.show();
           if(mouseIsPressed) {
