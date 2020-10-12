@@ -252,7 +252,7 @@ function addBoundary() {
 */
 function addContactUs() {
   if (contactUsElement) contactUsElement.remove();
-  contactUsElement = new ContactUs({x: gridStartX, y: windowHeight/1.1}, config.contactLinkText, config.contactLinkAddress);
+  contactUsElement = new ContactUs({x: gridStartX, y: windowHeight*0.93}, config.contactLinkText, config.contactLinkAddress);
   contactUsElement.add();
 }
 
@@ -390,9 +390,9 @@ function displayTitle() {
     push();
     textSize(tempTextSize);
     fill(config.mainColor); 
-    splitTitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.1 + tempTextSize*1.1*index));
+    splitTitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.07 + tempTextSize*1.1*index));
     textSize(iconSize/4);
-    splitSubtitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.1 + tempTextSize*splitTitle.length + index*tempTextSize));
+    splitSubtitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.07 + tempTextSize*splitTitle.length + index*tempTextSize));
     pop();
   } else {
     push();
@@ -456,20 +456,6 @@ function doubleClicked() {
     otherwise set clicked=false
 */
   function mousePressed(event) {
-    if(event.type != 'touchstart') return true;
-    menu.forEach((item) => {
-      if(item.onMenu(mouseX, mouseY)) {
-        if(item.selected) {
-          item.selected = false;
-          selectedCategory = "All";
-        } else {
-          item.selected = true;
-          selectedCategory = item.category;
-        }
-      } else {
-        item.selected = false;
-      }
-    });
     imageBalls.forEach(function(ball) {
       if(selectedCategory !== "All" && ball.category !== selectedCategory) {
         ball.display = false;
@@ -510,5 +496,18 @@ function doubleClicked() {
         ball.launched();
         totalShots++;
       } 
+    });
+    menu.forEach((item) => {
+      if(item.onMenu(mouseX, mouseY)) {
+        if(item.selected) {
+          item.selected = false;
+          selectedCategory = "All";
+        } else {
+          item.selected = true;
+          selectedCategory = item.category;
+        }
+      } else {
+        item.selected = false;
+      }
     });   
   }

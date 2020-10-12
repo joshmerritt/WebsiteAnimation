@@ -105,6 +105,8 @@ td:first-child {
 
 .reset {
   position: absolute;
+  height: 2em;
+  width: 2em;
   right: 1vmax;
   bottom: 1vmax;
   background-color: #F2FAFF;

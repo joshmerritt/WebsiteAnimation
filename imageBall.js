@@ -19,7 +19,6 @@ class ImageBall {
         info.forEach((item) => {
           tempInfo.push(item.split(": "));
         });
-        console.log('tempInfo');
         this.name = tempInfo[0][1];
         this.link = tempInfo[1][1];
         this.category = tempInfo[2][1];
