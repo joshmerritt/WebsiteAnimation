@@ -75,8 +75,8 @@ let config = {
   function setup() {
     history.pushState({'page_id': 1}, document.title, location.href);
     playfield = createCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
-    let canvasElement = document.getElementsByTagName("canvas")[0];
-    canvasElement.addEventListener("dblclick", doubleClicked, false);
+    // let canvasElement = document.getElementsByTagName("canvas")[0];
+    // canvasElement.addEventListener("dblclick", doubleClicked, false);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
@@ -425,7 +425,8 @@ function resetBalls() {
   doubleClicked()
     Allows for viewing projects without having to make the ball
 */
-function doubleClicked() {
+function doubleClicked(event) {
+  event.preventDefault();
   imageBalls.forEach(function(ball) {
     if(ball.onBall(mouseX, mouseY) && ball.clicked) {
       clickedToOpen = true;
