@@ -429,6 +429,7 @@ function doubleClicked(event) {
   event.preventDefault();
   imageBalls.forEach(function(ball) {
     if(ball.onBall(mouseX, mouseY) && ball.clicked) {
+      ball.doubleClicked = "Double Clicked";
       clickedToOpen = true;
       ball.showDetail();
     } 
