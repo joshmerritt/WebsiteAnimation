@@ -467,6 +467,9 @@ function doubleClicked(event) {
         ball.display = true;
       }
       if(ball.onBall(mouseX, mouseY)) {
+        // let currentTime = Date.now();
+        // if(currentTime - ball.lastClickTime < 500);
+        if(ball.clicked) ball.showDetail();
         ball.clicked = true;
         ball.clickedCount++;
       } else {

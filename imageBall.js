@@ -48,7 +48,7 @@ class ImageBall {
       this.ballExpanded = false;
       this.display = true;
       this.clickedCount = 0;
-      this.doubleClicked = "";
+      this.lastClickTime = 0;
       this.removeDetailPage = this.removeDetailPage.bind(this);
       this.checkForReset = this.checkForReset.bind(this);
       this.showDetail = this.showDetail.bind(this);
@@ -215,8 +215,8 @@ class ImageBall {
       stroke(config.mainColor);
       strokeWeight(iconSize/50); 
       circle(0, 0, iconSize*.99, iconSize*.99);
-      text(this.clickedCount, 0, 0);
-      text(this.doubleClicked, 0, 20);
+      // text(this.clickedCount, 0, 0);
+      // text(this.doubleClicked, 0, 20);
       pop();
       this.x = this.body.position.x;
       this.y = this.body.position.y;
