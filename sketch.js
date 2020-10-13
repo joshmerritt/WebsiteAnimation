@@ -427,7 +427,7 @@ function resetBalls() {
 */
 function doubleClicked() {
   imageBalls.forEach(function(ball) {
-    if(ball.onBall(mouseX, mouseY)) {
+    if(ball.onBall(mouseX, mouseY) && ball.clicked) {
       clickedToOpen = true;
       ball.showDetail();
     } 
