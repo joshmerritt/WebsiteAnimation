@@ -75,8 +75,8 @@ let config = {
   function setup() {
     history.pushState({'page_id': 1}, document.title, location.href);
     playfield = createCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
-    // var el = document.getElementsByTagName("canvas")[0];
-    // el.addEventListener("touchstart", mousePressed, false);
+    let canvasElement = document.getElementsByTagName("canvas")[0];
+    canvasElement.addEventListener("dblclick", doubleClicked, false);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
