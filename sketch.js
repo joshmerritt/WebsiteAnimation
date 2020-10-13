@@ -97,9 +97,9 @@ let config = {
       drawGoals();
       menu.forEach((item) => item.show());
       net.forEach((item) => item.show());
+      helpMessage();
     }
     drawBalls();
-    helpMessage();
   }
 
 
@@ -466,13 +466,16 @@ function doubleClicked() {
       }
       if(ball.onBall(mouseX, mouseY)) {
         ball.clicked = true;
+        ball.clickedCount++;
       } else {
         ball.clicked = false;
       }
     });
-    
-
   }
+
+  // function checkIfClicked() {
+
+  // }
 
 
 /*
