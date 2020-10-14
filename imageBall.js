@@ -141,7 +141,7 @@ class ImageBall {
       this.pageTitle = createElement("h1", this.name)
       this.exitButton = createButton("X");
       this.exitButton.addClass("ExitButton");
-      this.exitButton.mousePressed(this.removeDetailPage);
+      this.exitButton.mouseClicked(this.removeDetailPage);
       this.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
       this.tableElement = createElement("table");
       this.goalRow = createElement("tr");

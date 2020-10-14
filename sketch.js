@@ -469,26 +469,27 @@ function resetBalls() {
     otherwise set clicked=false
 */
   function mousePressed() {
-    if(detailPageOpen) return false;
-    imageBalls.forEach(function(ball) {
-      if(selectedCategory !== "All" && ball.category !== selectedCategory) {
-        ball.display = false;
-      } else {
-        ball.display = true;
-      }
-      if(ball.onBall(mouseX, mouseY)) {
-        if(ball.clicked && (Date.now() - ball.lastClickTime) < 300) {
-          ball.showDetail();
-          clickedToOpen = true;
+    if(!detailPageOpen) {
+      imageBalls.forEach(function(ball) {
+        if(selectedCategory !== "All" && ball.category !== selectedCategory) {
+          ball.display = false;
+        } else {
+          ball.display = true;
         }
-        ball.lastClickTime = Date.now();
-        ball.clicked = true;
-        ball.clickedCount++;
-      } else {
-        ball.clicked = false;
-      }
-    });
-    return false;
+        if(ball.onBall(mouseX, mouseY)) {
+          if(ball.clicked && (Date.now() - ball.lastClickTime) < 300) {
+            ball.showDetail();
+            clickedToOpen = true;
+          }
+          ball.lastClickTime = Date.now();
+          ball.clicked = true;
+          ball.clickedCount++;
+        } else {
+          ball.clicked = false;
+        }
+      });
+      return false;
+    }
   }
 
 /*
@@ -498,35 +499,37 @@ function resetBalls() {
     The ball is made moveable and the strength vector is applied as a force.
 */
   function mouseReleased() {
-    imageBalls.forEach((ball, index) => {
-      if(ball.clicked && (ball.xPower || ball.yPower)) {
-        let strength = Matter.Vector.create(-ball.xPower*config.sensitivity/30000, -ball.yPower*config.sensitivity/30000);
-        let ballPos = Matter.Vector.create(ball.x, ball.y);
-        let ballCatIndex = categories.findIndex((category) => category === ball.category); 
-        if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
-        ball.body.collisionFilter = {
-          'group': ballCatIndex+1,
-          'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
-          'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
-        };
-        Matter.Body.setStatic(ball.body, false);
-        Matter.Body.applyForce(ball.body, ballPos, strength);
-        ball.launched();
-        totalShots++;
-      } 
-    });
-    menu.forEach((item) => {
-      if(item.onMenu(mouseX, mouseY)) {
-        if(item.selected) {
-          item.selected = false;
-          selectedCategory = "All";
+    if(!detailPageOpen) {
+      imageBalls.forEach((ball, index) => {
+        if(ball.clicked && (ball.xPower || ball.yPower)) {
+          let strength = Matter.Vector.create(-ball.xPower*config.sensitivity/30000, -ball.yPower*config.sensitivity/30000);
+          let ballPos = Matter.Vector.create(ball.x, ball.y);
+          let ballCatIndex = categories.findIndex((category) => category === ball.category); 
+          if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
+          ball.body.collisionFilter = {
+            'group': ballCatIndex+1,
+            'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
+            'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
+          };
+          Matter.Body.setStatic(ball.body, false);
+          Matter.Body.applyForce(ball.body, ballPos, strength);
+          ball.launched();
+          totalShots++;
+        } 
+      });
+      menu.forEach((item) => {
+        if(item.onMenu(mouseX, mouseY)) {
+          if(item.selected) {
+            item.selected = false;
+            selectedCategory = "All";
+          } else {
+            item.selected = true;
+            selectedCategory = item.category;
+          }
         } else {
-          item.selected = true;
-          selectedCategory = item.category;
+          item.selected = false;
         }
-      } else {
-        item.selected = false;
-      }
-    });  
-    return false;
+      });  
+      return false;
+    }
   }
