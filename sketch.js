@@ -194,6 +194,7 @@ function trackCollisions() {
 */
   function createBalls() {
     imageBalls = [];
+    if(!pageInfo) setTimeout(createBalls, 150);
     imgs.forEach((img, i) => {
       imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, iconSize, pageInfo[i], i);
       if(gridCurrentX + iconSize + config.gridSpacing <= playfieldWidth) {
