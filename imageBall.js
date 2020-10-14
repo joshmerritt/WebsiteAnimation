@@ -12,7 +12,7 @@ class ImageBall {
         restitution: 0.66,
         isStatic: true,
       };
-      this.body = Matter.Bodies.circle(xPos, yPos, size, defaultOptions);
+      this.body = Matter.Bodies.circle(xPos, yPos, size/2, defaultOptions);
       this.index = index;
       this.parseInfo = function() {
         let tempInfo = [];
