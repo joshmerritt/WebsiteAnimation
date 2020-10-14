@@ -32,6 +32,8 @@ contactUsElement,
 titleFont;
 let clickedToOpen = false;
 let totalShots = 0;
+let totalMakes = 0;
+let totalOpens = 0;
 let selectedCategory = "All";
 let config = {
   //  itemsToDisplay: ['thisWebsite', 'scoreboard', 'swingBet', 'coopDoor', 'googleDataStudio', 'powerBI', 'financialModels', 'flowchart'],
@@ -125,7 +127,7 @@ function helpMessage() {
   function captureWebsite() {
     let minDim = Math.min(playfieldWidth, playfieldHeight);
     let thisWebsite = get(0, 0, minDim, minDim);
-    //imageBalls[1].ballImage = thisWebsite;
+    imageBalls[1].ballImage = thisWebsite;
     imageBalls[1].fullImage = thisWebsite;
   }
 
@@ -172,8 +174,10 @@ function trackCollisions() {
         if(collision.bodyA.category && collision.bodyB.category && collision.bodyA.category === collision.bodyB.category && collision.bodyA.id !== collision.bodyB.id) {
           if(collision.bodyA.label === 'Image Ball') {
             imageBalls.find(imageBall => imageBall.body.id === collision.bodyA.id).showDetail();
+            totalMakes++;   
           } else if(collision.bodyB.label === 'Image Ball') {
             imageBalls.find(imageBall => imageBall.body.id === collision.bodyB.id).showDetail();
+            totalMakes++;
           }
         }
       });
@@ -212,11 +216,11 @@ function trackCollisions() {
     Uses built in p5.js methods
 */
   function windowResized() {
-    playfieldWidth = playfieldWidth;
-    playfieldHeight = playfieldHeight;
+    playfieldWidth = windowWidth;
+    playfieldHeight = windowHeight;
     resizeCanvas(playfieldWidth*config.xScale, playfieldHeight*config.yScale);
     setDisplaySize();
-    imageBalls.forEach(function(ball){
+    imageBalls.forEach((ball) => {
       if(ball.pageOpen) {
         ball.showDetail();
       } else {
@@ -453,6 +457,7 @@ function resetBalls() {
         ball.aim();
       }
     });
+    return false;
   }
 
 
@@ -462,7 +467,8 @@ function resetBalls() {
     If it is on a given ball, set clicked=true,
     otherwise set clicked=false
 */
-  function mousePressed(event) {
+  function mousePressed() {
+    if(detailPageOpen) return false;
     imageBalls.forEach(function(ball) {
       if(selectedCategory !== "All" && ball.category !== selectedCategory) {
         ball.display = false;
@@ -470,7 +476,10 @@ function resetBalls() {
         ball.display = true;
       }
       if(ball.onBall(mouseX, mouseY)) {
-        if(ball.clicked && (Date.now() - ball.lastClickTime) < 300) ball.showDetail();
+        if(ball.clicked && (Date.now() - ball.lastClickTime) < 300) {
+          ball.showDetail();
+          clickedToOpen = true;
+        }
         ball.lastClickTime = Date.now();
         ball.clicked = true;
         ball.clickedCount++;
@@ -478,12 +487,8 @@ function resetBalls() {
         ball.clicked = false;
       }
     });
+    return false;
   }
-
-  // function checkIfClicked() {
-
-  // }
-
 
 /*
   mouseReleased()
@@ -521,5 +526,6 @@ function resetBalls() {
       } else {
         item.selected = false;
       }
-    });   
+    });  
+    return false;
   }

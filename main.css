@@ -105,12 +105,12 @@ td:first-child {
 
 .reset {
   position: absolute;
-  height: 2em;
-  width: 2em;
-  right: 1vmax;
-  bottom: 1vmax;
+  height: 4vmax;
+  width: 4vmax;
+  right: 2vmax;
+  bottom: 2vmax;
   background-color: #F2FAFF;
-  font-size: 1em;
+  font-size: 2vmax;
   font-weight: 900;
 }
 

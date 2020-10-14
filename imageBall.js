@@ -49,6 +49,8 @@ class ImageBall {
       this.display = true;
       this.clickedCount = 0;
       this.lastClickTime = 0;
+      this.opens = 0;
+      this.makes = 0;
       this.removeDetailPage = this.removeDetailPage.bind(this);
       this.checkForReset = this.checkForReset.bind(this);
       this.showDetail = this.showDetail.bind(this);
@@ -90,6 +92,8 @@ class ImageBall {
       // if(!this.ballExpanded) {
       //   this.expandBall();
       // } else {
+        totalOpens++;
+        this.makes++;
         let circleX = playfield.width*0.733;
         let circleY = playfield.height*0.5;
         let circleR = Math.sqrt((Math.pow(playfield.width/1.75, 2) + Math.pow(playfield.height/1.75, 2)));
@@ -122,6 +126,7 @@ class ImageBall {
         image(tempImage, imageX, imageY, imageSize, imageSize);
         pop();
       //}
+      return this;
     }
 
 
