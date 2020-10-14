@@ -89,8 +89,9 @@ If you are interested in using my code to run your website, you'll need to:
     X Make detail page title it's own h1/2 element
     X Add double click ability to menu, display applicable subset of balls
     X Prompt that double clicking is okay
-    _ Fix iphone support for double click, add in timestamp to mouse released
-    _ Create new site named: joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com, dadatadad.com
+    X Fix iphone support for double click, add in timestamp to mouse released
+    _ Add loading screen that is actually button that says start
+    _ Create new site named: dadatadad.com, joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 
 Secondary tasks
     _ Reorg codebase and complete documentation

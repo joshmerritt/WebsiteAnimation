@@ -40,17 +40,26 @@ class Menu {
     }
 
     onMenu(x, y) {
-        let menuLength = this.category.length;
-        let xMin = this.position.x - (this.position.x*menuLength/20);
-        let xMax = this.position.x + (this.position.x*menuLength/20);
-        let yMin = this.position.y - (iconSize/8);
-        let yMax = this.position.y + (iconSize/8);
+        console.log("onMenu this", this, );
+        let menuLength = this.category.length/20;
+        console.log("menu length", menuLength);
+        let xMin = this.position.x - (menuLength*this.width);
+        let xMax = this.position.x + (menuLength*this.width);
+        let yMin = this.position.y - (this.height/2);
+        let yMax = this.position.y;
+        console.log("bounds xmin, xmax, ymin, ymax", xMin, ", ", xMax, ", ", yMin, ", ", yMax);
         let onX = (x > xMin && x < xMax);
         let onY = (y > yMin && y < yMax);
         return onX && onY;
     }
 
-    select() {
-
+    highlight() {
+        push();
+        textAlign(CENTER);
+        textSize(iconSize/4)
+        fill(config.mainColor);
+        textStyle(BOLD);
+        text(this.category, this.position.x, this.position.y);
+        pop();
     }
 }

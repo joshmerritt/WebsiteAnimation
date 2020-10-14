@@ -105,10 +105,10 @@ td:first-child {
 
 .reset {
   position: absolute;
-  right: 1.5vmax;
-  bottom: 1.5vmax;
+  right: 5vmin;
+  bottom: 5vmin;
   background-color: #F2FAFF;
-  font-size: 2.2vmax;
+  font-size: 5vmin;
 }
 
 a {

@@ -219,7 +219,7 @@ class ImageBall {
       noFill();
       stroke(config.mainColor);
       strokeWeight(iconSize/50); 
-      circle(0, 0, iconSize*.99, iconSize*.99);
+      circle(0, 0, this.r*2, this.r*2);
       // text(this.clickedCount, 0, 0);
       // text(this.doubleClicked, 0, 20);
       pop();
@@ -300,7 +300,9 @@ class ImageBall {
       };
       push();
       stroke(config.accentColor);
-      strokeWeight(5);
+      strokeWeight(iconSize/20);
+      noFill();
+      circle(this.x, this.y, this.r*2, this.r*2);
       fill(config.accentColor);
       line(this.x, this.y, lineEnd.x , lineEnd.y);
       triangle(pointA.x, pointA.y, pointB.x, pointB.y, pointC.x, pointC.y);

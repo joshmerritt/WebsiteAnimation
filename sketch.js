@@ -41,6 +41,9 @@ let config = {
   backgroundColor: 	"rgb(17, 17, 17)", 
   mainColor: "rgb(242, 250, 255)", 
   accentColor: "rgb(96, 117, 134)",
+  // backgroundColor: 	"rgb(255, 255, 255)", 
+  // mainColor: "rgb(17, 17, 17)", 
+  // accentColor: "rgb(96, 117, 134)",
   //accentColor: "rgb(3, 27, 81)",
   xScale: 1,
   yScale: 1,
@@ -98,12 +101,26 @@ let config = {
     if(!detailPageOpen) {
       displayTitle();   
       drawGoals();
-      menu.forEach((item) => item.show());
+      drawMenu();
       net.forEach((item) => item.show());
       helpMessage();
     }
     drawBalls();
   }
+
+
+/*
+  drawMenu()
+*/
+function drawMenu() {
+  menu.forEach((item) => {
+    if(item.onMenu(mouseX, mouseY)) {
+      item.highlight();
+    } else {
+      item.show();
+    }
+  });
+}
 
 
 /*
@@ -499,8 +516,26 @@ function resetBalls() {
     The ball is made moveable and the strength vector is applied as a force.
 */
   function mouseReleased() {
+    menu.forEach((item) => {
+      if(item.onMenu(mouseX, mouseY)) {
+        if(item.selected) {
+          item.selected = false;
+          selectedCategory = "All";
+        } else {
+          item.selected = true;
+          selectedCategory = item.category;
+        }
+      } else {
+        item.selected = false;
+      }
+    });
     if(!detailPageOpen) {
       imageBalls.forEach((ball, index) => {
+        if(selectedCategory !== "All" && ball.category !== selectedCategory) {
+          ball.display = false;
+        } else {
+          ball.display = true;
+        }
         if(ball.clicked && (ball.xPower || ball.yPower)) {
           let strength = Matter.Vector.create(-ball.xPower*config.sensitivity/30000, -ball.yPower*config.sensitivity/30000);
           let ballPos = Matter.Vector.create(ball.x, ball.y);
@@ -516,19 +551,6 @@ function resetBalls() {
           ball.launched();
           totalShots++;
         } 
-      });
-      menu.forEach((item) => {
-        if(item.onMenu(mouseX, mouseY)) {
-          if(item.selected) {
-            item.selected = false;
-            selectedCategory = "All";
-          } else {
-            item.selected = true;
-            selectedCategory = item.category;
-          }
-        } else {
-          item.selected = false;
-        }
       });  
       return false;
     }
