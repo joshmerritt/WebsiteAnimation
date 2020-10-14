@@ -274,7 +274,7 @@ function addResetButton() {
   if(resetButton) resetButton.remove();
   resetButton = createButton("↻");
   resetButton.addClass("reset");
-  resetButton.mousePressed(resetBalls);
+  resetButton.mouseClicked(resetBalls);
 }
 
 
