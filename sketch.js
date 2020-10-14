@@ -67,7 +67,6 @@ let config = {
       let tempString = loadStrings(`assets/${item}.txt`);
       pageInfo.push(tempString);
     }
-    titleFont = loadFont(`assets/fonts/${config.fontName}.otf`);
   }
 
   function preload() {
@@ -111,7 +110,6 @@ let config = {
 function helpMessage() {
   if((totalShots === 3 || totalShots === 4) && !clickedToOpen && !detailPageOpen) {
     push();
-    textFont(titleFont);
     textAlign(CENTER);
     textSize(iconSize/4)
     fill(config.mainColor);

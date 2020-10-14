@@ -31,8 +31,6 @@ class Menu {
       push();
       // rectMode(CENTER);
       // rect(this.position.x, this.position.y, this.width, this.height);
-      
-      textFont(titleFont);
       textAlign(CENTER);
       textSize(iconSize/4)
       fill(config.mainColor); 
