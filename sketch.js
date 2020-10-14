@@ -7,7 +7,9 @@ let categories = [];
 let pageInfo = [];
 let menu = [];
 let net = [];
-let iconSize, 
+let playfieldWidth,
+playfieldHeight,
+iconSize, 
 gridStartX, 
 gridStartY, 
 gridCurrentX, 
@@ -113,7 +115,7 @@ function helpMessage() {
     textAlign(CENTER);
     textSize(iconSize/4)
     fill(config.mainColor);
-    text("Double click the ball if you're tired of playing", gridStartX, windowHeight*0.9);
+    text("Double click the ball if you're tired of playing", gridStartX, playfieldHeight*0.9);
     pop();
   }
 }
@@ -123,7 +125,7 @@ function helpMessage() {
     Used to display a copy of the website within the website ball
 */
   function captureWebsite() {
-    let minDim = Math.min(windowWidth, windowHeight);
+    let minDim = Math.min(playfieldWidth, playfieldHeight);
     let thisWebsite = get(0, 0, minDim, minDim);
     //imageBalls[1].ballImage = thisWebsite;
     imageBalls[1].fullImage = thisWebsite;
@@ -190,10 +192,9 @@ function trackCollisions() {
 */
   function createBalls() {
     imageBalls = [];
-    imgs.forEach(function(img, i) {
-      //console.log("gridStartX, Y, gridCurrentX, Y", gridStartX, ", ", gridStartY, ", ", gridCurrentX, ", ", gridCurrentY);
-      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, pageInfo[i], i);
-      if(gridCurrentX + iconSize + config.gridSpacing <= windowWidth) {
+    imgs.forEach((img, i) => {
+      imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, iconSize, pageInfo[i], i);
+      if(gridCurrentX + iconSize + config.gridSpacing <= playfieldWidth) {
         gridCurrentX += config.gridSpacing;
       } else {
         gridCurrentX = gridStartX;
@@ -213,7 +214,9 @@ function trackCollisions() {
     Uses built in p5.js methods
 */
   function windowResized() {
-    resizeCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
+    playfieldWidth = playfieldWidth;
+    playfieldHeight = playfieldHeight;
+    resizeCanvas(playfieldWidth*config.xScale, playfieldHeight*config.yScale);
     setDisplaySize();
     imageBalls.forEach(function(ball){
       if(ball.pageOpen) {
@@ -254,7 +257,7 @@ function addBoundary() {
 */
 function addContactUs() {
   if (contactUsElement) contactUsElement.remove();
-  contactUsElement = new ContactUs({x: gridStartX, y: windowHeight*0.93}, config.contactLinkText, config.contactLinkAddress);
+  contactUsElement = new ContactUs({x: gridStartX, y: playfieldHeight*0.93}, config.contactLinkText, config.contactLinkAddress);
   contactUsElement.add();
 }
 
@@ -278,16 +281,18 @@ function addResetButton() {
     Called during set up or when the window is resized
 */
   function setDisplaySize() {
-    screenArea = windowWidth * windowHeight;
+    playfieldWidth = windowWidth;
+    playfieldHeight = windowHeight;
+    screenArea = playfieldWidth * playfieldHeight;
     config.sensitivity = Math.pow(screenArea, 1/3);
-    portraitMode = windowHeight > windowWidth;
-    iconSize =  Math.min(windowWidth/config.iconScale, windowHeight/config.iconScale);
+    portraitMode = playfieldHeight > playfieldWidth;
+    iconSize =  Math.min(playfieldWidth/config.iconScale, playfieldHeight/config.iconScale);
     config.gridSpacing = 2*iconSize;
-    goalPosition = {x: 0.33*iconSize, y:windowHeight*0.4};
+    goalPosition = {x: 0.33*iconSize, y:playfieldHeight*0.4};
     goalWidth = iconSize*1.4;
     gridStartX = goalPosition.x + goalWidth + 2*iconSize;
     gridStartY = goalPosition.y;
-    if(windowWidth < windowHeight) gridStartY -= iconSize;
+    if(playfieldWidth < playfieldHeight) gridStartY -= iconSize;
     gridCurrentX = gridStartX;
     gridCurrentY = gridStartY;
   } 
@@ -385,24 +390,24 @@ function createGoals() {
     Shows the page creator's name with a brief description of the site
 */
 function displayTitle() {
-  if(windowHeight > windowWidth) {
+  if(playfieldHeight > playfieldWidth) {
     let splitTitle = config.titleText.replace(".", "").split(", ");
     let splitSubtitle = config.subTitleText.split(". ");
     let tempTextSize = iconSize/2.5;
     push();
     textSize(tempTextSize);
     fill(config.mainColor); 
-    splitTitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.07 + tempTextSize*1.1*index));
+    splitTitle.forEach((item, index) => text(item, playfieldWidth/8, playfieldHeight*0.07 + tempTextSize*1.1*index));
     textSize(iconSize/4);
-    splitSubtitle.forEach((item, index) => text(item, windowWidth/8, windowHeight*0.07 + tempTextSize*splitTitle.length + index*tempTextSize));
+    splitSubtitle.forEach((item, index) => text(item, playfieldWidth/8, playfieldHeight*0.07 + tempTextSize*splitTitle.length + index*tempTextSize));
     pop();
   } else {
     push();
     textSize(iconSize/2.5);
     fill(config.mainColor); 
-    text(config.titleText, windowWidth/8, windowHeight/6);
+    text(config.titleText, playfieldWidth/8, playfieldHeight/6);
     textSize(iconSize/4);
-    text(config.subTitleText, windowWidth/8, windowHeight/4.2);
+    text(config.subTitleText, playfieldWidth/8, playfieldHeight/4.2);
     pop();
   }
 }
@@ -421,20 +426,20 @@ function resetBalls() {
 }
 
 
-/*
-  doubleClicked()
-    Allows for viewing projects without having to make the ball
-*/
-function doubleClicked(event) {
-  event.preventDefault();
-  imageBalls.forEach(function(ball) {
-    if(ball.onBall(mouseX, mouseY) && ball.clicked) {
-      ball.doubleClicked = "Double Clicked";
-      clickedToOpen = true;
-      ball.showDetail();
-    } 
-  });
-}
+// /*
+//   doubleClicked()
+//     Allows for viewing projects without having to make the ball
+// */
+// function doubleClicked(event) {
+//   event.preventDefault();
+//   imageBalls.forEach(function(ball) {
+//     if(ball.onBall(mouseX, mouseY) && ball.clicked) {
+//       ball.doubleClicked = "Double Clicked";
+//       clickedToOpen = true;
+//       ball.showDetail();
+//     } 
+//   });
+// }
 
 
 /*
@@ -467,9 +472,8 @@ function doubleClicked(event) {
         ball.display = true;
       }
       if(ball.onBall(mouseX, mouseY)) {
-        // let currentTime = Date.now();
-        // if(currentTime - ball.lastClickTime < 500);
-        if(ball.clicked) ball.showDetail();
+        if(ball.clicked && (Date.now() - ball.lastClickTime) < 300) ball.showDetail();
+        ball.lastClickTime = Date.now();
         ball.clicked = true;
         ball.clickedCount++;
       } else {

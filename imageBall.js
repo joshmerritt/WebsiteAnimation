@@ -5,14 +5,14 @@
 */
 
 class ImageBall {
-    constructor(img, xPos, yPos, info, index) {
+    constructor(img, xPos, yPos, size, info, index) {
       let defaultOptions = {
         friction: 0.5,
         frictionAir: 0.001,
         restitution: 0.66,
         isStatic: true,
       };
-      this.body = Matter.Bodies.circle(xPos, yPos, iconSize/2, defaultOptions);
+      this.body = Matter.Bodies.circle(xPos, yPos, size, defaultOptions);
       this.index = index;
       this.parseInfo = function() {
         let tempInfo = [];
@@ -35,7 +35,7 @@ class ImageBall {
       this.ballImage = img.get();  
       this.x = xPos;
       this.y = yPos;
-      this.r = iconSize/2;
+      this.r = size/2;
       this.xPower = 0;
       this.yPower = 0;
       this.clicked = false;
@@ -90,19 +90,19 @@ class ImageBall {
       // if(!this.ballExpanded) {
       //   this.expandBall();
       // } else {
-        let circleX = windowWidth*0.733;
-        let circleY = windowHeight*0.5;
-        let circleR = Math.sqrt((Math.pow(windowWidth/1.75, 2) + Math.pow(windowHeight/1.75, 2)));
-        let imageSize = Math.min(windowHeight, windowWidth/2)*0.90;
-        let imageX = Math.min(windowHeight, windowWidth)*0.025;
-        let imageY = Math.max((windowHeight - imageSize)/2, Math.min(windowHeight, windowWidth)*0.025);
+        let circleX = playfield.width*0.733;
+        let circleY = playfield.height*0.5;
+        let circleR = Math.sqrt((Math.pow(playfield.width/1.75, 2) + Math.pow(playfield.height/1.75, 2)));
+        let imageSize = Math.min(playfield.height, playfield.width/2)*0.90;
+        let imageX = Math.min(playfield.height, playfield.width)*0.025;
+        let imageY = Math.max((playfield.height - imageSize)/2, Math.min(playfield.height, playfield.width)*0.025);
         let tempImage = this.fullImage;
-        if(windowHeight > windowWidth) {
-          imageSize = Math.min(windowWidth, windowHeight/2) - Math.min(windowHeight, windowWidth)*0.05;
-          imageX = Math.max((windowWidth - imageSize)/2, Math.min(windowHeight, windowWidth)*0.025);
-          imageY = Math.min(windowHeight, windowWidth)*0.025;
-          circleX = windowWidth*0.5;
-          circleY = windowHeight*0.75
+        if(playfield.height > playfield.width) {
+          imageSize = Math.min(playfield.width, playfield.height/2) - Math.min(playfield.height, playfield.width)*0.05;
+          imageX = Math.max((playfield.width - imageSize)/2, Math.min(playfield.height, playfield.width)*0.025);
+          imageY = Math.min(playfield.height, playfield.width)*0.025;
+          circleX = playfield.width*0.5;
+          circleY = playfield.height*0.75
         }
         if ( this.pageOpen === false ) {
           this.pageOpen = true;
@@ -244,8 +244,8 @@ class ImageBall {
       let x = this.body.position.x;
       let y = this.body.position.y;
       let radius = this.body.circleRadius*2;
-      let offX = ((x + radius) < 0 || (x - radius) > windowWidth);
-      let offY = (((y + radius) < -windowHeight*4) || ((y - radius) > windowHeight));
+      let offX = ((x + radius) < 0 || (x - radius) > playfield.width);
+      let offY = (((y + radius) < -playfield.height*4) || ((y - radius) > playfield.height));
       if(offY) {
         return true;
       } else if(offX) {
