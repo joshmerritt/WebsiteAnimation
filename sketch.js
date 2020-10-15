@@ -7,6 +7,8 @@ let categories = [];
 let pageInfo = [];
 let menu = [];
 let net = [];
+let loaded = false;
+let loadCount = 0;
 let playfieldWidth,
 playfieldHeight,
 iconSize, 
@@ -65,27 +67,23 @@ let config = {
 */
   function preLoadAssets() {
     for (const item of config.itemsToDisplay) {
-      imgs.push(loadImage(`assets/images/${item}.jpg`));
+      imgs.push(loadImage(`assets/images/${item}.jpg`, imageLoads));
       let tempString = loadStrings(`assets/${item}.txt`);
       pageInfo.push(tempString);
     }
+    console.log("loaded temp pageInfo, imgs: ", pageInfo, ", ", imgs);
   }
 
-  function preload() {
-    preLoadAssets();
-  }
 
   function setup() {
     history.pushState({'page_id': 1}, document.title, location.href);
     playfield = createCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
-    // let canvasElement = document.getElementsByTagName("canvas")[0];
-    // canvasElement.addEventListener("dblclick", doubleClicked, false);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
     console.log("physics engine", world); 
     background(config.backgroundColor);
-    loadAssets();
+    preLoadAssets();
   }
 
 /*
@@ -93,18 +91,33 @@ let config = {
     Native p5.js function used to continually loop the program
 */
   function draw() {
+    if(loaded) { 
+      if(!detailPageOpen) {
+        displayTitle();   
+        drawGoals();
+        menu.forEach((item) => item.show());
+        net.forEach((item) => item.show());
+        helpMessage();
+      }
+      drawBalls();
+    } else {
+      //stroke(config.mainColor);
+      text("Welcome to my portfolio");
+    }
     Matter.Engine.update(engine);
     background(config.backgroundColor); 
-    if(!detailPageOpen) {
-      displayTitle();   
-      drawGoals();
-      menu.forEach((item) => item.show());
-      net.forEach((item) => item.show());
-      helpMessage();
-    }
-    drawBalls();
   }
 
+
+/*
+  imageLoaded()
+*/  
+function imageLoads() {
+  loadCount++;
+  if(loadCount === 8) {
+    loadAssets();
+  }
+}
 
 /*
   helpMessage();
@@ -141,14 +154,15 @@ function helpMessage() {
     Invisible barriers are in place to prevent reaching the menu except from above
 */
   function loadAssets() {
-    createBalls();
-    createGoals();
-    createMenu();
+    console.log("config  items length, imgs length, pageInfo length", config.itemsToDisplay.length, ", ", imgs.length, ", ", pageInfo.length);
     addResetButton();
     addContactUs();
     addBoundary();
-    trackCollisions();
     createOutline();
+    createBalls();
+    createGoals();
+    createMenu();
+    trackCollisions();
   }
 
 /*
