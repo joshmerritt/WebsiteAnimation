@@ -282,9 +282,13 @@ class ImageBall {
       angleMode(DEGREES);
       let arrowLength = iconSize/8;
       let angle = 45;
+      let lineStart = {
+        x: this.x - this.r*sin(angle),
+        y: this.y - this.r*cos(angle)
+      };
       let lineEnd = {
-        x: this.x - iconSize/2,
-        y: this.y - iconSize/2
+        x: lineStart.x - this.r,
+        y: lineStart.y - this.r
       };
       let pointA = {
         x: lineEnd.x - sin(angle)*arrowLength*2,
@@ -304,7 +308,7 @@ class ImageBall {
       noFill();
       circle(this.x, this.y, this.r*2, this.r*2);
       fill(config.accentColor);
-      line(this.x, this.y, lineEnd.x , lineEnd.y);
+      line(lineStart.x, lineStart.y, lineEnd.x , lineEnd.y);
       triangle(pointA.x, pointA.y, pointB.x, pointB.y, pointC.x, pointC.y);
       pop();
       angleMode(RADIANS);
@@ -323,8 +327,12 @@ class ImageBall {
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/config.sensitivity*powerScale;
       this.yPower += (mouseY - pmouseY)/config.sensitivity*powerScale;
-      let currentPosX = this.x - (this.xPower);
-      let currentPosY = this.y - (this.yPower);
+      let lineStart = {
+        x: this.x - this.r*sin(45),
+        y: this.y - this.r*cos(45)
+      };
+      let currentPosX = lineStart.x - (this.xPower);
+      let currentPosY = lineStart.y - (this.yPower);
       let arrowLength = iconSize/8;
       let angle = atan2(this.xPower, this.yPower);
       let pointA = {
@@ -343,7 +351,7 @@ class ImageBall {
       stroke(config.accentColor);
       strokeWeight(5);
       fill(config.accentColor);
-      line(this.x, this.y, currentPosX, currentPosY);
+      line(lineStart.x, lineStart.y, currentPosX, currentPosY);
       triangle(pointA.x, pointA.y, pointB.x, pointB.y, pointC.x, pointC.y);
       pop();
       angleMode(RADIANS);
