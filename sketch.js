@@ -446,20 +446,19 @@ function resetBalls() {
 }
 
 
-// /*
-//   doubleClicked()
-//     Allows for viewing projects without having to make the ball
-// */
-// function doubleClicked(event) {
-//   event.preventDefault();
-//   imageBalls.forEach(function(ball) {
-//     if(ball.onBall(mouseX, mouseY) && ball.clicked) {
-//       ball.doubleClicked = "Double Clicked";
-//       clickedToOpen = true;
-//       ball.showDetail();
-//     } 
-//   });
-// }
+/*
+  keyPressed()
+    Built in function to trigger an action based upon a key press
+*/
+function keyPressed() {
+  if(detailPageOpen &&  (keyCode === BACKSPACE || keyCode === ESCAPE)) {
+    imageBalls.forEach(function(ball) {
+      if(ball.pageOpen) {
+        ball.removeDetailPage();
+      } 
+    });
+  }
+}
 
 
 /*

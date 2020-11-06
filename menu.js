@@ -40,14 +40,11 @@ class Menu {
     }
 
     onMenu(x, y) {
-        console.log("onMenu this", this, );
         let menuLength = this.category.length/20;
-        console.log("menu length", menuLength);
         let xMin = this.position.x - (menuLength*this.width);
         let xMax = this.position.x + (menuLength*this.width);
         let yMin = this.position.y - (this.height/2);
         let yMax = this.position.y;
-        console.log("bounds xmin, xmax, ymin, ymax", xMin, ", ", xMax, ", ", yMin, ", ", yMax);
         let onX = (x > xMin && x < xMax);
         let onY = (y > yMin && y < yMax);
         return onX && onY;
