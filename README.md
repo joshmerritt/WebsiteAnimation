@@ -7,6 +7,11 @@ Each "project" has an image and an about file with details. When an image is hov
 prompted to "aim," if they click and drag they can launch the "ball" towards the "goal" which is actually the menu.
 If the ball goes through the goal, the selected project is loaded full screen.
 
+#### Technology
+
+Javascript, CSS, HTML, Git, cPanel. I used a visualization library based upon the respected Processing.org, called p5.js, 
+along with a simple physics engine, matter.js. Both libraries are open-source and were easily accessible to an amatuer developer. 
+
 ### Creating your own website
 
 If you are interested in using my code to run your website, you'll need to:
@@ -15,7 +20,7 @@ If you are interested in using my code to run your website, you'll need to:
     - Update the sketch.js file to set your desired project display order
     - Create your description files for each project (see template)
     - Add your image and text files
-    - Host on a server of your choosing (I use namecheap linked to github for seemless deployment)
+    - Host on a server of your choosing (I use cpanel linked to github for automated deployment)
     - Send prospective employers and colleagues your site to show off your skills
 
 ## Project Plan
@@ -64,7 +69,7 @@ If you are interested in using my code to run your website, you'll need to:
     X Add doubleclick to allow for opening of item
     X Add configuration object
     X Refactor Reset logic
-    X Test side wall permibility
+    X Test side wall permeability
     X Add a mimic'd version of the website as the first ball
     X Add title
     X Add footer with contact links
@@ -91,7 +96,7 @@ If you are interested in using my code to run your website, you'll need to:
     X Prompt that double clicking is okay
     X Fix iphone support for double click, add in timestamp to mouse released
     _ Add loading screen that is actually button that says start
-    _ Create new site named: dadatadad.com, joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
+    X Create new site named: dadatadad.com, joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
 
 Secondary tasks
     _ Reorg codebase and complete documentation
