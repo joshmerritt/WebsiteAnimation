@@ -28,15 +28,13 @@ detailPageOpen,
 resetButton,
 titleElement,
 subtitleElement,
-contactUsElement,
-titleFont;
+contactUsElement;
 let clickedToOpen = false;
 let totalShots = 0;
 let totalMakes = 0;
 let totalOpens = 0;
 let selectedCategory = "All";
 let config = {
-  //  itemsToDisplay: ['thisWebsite', 'scoreboard', 'swingBet', 'coopDoor', 'googleDataStudio', 'powerBI', 'financialModels', 'flowchart'],
   itemsToDisplay: ['aboutMe', 'thisWebsite', 'swingBet', 'googleDataStudioOverview', 'powerBIConversionMetrics', 'arduinoScoreboard', 'arduinoCoopDoor', 'googleDataStudioServiceTechs'],
   backgroundColor: 	"rgb(17, 17, 17)", 
   mainColor: "rgb(242, 250, 255)", 
@@ -50,11 +48,10 @@ let config = {
   iconScale: 7,
   sensitivity: 1,
   gridSpacing: 1,
-  fontName: "Gidolinya-Regular",
   titleText: "Hello world, I am Josh Merritt.",
   subTitleText: "Honest. Data-driven. Product Management & Development. ",
   contactLinkText: "What problem can I help you solve?",
-  contactLinkAddress: "mailto:josh@wayfarerfarms.com"
+  contactLinkAddress: "mailto:josh@DaDataDad.com"
 };
 
 
@@ -86,7 +83,7 @@ let config = {
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
-    console.log("physics engine", world); 
+    console.log("matter.js engine.world", world); 
     background(config.backgroundColor);
     loadAssets();
   }

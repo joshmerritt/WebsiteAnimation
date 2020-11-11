@@ -97,13 +97,18 @@ class ImageBall {
         let circleX = playfield.width*0.733;
         let circleY = playfield.height*0.5;
         let circleR = Math.sqrt((Math.pow(playfield.width/1.75, 2) + Math.pow(playfield.height/1.75, 2)));
-        let imageSize = Math.min(playfield.height, playfield.width/2)*0.90;
+        let maxSize = Math.min(playfield.height, playfield.width/2)*0.90;
+        let imageSize = {
+          x: maxSize,
+          y: maxSize*this.fullImage.height/this.fullImage.width
+        };
         let imageX = Math.min(playfield.height, playfield.width)*0.025;
-        let imageY = Math.max((playfield.height - imageSize)/2, Math.min(playfield.height, playfield.width)*0.025);
+        let imageY = Math.max((playfield.height - imageSize.y)/2, Math.min(playfield.height, playfield.width)*0.025);
         let tempImage = this.fullImage;
+        console.log('tempImage', tempImage.width, tempImage.height);
         if(playfield.height > playfield.width) {
           imageSize = Math.min(playfield.width, playfield.height/2) - Math.min(playfield.height, playfield.width)*0.05;
-          imageX = Math.max((playfield.width - imageSize)/2, Math.min(playfield.height, playfield.width)*0.025);
+          imageX = Math.max((playfield.width - imageSize.x)/2, Math.min(playfield.height, playfield.width)*0.025);
           imageY = Math.min(playfield.height, playfield.width)*0.025;
           circleX = playfield.width*0.5;
           circleY = playfield.height*0.75
@@ -122,8 +127,8 @@ class ImageBall {
         // ellipseMode(CENTER);
         // circle(circleX, circleY, circleR);
         strokeWeight(4);
-        rect(imageX, imageY, imageSize, imageSize);
-        image(tempImage, imageX, imageY, imageSize, imageSize);
+        rect(imageX, imageY, imageSize.x, imageSize.y);
+        image(tempImage, imageX, imageY, imageSize.x, imageSize.y);
         pop();
       //}
       return this;
@@ -322,7 +327,7 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
     aim() {
-      let powerScale = 26;
+      let powerScale = 20;
       if(portraitMode) powerScale = powerScale/2
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/config.sensitivity*powerScale;

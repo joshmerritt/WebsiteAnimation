@@ -50,16 +50,11 @@ table {
 }
 /* End of Reset */
 
-@font-face {
-  font-family: gidole;
-  src: url(assets/fonts/Gidolinya-Regular.otf);
-}
-
 body {
     background:rgb(17, 17, 17);
     overflow: hidden;
     overscroll-behavior: none;
-    font-family: gidole, "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-family: Helvetica, Arial, "Lucida Grande", sans-serif;
     
 }
 
@@ -77,10 +72,11 @@ h1 {
   font-size: 1.1em;
   padding-bottom: 1em;
   font-weight: 900;
+  text-align: center;
 }
 
 td {
-  padding: 0.2em;
+  padding: 0.3em;
   font-size: .85em;
 }
 
