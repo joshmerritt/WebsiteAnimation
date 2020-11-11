@@ -33,8 +33,8 @@ class Menu {
       // rect(this.position.x, this.position.y, this.width, this.height);
       textAlign(CENTER);
       textSize(iconSize/4)
-      fill(config.mainColor); 
-      if(this.selected) fill(config.accentColor);
+      this.onMenu(mouseX, mouseY) ? textStyle(BOLD) : textStyle(NORMAL); 
+      this.selected ? fill(config.secondaryColor) : fill(config.mainColor);
       text(this.category, this.position.x, this.position.y);
       pop();
     }
@@ -48,15 +48,5 @@ class Menu {
         let onX = (x > xMin && x < xMax);
         let onY = (y > yMin && y < yMax);
         return onX && onY;
-    }
-
-    highlight() {
-        push();
-        textAlign(CENTER);
-        textSize(iconSize/4)
-        fill(config.mainColor);
-        textStyle(BOLD);
-        text(this.category, this.position.x, this.position.y);
-        pop();
     }
 }

@@ -94,9 +94,9 @@ class ImageBall {
       // } else {
         totalOpens++;
         this.makes++;
-        let circleX = playfield.width*0.733;
-        let circleY = playfield.height*0.5;
-        let circleR = Math.sqrt((Math.pow(playfield.width/1.75, 2) + Math.pow(playfield.height/1.75, 2)));
+        // let circleX = playfield.width*0.733;
+        // let circleY = playfield.height*0.5;
+        // let circleR = Math.sqrt((Math.pow(playfield.width/1.75, 2) + Math.pow(playfield.height/1.75, 2)));
         let maxSize = Math.min(playfield.height, playfield.width/2)*0.90;
         let imageSize = {
           x: maxSize,
@@ -105,15 +105,18 @@ class ImageBall {
         let imageX = Math.min(playfield.height, playfield.width)*0.025;
         let imageY = Math.max((playfield.height - imageSize.y)/2, Math.min(playfield.height, playfield.width)*0.025);
         let tempImage = this.fullImage;
-        console.log('tempImage', tempImage.width, tempImage.height);
-        if(playfield.height > playfield.width) {
-          imageSize = Math.min(playfield.width, playfield.height/2) - Math.min(playfield.height, playfield.width)*0.05;
+        if(portraitMode) {
+          console.log("portraitMode", portraitMode);
+          maxSize = playfield.width*0.85;
+          console.log('maxSize', maxSize);
+          imageSize = {
+            x: maxSize,
+            y: maxSize*this.fullImage.height/this.fullImage.width
+          };
           imageX = Math.max((playfield.width - imageSize.x)/2, Math.min(playfield.height, playfield.width)*0.025);
-          imageY = Math.min(playfield.height, playfield.width)*0.025;
-          circleX = playfield.width*0.5;
-          circleY = playfield.height*0.75
+          imageY = Math.min(playfield.height, playfield.width)*0.075;
         }
-        if ( this.pageOpen === false ) {
+        if (this.pageOpen === false) {
           this.pageOpen = true;
           detailPageOpen = true;
           this.createDetailElements();
@@ -147,7 +150,7 @@ class ImageBall {
       this.exitButton = createButton("X");
       this.exitButton.addClass("ExitButton");
       this.exitButton.mouseClicked(this.removeDetailPage);
-      this.linkElement = createA(`${this.link}`, "See more details", "_blank"); 
+      this.linkElement = createA(`${this.link}`, "Learn more", "_blank"); 
       this.tableElement = createElement("table");
       this.goalRow = createElement("tr");
       this.goalTitle = createElement("td", "Goal");
@@ -327,7 +330,7 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
     aim() {
-      let powerScale = 20;
+      let powerScale = 32;
       if(portraitMode) powerScale = powerScale/2
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/config.sensitivity*powerScale;

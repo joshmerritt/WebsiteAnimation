@@ -34,15 +34,14 @@ let totalShots = 0;
 let totalMakes = 0;
 let totalOpens = 0;
 let selectedCategory = "All";
+
+// Config object is used to store values for variables which are expected to be customized per user deployment preferences
 let config = {
   itemsToDisplay: ['aboutMe', 'thisWebsite', 'swingBet', 'googleDataStudioOverview', 'powerBIConversionMetrics', 'arduinoScoreboard', 'arduinoCoopDoor', 'googleDataStudioServiceTechs'],
   backgroundColor: 	"rgb(17, 17, 17)", 
   mainColor: "rgb(242, 250, 255)", 
+  secondaryColor: "rgb(96, 117, 134)",
   accentColor: "rgb(242, 250, 255)",
-  // backgroundColor: 	"rgb(255, 255, 255)", 
-  // mainColor: "rgb(17, 17, 17)", 
-  // accentColor: "rgb(96, 117, 134)",
-  // accentColor: "rgb(3, 27, 81)",
   xScale: 1,
   yScale: 1,
   iconScale: 7,
@@ -61,7 +60,6 @@ let config = {
     and available to the system before attempting to build the page.
     Loops through itemsToDisplay array to load images and text description files.
     Stores the images in the imgs array and the descriptions in the pageInfo array.
-
 */
   function preLoadAssets() {
     for (const item of config.itemsToDisplay) {
@@ -71,15 +69,23 @@ let config = {
     }
   }
 
+
+/*
+  preload()
+    Native p5.js function used to load assets prior to running the rest of the program  
+*/
   function preload() {
     preLoadAssets();
   }
 
+
+/*
+  setup()
+    Native p5.js function, run once when the program is loaded
+*/
   function setup() {
     history.pushState({'page_id': 1}, document.title, location.href);
     playfield = createCanvas(windowWidth*config.xScale, windowHeight*config.yScale);
-    // let canvasElement = document.getElementsByTagName("canvas")[0];
-    // canvasElement.addEventListener("dblclick", doubleClicked, false);
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
@@ -87,6 +93,7 @@ let config = {
     background(config.backgroundColor);
     loadAssets();
   }
+
 
 /*
   draw()
@@ -108,14 +115,13 @@ let config = {
 
 /*
   drawMenu()
+    Called by the draw function in order to show the menu each time.
+    Loops through all menu items and checks if they have been selected or hovered over,
+    if so, changes the display to reflect the user interaction for the applicable menu item
 */
 function drawMenu() {
   menu.forEach((item) => {
-    if(item.onMenu(mouseX, mouseY)) {
-      item.highlight();
-    } else {
-      item.show();
-    }
+      item.show(); 
   });
 }
 
@@ -167,7 +173,7 @@ function helpMessage() {
 
 /*
   createOutline()
-    Uses a second p5 graphics object to make images appear circular
+    Uses a second p5 graphics object to make images appear circular by applying a "mask"
 */ 
 function createOutline() {
   if(imageMask) imageMask.remove();
@@ -274,7 +280,7 @@ function addBoundary() {
 */
 function addContactUs() {
   if (contactUsElement) contactUsElement.remove();
-  contactUsElement = new ContactUs({x: gridStartX, y: playfieldHeight*0.93}, config.contactLinkText, config.contactLinkAddress);
+  contactUsElement = new ContactUs({x: gridStartX, y: playfieldHeight*0.95}, config.contactLinkText, config.contactLinkAddress);
   contactUsElement.add();
 }
 
@@ -286,7 +292,7 @@ function addContactUs() {
 */
 function addResetButton() {
   if(resetButton) resetButton.remove();
-  resetButton = createButton("↻");
+  resetButton = createButton("Reset");
   resetButton.addClass("reset");
   resetButton.mouseClicked(resetBalls);
 }
@@ -332,6 +338,7 @@ function createMenu() {
   });
 }
 
+
 /*
 createGoals()
   Adds 2 visible "goalposts" to the field
@@ -350,6 +357,7 @@ function createGoals() {
     net.push(new Net(goalPosition.x + i * goalWidth + netOffset, goalPosition.y + netHeight/2, netHeight));
   };
 }
+
 
 /*
   drawBalls()

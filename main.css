@@ -64,7 +64,7 @@ div {
   align-items: center;
   justify-content: center;
   color: rgb(242, 250, 255);
-  font-size: 3.3vmin;
+  font-size: 3vmin;
   margin: 2.5vmin;
 }
 
@@ -104,11 +104,11 @@ td:first-child {
   right: 2.5vmin;
   bottom: 1vmin;
   background-color: #F2FAFF;
-  font-size: 2.5vmin;
+  font-size: 1vmin;
 }
 
 a {
-  padding: 0.5em;
+  padding: 2.5em;
   color:  #F2FAFF;
 }
 
@@ -131,10 +131,13 @@ a {
   }
   .reset {
     position: absolute;
-    right: 5vmin;
-    bottom: 5vmin;
+    right: 4vmin;
+    bottom: 2vmin;
     background-color: #F2FAFF;
-    font-size: 5vmin;
+    font-size: 2vmin;
+  }
+  a {
+    padding: 0.75em;
   }
 }
 
@@ -142,7 +145,7 @@ a {
   .DetailPage {
     right: 0;
     font-weight: normal;
-    font-size: 2.3vmax;
+    font-size: 2vmax;
   }
 }
 
