@@ -280,7 +280,7 @@ function addBoundary() {
 */
 function addContactUs() {
   if (contactUsElement) contactUsElement.remove();
-  contactUsElement = new ContactUs({x: gridStartX, y: playfieldHeight*0.95}, config.contactLinkText, config.contactLinkAddress);
+  contactUsElement = new ContactUs({x: gridStartX, y: playfieldHeight*0.9}, config.contactLinkText, config.contactLinkAddress);
   contactUsElement.add();
 }
 
