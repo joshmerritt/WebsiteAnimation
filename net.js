@@ -10,7 +10,7 @@ class Net {
           restitution: 0.99,
         };
         this.netHeight = netHeight;
-        this.width = (playfieldWidth > playfieldHeight ? goalWidth/5 : goalWidth/3.5);
+        this.width = (portraitMode ? goalWidth/8 : goalWidth/8);
         this.body = Matter.Bodies.rectangle(xPos, yPos, this.width, netHeight, options);
         this.body.id = "Net"
         Matter.World.add(world, this.body);

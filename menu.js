@@ -34,7 +34,7 @@ class Menu {
       textAlign(CENTER);
       textSize(iconSize/4)
       this.onMenu(mouseX, mouseY) ? textStyle(BOLD) : textStyle(NORMAL); 
-      this.selected ? fill(config.secondaryColor) : fill(config.mainColor);
+      this.selected ? fill(config.mainColor) : fill(config.secondaryColor);
       text(this.category, this.position.x, this.position.y);
       pop();
     }

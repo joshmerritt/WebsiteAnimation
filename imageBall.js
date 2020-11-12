@@ -123,11 +123,8 @@ class ImageBall {
         }
         push();
         fill(config.accentColor);
-        stroke(config.mainColor);
-        // strokeWeight(0);
-        // ellipseMode(CENTER);
-        // circle(circleX, circleY, circleR);
-        strokeWeight(4);
+        stroke(config.accentColor);
+        strokeWeight(iconSize/10);
         rect(imageX, imageY, imageSize.x, imageSize.y);
         image(tempImage, imageX, imageY, imageSize.x, imageSize.y);
         pop();
@@ -328,8 +325,8 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
     aim() {
-      let powerScale = 32;
-      if(portraitMode) powerScale = powerScale/2
+      let powerScale = 40;
+      if(portraitMode) powerScale = powerScale/6;
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/config.sensitivity*powerScale;
       this.yPower += (mouseY - pmouseY)/config.sensitivity*powerScale;
@@ -356,6 +353,8 @@ class ImageBall {
       push();
       stroke(config.accentColor);
       strokeWeight(5);
+      noFill();
+      circle(this.x, this.y, this.r*2, this.r*2);
       fill(config.accentColor);
       line(lineStart.x, lineStart.y, currentPosX, currentPosY);
       triangle(pointA.x, pointA.y, pointB.x, pointB.y, pointC.x, pointC.y);

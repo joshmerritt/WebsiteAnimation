@@ -51,7 +51,7 @@ table {
 /* End of Reset */
 
 body {
-    background:rgb(17, 17, 17);
+    background:rgba(12, 18, 12, 1);
     overflow: hidden;
     overscroll-behavior: none;
     font-family: Helvetica, Arial, "Lucida Grande", sans-serif;
@@ -63,7 +63,7 @@ div {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: rgb(242, 250, 255);
+  color:rgba(199, 214, 213, 1);
   font-size: 3vmin;
   margin: 2.5vmin;
 }
@@ -103,13 +103,13 @@ td:first-child {
   position: absolute;
   right: 2.5vmin;
   bottom: 1vmin;
-  background-color: #F2FAFF;
+  background-color:rgba(89, 133, 177, 1);
   font-size: 1.5vmin;
 }
 
 a {
   padding: 2.5em;
-  color:  #F2FAFF;
+  color:  rgba(199, 214, 213, 1);
 }
 
 @media screen {
@@ -130,10 +130,8 @@ a {
     top: 47vh;
   }
   .reset {
-    position: absolute;
     right: 4vmin;
     bottom: 2vmin;
-    background-color: #F2FAFF;
     font-size: 2vmin;
   }
   a {

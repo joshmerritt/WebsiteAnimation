@@ -38,10 +38,10 @@ let selectedCategory = "All";
 // Config object is used to store values for variables which are expected to be customized per user deployment preferences
 let config = {
   itemsToDisplay: ['aboutMe', 'thisWebsite', 'swingBet', 'googleDataStudioOverview', 'powerBIConversionMetrics', 'arduinoScoreboard', 'arduinoCoopDoor', 'googleDataStudioServiceTechs'],
-  backgroundColor: 	"rgb(17, 17, 17)", 
-  mainColor: "rgb(242, 250, 255)", 
-  secondaryColor: "rgb(96, 117, 134)",
-  accentColor: "rgb(242, 250, 255)",
+  backgroundColor: "rgba(12, 18, 12, 1)", 
+  mainColor: "rgba(199, 214, 213, 1)", 
+  secondaryColor: "rgba(89, 133, 177, 1)",
+  accentColor: "rgba(89, 133, 177, 1)",
   xScale: 1,
   yScale: 1,
   iconScale: 7,
@@ -131,11 +131,11 @@ function drawMenu() {
 */
 function helpMessage() {
   if((totalShots === 3 || totalShots === 4) && !clickedToOpen && !detailPageOpen) {
+    let verticalPos = portraitMode ? playfieldHeight*.9 : playfieldHeight*.85;
     push();
-    textAlign(CENTER);
-    textSize(iconSize/4)
+    textSize(iconSize/6)
     fill(config.mainColor);
-    text("Double click the ball if you're tired of playing", gridStartX, playfieldHeight*0.9);
+    text("Double click the image if you're tired of playing.", playfieldWidth/8, verticalPos);
     pop();
   }
 }
@@ -295,6 +295,9 @@ function addResetButton() {
   resetButton = createButton("Reset");
   resetButton.addClass("reset");
   resetButton.mouseClicked(resetBalls);
+  resetButton.mouseClicked(windowResized);
+  resetButton.touchEnded(resetBalls);
+  resetButton.touchEnded(windowResized);
 }
 
 
@@ -332,7 +335,7 @@ function createMenu() {
   categories.forEach((category, index) => {
     let menuPos = {
       x: goalPosition.x + goalWidth/2,
-      y: goalPosition.y + (index+1)*0.7*iconSize
+      y: goalPosition.y + (index+1)*0.4*iconSize
     };
     menu.push(new Menu(menuPos, category, index));
   });
@@ -349,9 +352,9 @@ function createGoals() {
   net.forEach((net) => Matter.World.remove(world, net.body));
   goals = [];
   net = [];
-  const netHeight = 0.8*categories.length*iconSize;
+  const netHeight = 0.4*categories.length*iconSize;
   for(let i = 0; i < 2; i++){
-    let netOffset = -iconSize/6;
+    let netOffset = 0;
     if(i) netOffset = netOffset*-1;
     goals[i] = new Goal(goalPosition.x + i * goalWidth, goalPosition.y, iconSize/7.5, i);
     net.push(new Net(goalPosition.x + i * goalWidth + netOffset, goalPosition.y + netHeight/2, netHeight));
@@ -415,7 +418,7 @@ function createGoals() {
     Shows the page creator's name with a brief description of the site
 */
 function displayTitle() {
-  if(playfieldHeight > playfieldWidth) {
+  if(portraitMode) {
     let splitTitle = config.titleText.replace(".", "").split(", ");
     let splitSubtitle = config.subTitleText.split(". ");
     let tempTextSize = iconSize/2.5;
@@ -529,10 +532,9 @@ function keyPressed() {
           item.selected = true;
           selectedCategory = item.category;
         }
-      } else {
-        item.selected = false;
       }
     });
+    menu.forEach((item) => selectedCategory !== item.category ? item.selected = false : item.selected = true);
     if(!detailPageOpen) {
       imageBalls.forEach((ball, index) => {
         if(selectedCategory !== "All" && ball.category !== selectedCategory) {
