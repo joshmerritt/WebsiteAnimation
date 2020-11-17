@@ -29,6 +29,7 @@ resetButton,
 titleElement,
 subtitleElement,
 contactUsElement;
+let showDemo = true;
 let clickedToOpen = false;
 let totalShots = 0;
 let totalMakes = 0;
@@ -111,7 +112,32 @@ let config = {
       helpMessage();
     }
     drawBalls();
+    if(showDemo) demo();
   }
+
+
+/*
+  demo()
+    Used to provide a demonstration of the launching feature of the website
+    Show only once, on the initial load
+*/
+  function demo() {
+    let ball = imageBalls[0];
+    power = portraitMode ? 6.6 : 66;
+    let strength = Matter.Vector.create(-power*config.sensitivity/config.powerAdjustment, -power*config.sensitivity/config.powerAdjustment);
+    let ballPos = Matter.Vector.create(ball.x, ball.y);
+    let ballCatIndex = categories.findIndex((category) => category === ball.category); 
+    if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
+    ball.body.collisionFilter = {
+      'group': ballCatIndex + 1,
+      'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
+      'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
+    };
+    Matter.Body.setStatic(ball.body, false);
+    Matter.Body.applyForce(ball.body, ballPos, strength);
+    ball.launched();
+    showDemo = false;
+}
 
 
 /*
@@ -546,6 +572,7 @@ function keyPressed() {
         }
         if(ball.clicked && (ball.xPower || ball.yPower)) {
           let strength = Matter.Vector.create(-ball.xPower*config.sensitivity/config.powerAdjustment, -ball.yPower*config.sensitivity/config.powerAdjustment);
+          console.log('ball.xPower, ball.yPower, strength', ball.xPower, ", ", ball.yPower, ", ", strength);
           let ballPos = Matter.Vector.create(ball.x, ball.y);
           let ballCatIndex = categories.findIndex((category) => category === ball.category); 
           if(ball.inOriginalPosition) Matter.World.add(world, ball.body);

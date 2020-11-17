@@ -106,7 +106,7 @@ class ImageBall {
         let imageY = Math.max((playfield.height - imageSize.y)/2, Math.min(playfield.height, playfield.width)*0.025);
         let tempImage = this.fullImage;
         if(portraitMode) {
-          maxSize = playfield.width*0.75;
+          maxSize = playfield.width*0.85;
           imageSize = {
             x: maxSize,
             y: maxSize*this.fullImage.height/this.fullImage.width
