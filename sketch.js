@@ -123,8 +123,8 @@ let config = {
 */
   function demo() {
     let ball = imageBalls[0];
-    power = portraitMode ? 6.6 : 66;
-    let strength = Matter.Vector.create(-power*config.sensitivity/config.powerAdjustment, -power*config.sensitivity/config.powerAdjustment);
+    power = portraitMode ? iconSize/10 : iconSize/2;
+    let strength = Matter.Vector.create(-power*config.sensitivity/config.powerAdjustment, -power*1.1*config.sensitivity/config.powerAdjustment);
     let ballPos = Matter.Vector.create(ball.x, ball.y);
     let ballCatIndex = categories.findIndex((category) => category === ball.category); 
     if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
@@ -139,6 +139,31 @@ let config = {
     showDemo = false;
 }
 
+
+// Returns a Promise that resolves after "ms" Milliseconds
+const timer = ms => new Promise(res => setTimeout(res, ms))
+
+async function demoAim(power, ball) {
+  while(ball.xPower < power) {
+    ball.xPower += 0.1;
+    ball.yPower += 0.111;
+    ball.aim();
+    await timer(3);
+  }
+  let strength = Matter.Vector.create(-ball.xPower*config.sensitivity/config.powerAdjustment, -ball.yPower*config.sensitivity/config.powerAdjustment);
+  let ballPos = Matter.Vector.create(ball.x, ball.y);
+  let ballCatIndex = categories.findIndex((category) => category === ball.category); 
+  if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
+  ball.body.collisionFilter = {
+    'group': ballCatIndex + 1,
+    'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
+    'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
+  };
+  Matter.Body.setStatic(ball.body, false);
+  Matter.Body.applyForce(ball.body, ballPos, strength);
+  ball.launched();
+  showDemo = false;
+}
 
 /*
   drawMenu()
@@ -336,7 +361,8 @@ function addResetButton() {
   function setDisplaySize() {
     playfieldWidth = windowWidth;
     playfieldHeight = windowHeight;
-    portraitMode = playfieldHeight > playfieldWidth;
+    portraitMode = ((playfieldHeight > playfieldWidth) || (playfieldWidth < 1000));
+    console.log('portraitMode', portraitMode);
     screenArea = playfieldWidth * playfieldHeight;
     config.sensitivity = Math.pow(screenArea, 1/3);
     config.powerAdjustment = portraitMode ? screenArea/20 : screenArea/100;
