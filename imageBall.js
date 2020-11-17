@@ -106,13 +106,13 @@ class ImageBall {
         let imageY = Math.max((playfield.height - imageSize.y)/2, Math.min(playfield.height, playfield.width)*0.025);
         let tempImage = this.fullImage;
         if(portraitMode) {
-          maxSize = playfield.width*0.85;
+          maxSize = playfield.width*0.80;
           imageSize = {
             x: maxSize,
             y: maxSize*this.fullImage.height/this.fullImage.width
           };
           imageX = Math.max((playfield.width - imageSize.x)/2, Math.min(playfield.height, playfield.width)*0.025);
-          imageY = Math.min(playfield.height, playfield.width)*0.075;
+          imageY = Math.min(playfield.height, playfield.width)*0.1;
         }
         if (this.pageOpen === false) {
           this.pageOpen = true;
