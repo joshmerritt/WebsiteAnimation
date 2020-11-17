@@ -3,5 +3,5 @@ Link: https://github.com/joshmerritt/websiteAnimation
 Category: Technology
 Goal: Create a fun and interactive way to showcase my creativity and experience with business and technology
 My Role: Creator, Designer, Developer, Engineer
-Technology: Javascript, CSS, HTML, Git, p5.js, matter.js
+Technology: JavaScript, CSS3, HTML5, Git, p5.js, matter.js
 Description: I created this website to showcase some of my favorite recent projects. It is coded to allow for a dynamic number of content tiles and is responsive to the size of the screen on which it is viewed.

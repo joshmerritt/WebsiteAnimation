@@ -177,6 +177,12 @@ class ImageBall {
       this.descRow.child(this.descDesc);
     }
 
+
+  /*
+    removeDetailPage()
+      When the user closes the detail page, removes the various elements 
+      and resets to the original state
+  */
     removeDetailPage() {
       selectedCategory = "All";
       detailPageOpen = false;
@@ -325,8 +331,8 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
     aim() {
-      let powerScale = 40;
-      if(portraitMode) powerScale = powerScale/6;
+      let powerScale = 50;
+      if(portraitMode) powerScale = powerScale/10;
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/config.sensitivity*powerScale;
       this.yPower += (mouseY - pmouseY)/config.sensitivity*powerScale;

@@ -13,7 +13,7 @@ iconSize,
 gridStartX, 
 gridStartY, 
 gridCurrentX, 
-gridCurentY,
+gridCurrentY,
 playfield,
 engine,
 world,
@@ -46,6 +46,7 @@ let config = {
   yScale: 1,
   iconScale: 7,
   sensitivity: 1,
+  powerAdjustment: 20000,
   gridSpacing: 1,
   titleText: "Hello world, I am Josh Merritt.",
   subTitleText: "Honest. Data-driven. Product Management & Development. ",
@@ -219,7 +220,7 @@ function trackCollisions() {
       imageBalls[i] = new ImageBall(img, gridCurrentX, gridCurrentY, iconSize, pageInfo[i], i);
       if(gridCurrentX + iconSize + config.gridSpacing <= playfieldWidth) {
         gridCurrentX += config.gridSpacing;
-      } else {
+      } else if(!(Object.is(imgs.length - 1, i))){
         gridCurrentX = gridStartX;
         gridCurrentY += config.gridSpacing;
       }
@@ -309,9 +310,10 @@ function addResetButton() {
   function setDisplaySize() {
     playfieldWidth = windowWidth;
     playfieldHeight = windowHeight;
+    portraitMode = playfieldHeight > playfieldWidth;
     screenArea = playfieldWidth * playfieldHeight;
     config.sensitivity = Math.pow(screenArea, 1/3);
-    portraitMode = playfieldHeight > playfieldWidth;
+    config.powerAdjustment = portraitMode ? screenArea/20 : screenArea/100;
     iconSize =  Math.min(playfieldWidth/config.iconScale, playfieldHeight/config.iconScale);
     config.gridSpacing = 2*iconSize;
     goalPosition = {x: 0.33*iconSize, y:playfieldHeight*0.4};
@@ -543,12 +545,12 @@ function keyPressed() {
           ball.display = true;
         }
         if(ball.clicked && (ball.xPower || ball.yPower)) {
-          let strength = Matter.Vector.create(-ball.xPower*config.sensitivity/30000, -ball.yPower*config.sensitivity/30000);
+          let strength = Matter.Vector.create(-ball.xPower*config.sensitivity/config.powerAdjustment, -ball.yPower*config.sensitivity/config.powerAdjustment);
           let ballPos = Matter.Vector.create(ball.x, ball.y);
           let ballCatIndex = categories.findIndex((category) => category === ball.category); 
           if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
           ball.body.collisionFilter = {
-            'group': ballCatIndex+1,
+            'group': ballCatIndex + 1,
             'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
             'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
           };

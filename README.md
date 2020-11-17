@@ -9,7 +9,7 @@ If the ball goes through the goal, the selected project is loaded full screen.
 
 #### Technology
 
-Javascript, CSS, HTML, Git, cPanel. I used a visualization library based upon the respected Processing.org, called p5.js, 
+JavaScript, CSS3, HTML5, Git, cPanel. I used a visualization library based upon the respected Processing.org, called p5.js, 
 along with a simple physics engine, matter.js. Both libraries are open-source and were easily accessible to an amatuer developer. 
 
 ### Creating your own website
@@ -37,7 +37,7 @@ If you are interested in using my code to run your website, you'll need to:
     - The thumbnail will only load the page if it passes through the goal posts
     - An invisible barrier will surround the menu/goal in order to only allow access through the goalposts
     - Each thumbnail will have an information page
-    = Categories will be dynamically derived from the project text files
+    - Categories will be dynamically derived from the project text files
     - Each category for the menu will be clickable
     - The names of the subcategories should be ordered in descending length
     - The playfield should always fill the screen
@@ -100,10 +100,9 @@ If you are interested in using my code to run your website, you'll need to:
 
 Secondary tasks
     _ Reorg codebase and complete documentation
-    _ Test slanted net
+    X Test slanted net
     _ Add some visual of the stats for number of shots and number made, % of projects opened
     _ Build display page to appear like the imageball is simply expanded to allow for full view of the page
-
     _ Add some special effect when a ball is made
     X Troubleshoot simultaneous collision issues
     
