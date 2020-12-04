@@ -25,6 +25,7 @@ goalWidth,
 screenArea,
 portraitMode,
 detailPageOpen,
+demoBall,
 resetButton,
 titleElement,
 subtitleElement,
@@ -94,6 +95,7 @@ let config = {
     console.log("matter.js engine.world", world); 
     background(config.backgroundColor);
     loadAssets();
+    //demo();
   }
 
 
@@ -112,7 +114,30 @@ let config = {
       helpMessage();
     }
     drawBalls();
-    if(showDemo) demo();
+    if(showDemo) {
+      demoBall = imageBalls[0];
+      power = portraitMode ? iconSize/11 : iconSize/2;
+      while(demoBall.xPower < power) {
+        console.log('ball.xPower, power', demoBall, " - ", demoBall.xPower, ", ", power);
+        demoBall.xPower += 0.01;
+        demoBall.yPower += 0.0101;
+        demoBall.show();
+        demoBall.demoAim();
+      }
+      let strength = Matter.Vector.create(-power*config.sensitivity/config.powerAdjustment, -power*1.3*config.sensitivity/config.powerAdjustment);
+      let ballPos = Matter.Vector.create(demoBall.x, demoBall.y);
+      let ballCatIndex = categories.findIndex((category) => category === demoBall.category); 
+      Matter.World.add(world, demoBall.body);
+      demoBall.body.collisionFilter = {
+        'group': ballCatIndex + 1,
+        'category': Math.pow(2, categories.findIndex(category => category === demoBall.category)),
+        'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
+      };
+      Matter.Body.setStatic(demoBall.body, false);
+      Matter.Body.applyForce(demoBall.body, ballPos, strength);
+      demoBall.launched();
+      showDemo = false; 
+    }
   }
 
 
@@ -122,48 +147,30 @@ let config = {
     Show only once, on the initial load
 */
   function demo() {
-    let ball = imageBalls[0];
-    power = portraitMode ? iconSize/10 : iconSize/2;
-    let strength = Matter.Vector.create(-power*config.sensitivity/config.powerAdjustment, -power*1.1*config.sensitivity/config.powerAdjustment);
-    let ballPos = Matter.Vector.create(ball.x, ball.y);
-    let ballCatIndex = categories.findIndex((category) => category === ball.category); 
-    if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
-    ball.body.collisionFilter = {
+    demoBall = imageBalls[0];
+    power = portraitMode ? iconSize/11 : iconSize/2;
+    while(demoBall.xPower < power) {
+      console.log('ball.xPower, power', demoBall, " - ", demoBall.xPower, ", ", power);
+      demoBall.xPower += 0.01;
+      demoBall.yPower += 0.0101;
+      demoBall.show();
+      demoBall.demoAim();
+    }
+    let strength = Matter.Vector.create(-power*config.sensitivity/config.powerAdjustment, -power*1.3*config.sensitivity/config.powerAdjustment);
+    let ballPos = Matter.Vector.create(demoBall.x, demoBall.y);
+    let ballCatIndex = categories.findIndex((category) => category === demoBall.category); 
+    Matter.World.add(world, demoBall.body);
+    demoBall.body.collisionFilter = {
       'group': ballCatIndex + 1,
-      'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
+      'category': Math.pow(2, categories.findIndex(category => category === demoBall.category)),
       'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
     };
-    Matter.Body.setStatic(ball.body, false);
-    Matter.Body.applyForce(ball.body, ballPos, strength);
-    ball.launched();
+    Matter.Body.setStatic(demoBall.body, false);
+    Matter.Body.applyForce(demoBall.body, ballPos, strength);
+    demoBall.launched();
     showDemo = false;
 }
 
-
-// Returns a Promise that resolves after "ms" Milliseconds
-const timer = ms => new Promise(res => setTimeout(res, ms))
-
-async function demoAim(power, ball) {
-  while(ball.xPower < power) {
-    ball.xPower += 0.1;
-    ball.yPower += 0.111;
-    ball.aim();
-    await timer(3);
-  }
-  let strength = Matter.Vector.create(-ball.xPower*config.sensitivity/config.powerAdjustment, -ball.yPower*config.sensitivity/config.powerAdjustment);
-  let ballPos = Matter.Vector.create(ball.x, ball.y);
-  let ballCatIndex = categories.findIndex((category) => category === ball.category); 
-  if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
-  ball.body.collisionFilter = {
-    'group': ballCatIndex + 1,
-    'category': Math.pow(2, categories.findIndex(category => category === ball.category)),
-    'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
-  };
-  Matter.Body.setStatic(ball.body, false);
-  Matter.Body.applyForce(ball.body, ballPos, strength);
-  ball.launched();
-  showDemo = false;
-}
 
 /*
   drawMenu()

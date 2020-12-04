@@ -61,6 +61,8 @@ class ImageBall {
       this.hover = this.hover.bind(this);
       this.launched = this.launched.bind(this);
       this.reset = this.reset.bind(this);
+      this.aim = this.aim.bind(this);
+      this.demoAim = this.demoAim.bind(this);
    }
 
 /*
@@ -368,6 +370,46 @@ class ImageBall {
       angleMode(RADIANS);
     }
 
+
+ /*
+  demoAim()
+      Aim takes the mouse position when the mouse is dragged and creates a visual arrow to indicate direction and power.
+      Needs to be cleaned up to properly rotate the arrow around the end point of the line
+      To keep the launch from being too powerful, limits the maximum power registered
+*/
+demoAim() {
+  angleMode(DEGREES);
+  let lineStart = {
+    x: this.x - this.r*sin(45),
+    y: this.y - this.r*cos(45)
+  };
+  let currentPosX = lineStart.x - (this.xPower);
+  let currentPosY = lineStart.y - (this.yPower);
+  let arrowLength = iconSize/8;
+  let angle = atan2(this.xPower, this.yPower);
+  let pointA = {
+    x: currentPosX - sin(angle)*arrowLength*2,
+    y: currentPosY - cos(angle)*arrowLength*2
+  };
+  let pointB = {
+    x: currentPosX + cos(angle)*arrowLength,
+    y: currentPosY - sin(angle)*arrowLength
+  };
+  let pointC = {
+    x: currentPosX - cos(angle)*arrowLength,
+    y: currentPosY + sin(angle)*arrowLength
+  };
+  push();
+  stroke(config.accentColor);
+  strokeWeight(5);
+  noFill();
+  circle(this.x, this.y, this.r*2, this.r*2);
+  fill(config.accentColor);
+  line(lineStart.x, lineStart.y, currentPosX, currentPosY);
+  triangle(pointA.x, pointA.y, pointB.x, pointB.y, pointC.x, pointC.y);
+  pop();
+  angleMode(RADIANS);
+}   
     
 /*
   launched()
