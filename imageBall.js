@@ -291,15 +291,15 @@ class ImageBall {
 */
     hover() {
       angleMode(DEGREES);
-      let arrowLength = iconSize/8;
+      let arrowLength = iconSize/22;
       let angle = 45;
       let lineStart = {
         x: this.x - this.r*sin(angle),
         y: this.y - this.r*cos(angle)
       };
       let lineEnd = {
-        x: lineStart.x - this.r,
-        y: lineStart.y - this.r
+        x: lineStart.x - this.r/2,
+        y: lineStart.y - this.r/2
       };
       let pointA = {
         x: lineEnd.x - sin(angle)*arrowLength*2,
@@ -342,9 +342,9 @@ class ImageBall {
         x: this.x - this.r*sin(45),
         y: this.y - this.r*cos(45)
       };
-      let currentPosX = lineStart.x - (this.xPower);
-      let currentPosY = lineStart.y - (this.yPower);
-      let arrowLength = iconSize/8;
+      let currentPosX = lineStart.x - (this.xPower)*2;
+      let currentPosY = lineStart.y - (this.yPower)*2;
+      let arrowLength = iconSize/22;
       let angle = atan2(this.xPower, this.yPower);
       let pointA = {
         x: currentPosX - sin(angle)*arrowLength*2,
@@ -378,14 +378,15 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
 demoAim() {
+  this.show();
   angleMode(DEGREES);
   let lineStart = {
     x: this.x - this.r*sin(45),
     y: this.y - this.r*cos(45)
   };
-  let currentPosX = lineStart.x - (this.xPower);
-  let currentPosY = lineStart.y - (this.yPower);
-  let arrowLength = iconSize/8;
+  let currentPosX = lineStart.x - (this.xPower)*2;
+  let currentPosY = lineStart.y - (this.yPower)*2;
+  let arrowLength = iconSize/22;
   let angle = atan2(this.xPower, this.yPower);
   let pointA = {
     x: currentPosX - sin(angle)*arrowLength*2,

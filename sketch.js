@@ -25,7 +25,6 @@ goalWidth,
 screenArea,
 portraitMode,
 detailPageOpen,
-demoBall,
 resetButton,
 titleElement,
 subtitleElement,
@@ -95,7 +94,6 @@ let config = {
     console.log("matter.js engine.world", world); 
     background(config.backgroundColor);
     loadAssets();
-    //demo();
   }
 
 
@@ -113,31 +111,14 @@ let config = {
       net.forEach((item) => item.show());
       helpMessage();
     }
-    drawBalls();
     if(showDemo) {
-      demoBall = imageBalls[0];
-      power = portraitMode ? iconSize/11 : iconSize/2;
-      while(demoBall.xPower < power) {
-        console.log('ball.xPower, power', demoBall, " - ", demoBall.xPower, ", ", power);
-        demoBall.xPower += 0.01;
-        demoBall.yPower += 0.0101;
-        demoBall.show();
-        demoBall.demoAim();
+      imageBalls[0].xPower += (power/100);
+      imageBalls[0].yPower += (power/80);
+      imageBalls[0].demoAim();
+      if(imageBalls[0].xPower > power) {
+        demo();
       }
-      let strength = Matter.Vector.create(-power*config.sensitivity/config.powerAdjustment, -power*1.3*config.sensitivity/config.powerAdjustment);
-      let ballPos = Matter.Vector.create(demoBall.x, demoBall.y);
-      let ballCatIndex = categories.findIndex((category) => category === demoBall.category); 
-      Matter.World.add(world, demoBall.body);
-      demoBall.body.collisionFilter = {
-        'group': ballCatIndex + 1,
-        'category': Math.pow(2, categories.findIndex(category => category === demoBall.category)),
-        'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
-      };
-      Matter.Body.setStatic(demoBall.body, false);
-      Matter.Body.applyForce(demoBall.body, ballPos, strength);
-      demoBall.launched();
-      showDemo = false; 
-    }
+    } else drawBalls();
   }
 
 
@@ -147,27 +128,18 @@ let config = {
     Show only once, on the initial load
 */
   function demo() {
-    demoBall = imageBalls[0];
-    power = portraitMode ? iconSize/11 : iconSize/2;
-    while(demoBall.xPower < power) {
-      console.log('ball.xPower, power', demoBall, " - ", demoBall.xPower, ", ", power);
-      demoBall.xPower += 0.01;
-      demoBall.yPower += 0.0101;
-      demoBall.show();
-      demoBall.demoAim();
-    }
-    let strength = Matter.Vector.create(-power*config.sensitivity/config.powerAdjustment, -power*1.3*config.sensitivity/config.powerAdjustment);
-    let ballPos = Matter.Vector.create(demoBall.x, demoBall.y);
-    let ballCatIndex = categories.findIndex((category) => category === demoBall.category); 
-    Matter.World.add(world, demoBall.body);
-    demoBall.body.collisionFilter = {
+    let strength = Matter.Vector.create(-imageBalls[0].xPower*config.sensitivity/config.powerAdjustment, -imageBalls[0].yPower*config.sensitivity/config.powerAdjustment);
+    let ballPos = Matter.Vector.create(imageBalls[0].x, imageBalls[0].y);
+    let ballCatIndex = categories.findIndex((category) => category === imageBalls[0].category); 
+    Matter.World.add(world, imageBalls[0].body);
+    imageBalls[0].body.collisionFilter = {
       'group': ballCatIndex + 1,
-      'category': Math.pow(2, categories.findIndex(category => category === demoBall.category)),
+      'category': Math.pow(2, categories.findIndex(category => category === imageBalls[0].category)),
       'mask': categoryBits[0] | categoryBits[1] | categoryBits[2],
     };
-    Matter.Body.setStatic(demoBall.body, false);
-    Matter.Body.applyForce(demoBall.body, ballPos, strength);
-    demoBall.launched();
+    Matter.Body.setStatic(imageBalls[0].body, false);
+    Matter.Body.applyForce(imageBalls[0].body, ballPos, strength);
+    imageBalls[0].launched();
     showDemo = false;
 }
 
@@ -189,7 +161,7 @@ function drawMenu() {
   helpMessage();
 */
 function helpMessage() {
-  if((totalShots === 3 || totalShots === 4) && !clickedToOpen && !detailPageOpen) {
+  if(totalShots > 2 && totalShots < 10 && !clickedToOpen && !detailPageOpen) {
     let verticalPos = portraitMode ? playfieldHeight*.9 : playfieldHeight*.85;
     push();
     textSize(iconSize/6)
@@ -369,11 +341,11 @@ function addResetButton() {
     playfieldWidth = windowWidth;
     playfieldHeight = windowHeight;
     portraitMode = ((playfieldHeight > playfieldWidth) || (playfieldWidth < 1000));
-    console.log('portraitMode', portraitMode);
     screenArea = playfieldWidth * playfieldHeight;
     config.sensitivity = Math.pow(screenArea, 1/3);
     config.powerAdjustment = portraitMode ? screenArea/20 : screenArea/100;
     iconSize =  Math.min(playfieldWidth/config.iconScale, playfieldHeight/config.iconScale);
+    power = portraitMode ? iconSize/11 : iconSize/5;
     config.gridSpacing = 2*iconSize;
     goalPosition = {x: 0.33*iconSize, y:playfieldHeight*0.4};
     goalWidth = iconSize*1.4;
@@ -620,6 +592,6 @@ function keyPressed() {
           totalShots++;
         } 
       });  
-      return false;
+      //return false;
     }
   }
