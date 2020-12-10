@@ -51,7 +51,8 @@ let config = {
   gridSpacing: 1,
   titleText: "Hello world, I am Josh Merritt.",
   subTitleText: "Honest. Data-driven. Product Management & Development. ",
-  contactLinkText: "What problem can I help you solve?",
+  //contactLinkText: "What problem can I help you solve?",
+  contactLinkText: "Contact Me",
   contactLinkAddress: "mailto:josh@DaDataDad.com"
 };
 
@@ -196,7 +197,7 @@ function helpMessage() {
     createGoals();
     createMenu();
     addResetButton();
-    addContactUs();
+    //addContactUs();
     addBoundary();
     trackCollisions();
     createOutline();
@@ -284,7 +285,7 @@ function trackCollisions() {
       createGoals();
       createMenu();
       addBoundary();
-      addContactUs()
+      //addContactUs()
       addResetButton();
       createOutline();
       trackCollisions();
@@ -525,7 +526,8 @@ function keyPressed() {
     If it is on a given ball, set clicked=true,
     otherwise set clicked=false
 */
-  function mousePressed() {
+  function mousePressed(event) {
+    console.log('mousePressed event', event);
     if(!detailPageOpen) {
       imageBalls.forEach(function(ball) {
         if(selectedCategory !== "All" && ball.category !== selectedCategory) {
@@ -555,7 +557,8 @@ function keyPressed() {
     checked to see if it's already been launched, if not it's added to the world.
     The ball is made moveable and the strength vector is applied as a force.
 */
-  function mouseReleased() {
+  function mouseReleased(event) {
+    console.log('mouseReleased event', event);
     menu.forEach((item) => {
       if(item.onMenu(mouseX, mouseY)) {
         if(item.selected) {
@@ -577,7 +580,6 @@ function keyPressed() {
         }
         if(ball.clicked && (ball.xPower || ball.yPower)) {
           let strength = Matter.Vector.create(-ball.xPower*config.sensitivity/config.powerAdjustment, -ball.yPower*config.sensitivity/config.powerAdjustment);
-          console.log('ball.xPower, ball.yPower, strength', ball.xPower, ", ", ball.yPower, ", ", strength);
           let ballPos = Matter.Vector.create(ball.x, ball.y);
           let ballCatIndex = categories.findIndex((category) => category === ball.category); 
           if(ball.inOriginalPosition) Matter.World.add(world, ball.body);
@@ -592,6 +594,6 @@ function keyPressed() {
           totalShots++;
         } 
       });  
-      //return false;
+      return false;
     }
   }

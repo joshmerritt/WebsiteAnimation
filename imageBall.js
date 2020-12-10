@@ -120,7 +120,7 @@ class ImageBall {
           this.pageOpen = true;
           detailPageOpen = true;
           this.createDetailElements();
-          contactUsElement.hide();
+          //contactUsElement.hide();
           resetButton.style("display", "none"); 
         }
         push();
@@ -147,7 +147,8 @@ class ImageBall {
       this.exitButton = createButton("X");
       this.exitButton.addClass("ExitButton");
       this.exitButton.mouseClicked(this.removeDetailPage);
-      this.linkElement = createA(`${this.link}`, "Learn more", "_blank"); 
+      this.linkElement = createA(`${this.link}`, "Learn more", "_blank");
+      this.contactElement = createA(config.contactLinkAddress, config.contactLinkText, "_blank");
       this.tableElement = createElement("table");
       this.goalRow = createElement("tr");
       this.goalTitle = createElement("td", "Goal");
@@ -164,6 +165,7 @@ class ImageBall {
       this.element.child(this.pageTitle);
       this.element.child(this.tableElement);
       this.element.child(this.linkElement);
+      this.element.child(this.contactElement);
       this.element.child(this.exitButton);
       this.tableElement.child(this.goalRow);
       this.tableElement.child(this.roleRow);
@@ -196,7 +198,7 @@ class ImageBall {
           ball.reset();
         }
       });
-      contactUsElement.show(); 
+      //contactUsElement.show(); 
       resetButton.style("display", "block");      
     }
 
