@@ -113,7 +113,6 @@ let config = {
       helpMessage();
     }
     if(showDemo) {
-      console.log(imageBalls[0]);
       imageBalls[0].xPower += (power/100);
       imageBalls[0].yPower += (power/80);
       imageBalls[0].demoAim();
@@ -130,7 +129,6 @@ let config = {
     Show only once, on the initial load
 */
   function demo() {
-    console.log('power', power);
     let strength = Matter.Vector.create(-imageBalls[0].xPower*config.sensitivity/config.powerAdjustment, -imageBalls[0].yPower*config.sensitivity/config.powerAdjustment);
     let ballPos = Matter.Vector.create(imageBalls[0].x, imageBalls[0].y);
     let ballCatIndex = categories.findIndex((category) => category === imageBalls[0].category); 
