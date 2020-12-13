@@ -107,7 +107,7 @@ class ImageBall {
         let imageX = Math.min(playfield.height, playfield.width)*0.025;
         let imageY = Math.max((playfield.height - imageSize.y)/2, Math.min(playfield.height, playfield.width)*0.025);
         let tempImage = this.fullImage;
-        if(portraitMode && playfieldHeight > playfieldWidth) {
+        if(portraitMode) {
           maxSize = playfield.width*0.80;
           imageSize = {
             x: maxSize,
@@ -335,7 +335,7 @@ class ImageBall {
       To keep the launch from being too powerful, limits the maximum power registered
 */
     aim() {
-      let powerScale = 50;
+      let powerScale = 33;
       if(portraitMode) powerScale = powerScale/10;
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/config.sensitivity*powerScale;

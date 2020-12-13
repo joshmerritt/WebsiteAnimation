@@ -113,6 +113,7 @@ let config = {
       helpMessage();
     }
     if(showDemo) {
+      console.log(imageBalls[0]);
       imageBalls[0].xPower += (power/100);
       imageBalls[0].yPower += (power/80);
       imageBalls[0].demoAim();
@@ -129,6 +130,7 @@ let config = {
     Show only once, on the initial load
 */
   function demo() {
+    console.log('power', power);
     let strength = Matter.Vector.create(-imageBalls[0].xPower*config.sensitivity/config.powerAdjustment, -imageBalls[0].yPower*config.sensitivity/config.powerAdjustment);
     let ballPos = Matter.Vector.create(imageBalls[0].x, imageBalls[0].y);
     let ballCatIndex = categories.findIndex((category) => category === imageBalls[0].category); 
@@ -346,7 +348,7 @@ function addResetButton() {
     config.sensitivity = Math.pow(screenArea, 1/3);
     config.powerAdjustment = portraitMode ? screenArea/20 : screenArea/100;
     iconSize =  Math.min(playfieldWidth/config.iconScale, playfieldHeight/config.iconScale);
-    power = portraitMode ? iconSize/11 : iconSize/5;
+    power = portraitMode ? screenArea/(iconSize*iconSize*13) : iconSize/6 ;
     config.gridSpacing = 2*iconSize;
     goalPosition = {x: 0.33*iconSize, y:playfieldHeight*0.4};
     goalWidth = iconSize*1.4;
@@ -527,7 +529,6 @@ function keyPressed() {
     otherwise set clicked=false
 */
   function mousePressed(event) {
-    console.log('mousePressed event', event);
     if(!detailPageOpen) {
       imageBalls.forEach(function(ball) {
         if(selectedCategory !== "All" && ball.category !== selectedCategory) {
@@ -558,7 +559,6 @@ function keyPressed() {
     The ball is made moveable and the strength vector is applied as a force.
 */
   function mouseReleased(event) {
-    console.log('mouseReleased event', event);
     menu.forEach((item) => {
       if(item.onMenu(mouseX, mouseY)) {
         if(item.selected) {
