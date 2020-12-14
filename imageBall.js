@@ -72,8 +72,8 @@ class ImageBall {
 */
     expandBall() {
       console.log('expandBall this', this);
-      // if(this.x < playfield.width/2 || this.y < playfield.height/2) {
-      //   let expansionRatio = (playfield.width/2 - this.x) / (playfield.height/2 - this.y);
+      // if(this.x < playfieldWidth/2 || this.y < playfieldHeight/2) {
+      //   let expansionRatio = (playfieldWidth/2 - this.x) / (playfieldHeight/2 - this.y);
       //   this.x += 1,
       //   this.y += expansionRatio
       // } else {
@@ -96,25 +96,25 @@ class ImageBall {
       // } else {
         totalOpens++;
         this.makes++;
-        // let circleX = playfield.width*0.733;
-        // let circleY = playfield.height*0.5;
-        // let circleR = Math.sqrt((Math.pow(playfield.width/1.75, 2) + Math.pow(playfield.height/1.75, 2)));
-        let maxSize = Math.min(playfield.height, playfield.width/2)*0.90;
+        // let circleX = playfieldWidth*0.733;
+        // let circleY = playfieldHeight*0.5;
+        // let circleR = Math.sqrt((Math.pow(playfieldWidth/1.75, 2) + Math.pow(playfieldHeight/1.75, 2)));
+        let maxSize = Math.min(playfieldHeight, playfieldWidth/2)*0.90;
         let imageSize = {
           x: maxSize,
           y: maxSize*this.fullImage.height/this.fullImage.width
         };
-        let imageX = Math.min(playfield.height, playfield.width)*0.025;
-        let imageY = Math.max((playfield.height - imageSize.y)/2, Math.min(playfield.height, playfield.width)*0.025);
+        let imageX = Math.min(playfieldHeight, playfieldWidth)*0.025;
+        let imageY = Math.max((playfieldHeight - imageSize.y)/2, Math.min(playfieldHeight, playfieldWidth)*0.025);
         let tempImage = this.fullImage;
         if(portraitMode) {
-          maxSize = playfield.width*0.80;
+          maxSize = playfieldWidth*0.80;
           imageSize = {
             x: maxSize,
             y: maxSize*this.fullImage.height/this.fullImage.width
           };
-          imageX = Math.max((playfield.width - imageSize.x)/2, Math.min(playfield.height, playfield.width)*0.025);
-          imageY = Math.min(playfield.height, playfield.width)*0.1;
+          imageX = Math.max((playfieldWidth - imageSize.x)/2, Math.min(playfieldHeight, playfieldWidth)*0.025);
+          imageY = Math.min(playfieldHeight, playfieldWidth)*0.1;
         }
         if (this.pageOpen === false) {
           this.pageOpen = true;
@@ -262,8 +262,8 @@ class ImageBall {
       let x = this.body.position.x;
       let y = this.body.position.y;
       let radius = this.body.circleRadius*2;
-      let offX = ((x + radius) < 0 || (x - radius) > playfield.width);
-      let offY = (((y + radius) < -playfield.height*4) || ((y - radius) > playfield.height));
+      let offX = ((x + radius) < 0 || (x - radius) > playfieldWidth);
+      let offY = (((y + radius) < -playfieldHeight*4) || ((y - radius) > playfieldHeight));
       if(offY) {
         return true;
       } else if(offX) {
@@ -336,7 +336,7 @@ class ImageBall {
 */
     aim() {
       let powerScale = 33;
-      if(portraitMode) powerScale = powerScale/10;
+      if(portraitMode || mobileMode) powerScale = powerScale/5;
       angleMode(DEGREES);
       this.xPower += (mouseX - pmouseX)/config.sensitivity*powerScale;
       this.yPower += (mouseY - pmouseY)/config.sensitivity*powerScale;

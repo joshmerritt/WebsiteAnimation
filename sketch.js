@@ -24,6 +24,7 @@ goalPosition,
 goalWidth,
 screenArea,
 portraitMode,
+mobileMode,
 detailPageOpen,
 resetButton,
 titleElement,
@@ -300,7 +301,7 @@ function trackCollisions() {
 */
 function addBoundary() {
   if(boundary) boundary.remove();
-  boundary = new Boundary(playfield.width, playfield.height, iconSize*2);
+  boundary = new Boundary(playfieldWidth, playfieldHeight, iconSize*2);
   boundary.add();
 }
 
@@ -341,12 +342,18 @@ function addResetButton() {
   function setDisplaySize() {
     playfieldWidth = windowWidth;
     playfieldHeight = windowHeight;
-    portraitMode = ((playfieldHeight > playfieldWidth) || (playfieldWidth < 1000));
+    portraitMode = (playfieldHeight > playfieldWidth);
+    mobileMode = (Math.max(playfieldHeight, playfieldWidth) <= 1000);
     screenArea = playfieldWidth * playfieldHeight;
     config.sensitivity = Math.pow(screenArea, 1/3);
     config.powerAdjustment = portraitMode ? screenArea/20 : screenArea/100;
     iconSize =  Math.min(playfieldWidth/config.iconScale, playfieldHeight/config.iconScale);
-    power = portraitMode ? screenArea/(iconSize*iconSize*13) : iconSize/6 ;
+    console.log('screenArea :: iconSize', screenArea, " :: ", iconSize);
+    power = Math.sqrt(iconSize)*(screenArea/600000);
+    if(mobileMode) {
+      power = portraitMode ? (screenArea*0.00145/iconSize) : (screenArea*0.0005/iconSize);
+    };
+    console.log('power', power);
     config.gridSpacing = 2*iconSize;
     goalPosition = {x: 0.33*iconSize, y:playfieldHeight*0.4};
     goalWidth = iconSize*1.4;

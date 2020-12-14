@@ -17,8 +17,8 @@ class ContactUs {
       this.element.size(this.element.width);
       this.length = this.element.width;
       this.height = this.element.height;
-      if(playfield.width < 800) {
-        this.position = {x: (playfield.width-this.element.width)/2, y: this.position.y}
+      if(playfieldWidth < 800) {
+        this.position = {x: (playfieldWidth-this.element.width)/2, y: this.position.y}
       }
       this.element.position(this.position.x, this.position.y);
       let options = {
