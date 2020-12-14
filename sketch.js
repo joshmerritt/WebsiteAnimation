@@ -347,6 +347,7 @@ function addResetButton() {
     screenArea = playfieldWidth * playfieldHeight;
     config.sensitivity = Math.pow(screenArea, 1/3);
     config.powerAdjustment = portraitMode ? screenArea/20 : screenArea/100;
+    config.powerAdjustment = (screenArea > 600000) ? config.powerAdjustment : config.powerAdjustment/2;
     iconSize =  Math.min(playfieldWidth/config.iconScale, playfieldHeight/config.iconScale);
     console.log('screenArea :: iconSize', screenArea, " :: ", iconSize);
     power = Math.sqrt(iconSize)*(screenArea/600000);
