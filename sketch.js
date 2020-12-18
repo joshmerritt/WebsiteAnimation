@@ -351,7 +351,7 @@ function addResetButton() {
     config.powerAdjustment = portraitMode ? config.powerAdjustment*0.95 : config.powerAdjustment;
     power = Math.sqrt(iconSize)*(screenArea/350000);
     if(mobileMode) {
-      power = portraitMode ? (screenArea/Math.pow(iconSize, 2.8)) : (screenArea/Math.pow(iconSize, 2.9));
+      power = portraitMode ? (screenArea/Math.pow(iconSize, 2.7)) : (screenArea/Math.pow(iconSize, 3));
     };
     console.log('mobileMode::', mobileMode, 'portraitMode::', portraitMode);
     console.log('screenArea :: iconSize', screenArea, " :: ", iconSize);
