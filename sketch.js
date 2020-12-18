@@ -347,16 +347,16 @@ function addResetButton() {
     screenArea = playfieldWidth * playfieldHeight;
     iconSize =  Math.min(playfieldWidth/config.iconScale, playfieldHeight/config.iconScale);
     config.sensitivity = Math.pow(screenArea, 1/3);
-    config.powerAdjustment = portraitMode ? Math.pow(iconSize, 2.2) : Math.pow(iconSize, 2);
-    // config.powerAdjustment = (screenArea > 600000 && mobileMode) ? config.powerAdjustment : config.powerAdjustment;
+    config.powerAdjustment = mobileMode ? Math.pow(iconSize, 2.2) : Math.pow(iconSize, 2);
+    config.powerAdjustment = portraitMode ? config.powerAdjustment*0.95 : config.powerAdjustment;
     power = Math.sqrt(iconSize)*(screenArea/350000);
     if(mobileMode) {
-      power = portraitMode ? (screenArea*0.00145/iconSize) : (screenArea*0.0005/iconSize);
+      power = portraitMode ? (screenArea/Math.pow(iconSize, 2.88)) : (screenArea/Math.pow(iconSize, 2.85));
     };
-    // console.log('mobileMode::', mobileMode, 'portraitMode::', portraitMode);
-    // console.log('screenArea :: iconSize', screenArea, " :: ", iconSize);
-    // console.log('powerAdjustment', config.powerAdjustment);
-    // console.log('power', power);
+    console.log('mobileMode::', mobileMode, 'portraitMode::', portraitMode);
+    console.log('screenArea :: iconSize', screenArea, " :: ", iconSize);
+    console.log('powerAdjustment', config.powerAdjustment);
+    console.log('power', power);
     config.gridSpacing = 2*iconSize;
     goalPosition = {x: 0.33*iconSize, y:playfieldHeight*0.4};
     goalWidth = iconSize*1.4;
