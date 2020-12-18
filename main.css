@@ -126,8 +126,8 @@ a {
 @media (orientation: portrait) {
   .DetailPage {
     width: 95vw;
-    height: 50vh;
-    top: 50vh;
+    height: 55vh;
+    top: 46vh;
   }
   .reset {
     right: 4vmin;
