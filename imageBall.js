@@ -316,6 +316,15 @@ class ImageBall {
         y: lineEnd.y + sin(angle)*arrowLength
       };
       push();
+      if ( totalShots < 3) {
+        textAlign(CENTER);
+        fill(config.mainColor);
+        textSize(iconSize/9);
+        let textDrag = "Drag to aim";
+        let textRelease = "Release to launch";
+        text(textDrag, this.x, this.y + this.r*1.3);
+        text(textRelease, this.x, this.y + this.r*1.3 + iconSize/8);
+      }
       stroke(config.accentColor);
       strokeWeight(iconSize/20);
       noFill();
