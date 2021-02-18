@@ -71,7 +71,6 @@ class ImageBall {
     Called after the ball is made
 */
     expandBall() {
-      console.log('expandBall this', this);
       // if(this.x < playfieldWidth/2 || this.y < playfieldHeight/2) {
       //   let expansionRatio = (playfieldWidth/2 - this.x) / (playfieldHeight/2 - this.y);
       //   this.x += 1,

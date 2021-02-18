@@ -39,7 +39,7 @@ let selectedCategory = "All";
 
 // Config object is used to store values for variables which are expected to be customized per user deployment preferences
 let config = {
-  itemsToDisplay: ['aboutMe', 'thisWebsite', 'swingBet', 'googleDataStudioOverview', 'powerBIConversionMetrics', 'arduinoScoreboard', 'arduinoCoopDoor', 'googleDataStudioServiceTechs'],
+  itemsToDisplay: ['aboutMe', 'thisWebsite', 'arduinoCoopDoor', 'googleDataStudioServiceTechs', 'powerBIConversionMetrics', 'swingBet', 'arduinoScoreboard'],
   backgroundColor: "rgba(12, 18, 12, 1)", 
   mainColor: "rgba(199, 214, 213, 1)", 
   secondaryColor: "rgba(89, 133, 177, 1)",
@@ -93,7 +93,7 @@ let config = {
     setDisplaySize();
     engine = Matter.Engine.create();
     world = engine.world;
-    console.log("matter.js engine.world", world); 
+    //console.log("matter.js engine.world", world); 
     background(config.backgroundColor);
     loadAssets();
   }
@@ -353,10 +353,10 @@ function addResetButton() {
     if(mobileMode) {
       power = portraitMode ? (screenArea/Math.pow(iconSize, 2.7)) : (screenArea/Math.pow(iconSize, 3));
     };
-    console.log('mobileMode::', mobileMode, 'portraitMode::', portraitMode);
-    console.log('screenArea :: iconSize', screenArea, " :: ", iconSize);
-    console.log('powerAdjustment', config.powerAdjustment);
-    console.log('power', power);
+    // console.log('mobileMode::', mobileMode, 'portraitMode::', portraitMode);
+    // console.log('screenArea :: iconSize', screenArea, " :: ", iconSize);
+    // console.log('powerAdjustment', config.powerAdjustment);
+    // console.log('power', power);
     config.gridSpacing = 2*iconSize;
     goalPosition = {x: 0.33*iconSize, y:playfieldHeight*0.4};
     goalWidth = iconSize*1.4;
