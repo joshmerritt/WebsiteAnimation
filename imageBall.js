@@ -32,7 +32,8 @@ class ImageBall {
       this.body.id = this.name;
       this.body.label = 'Image Ball';
       this.fullImage = img;
-      this.ballImage = img.get();  
+      this.minSize = Math.min(img.height, img.width);
+      this.ballImage = img.get(0, 0, this.minSize, this.minSize);  
       this.x = xPos;
       this.y = yPos;
       this.r = size/2;
