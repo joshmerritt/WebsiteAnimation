@@ -51,7 +51,7 @@ let config = {
   powerAdjustment: 20000,
   gridSpacing: 1,
   titleText: "Hello world, I am Josh Merritt.",
-  subTitleText: "Honest. Data-driven. Product Management & Development. ",
+  subTitleText: "Honest. Analytical. Data Sleuth.",
   //contactLinkText: "What problem can I help you solve?",
   contactLinkText: "Contact Me",
   contactLinkAddress: "mailto:josh@DaDataDad.com"
