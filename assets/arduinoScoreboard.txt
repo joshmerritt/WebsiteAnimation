@@ -4,4 +4,4 @@ Category: Technology
 Goal: Provide an elegant scoreboard to time games and be visible from anywhere in the room.
 My Role: Creator, Designer, Developer, Engineer.
 Technology: C++, Arduino, Programmable RGB leds, Woodworking
-Description: Using an Arduino Uno and 50+ RGB LED’s, I built a two-team scoreboard wired inside an attractive, custom Walnut housing. Players can add or subtract from their displayed score using a separate button box (not pictured). Other functions include - unique sounds for adding and subtracting points; game reset button; sound toggle; and ability to select between 15 and 21 point games.
+Description: Using an Arduino Uno and 50+ RGB LED’s, I built a two-team scoreboard wired inside an attractive, custom Walnut housing. Players can add or subtract from their displayed score using a separate button box (not pictured). Other functions include unique sounds for adding and subtracting points, game reset button, sound toggle, and ability to select between 15 and 21 point games.
