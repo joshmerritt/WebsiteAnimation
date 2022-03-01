@@ -58,28 +58,12 @@ class ImageBall {
       this.show = this.show.bind(this);
       this.createDetailElements = this.createDetailElements.bind(this);
       this.onBall = this.onBall.bind(this);
-      this.expandBall = this.expandBall.bind(this);
       this.hover = this.hover.bind(this);
       this.launched = this.launched.bind(this);
       this.reset = this.reset.bind(this);
       this.aim = this.aim.bind(this);
       this.demoAim = this.demoAim.bind(this);
    }
-
-/*
-  expandBall()
-    Used to give appearence of ball slowly expanding to fill the screen
-    Called after the ball is made
-*/
-    expandBall() {
-      // if(this.x < playfieldWidth/2 || this.y < playfieldHeight/2) {
-      //   let expansionRatio = (playfieldWidth/2 - this.x) / (playfieldHeight/2 - this.y);
-      //   this.x += 1,
-      //   this.y += expansionRatio
-      // } else {
-      //   this.ballExpanded = true;
-      // }
-    }
 
 
 /*
@@ -89,50 +73,42 @@ class ImageBall {
     Displays the image, along with the name, description, and link
 */
     showDetail() {
-      // console.log('showDetail(), this:', this);
-      // Matter.World.remove(world, this.body);
-      // if(!this.ballExpanded) {
-      //   this.expandBall();
-      // } else {
-        totalOpens++;
-        this.makes++;
-        // let circleX = playfieldWidth*0.733;
-        // let circleY = playfieldHeight*0.5;
-        // let circleR = Math.sqrt((Math.pow(playfieldWidth/1.75, 2) + Math.pow(playfieldHeight/1.75, 2)));
-        let maxSize = Math.min(playfieldHeight, playfieldWidth/2)*0.90;
-        let imageSize = {
+      totalOpens++;
+      this.makes++;
+      let maxSize = Math.min(playfieldHeight, playfieldWidth/2)*0.90;
+      let imageSize = {
+        x: maxSize,
+        y: maxSize*this.fullImage.height/this.fullImage.width
+      };
+      let imageX = Math.min(playfieldHeight, playfieldWidth)*0.025;
+      let imageY = Math.max((playfieldHeight - imageSize.y)/2, Math.min(playfieldHeight, playfieldWidth)*0.025);
+      let tempImage = this.fullImage;
+      if(portraitMode) {
+        maxSize = playfieldHeight*0.36;
+        imageSize = {
           x: maxSize,
           y: maxSize*this.fullImage.height/this.fullImage.width
         };
-        let imageX = Math.min(playfieldHeight, playfieldWidth)*0.025;
-        let imageY = Math.max((playfieldHeight - imageSize.y)/2, Math.min(playfieldHeight, playfieldWidth)*0.025);
-        let tempImage = this.fullImage;
-        if(portraitMode) {
-          maxSize = playfieldHeight*0.36;
-          imageSize = {
-            x: maxSize,
-            y: maxSize*this.fullImage.height/this.fullImage.width
-          };
-          imageX = Math.max((playfieldWidth - imageSize.x)/2, Math.min(playfieldHeight, playfieldWidth)*0.025);
-          imageY = Math.min(playfieldHeight, playfieldWidth)*0.1;
-        }
-        if (this.pageOpen === false) {
-          this.pageOpen = true;
-          detailPageOpen = true;
-          this.createDetailElements();
-          //contactUsElement.hide();
-          resetButton.style("display", "none"); 
-        }
-        push();
-        fill(config.accentColor);
-        stroke(config.accentColor);
-        strokeWeight(iconSize/10);
-        rect(imageX, imageY, imageSize.x, imageSize.y);
-        image(tempImage, imageX, imageY, imageSize.x, imageSize.y);
-        pop();
-      //}
-      return this;
-    }
+        imageX = Math.max((playfieldWidth - imageSize.x)/2, Math.min(playfieldHeight, playfieldWidth)*0.025);
+        imageY = Math.min(playfieldHeight, playfieldWidth)*0.1;
+      }
+      if (this.pageOpen === false) {
+        this.pageOpen = true;
+        detailPageOpen = true;
+        this.createDetailElements();
+        //contactUsElement.hide();
+        resetButton.style("display", "none"); 
+      }
+      push();
+      fill(config.accentColor);
+      stroke(config.accentColor);
+      strokeWeight(iconSize/10);
+      rect(imageX, imageY, imageSize.x, imageSize.y);
+      image(tempImage, imageX, imageY, imageSize.x, imageSize.y);
+      pop();
+    //}
+    return this;
+  }
 
 
 /*
@@ -148,7 +124,7 @@ class ImageBall {
       this.exitButton.addClass("ExitButton");
       this.exitButton.mouseClicked(this.removeDetailPage);
       this.linkElement = createA(`${this.link}`, "Learn more", "_blank");
-      this.contactElement = createA(config.contactLinkAddress, config.contactLinkText, "_blank");
+      //this.contactElement = createA(config.contactLinkAddress, config.contactLinkText, "_blank");
       this.tableElement = createElement("table");
       this.goalRow = createElement("tr");
       this.goalTitle = createElement("td", "Goal");
@@ -165,7 +141,7 @@ class ImageBall {
       this.element.child(this.pageTitle);
       this.element.child(this.tableElement);
       this.element.child(this.linkElement);
-      this.element.child(this.contactElement);
+      //this.element.child(this.contactElement);
       this.element.child(this.exitButton);
       this.tableElement.child(this.goalRow);
       this.tableElement.child(this.roleRow);
