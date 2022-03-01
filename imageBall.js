@@ -1,7 +1,7 @@
 /*
   ImageBall class is designed to create standalone balls that can be displayed, launched, and interacted with independently.
     The class uses the matter.js physics engine to handle interactions and movement
-    Visuals are created using p5.js, leveraging the matter.js world/body data
+    Visuals are created using p5.js, leveraging the matter.js world/body data 
 */
 
 class ImageBall {
