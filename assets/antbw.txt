@@ -1,4 +1,0 @@
-Name: Ants Vs. Humans
-Link: https://github.com/joshmerritt/
-Category: Technology
-Description: Data visualization comparing the population and size ratios of different species on the plant

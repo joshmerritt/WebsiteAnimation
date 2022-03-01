@@ -180,8 +180,8 @@ function helpMessage() {
   function captureWebsite() {
     let minDim = Math.min(playfieldWidth, playfieldHeight);
     let thisWebsite = get(0, 0, minDim, minDim);
-    imageBalls[1].ballImage = thisWebsite;
-    imageBalls[1].fullImage = thisWebsite;
+    imageBalls[4].ballImage = thisWebsite;
+    imageBalls[4].fullImage = thisWebsite;
   }
 
 
