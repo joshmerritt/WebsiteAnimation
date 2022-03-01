@@ -2,6 +2,6 @@ Name: Portfolio Website
 Link: https://github.com/joshmerritt/websiteAnimation	
 Category: Technology
 Goal: Learn new skills and create a fun, interactive way to showcase my creativity and experience with business and technology
-My Role: Creator, Designer, Developer
+My Role: Creator and Developer
 Technology: JavaScript, CSS3, HTML5, Git, p5.js, matter.js
 Description: I created this website to showcase some of my favorite recent projects while learning new technologies. It is coded to allow for a dynamic number of content tiles and is responsive to the size of the screen on which it is viewed.

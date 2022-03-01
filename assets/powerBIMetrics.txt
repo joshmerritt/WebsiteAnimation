@@ -1,0 +1,7 @@
+Name: Microsoft PowerBI
+Link: https://www.upwork.com/fl/joshuapmerritt
+Category: Business
+Goal: Create a data warehouse, with robust data pipelines and ETL processes, to enable self-service analytics.
+My Role: BI Developer and Data Analyst
+Technology: Microsoft PowerBI, REST APIs, Microsoft PowerQuery, DAX, Google BigQuery, Microsoft Azure
+Description: I use PowerBI to create multidimensional star schema modeled data warehouses. Using interconnected visualizations to answer real-world business questions and track key performance indicators. By combining data captured by CRMs, advertising platforms, and proprietary processes, I create robust business intelligence solutions that allow data-driven decision making.

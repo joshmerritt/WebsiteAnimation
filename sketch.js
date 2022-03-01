@@ -39,7 +39,7 @@ let selectedCategory = "All";
 
 // Config object is used to store values for variables which are expected to be customized per user deployment preferences
 let config = {
-  itemsToDisplay: ['aboutMe', 'thisWebsite', 'arduinoCoopDoor', 'googleDataStudioServiceTechs', 'powerBIConversionMetrics', 'swingBet', 'arduinoScoreboard'],
+  itemsToDisplay: ['aboutMe', 'arduinoCoopDoor', 'googleDataStudioServiceTechs', 'powerBIMetrics', 'thisWebsite'],
   backgroundColor: "rgba(12, 18, 12, 1)", 
   mainColor: "rgba(199, 214, 213, 1)", 
   secondaryColor: "rgba(89, 133, 177, 1)",
@@ -51,7 +51,7 @@ let config = {
   powerAdjustment: 20000,
   gridSpacing: 1,
   titleText: "Hello world, I am Josh Merritt.",
-  subTitleText: "Honest. Analytical. Data Sleuth.",
+  subTitleText: "Honest. Analytical. Data Nerd.",
   //contactLinkText: "What problem can I help you solve?",
   contactLinkText: "Contact Me",
   contactLinkAddress: "mailto:josh@DaDataDad.com"
