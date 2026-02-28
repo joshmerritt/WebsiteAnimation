@@ -21,33 +21,43 @@ time, mark, audio, video {
 }
 
 article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
-  display: block;
-}
+footer, header, hgroup, menu, nav, section { display: block; }
 
-body { line-height: 1; }
-ol, ul { list-style: none; }
+body          { line-height: 1; }
+ol, ul        { list-style: none; }
 blockquote, q { quotes: none; }
 blockquote:before, blockquote:after,
 q:before, q:after { content: ''; content: none; }
-table { border-collapse: collapse; border-spacing: 0; }
+table         { border-collapse: collapse; border-spacing: 0; }
 
-/* ─── Base ─────────────────────────────────────────────────────────────────── */
 
+/* ─── Design tokens ─────────────────────────────────────────────────────────── */
 :root {
   --bg:        rgba(12, 18, 12, 1);
   --main:      rgba(199, 214, 213, 1);
   --secondary: rgba(89, 133, 177, 1);
   --accent:    rgba(89, 133, 177, 1);
-  --radius:    6px;
+  --radius:    8px;
 }
 
+
+/* ─── Base ──────────────────────────────────────────────────────────────────── */
 body {
   background: var(--bg);
   overflow: hidden;
   overscroll-behavior: none;
   font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
   color: var(--main);
+}
+
+/* Prevent overscroll bounce on iOS */
+@media screen {
+  body {
+    height: 100%;
+    position: fixed;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* ─── p5.js canvas ──────────────────────────────────────────────────────────── */
@@ -58,12 +68,7 @@ canvas {
   left: 0;
 }
 
-/* ─── React overlay ─────────────────────────────────────────────────────────── */
-/*
-  #react-root sits on top of the canvas (pointer-events: none by default
-  so it doesn't block canvas interaction). Individual interactive children
-  re-enable pointer events as needed.
-*/
+/* ─── React overlay root ────────────────────────────────────────────────────── */
 #react-root {
   position: fixed;
   top: 0;
@@ -72,119 +77,6 @@ canvas {
   height: 100%;
   pointer-events: none;
   z-index: 10;
-}
-
-/* ─── Detail page ───────────────────────────────────────────────────────────── */
-.DetailPage {
-  position: absolute;
-  width: 48vw;
-  max-height: 94vh;
-  right: 1vw;
-  top: 3vh;
-  background: rgba(12, 18, 12, 0.92);
-  border: 1px solid rgba(89, 133, 177, 0.35);
-  border-radius: var(--radius);
-  padding: 3vmin 3vmin 4vmin;
-  overflow-y: auto;
-  overflow-x: hidden;
-  pointer-events: all;   /* re-enable so users can click/scroll */
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2vmin;
-
-  /* Smooth slide-in — animated in App.jsx via JS */
-  transition: opacity 0.28s ease, transform 0.28s ease;
-}
-
-.DetailPage h1 {
-  font-size: clamp(1rem, 2.5vmin, 1.6rem);
-  font-weight: 900;
-  text-align: center;
-  color: var(--main);
-  letter-spacing: 0.02em;
-  padding-bottom: 0.5em;
-}
-
-.DetailImage {
-  width: 100%;
-  max-width: 320px;
-}
-
-.DetailImage img {
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius);
-  display: block;
-}
-
-/* ─── Detail table ──────────────────────────────────────────────────────────── */
-.DetailPage table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.DetailPage td {
-  padding: 0.5em 0.6em;
-  font-size: clamp(0.7rem, 1.6vmin, 0.95rem);
-  color: var(--main);
-  vertical-align: top;
-  line-height: 1.5;
-}
-
-.DetailPage td:first-child {
-  font-weight: 700;
-  color: var(--secondary);
-  white-space: nowrap;
-  width: 28%;
-}
-
-.DetailPage tr + tr td {
-  border-top: 1px solid rgba(89, 133, 177, 0.15);
-}
-
-/* ─── Detail links ──────────────────────────────────────────────────────────── */
-.DetailPage a {
-  display: inline-block;
-  padding: 0.5em 1.2em;
-  color: var(--main);
-  background: rgba(89, 133, 177, 0.18);
-  border: 1px solid rgba(89, 133, 177, 0.5);
-  border-radius: var(--radius);
-  text-decoration: none;
-  font-size: clamp(0.7rem, 1.5vmin, 0.9rem);
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.DetailPage a:hover {
-  background: rgba(89, 133, 177, 0.35);
-  border-color: rgba(89, 133, 177, 0.8);
-}
-
-/* ─── Exit button ───────────────────────────────────────────────────────────── */
-.ExitButton {
-  position: absolute;
-  top: 0.8vmin;
-  right: 0.8vmin;
-  background: transparent;
-  border: 1px solid rgba(89, 133, 177, 0.4);
-  border-radius: var(--radius);
-  color: var(--main);
-  font-size: clamp(0.75rem, 1.5vmin, 1rem);
-  width: 2.4em;
-  height: 2.4em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
-  pointer-events: all;
-}
-
-.ExitButton:hover {
-  background: rgba(89, 133, 177, 0.25);
-  border-color: var(--secondary);
 }
 
 /* ─── Reset button ──────────────────────────────────────────────────────────── */
@@ -203,52 +95,204 @@ canvas {
   transition: background 0.15s;
 }
 
-.reset:hover {
-  background: rgba(89, 133, 177, 0.7);
+.reset:hover { background: rgba(89, 133, 177, 0.7); }
+
+
+/* ═══ Modal ══════════════════════════════════════════════════════════════════ */
+
+/* Backdrop — semi-transparent overlay that dims the canvas */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 20;
+  pointer-events: all;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: overlayIn 0.2s ease both;
 }
 
-/* ─── General links (outside detail page) ───────────────────────────────────── */
-a {
-  padding: 0.5em;
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Card */
+.modal-card {
+  position: relative;
+  background: rgba(14, 20, 14, 0.97);
+  border: 1px solid rgba(89, 133, 177, 0.25);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
+  animation: cardIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: scale(0.93) translateY(20px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+
+/* Close button */
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.85rem;
+  width: 2.2em;
+  height: 2.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  pointer-events: all;
+}
+
+.modal-close:hover { background: rgba(89, 133, 177, 0.55); }
+
+/* Hero image */
+.modal-hero {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 14px 14px 0 0;
+  flex-shrink: 0;
+}
+
+.modal-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.modal-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(14, 20, 14, 0.88) 100%
+  );
+}
+
+.modal-hero-title {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  right: 52px;
+  font-size: clamp(1.05rem, 3vmin, 1.55rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+  margin: 0;
+}
+
+/* Content area */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 22px 26px;
+}
+
+/* Fallback title (when no image) */
+.modal-title {
+  font-size: clamp(1.05rem, 3vmin, 1.55rem);
+  font-weight: 800;
+  color: var(--main);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  padding-right: 2.5em;
+  margin: 0;
+}
+
+/* Info table */
+.modal-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.modal-table td {
+  padding: 0.58em 0.5em;
+  font-size: clamp(0.72rem, 1.7vmin, 0.88rem);
+  color: var(--main);
+  vertical-align: top;
+  line-height: 1.55;
+}
+
+.modal-label {
+  font-weight: 700;
+  color: var(--secondary);
+  white-space: nowrap;
+  width: 26%;
+  padding-right: 0.8em;
+}
+
+.modal-table tr + tr td {
+  border-top: 1px solid rgba(89, 133, 177, 0.1);
+}
+
+/* CTA link */
+.modal-cta {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.6em 1.5em;
+  background: rgba(89, 133, 177, 0.18);
+  border: 1px solid rgba(89, 133, 177, 0.5);
+  border-radius: var(--radius);
   color: var(--main);
   text-decoration: none;
+  font-size: clamp(0.75rem, 1.6vmin, 0.88rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
 }
 
-/* ─── Scrollbar (detail panel) ──────────────────────────────────────────────── */
-.DetailPage::-webkit-scrollbar        { width: 4px; }
-.DetailPage::-webkit-scrollbar-track  { background: transparent; }
-.DetailPage::-webkit-scrollbar-thumb  { background: rgba(89,133,177,0.4); border-radius: 2px; }
-
-/* ─── Mobile / portrait overrides ───────────────────────────────────────────── */
-@media (orientation: portrait) {
-  .DetailPage {
-    width: 95vw;
-    max-height: 52vh;
-    right: 2.5vw;
-    top: 44vh;
-  }
-
-  .reset {
-    right: 4vmin;
-    bottom: 2vmin;
-    font-size: clamp(0.7rem, 2vmin, 0.9rem);
-  }
+.modal-cta:hover {
+  background: rgba(89, 133, 177, 0.35);
+  border-color: rgba(89, 133, 177, 0.8);
+  transform: translateY(-1px);
 }
 
-@media screen and (max-width: 1000px) {
-  .DetailPage {
-    right: 0;
-    border-radius: 0;
-    font-size: 1.9vmax;
-  }
-}
+/* Scrollbar */
+.modal-card::-webkit-scrollbar       { width: 4px; }
+.modal-card::-webkit-scrollbar-track { background: transparent; }
+.modal-card::-webkit-scrollbar-thumb { background: rgba(89, 133, 177, 0.35); border-radius: 2px; }
 
-/* Prevent overscroll bounce on iOS */
-@media screen {
-  body {
-    height: 100%;
-    position: fixed;
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+
+/* Mobile portrait */
+@media (max-width: 480px), (orientation: portrait) {
+  .modal-overlay  { padding: 10px; }
+  .modal-card     { max-height: 88vh; border-radius: 12px; }
+  .modal-hero     { height: 185px; border-radius: 12px 12px 0 0; }
+  .modal-content  { padding: 16px 15px 20px; gap: 14px; }
+
+  .modal-table td {
+    font-size: clamp(0.7rem, 2.4vmin, 0.82rem);
+    padding: 0.5em 0.4em;
   }
 }

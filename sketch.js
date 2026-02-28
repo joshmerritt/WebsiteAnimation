@@ -92,6 +92,7 @@ function setup() {
     selectedCategory = "All";
     imageBalls.forEach((ball) => {
       ball.display = true;
+      ball.pageOpen = false;
       if (ball && !ball.inOriginalPosition) ball.reset();
     });
   };
@@ -379,6 +380,7 @@ function windowResized() {
     }
   });
   if (!detailPageOpen) {
+    categories = [];
     createBalls();
     createGoals();
     createMenu();
@@ -418,7 +420,7 @@ function mousePressed() {
       }
       if (ball.onBall(mouseX, mouseY)) {
         // Double-click detection
-        if (ball.clicked && Date.now() - ball.lastClickTime < 300) {
+        if (ball.clicked && Date.now() - ball.lastClickTime < 450) {
           ball.showDetail();
           clickedToOpen = true;
         }
@@ -455,7 +457,7 @@ function mouseReleased() {
       } else {
         ball.display = true;
       }
-      if (ball.clicked && (ball.xPower || ball.yPower)) {
+      if (ball.clicked && (Math.abs(ball.xPower) > 2 || Math.abs(ball.yPower) > 2)) {
         const strength = Matter.Vector.create(
           (-ball.xPower * config.sensitivity) / config.powerAdjustment,
           (-ball.yPower * config.sensitivity) / config.powerAdjustment
