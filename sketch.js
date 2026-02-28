@@ -38,6 +38,10 @@ let playfieldWidth,
 // detailPageOpen is read by React via window.detailPageOpen, kept in sync here
 let detailPageOpen = false;
 
+// Sketch-level double-tap tracking (survives mouseReleased resetting ball.clicked)
+let lastTapTime = 0;
+let lastTappedBall = null;
+
 let showDemo = true;
 let clickedToOpen = false;
 let totalShots = 0;
@@ -171,6 +175,7 @@ function loadAssets() {
 
 function createBalls() {
   imageBalls = [];
+  lastTappedBall = null;  // invalidate any stale double-tap reference
   if (!pageInfo) {
     setTimeout(createBalls, 150);
     return;
@@ -489,12 +494,17 @@ function mousePressed() {
         ball.display = true;
       }
       if (ball.onBall(mouseX, mouseY)) {
-        // Double-click detection
-        if (ball.clicked && Date.now() - ball.lastClickTime < 450) {
+        // Double-tap detection — uses sketch-level tracking so mouseReleased
+        // resetting ball.clicked between taps doesn't break the second-tap check.
+        const now = Date.now();
+        if (lastTappedBall === ball && now - lastTapTime < 500) {
           ball.showDetail();
           clickedToOpen = true;
+          lastTappedBall = null;
+        } else {
+          lastTapTime = now;
+          lastTappedBall = ball;
         }
-        ball.lastClickTime = Date.now();
         ball.clicked = true;
         ball.clickedCount++;
       } else {
