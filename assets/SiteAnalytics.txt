@@ -1,0 +1,7 @@
+Name: Site Analytics
+Link: analytics-dashboard.html
+Category: Technology
+Goal: Track and visualize website engagement metrics including visitor traffic, referral sources, and interactive ball engagement data
+My Role: Creator and Developer
+Technology: React, JavaScript, CSS3, SVG
+Description: An interactive analytics dashboard built for DaDataDad.com that displays visitor traffic, traffic sources, top pages, and a unique ball engagement funnel tracking how users interact with the physics playground.
