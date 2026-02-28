@@ -46,7 +46,7 @@ let totalOpens = 0;
 let selectedCategory = "All";
 
 const config = {
-  itemsToDisplay: ['aboutMe', 'arduinoCoopDoor', 'googleDataStudioServiceTechs', 'powerBIMetrics', 'thisWebsite', 'SiteAnalytics'],
+  itemsToDisplay: ['aboutMe', 'arduinoCoopDoor', 'googleDataStudioServiceTechs', 'powerBIMetrics', 'thisWebsite', 'SiteAnalytics', 'thewineyoudrink', 'dartleague'],
   backgroundColor: "rgba(12, 18, 12, 1)",
   mainColor: "rgba(199, 214, 213, 1)",
   secondaryColor: "rgba(89, 133, 177, 1)",

@@ -1,0 +1,7 @@
+Name: The Wine You Drink
+Link: https://thewineyoudrink.web.app
+Category: Apps
+Goal: To provide a visually appealing and intuitive way to manage your wine cellar.
+My Role: Creator and Product Owner — dreamed up the concept after years of collecting wine and being dissatisfied with existing options. Built with Claude.ai as development partner and tested personally as both a power user and QA.
+Technology: React 18, Firebase (Auth + Firestore), Vite, PWA, CSS custom properties, Claude AI (wine label recognition)
+Description: A full-featured wine cellar management progressive web app. Features include multi-cellar management, a section builder with drag-and-drop reordering, AI-powered wine label photo recognition, drink window tracking with animated SVG rings, tasting notes timeline, consumption history, statistics dashboard, and full offline capability.

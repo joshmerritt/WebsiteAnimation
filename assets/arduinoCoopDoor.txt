@@ -1,6 +1,6 @@
 Name: Smart Chicken Coop
 Link: https://github.com/joshmerritt/arduinoChickenCoopDoor
-Category: Farm
+Category: Technology
 Goal: Build an automated door to allow the chickens to free range from sun-up to sun-down, while keeping them safely enclosed in their coop overnight.
 My Role: Creator and Engineer
 Technology: C++, Arduino, Motors, Programmable RGB leds, Woodworking

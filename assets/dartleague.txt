@@ -1,0 +1,7 @@
+Name: Black Sheep Dart League
+Link: https://theblacksheepdartleague.web.app
+Category: Apps
+Goal: To make setting up weekly pairings and brackets quick and easy for a local dart league.
+My Role: Creator and Product Owner — identified the friction points in a highly manual, paper-based process and built a solution to handle the numerous scenarios that come up each week. Built with Claude.ai as development partner.
+Technology: React 19, Firebase (Auth + Firestore + Cloud Functions), Tailwind CSS, Vite, Claude AI (scoresheet scanning)
+Description: A league management app that replaces a paper-based process. Tracks player stats and win percentages, manages weekly RSVPs, generates smart pairings based on matchup history and standings, and uses Claude AI to scan and parse physical scoresheets via phone camera.
