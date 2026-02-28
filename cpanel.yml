@@ -1,6 +1,5 @@
 ---
 deployment:
   tasks:
-    # Copy all repo files into your public web root
     - export DEPLOYPATH=/home/dadacikk/public_html/
     - /bin/cp -r $TRAVIS_BUILD_DIR/. $DEPLOYPATH
