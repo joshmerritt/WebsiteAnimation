@@ -35,19 +35,24 @@ table { border-collapse: collapse; border-spacing: 0; }
 /* ─── Base ─────────────────────────────────────────────────────────────────── */
 
 :root {
-  --bg:        rgba(12, 18, 12, 1);
-  --main:      rgba(199, 214, 213, 1);
-  --secondary: rgba(89, 133, 177, 1);
-  --accent:    rgba(89, 133, 177, 1);
-  --radius:    6px;
+  --bg:           rgba(12, 18, 12, 1);
+  --main:         rgba(199, 214, 213, 1);
+  --secondary:    rgba(89, 133, 177, 1);
+  --accent:       rgba(89, 133, 177, 1);
+  --radius:       10px;
+  --glass-bg:     rgba(10, 16, 22, 0.82);
+  --glass-border: rgba(89, 133, 177, 0.22);
+  --shadow-deep:  0 24px 64px rgba(0, 0, 0, 0.55), 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
 body {
   background: var(--bg);
   overflow: hidden;
   overscroll-behavior: none;
-  font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
   color: var(--main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ─── p5.js canvas ──────────────────────────────────────────────────────────── */
@@ -59,11 +64,6 @@ canvas {
 }
 
 /* ─── React overlay ─────────────────────────────────────────────────────────── */
-/*
-  #react-root sits on top of the canvas (pointer-events: none by default
-  so it doesn't block canvas interaction). Individual interactive children
-  re-enable pointer events as needed.
-*/
 #react-root {
   position: fixed;
   top: 0;
@@ -81,30 +81,38 @@ canvas {
   max-height: 94vh;
   right: 1vw;
   top: 3vh;
-  background: rgba(12, 18, 12, 0.92);
-  border: 1px solid rgba(89, 133, 177, 0.35);
+
+  background: var(--glass-bg);
+  backdrop-filter: blur(22px) saturate(1.4);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  border: 1px solid var(--glass-border);
+  border-top: 1px solid rgba(199, 214, 213, 0.1);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(199, 214, 213, 0.06);
+
   padding: 3vmin 3vmin 4vmin;
   overflow-y: auto;
   overflow-x: hidden;
-  pointer-events: all;   /* re-enable so users can click/scroll */
+  pointer-events: all;
 
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2vmin;
 
-  /* Smooth slide-in — animated in App.jsx via JS */
-  transition: opacity 0.28s ease, transform 0.28s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .DetailPage h1 {
   font-size: clamp(1rem, 2.5vmin, 1.6rem);
-  font-weight: 900;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
   text-align: center;
   color: var(--main);
-  letter-spacing: 0.02em;
-  padding-bottom: 0.5em;
+  letter-spacing: -0.01em;
+  padding-bottom: 0.6em;
+  border-bottom: 1px solid rgba(89, 133, 177, 0.18);
+  width: 100%;
 }
 
 .DetailImage {
@@ -117,6 +125,7 @@ canvas {
   height: auto;
   border-radius: var(--radius);
   display: block;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* ─── Detail table ──────────────────────────────────────────────────────────── */
@@ -126,50 +135,58 @@ canvas {
 }
 
 .DetailPage td {
-  padding: 0.5em 0.6em;
+  padding: 0.55em 0.7em;
   font-size: clamp(0.7rem, 1.6vmin, 0.95rem);
   color: var(--main);
   vertical-align: top;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .DetailPage td:first-child {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--secondary);
   white-space: nowrap;
   width: 28%;
+  font-size: clamp(0.65rem, 1.4vmin, 0.85rem);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .DetailPage tr + tr td {
-  border-top: 1px solid rgba(89, 133, 177, 0.15);
+  border-top: 1px solid rgba(89, 133, 177, 0.1);
 }
 
 /* ─── Detail links ──────────────────────────────────────────────────────────── */
 .DetailPage a {
-  display: inline-block;
-  padding: 0.5em 1.2em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.6em 1.4em;
   color: var(--main);
-  background: rgba(89, 133, 177, 0.18);
-  border: 1px solid rgba(89, 133, 177, 0.5);
-  border-radius: var(--radius);
+  background: rgba(89, 133, 177, 0.14);
+  border: 1px solid rgba(89, 133, 177, 0.4);
+  border-radius: 999px;
   text-decoration: none;
   font-size: clamp(0.7rem, 1.5vmin, 0.9rem);
-  transition: background 0.15s, border-color 0.15s;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .DetailPage a:hover {
-  background: rgba(89, 133, 177, 0.35);
-  border-color: rgba(89, 133, 177, 0.8);
+  background: rgba(89, 133, 177, 0.28);
+  border-color: rgba(89, 133, 177, 0.75);
+  box-shadow: 0 0 12px rgba(89, 133, 177, 0.2);
 }
 
 /* ─── Exit button ───────────────────────────────────────────────────────────── */
 .ExitButton {
   position: absolute;
-  top: 0.8vmin;
-  right: 0.8vmin;
-  background: transparent;
-  border: 1px solid rgba(89, 133, 177, 0.4);
-  border-radius: var(--radius);
+  top: 0.9vmin;
+  right: 0.9vmin;
+  background: rgba(89, 133, 177, 0.08);
+  border: 1px solid rgba(89, 133, 177, 0.3);
+  border-radius: 999px;
   color: var(--main);
   font-size: clamp(0.75rem, 1.5vmin, 1rem);
   width: 2.4em;
@@ -178,13 +195,16 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
   pointer-events: all;
+  opacity: 0.7;
 }
 
 .ExitButton:hover {
-  background: rgba(89, 133, 177, 0.25);
+  background: rgba(89, 133, 177, 0.22);
   border-color: var(--secondary);
+  box-shadow: 0 0 8px rgba(89, 133, 177, 0.2);
+  opacity: 1;
 }
 
 /* ─── Reset button ──────────────────────────────────────────────────────────── */
@@ -192,19 +212,26 @@ canvas {
   position: fixed;
   right: 2.5vmin;
   bottom: 2vmin;
-  background: var(--secondary);
-  border: none;
-  border-radius: var(--radius);
+  background: rgba(89, 133, 177, 0.12);
+  border: 1px solid rgba(89, 133, 177, 0.35);
+  border-radius: 999px;
   color: var(--main);
-  font-size: clamp(0.65rem, 1.5vmin, 0.85rem);
-  padding: 0.5em 1em;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.65rem, 1.4vmin, 0.85rem);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  padding: 0.55em 1.2em;
   cursor: pointer;
   pointer-events: all;
-  transition: background 0.15s;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .reset:hover {
-  background: rgba(89, 133, 177, 0.7);
+  background: rgba(89, 133, 177, 0.26);
+  border-color: rgba(89, 133, 177, 0.65);
+  box-shadow: 0 0 12px rgba(89, 133, 177, 0.18);
 }
 
 /* ─── General links (outside detail page) ───────────────────────────────────── */
@@ -217,7 +244,8 @@ a {
 /* ─── Scrollbar (detail panel) ──────────────────────────────────────────────── */
 .DetailPage::-webkit-scrollbar        { width: 4px; }
 .DetailPage::-webkit-scrollbar-track  { background: transparent; }
-.DetailPage::-webkit-scrollbar-thumb  { background: rgba(89,133,177,0.4); border-radius: 2px; }
+.DetailPage::-webkit-scrollbar-thumb  { background: rgba(89,133,177,0.35); border-radius: 2px; }
+.DetailPage::-webkit-scrollbar-thumb:hover { background: rgba(89,133,177,0.6); }
 
 /* ─── Mobile / portrait overrides ───────────────────────────────────────────── */
 @media (orientation: portrait) {
@@ -239,6 +267,8 @@ a {
   .DetailPage {
     right: 0;
     border-radius: 0;
+    border-left: none;
+    border-right: none;
     font-size: 1.9vmax;
   }
 }

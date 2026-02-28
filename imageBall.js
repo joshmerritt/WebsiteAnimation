@@ -132,12 +132,16 @@ class ImageBall {
 
     drawingContext.restore();
 
-    // Circle border
+    // Circle border with subtle glow
+    drawingContext.save();
+    drawingContext.shadowColor = 'rgba(89, 133, 177, 0.45)';
+    drawingContext.shadowBlur  = this.r / 5;
     noFill();
     stroke(config.mainColor);
     strokeWeight(iconSize / 50);
     ellipseMode(CENTER);
     circle(0, 0, this.r * 2);
+    drawingContext.restore();
 
     pop();
 
