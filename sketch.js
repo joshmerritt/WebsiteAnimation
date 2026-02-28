@@ -254,8 +254,12 @@ function drawBalls() {
           if (ball.clicked) ball.aim();
         } else {
           if (ball.onBall(mouseX, mouseY)) ball.hover();
-          ball.xPower = 0;
-          ball.yPower = 0;
+          // Keep power values intact until mouseReleased runs so launch
+          // strength cannot be cleared before force is applied.
+          if (!ball.clicked) {
+            ball.xPower = 0;
+            ball.yPower = 0;
+          }
         }
       }
     });
@@ -465,6 +469,11 @@ function mouseReleased() {
         ball.launched();
         totalShots++;
       }
+
+      // Release should always end the aiming session for this ball.
+      ball.clicked = false;
+      ball.xPower = 0;
+      ball.yPower = 0;
     });
     return false;
   }
