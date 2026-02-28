@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Da Data Dad</title>
+    <meta name="viewport" content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="shortcut icon" href="assets/images/favicon.png">
+    <link rel="stylesheet" href="main.css">
+
+    <!-- ✅ FIX: Use pinned CDN URLs instead of broken ../assets/ relative paths -->
+    <!-- p5.js v1.9.4 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+    <!-- matter.js v0.19.0 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+
+    <!-- React 18 + Babel standalone (enables JSX without a build step) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Game class modules (load before sketch.js) -->
+    <script src="imageBall.js"></script>
+    <script src="goal.js"></script>
+    <script src="boundary.js"></script>
+    <script src="net.js"></script>
+    <script src="menu.js"></script>
+    <script src="contactUs.js"></script>
+
+    <!-- Main p5.js sketch -->
+    <script src="sketch.js"></script>
+  </head>
+
+  <body>
+    <!--
+      Two layers:
+        1. p5.js canvas (physics + animation) — injected into body by p5
+        2. #react-root overlay (detail pages, buttons) — managed by React
+    -->
+    <div id="react-root"></div>
+
+    <!-- React UI component — Babel transforms JSX at runtime -->
+    <script type="text/babel" src="App.jsx"></script>
+  </body>
+</html>

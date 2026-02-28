@@ -1,0 +1,254 @@
+/* ─── Reset (Meyer Web) ─────────────────────────────────────────────────────── */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+body { line-height: 1; }
+ol, ul { list-style: none; }
+blockquote, q { quotes: none; }
+blockquote:before, blockquote:after,
+q:before, q:after { content: ''; content: none; }
+table { border-collapse: collapse; border-spacing: 0; }
+
+/* ─── Base ─────────────────────────────────────────────────────────────────── */
+
+:root {
+  --bg:        rgba(12, 18, 12, 1);
+  --main:      rgba(199, 214, 213, 1);
+  --secondary: rgba(89, 133, 177, 1);
+  --accent:    rgba(89, 133, 177, 1);
+  --radius:    6px;
+}
+
+body {
+  background: var(--bg);
+  overflow: hidden;
+  overscroll-behavior: none;
+  font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  color: var(--main);
+}
+
+/* ─── p5.js canvas ──────────────────────────────────────────────────────────── */
+canvas {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+/* ─── React overlay ─────────────────────────────────────────────────────────── */
+/*
+  #react-root sits on top of the canvas (pointer-events: none by default
+  so it doesn't block canvas interaction). Individual interactive children
+  re-enable pointer events as needed.
+*/
+#react-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ─── Detail page ───────────────────────────────────────────────────────────── */
+.DetailPage {
+  position: absolute;
+  width: 48vw;
+  max-height: 94vh;
+  right: 1vw;
+  top: 3vh;
+  background: rgba(12, 18, 12, 0.92);
+  border: 1px solid rgba(89, 133, 177, 0.35);
+  border-radius: var(--radius);
+  padding: 3vmin 3vmin 4vmin;
+  overflow-y: auto;
+  overflow-x: hidden;
+  pointer-events: all;   /* re-enable so users can click/scroll */
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vmin;
+
+  /* Smooth slide-in — animated in App.jsx via JS */
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.DetailPage h1 {
+  font-size: clamp(1rem, 2.5vmin, 1.6rem);
+  font-weight: 900;
+  text-align: center;
+  color: var(--main);
+  letter-spacing: 0.02em;
+  padding-bottom: 0.5em;
+}
+
+.DetailImage {
+  width: 100%;
+  max-width: 320px;
+}
+
+.DetailImage img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  display: block;
+}
+
+/* ─── Detail table ──────────────────────────────────────────────────────────── */
+.DetailPage table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.DetailPage td {
+  padding: 0.5em 0.6em;
+  font-size: clamp(0.7rem, 1.6vmin, 0.95rem);
+  color: var(--main);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.DetailPage td:first-child {
+  font-weight: 700;
+  color: var(--secondary);
+  white-space: nowrap;
+  width: 28%;
+}
+
+.DetailPage tr + tr td {
+  border-top: 1px solid rgba(89, 133, 177, 0.15);
+}
+
+/* ─── Detail links ──────────────────────────────────────────────────────────── */
+.DetailPage a {
+  display: inline-block;
+  padding: 0.5em 1.2em;
+  color: var(--main);
+  background: rgba(89, 133, 177, 0.18);
+  border: 1px solid rgba(89, 133, 177, 0.5);
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-size: clamp(0.7rem, 1.5vmin, 0.9rem);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.DetailPage a:hover {
+  background: rgba(89, 133, 177, 0.35);
+  border-color: rgba(89, 133, 177, 0.8);
+}
+
+/* ─── Exit button ───────────────────────────────────────────────────────────── */
+.ExitButton {
+  position: absolute;
+  top: 0.8vmin;
+  right: 0.8vmin;
+  background: transparent;
+  border: 1px solid rgba(89, 133, 177, 0.4);
+  border-radius: var(--radius);
+  color: var(--main);
+  font-size: clamp(0.75rem, 1.5vmin, 1rem);
+  width: 2.4em;
+  height: 2.4em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  pointer-events: all;
+}
+
+.ExitButton:hover {
+  background: rgba(89, 133, 177, 0.25);
+  border-color: var(--secondary);
+}
+
+/* ─── Reset button ──────────────────────────────────────────────────────────── */
+.reset {
+  position: fixed;
+  right: 2.5vmin;
+  bottom: 2vmin;
+  background: var(--secondary);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--main);
+  font-size: clamp(0.65rem, 1.5vmin, 0.85rem);
+  padding: 0.5em 1em;
+  cursor: pointer;
+  pointer-events: all;
+  transition: background 0.15s;
+}
+
+.reset:hover {
+  background: rgba(89, 133, 177, 0.7);
+}
+
+/* ─── General links (outside detail page) ───────────────────────────────────── */
+a {
+  padding: 0.5em;
+  color: var(--main);
+  text-decoration: none;
+}
+
+/* ─── Scrollbar (detail panel) ──────────────────────────────────────────────── */
+.DetailPage::-webkit-scrollbar        { width: 4px; }
+.DetailPage::-webkit-scrollbar-track  { background: transparent; }
+.DetailPage::-webkit-scrollbar-thumb  { background: rgba(89,133,177,0.4); border-radius: 2px; }
+
+/* ─── Mobile / portrait overrides ───────────────────────────────────────────── */
+@media (orientation: portrait) {
+  .DetailPage {
+    width: 95vw;
+    max-height: 52vh;
+    right: 2.5vw;
+    top: 44vh;
+  }
+
+  .reset {
+    right: 4vmin;
+    bottom: 2vmin;
+    font-size: clamp(0.7rem, 2vmin, 0.9rem);
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .DetailPage {
+    right: 0;
+    border-radius: 0;
+    font-size: 1.9vmax;
+  }
+}
+
+/* Prevent overscroll bounce on iOS */
+@media screen {
+  body {
+    height: 100%;
+    position: fixed;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+}
