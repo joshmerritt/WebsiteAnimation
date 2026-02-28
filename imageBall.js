@@ -92,11 +92,9 @@ class ImageBall {
      React calls window.onDetailClosed() which drives the reset cascade.
   */
   removeDetailPage() {
-    selectedCategory = "All";
-    detailPageOpen = false;
     this.pageOpen = false;
-    // window.onDetailClosed handles resetting balls (set up in sketch.js)
-    window.onDetailClosed?.();
+    // closeDetail closes the React modal and triggers onDetailClosed for sketch reset
+    window.ui?.closeDetail();
   }
 
 

@@ -21,19 +21,17 @@ time, mark, audio, video {
 }
 
 article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
-  display: block;
-}
+footer, header, hgroup, menu, nav, section { display: block; }
 
-body { line-height: 1; }
-ol, ul { list-style: none; }
+body          { line-height: 1; }
+ol, ul        { list-style: none; }
 blockquote, q { quotes: none; }
 blockquote:before, blockquote:after,
 q:before, q:after { content: ''; content: none; }
-table { border-collapse: collapse; border-spacing: 0; }
+table         { border-collapse: collapse; border-spacing: 0; }
 
-/* ─── Base ─────────────────────────────────────────────────────────────────── */
 
+/* ─── Design tokens ─────────────────────────────────────────────────────────── */
 :root {
   --bg:           rgba(12, 18, 12, 1);
   --main:         rgba(199, 214, 213, 1);
@@ -45,6 +43,8 @@ table { border-collapse: collapse; border-spacing: 0; }
   --shadow-deep:  0 24px 64px rgba(0, 0, 0, 0.55), 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
+
+/* ─── Base ──────────────────────────────────────────────────────────────────── */
 body {
   background: var(--bg);
   overflow: hidden;
@@ -53,6 +53,16 @@ body {
   color: var(--main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent overscroll bounce on iOS */
+@media screen {
+  body {
+    height: 100%;
+    position: fixed;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* ─── p5.js canvas ──────────────────────────────────────────────────────────── */
@@ -64,6 +74,7 @@ canvas {
 }
 
 /* ─── React overlay ─────────────────────────────────────────────────────────── */
+/* ─── React overlay root ────────────────────────────────────────────────────── */
 #react-root {
   position: fixed;
   top: 0;
@@ -97,8 +108,11 @@ canvas {
 
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2vmin;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
+  animation: cardIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
@@ -115,21 +129,71 @@ canvas {
   width: 100%;
 }
 
-.DetailImage {
-  width: 100%;
-  max-width: 320px;
+.modal-close:hover { background: rgba(89, 133, 177, 0.55); }
+
+/* Hero image */
+.modal-hero {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 14px 14px 0 0;
+  flex-shrink: 0;
 }
 
-.DetailImage img {
+.modal-hero img {
   width: 100%;
-  height: auto;
-  border-radius: var(--radius);
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
   display: block;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* ─── Detail table ──────────────────────────────────────────────────────────── */
-.DetailPage table {
+.modal-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(14, 20, 14, 0.88) 100%
+  );
+}
+
+.modal-hero-title {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  right: 52px;
+  font-size: clamp(1.05rem, 3vmin, 1.55rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+  margin: 0;
+}
+
+/* Content area */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 22px 26px;
+}
+
+/* Fallback title (when no image) */
+.modal-title {
+  font-size: clamp(1.05rem, 3vmin, 1.55rem);
+  font-weight: 800;
+  color: var(--main);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  padding-right: 2.5em;
+  margin: 0;
+}
+
+/* Info table */
+.modal-table {
   width: 100%;
   border-collapse: collapse;
 }
@@ -247,21 +311,8 @@ a {
 .DetailPage::-webkit-scrollbar-thumb  { background: rgba(89,133,177,0.35); border-radius: 2px; }
 .DetailPage::-webkit-scrollbar-thumb:hover { background: rgba(89,133,177,0.6); }
 
-/* ─── Mobile / portrait overrides ───────────────────────────────────────────── */
-@media (orientation: portrait) {
-  .DetailPage {
-    width: 95vw;
-    max-height: 52vh;
-    right: 2.5vw;
-    top: 44vh;
-  }
 
-  .reset {
-    right: 4vmin;
-    bottom: 2vmin;
-    font-size: clamp(0.7rem, 2vmin, 0.9rem);
-  }
-}
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
 
 @media screen and (max-width: 1000px) {
   .DetailPage {
@@ -273,12 +324,8 @@ a {
   }
 }
 
-/* Prevent overscroll bounce on iOS */
-@media screen {
-  body {
-    height: 100%;
-    position: fixed;
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
+  .modal-table td {
+    font-size: clamp(0.7rem, 2.4vmin, 0.82rem);
+    padding: 0.5em 0.4em;
   }
 }

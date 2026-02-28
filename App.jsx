@@ -1,84 +1,65 @@
 /*
   App.jsx — React UI Overlay
   ──────────────────────────
-  Manages all HTML-based UI elements that sit on top of the p5.js canvas:
-    • Project detail panel (opened when a ball scores a goal)
+  Manages all HTML UI that sits on top of the p5.js canvas:
+    • Project detail modal (hero image, info table, CTA link)
     • Reset button
-    • Contact link
 
-  Communication with p5.js sketch via the window.ui bridge object:
-    window.ui.openDetail(data)  — called by imageBall when a goal is scored or double-clicked
-    window.ui.closeDetail()     — called programmatically if needed
+  Bridge API (called by p5.js sketch):
+    window.ui.openDetail(data)  — opens the modal
+    window.ui.closeDetail()     — closes modal + triggers sketch reset
 */
 
-const { useState, useEffect, useCallback, useRef } = React;
+const { useState, useEffect, useCallback } = React;
 
-function DetailPage({ detail, onClose }) {
-  const panelRef = useRef(null);
-
-  // Animate in
-  useEffect(() => {
-    if (panelRef.current) {
-      panelRef.current.style.opacity = '0';
-      panelRef.current.style.transform = 'translateX(30px)';
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (panelRef.current) {
-            panelRef.current.style.opacity = '1';
-            panelRef.current.style.transform = 'translateX(0)';
-          }
-        });
-      });
-    }
-  }, [detail]);
-
+function DetailModal({ detail, onClose }) {
   if (!detail) return null;
 
+  const hasLink = detail.link && detail.link !== 'null' && detail.link.trim() !== '';
+
+  const rows = [
+    { label: 'Goal',       value: detail.goal },
+    { label: 'My Role',    value: detail.role },
+    { label: 'Technology', value: detail.technology },
+    { label: 'Summary',    value: detail.description },
+  ].filter(r => r.value);
+
   return (
-    <div className="DetailPage" ref={panelRef}>
-      <button className="ExitButton" onClick={onClose} aria-label="Close">✕</button>
-      <h1>{detail.name}</h1>
+    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal-card">
 
-      {detail.imageSrc && (
-        <div className="DetailImage">
-          <img src={detail.imageSrc} alt={detail.name} />
+        <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
+
+        {detail.imageSrc && (
+          <div className="modal-hero">
+            <img src={detail.imageSrc} alt={detail.name} />
+            <div className="modal-hero-gradient" />
+            <h2 className="modal-hero-title">{detail.name}</h2>
+          </div>
+        )}
+
+        <div className="modal-content">
+          {!detail.imageSrc && <h2 className="modal-title">{detail.name}</h2>}
+
+          <table className="modal-table">
+            <tbody>
+              {rows.map(({ label, value }) => (
+                <tr key={label}>
+                  <td className="modal-label">{label}</td>
+                  <td>{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {hasLink && (
+            <a className="modal-cta" href={detail.link} target="_blank" rel="noopener noreferrer">
+              View Project ↗
+            </a>
+          )}
         </div>
-      )}
 
-      <table>
-        <tbody>
-          {detail.goal && (
-            <tr>
-              <td>Goal</td>
-              <td>{detail.goal}</td>
-            </tr>
-          )}
-          {detail.role && (
-            <tr>
-              <td>My Role</td>
-              <td>{detail.role}</td>
-            </tr>
-          )}
-          {detail.technology && (
-            <tr>
-              <td>Technology</td>
-              <td>{detail.technology}</td>
-            </tr>
-          )}
-          {detail.description && (
-            <tr>
-              <td>Summary</td>
-              <td>{detail.description}</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      {detail.link && detail.link !== 'null' && detail.link !== '' && (
-        <a href={detail.link} target="_blank" rel="noopener noreferrer">
-          Learn more ↗
-        </a>
-      )}
+      </div>
     </div>
   );
 }
@@ -86,49 +67,35 @@ function DetailPage({ detail, onClose }) {
 function App() {
   const [detail, setDetail] = useState(null);
 
-  // Wire up the bridge that p5.js sketch calls into
+  const handleClose = useCallback(() => {
+    setDetail(null);
+    window.detailPageOpen = false;
+    window.onDetailClosed?.();
+  }, []);
+
   useEffect(() => {
     window.ui = {
       openDetail: (data) => {
         setDetail(data);
-        // Let sketch know detail is open (it reads window.detailPageOpen)
         window.detailPageOpen = true;
       },
       closeDetail: () => {
         setDetail(null);
         window.detailPageOpen = false;
+        window.onDetailClosed?.();
       },
     };
-
-    // Clean up on unmount
     return () => { window.ui = null; };
-  }, []);
-
-  const handleClose = useCallback(() => {
-    setDetail(null);
-    window.detailPageOpen = false;
-    // Tell sketch to reset balls and show reset button again
-    window.onDetailClosed?.();
-  }, []);
-
-  const handleReset = useCallback(() => {
-    window.onReset?.();
-  }, []);
+  }, [handleClose]);
 
   return (
     <>
-      <DetailPage detail={detail} onClose={handleClose} />
-
-      {/* Reset button — hidden while detail page is open */}
+      <DetailModal detail={detail} onClose={handleClose} />
       {!detail && (
-        <button className="reset" onClick={handleReset}>
-          ↺ Reset
-        </button>
+        <button className="reset" onClick={() => window.onReset?.()}>↺ Reset</button>
       )}
     </>
   );
 }
 
-// Mount React app
-const root = ReactDOM.createRoot(document.getElementById('react-root'));
-root.render(<App />);
+ReactDOM.createRoot(document.getElementById('react-root')).render(<App />);
