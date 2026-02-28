@@ -402,6 +402,12 @@ function mouseDragged() {
   return false;
 }
 
+// Touch equivalents — mouseReleased is not reliably triggered by touchend
+// on all mobile browsers, so we wire touch events explicitly.
+function touchStarted() { return mousePressed(); }
+function touchMoved()   { return mouseDragged(); }
+function touchEnded()   { return mouseReleased(); }
+
 function mousePressed() {
   if (!detailPageOpen) {
     imageBalls.forEach((ball) => {
