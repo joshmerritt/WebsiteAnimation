@@ -4,6 +4,7 @@
   Manages all HTML UI that sits on top of the p5.js canvas:
     • Project detail modal (hero image, info table, CTA link)
     • Reset button
+    • Contact button
 
   Bridge API (called by p5.js sketch):
     window.ui.openDetail(data)  — opens the modal
@@ -11,6 +12,15 @@
 */
 
 const { useState, useEffect, useCallback } = React;
+
+function ctaLabel(link) {
+  if (!link) return 'View Project ↗';
+  if (link.includes('linkedin.com'))  return 'View LinkedIn ↗';
+  if (link.includes('github.com'))    return 'View on GitHub ↗';
+  if (link.includes('upwork.com'))    return 'View Upwork Profile ↗';
+  if (link.includes('.html'))         return 'View Dashboard ↗';
+  return 'Open App ↗';
+}
 
 function DetailModal({ detail, onClose }) {
   if (!detail) return null;
@@ -54,7 +64,7 @@ function DetailModal({ detail, onClose }) {
 
           {hasLink && (
             <a className="modal-cta" href={detail.link} target="_blank" rel="noopener noreferrer">
-              View Project ↗
+              {ctaLabel(detail.link)}
             </a>
           )}
         </div>
@@ -92,7 +102,15 @@ function App() {
     <>
       <DetailModal detail={detail} onClose={handleClose} />
       {!detail && (
-        <button className="reset" onClick={() => window.onReset?.()}>↺ Reset</button>
+        <>
+          <a
+            className="contact-btn"
+            href="mailto:josh@DaDataDad.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >✉ Contact Me</a>
+          <button className="reset" onClick={() => window.onReset?.()}>↺ Reset</button>
+        </>
       )}
     </>
   );

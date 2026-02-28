@@ -22,11 +22,17 @@ class Net {
   }
 
   show() {
-    // Invisible — uncomment below to debug net placement:
-    // push();
-    // fill('red');
-    // rectMode(CENTER);
-    // rect(this.body.position.x, this.body.position.y, this.width, this.netHeight);
-    // pop();
+    // Subtle dashed side lines framing the net/menu area
+    const topY = this.body.position.y - this.netHeight / 2;
+    const botY = this.body.position.y + this.netHeight / 2;
+    drawingContext.save();
+    drawingContext.strokeStyle = 'rgba(89, 133, 177, 0.22)';
+    drawingContext.lineWidth = 1;
+    drawingContext.setLineDash([2, 5]);
+    drawingContext.beginPath();
+    drawingContext.moveTo(this.body.position.x, topY);
+    drawingContext.lineTo(this.body.position.x, botY);
+    drawingContext.stroke();
+    drawingContext.restore();
   }
 }

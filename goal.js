@@ -15,10 +15,15 @@ class Goal {
   }
 
   show() {
+    // Draw rim post slightly above the physics body so it crowns the net
+    const drawX = this.body.position.x;
+    const drawY = this.body.position.y - this.radius * 1.5;
     push();
-    fill(config.accentColor);
+    stroke(config.accentColor);
+    strokeWeight(this.radius * 0.6);
+    noFill();
     ellipseMode(CENTER);
-    circle(this.body.position.x, this.body.position.y, this.radius);
+    circle(drawX, drawY, this.radius * 2);
     pop();
   }
 }

@@ -62,7 +62,7 @@ const config = {
   powerAdjustment: 20000,
   gridSpacing: 1,
   titleText: "Hello world, I am Josh Merritt.",
-  subTitleText: "Honest. Analytical. Data Nerd.",
+  subTitleText: "Honest. Analytical. Data Dreamer",
   contactLinkText: "Contact Me",
   contactLinkAddress: "mailto:josh@DaDataDad.com",
 };
@@ -286,6 +286,18 @@ function drawBalls() {
 }
 
 function drawGoals() {
+  // Draw horizontal rim bar connecting the two goal posts
+  if (goals.length >= 2) {
+    const g0 = goals[0];
+    const g1 = goals[1];
+    const rimY = g0.body.position.y - g0.radius * 1.5;
+    push();
+    stroke(config.accentColor);
+    strokeWeight(g0.radius * 0.6);
+    noFill();
+    line(g0.body.position.x, rimY, g1.body.position.x, rimY);
+    pop();
+  }
   goals.forEach((g) => { if (g) g.show(); });
 }
 
@@ -419,7 +431,7 @@ function setDisplaySize() {
   }
   config.gridSpacing = 2 * iconSize;
   goalPosition = { x: 0.33 * iconSize, y: playfieldHeight * 0.4 };
-  goalWidth = iconSize * 1.4;
+  goalWidth = iconSize * 1.7;
   gridStartX = goalPosition.x + goalWidth + 2 * iconSize;
   gridStartY = goalPosition.y;
   if (playfieldWidth < playfieldHeight) gridStartY -= iconSize;
