@@ -33,11 +33,14 @@ table         { border-collapse: collapse; border-spacing: 0; }
 
 /* ─── Design tokens ─────────────────────────────────────────────────────────── */
 :root {
-  --bg:        rgba(12, 18, 12, 1);
-  --main:      rgba(199, 214, 213, 1);
-  --secondary: rgba(89, 133, 177, 1);
-  --accent:    rgba(89, 133, 177, 1);
-  --radius:    8px;
+  --bg:           rgba(12, 18, 12, 1);
+  --main:         rgba(199, 214, 213, 1);
+  --secondary:    rgba(89, 133, 177, 1);
+  --accent:       rgba(89, 133, 177, 1);
+  --radius:       10px;
+  --glass-bg:     rgba(10, 16, 22, 0.82);
+  --glass-border: rgba(89, 133, 177, 0.22);
+  --shadow-deep:  0 24px 64px rgba(0, 0, 0, 0.55), 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
 
@@ -46,8 +49,10 @@ body {
   background: var(--bg);
   overflow: hidden;
   overscroll-behavior: none;
-  font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
   color: var(--main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Prevent overscroll bounce on iOS */
@@ -68,6 +73,7 @@ canvas {
   left: 0;
 }
 
+/* ─── React overlay ─────────────────────────────────────────────────────────── */
 /* ─── React overlay root ────────────────────────────────────────────────────── */
 #react-root {
   position: fixed;
@@ -79,59 +85,27 @@ canvas {
   z-index: 10;
 }
 
-/* ─── Reset button ──────────────────────────────────────────────────────────── */
-.reset {
-  position: fixed;
-  right: 2.5vmin;
-  bottom: 2vmin;
-  background: var(--secondary);
-  border: none;
+/* ─── Detail page ───────────────────────────────────────────────────────────── */
+.DetailPage {
+  position: absolute;
+  width: 48vw;
+  max-height: 94vh;
+  right: 1vw;
+  top: 3vh;
+
+  background: var(--glass-bg);
+  backdrop-filter: blur(22px) saturate(1.4);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  border: 1px solid var(--glass-border);
+  border-top: 1px solid rgba(199, 214, 213, 0.1);
   border-radius: var(--radius);
-  color: var(--main);
-  font-size: clamp(0.65rem, 1.5vmin, 0.85rem);
-  padding: 0.5em 1em;
-  cursor: pointer;
-  pointer-events: all;
-  transition: background 0.15s;
-}
+  box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(199, 214, 213, 0.06);
 
-.reset:hover { background: rgba(89, 133, 177, 0.7); }
-
-
-/* ═══ Modal ══════════════════════════════════════════════════════════════════ */
-
-/* Backdrop — semi-transparent overlay that dims the canvas */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.72);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  z-index: 20;
-  pointer-events: all;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  animation: overlayIn 0.2s ease both;
-}
-
-@keyframes overlayIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* Card */
-.modal-card {
-  position: relative;
-  background: rgba(14, 20, 14, 0.97);
-  border: 1px solid rgba(89, 133, 177, 0.25);
-  border-radius: 14px;
-  width: 100%;
-  max-width: 680px;
-  max-height: 90vh;
+  padding: 3vmin 3vmin 4vmin;
   overflow-y: auto;
   overflow-x: hidden;
+  pointer-events: all;
+
   display: flex;
   flex-direction: column;
   box-shadow:
@@ -140,30 +114,19 @@ canvas {
   animation: cardIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes cardIn {
-  from { opacity: 0; transform: scale(0.93) translateY(20px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Close button */
-.modal-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 2;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  color: #fff;
-  font-size: 0.85rem;
-  width: 2.2em;
-  height: 2.2em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-  pointer-events: all;
+.DetailPage h1 {
+  font-size: clamp(1rem, 2.5vmin, 1.6rem);
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  color: var(--main);
+  letter-spacing: -0.01em;
+  padding-bottom: 0.6em;
+  border-bottom: 1px solid rgba(89, 133, 177, 0.18);
+  width: 100%;
 }
 
 .modal-close:hover { background: rgba(89, 133, 177, 0.55); }
@@ -183,6 +146,7 @@ canvas {
   object-fit: cover;
   object-position: center top;
   display: block;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .modal-hero-gradient {
@@ -234,62 +198,131 @@ canvas {
   border-collapse: collapse;
 }
 
-.modal-table td {
-  padding: 0.58em 0.5em;
-  font-size: clamp(0.72rem, 1.7vmin, 0.88rem);
+.DetailPage td {
+  padding: 0.55em 0.7em;
+  font-size: clamp(0.7rem, 1.6vmin, 0.95rem);
   color: var(--main);
   vertical-align: top;
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
-.modal-label {
-  font-weight: 700;
+.DetailPage td:first-child {
+  font-weight: 600;
   color: var(--secondary);
   white-space: nowrap;
-  width: 26%;
-  padding-right: 0.8em;
+  width: 28%;
+  font-size: clamp(0.65rem, 1.4vmin, 0.85rem);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
-.modal-table tr + tr td {
+.DetailPage tr + tr td {
   border-top: 1px solid rgba(89, 133, 177, 0.1);
 }
 
-/* CTA link */
-.modal-cta {
-  display: inline-block;
-  align-self: flex-start;
-  padding: 0.6em 1.5em;
-  background: rgba(89, 133, 177, 0.18);
-  border: 1px solid rgba(89, 133, 177, 0.5);
-  border-radius: var(--radius);
+/* ─── Detail links ──────────────────────────────────────────────────────────── */
+.DetailPage a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.6em 1.4em;
+  color: var(--main);
+  background: rgba(89, 133, 177, 0.14);
+  border: 1px solid rgba(89, 133, 177, 0.4);
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: clamp(0.7rem, 1.5vmin, 0.9rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.DetailPage a:hover {
+  background: rgba(89, 133, 177, 0.28);
+  border-color: rgba(89, 133, 177, 0.75);
+  box-shadow: 0 0 12px rgba(89, 133, 177, 0.2);
+}
+
+/* ─── Exit button ───────────────────────────────────────────────────────────── */
+.ExitButton {
+  position: absolute;
+  top: 0.9vmin;
+  right: 0.9vmin;
+  background: rgba(89, 133, 177, 0.08);
+  border: 1px solid rgba(89, 133, 177, 0.3);
+  border-radius: 999px;
+  color: var(--main);
+  font-size: clamp(0.75rem, 1.5vmin, 1rem);
+  width: 2.4em;
+  height: 2.4em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  pointer-events: all;
+  opacity: 0.7;
+}
+
+.ExitButton:hover {
+  background: rgba(89, 133, 177, 0.22);
+  border-color: var(--secondary);
+  box-shadow: 0 0 8px rgba(89, 133, 177, 0.2);
+  opacity: 1;
+}
+
+/* ─── Reset button ──────────────────────────────────────────────────────────── */
+.reset {
+  position: fixed;
+  right: 2.5vmin;
+  bottom: 2vmin;
+  background: rgba(89, 133, 177, 0.12);
+  border: 1px solid rgba(89, 133, 177, 0.35);
+  border-radius: 999px;
+  color: var(--main);
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.65rem, 1.4vmin, 0.85rem);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  padding: 0.55em 1.2em;
+  cursor: pointer;
+  pointer-events: all;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.reset:hover {
+  background: rgba(89, 133, 177, 0.26);
+  border-color: rgba(89, 133, 177, 0.65);
+  box-shadow: 0 0 12px rgba(89, 133, 177, 0.18);
+}
+
+/* ─── General links (outside detail page) ───────────────────────────────────── */
+a {
+  padding: 0.5em;
   color: var(--main);
   text-decoration: none;
-  font-size: clamp(0.75rem, 1.6vmin, 0.88rem);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  transition: background 0.15s, border-color 0.15s, transform 0.1s;
 }
 
-.modal-cta:hover {
-  background: rgba(89, 133, 177, 0.35);
-  border-color: rgba(89, 133, 177, 0.8);
-  transform: translateY(-1px);
-}
-
-/* Scrollbar */
-.modal-card::-webkit-scrollbar       { width: 4px; }
-.modal-card::-webkit-scrollbar-track { background: transparent; }
-.modal-card::-webkit-scrollbar-thumb { background: rgba(89, 133, 177, 0.35); border-radius: 2px; }
+/* ─── Scrollbar (detail panel) ──────────────────────────────────────────────── */
+.DetailPage::-webkit-scrollbar        { width: 4px; }
+.DetailPage::-webkit-scrollbar-track  { background: transparent; }
+.DetailPage::-webkit-scrollbar-thumb  { background: rgba(89,133,177,0.35); border-radius: 2px; }
+.DetailPage::-webkit-scrollbar-thumb:hover { background: rgba(89,133,177,0.6); }
 
 
 /* ─── Responsive ─────────────────────────────────────────────────────────────── */
 
-/* Mobile portrait */
-@media (max-width: 480px), (orientation: portrait) {
-  .modal-overlay  { padding: 10px; }
-  .modal-card     { max-height: 88vh; border-radius: 12px; }
-  .modal-hero     { height: 185px; border-radius: 12px 12px 0 0; }
-  .modal-content  { padding: 16px 15px 20px; gap: 14px; }
+@media screen and (max-width: 1000px) {
+  .DetailPage {
+    right: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    font-size: 1.9vmax;
+  }
+}
 
   .modal-table td {
     font-size: clamp(0.7rem, 2.4vmin, 0.82rem);

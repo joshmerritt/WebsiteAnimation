@@ -32,10 +32,40 @@ class Menu {
 
   show() {
     push();
+    noFill();
+    noStroke();
+
+    // Pill background
+    const isHover  = this.onMenu(mouseX, mouseY);
+    const pillH    = iconSize / 2.8;
+    const pillW    = goalWidth * 0.92;
+    const pillX    = this.position.x - pillW / 2;
+    const pillY    = this.position.y - pillH * 0.78;
+    const fillAlpha   = this.selected ? 0.22 : (isHover ? 0.1 : 0.05);
+    const borderAlpha = this.selected ? 0.65 : (isHover ? 0.35 : 0.18);
+
+    drawingContext.save();
+    drawingContext.beginPath();
+    if (drawingContext.roundRect) {
+      drawingContext.roundRect(pillX, pillY, pillW, pillH, pillH / 2);
+    } else {
+      drawingContext.arc(pillX + pillH / 2, pillY + pillH / 2, pillH / 2, Math.PI / 2, -Math.PI / 2, true);
+      drawingContext.lineTo(pillX + pillW - pillH / 2, pillY);
+      drawingContext.arc(pillX + pillW - pillH / 2, pillY + pillH / 2, pillH / 2, -Math.PI / 2, Math.PI / 2, false);
+      drawingContext.closePath();
+    }
+    drawingContext.fillStyle   = `rgba(89, 133, 177, ${fillAlpha})`;
+    drawingContext.strokeStyle = `rgba(89, 133, 177, ${borderAlpha})`;
+    drawingContext.lineWidth   = 1;
+    drawingContext.fill();
+    drawingContext.stroke();
+    drawingContext.restore();
+
     textAlign(CENTER);
-    textSize(iconSize / 4);
-    this.onMenu(mouseX, mouseY) ? textStyle(BOLD) : textStyle(NORMAL);
-    this.selected ? fill(config.mainColor) : fill(config.secondaryColor);
+    textFont('Inter');
+    textSize(iconSize / 4.5);
+    textStyle(this.selected || isHover ? BOLD : NORMAL);
+    fill(this.selected ? config.mainColor : config.secondaryColor);
     text(this.category, this.position.x, this.position.y);
     pop();
   }

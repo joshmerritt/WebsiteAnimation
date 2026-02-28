@@ -102,6 +102,18 @@ function draw() {
   Matter.Engine.update(engine);
   background(config.backgroundColor);
 
+  // Subtle radial gradient for depth — warms the ball area
+  drawingContext.save();
+  const bgGrad = drawingContext.createRadialGradient(
+    playfieldWidth * 0.7, playfieldHeight * 0.5, 0,
+    playfieldWidth * 0.7, playfieldHeight * 0.5, Math.max(playfieldWidth, playfieldHeight) * 0.65
+  );
+  bgGrad.addColorStop(0, 'rgba(40, 60, 90, 0.13)');
+  bgGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  drawingContext.fillStyle = bgGrad;
+  drawingContext.fillRect(0, 0, playfieldWidth, playfieldHeight);
+  drawingContext.restore();
+
   if (!detailPageOpen) {
     displayTitle();
     drawGoals();
@@ -280,25 +292,83 @@ function displayTitle() {
   if (portraitMode) {
     const splitTitle = config.titleText.replace(".", "").split(", ");
     const splitSubtitle = config.subTitleText.split(". ");
-    const tempTextSize = iconSize / 2.5;
+    const titleSize = iconSize / 2.5;
+    const subSize   = iconSize / 4;
+    const xPos      = playfieldWidth / 8;
+    const yStart    = playfieldHeight * 0.07;
+
+    // Gradient panel behind text
+    const panelX = xPos - iconSize * 0.22;
+    const panelY = yStart - titleSize * 0.85;
+    const panelW = playfieldWidth * 0.38;
+    const panelH = titleSize * (splitTitle.length * 1.15 + splitSubtitle.length + 0.8);
+
+    drawingContext.save();
+    const panelGrad = drawingContext.createLinearGradient(panelX, panelY, panelX + panelW, panelY);
+    panelGrad.addColorStop(0, 'rgba(89, 133, 177, 0.07)');
+    panelGrad.addColorStop(1, 'rgba(89, 133, 177, 0)');
+    drawingContext.fillStyle = panelGrad;
+    if (drawingContext.roundRect) {
+      drawingContext.beginPath();
+      drawingContext.roundRect(panelX, panelY, panelW, panelH, 6);
+      drawingContext.fill();
+    } else {
+      drawingContext.fillRect(panelX, panelY, panelW, panelH);
+    }
+
+    // Vertical accent line on left edge
+    drawingContext.strokeStyle = 'rgba(89, 133, 177, 0.65)';
+    drawingContext.lineWidth   = 2;
+    drawingContext.lineCap     = 'round';
+    drawingContext.beginPath();
+    drawingContext.moveTo(panelX + 1, panelY + 6);
+    drawingContext.lineTo(panelX + 1, panelY + panelH - 6);
+    drawingContext.stroke();
+    drawingContext.restore();
+
     push();
-    textSize(tempTextSize);
-    fill(config.mainColor);
-    splitTitle.forEach((item, i) =>
-      text(item, playfieldWidth / 8, playfieldHeight * 0.07 + tempTextSize * 1.1 * i)
-    );
-    textSize(iconSize / 4);
-    splitSubtitle.forEach((item, i) =>
-      text(item, playfieldWidth / 8, playfieldHeight * 0.07 + tempTextSize * splitTitle.length + i * tempTextSize)
-    );
+    textFont('Inter');
+    splitTitle.forEach((item, i) => {
+      textSize(titleSize);
+      textStyle(i === 0 ? NORMAL : BOLD);
+      fill(i === 0 ? 'rgba(199, 214, 213, 0.7)' : config.mainColor);
+      text(item, xPos + 6, yStart + titleSize * 1.15 * i);
+    });
+    textSize(subSize);
+    textStyle(NORMAL);
+    splitSubtitle.forEach((item, i) => {
+      fill(config.secondaryColor);
+      text(item, xPos + 6, yStart + titleSize * splitTitle.length * 1.15 + i * titleSize);
+    });
     pop();
   } else {
+    const xPos      = playfieldWidth / 8;
+    const titleSize = iconSize / 2.5;
+    const subSize   = iconSize / 4;
+    const yTitle    = playfieldHeight / 6;
+    const ySubtitle = playfieldHeight / 4.2;
+
+    // Vertical accent line
+    drawingContext.save();
+    drawingContext.strokeStyle = 'rgba(89, 133, 177, 0.65)';
+    drawingContext.lineWidth   = 2;
+    drawingContext.lineCap     = 'round';
+    drawingContext.beginPath();
+    drawingContext.moveTo(xPos - iconSize * 0.14, yTitle - titleSize * 0.8);
+    drawingContext.lineTo(xPos - iconSize * 0.14, ySubtitle + subSize * 0.5);
+    drawingContext.stroke();
+    drawingContext.restore();
+
     push();
-    textSize(iconSize / 2.5);
+    textFont('Inter');
+    textSize(titleSize);
+    textStyle(BOLD);
     fill(config.mainColor);
-    text(config.titleText, playfieldWidth / 8, playfieldHeight / 6);
-    textSize(iconSize / 4);
-    text(config.subTitleText, playfieldWidth / 8, playfieldHeight / 4.2);
+    text(config.titleText, xPos, yTitle);
+    textSize(subSize);
+    textStyle(NORMAL);
+    fill(config.secondaryColor);
+    text(config.subTitleText, xPos, ySubtitle);
     pop();
   }
 }
