@@ -431,7 +431,7 @@ function setDisplaySize() {
   }
   config.gridSpacing = 2 * iconSize;
   goalPosition = { x: 0.33 * iconSize, y: playfieldHeight * 0.4 };
-  goalWidth = iconSize * 1.7;
+  goalWidth = iconSize * 1.4;
   gridStartX = goalPosition.x + goalWidth + 2 * iconSize;
   gridStartY = goalPosition.y;
   if (playfieldWidth < playfieldHeight) gridStartY -= iconSize;
