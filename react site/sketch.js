@@ -68,8 +68,8 @@ const config = {
 
 function preload() {
   for (const item of config.itemsToDisplay) {
-    imgs.push(loadImage(`assets/images/${item}.jpg`));
-    pageInfo.push(loadStrings(`assets/${item}.txt`));
+    imgs.push(loadImage(`../assets/images/${item}.jpg`));
+    pageInfo.push(loadStrings(`../assets/${item}.txt`));
   }
 }
 

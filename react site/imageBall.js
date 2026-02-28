@@ -35,7 +35,7 @@ class ImageBall {
     this.body.label = 'Image Ball';
 
     // Image source URL — used by React detail panel
-    this.imageSrc = itemName ? `assets/images/${itemName}.jpg` : '';
+    this.imageSrc = itemName ? `../assets/images/${itemName}.jpg` : '';
 
     this.fullImage = img;
     const minSize = Math.min(img.height, img.width);
