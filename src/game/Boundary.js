@@ -16,8 +16,8 @@ export default class Boundary {
     this.rightWall = Matter.Bodies.rectangle(
       width + thickness / 2, -height / 2, thickness, height * 3, opts,
     );
-    this.leftWall.id  = 'leftWall';
-    this.rightWall.id = 'rightWall';
+    this.leftWall.label  = 'leftWall';
+    this.rightWall.label = 'rightWall';
 
     Matter.Composite.add(world, this.leftWall);
     Matter.Composite.add(world, this.rightWall);

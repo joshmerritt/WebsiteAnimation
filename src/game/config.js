@@ -21,8 +21,8 @@ const config = {
   },
 
   // ── Layout ────────────────────────────────────────────────────────────
-  iconScale: 5,          // viewport / iconScale = icon size (lower = larger balls)
-  gridSpacingMultiplier: 2,
+  iconScale: 6,          // viewport / iconScale = icon size
+  gridSpacingMultiplier: 1.6,
 
   // ── Physics tuning ────────────────────────────────────────────────────
   ball: {

@@ -49,6 +49,10 @@ export default class Game {
     this.totalOpens       = 0;
     this.clickedToOpen    = false;
 
+    // Pagination
+    this.currentPage      = 0;
+    this.ballsPerPage     = 999; // calculated in _computeLayout
+
     // Particle effects
     this.particles = new ParticleSystem();
 
@@ -107,6 +111,7 @@ export default class Game {
       this.menus.forEach((m) => m.show());
       this.nets.forEach((n) => n.show());
       this._drawHelpMessage();
+      if (this.totalPages > 1) this._drawPageNav();
     }
 
     if (this.showDemo) {
@@ -142,8 +147,15 @@ export default class Game {
     if (this.detailOpen) return false;
     const p = this.p;
 
+    // Page navigation click
+    if (this.totalPages > 1 && this._checkPageNavClick(p.mouseX, p.mouseY)) {
+      return false;
+    }
+
     this.balls.forEach((ball) => {
-      ball.display = this.selectedCategory === 'All' || ball.category === this.selectedCategory;
+      const onPage = ball.index >= this.currentPage * this.ballsPerPage &&
+                     ball.index < (this.currentPage + 1) * this.ballsPerPage;
+      ball.display = onPage && (this.selectedCategory === 'All' || ball.category === this.selectedCategory);
 
       if (ball.onBall(p.mouseX, p.mouseY)) {
         // Double-tap detection
@@ -199,7 +211,9 @@ export default class Game {
     if (this.detailOpen) return false;
 
     this.balls.forEach((ball) => {
-      ball.display = this.selectedCategory === 'All' || ball.category === this.selectedCategory;
+      const onPage = ball.index >= this.currentPage * this.ballsPerPage &&
+                     ball.index < (this.currentPage + 1) * this.ballsPerPage;
+      ball.display = onPage && (this.selectedCategory === 'All' || ball.category === this.selectedCategory);
 
       if (ball.clicked && (Math.abs(ball.xPower) > config.minLaunchPower || Math.abs(ball.yPower) > config.minLaunchPower)) {
         this._launchBall(ball);
@@ -256,11 +270,18 @@ export default class Game {
   }
 
   _createBalls() {
-    let gx = this.vp.gridStartX;
-    let gy = this.vp.gridStartY;
-    const spacing = this.vp.iconSize * config.gridSpacingMultiplier;
+    const { gridStartX, gridStartY, spacing, gridCols } = this.vp;
+    const startIdx = this.currentPage * this.ballsPerPage;
+    const endIdx   = Math.min(startIdx + this.ballsPerPage, projects.length);
+
+    let col = 0;
+    let row = 0;
 
     projects.forEach((proj, i) => {
+      const isOnPage = i >= startIdx && i < endIdx;
+      const gx = isOnPage ? gridStartX + col * spacing : -9999;
+      const gy = isOnPage ? gridStartY + row * spacing : -9999;
+
       const ball = new Ball({
         p: this.p,
         world: this.world,
@@ -271,13 +292,15 @@ export default class Game {
         size: this.vp.iconSize,
         index: i,
       });
+      ball.display = isOnPage;
       this.balls.push(ball);
 
-      if (gx + spacing <= this.vp.width) {
-        gx += spacing;
-      } else if (i < projects.length - 1) {
-        gx = this.vp.gridStartX;
-        gy += spacing;
+      if (isOnPage) {
+        col++;
+        if (col >= gridCols) {
+          col = 0;
+          row++;
+        }
       }
 
       if (!this.categories.includes(proj.category)) {
@@ -285,6 +308,8 @@ export default class Game {
       }
     });
     this.categories.sort((a, b) => b.length - a.length);
+
+    this.totalPages = Math.ceil(projects.length / this.ballsPerPage);
   }
 
   _createGoals() {
@@ -400,14 +425,20 @@ export default class Game {
     this.detailOpen = false;
     this.selectedCategory = 'All';
     this.particles.clear();
+
+    const startIdx = this.currentPage * this.ballsPerPage;
+    const endIdx   = Math.min(startIdx + this.ballsPerPage, projects.length);
+
     this.balls.forEach((ball) => {
-      ball.display = true;
+      const isOnPage = ball.index >= startIdx && ball.index < endIdx;
+      ball.display = isOnPage;
       ball.closeDetail();
       if (!ball.inOriginalPosition) ball.reset();
     });
   }
 
   _onReset() {
+    this.currentPage = 0;
     this.particles.clear();
     this.windowResized();
   }
@@ -606,6 +637,113 @@ export default class Game {
     }
   }
 
+  // ── Private: page navigation ─────────────────────────────────────────
+
+  _drawPageNav() {
+    const p = this.p;
+    const { width, height, iconSize } = this.vp;
+    const navY = height - iconSize * 0.6;
+    const navX = width * 0.65;
+    const arrowSize = iconSize / 5;
+
+    p.push();
+    p.textAlign(p.CENTER, p.CENTER);
+    p.textFont('DM Sans');
+    p.textSize(arrowSize * 0.8);
+
+    // Left arrow
+    if (this.currentPage > 0) {
+      p.fill(config.colors.accent);
+      p.noStroke();
+      p.triangle(
+        navX - arrowSize * 3, navY,
+        navX - arrowSize * 1.5, navY - arrowSize * 0.6,
+        navX - arrowSize * 1.5, navY + arrowSize * 0.6,
+      );
+    }
+
+    // Page indicator
+    p.fill(config.colors.main);
+    p.text(`${this.currentPage + 1} / ${this.totalPages}`, navX, navY);
+
+    // Right arrow
+    if (this.currentPage < this.totalPages - 1) {
+      p.fill(config.colors.accent);
+      p.noStroke();
+      p.triangle(
+        navX + arrowSize * 3, navY,
+        navX + arrowSize * 1.5, navY - arrowSize * 0.6,
+        navX + arrowSize * 1.5, navY + arrowSize * 0.6,
+      );
+    }
+
+    p.pop();
+
+    // Store hit areas for click detection
+    this._pageNavAreas = {
+      y: navY, x: navX, size: arrowSize,
+    };
+  }
+
+  _checkPageNavClick(mx, my) {
+    if (!this._pageNavAreas) return false;
+    const { x, y, size } = this._pageNavAreas;
+    const hitPad = size * 2;
+
+    // Left arrow hit
+    if (this.currentPage > 0 &&
+        mx > x - size * 4 && mx < x - size &&
+        my > y - hitPad && my < y + hitPad) {
+      this._changePage(this.currentPage - 1);
+      return true;
+    }
+    // Right arrow hit
+    if (this.currentPage < this.totalPages - 1 &&
+        mx > x + size && mx < x + size * 4 &&
+        my > y - hitPad && my < y + hitPad) {
+      this._changePage(this.currentPage + 1);
+      return true;
+    }
+    return false;
+  }
+
+  _changePage(newPage) {
+    this.currentPage = newPage;
+
+    // Reposition balls for the current page
+    const { gridStartX, gridStartY, spacing, gridCols } = this.vp;
+    const startIdx = this.currentPage * this.ballsPerPage;
+    const endIdx   = Math.min(startIdx + this.ballsPerPage, projects.length);
+
+    let col = 0;
+    let row = 0;
+
+    this.balls.forEach((ball) => {
+      const isOnPage = ball.index >= startIdx && ball.index < endIdx;
+      ball.display = isOnPage;
+
+      if (isOnPage) {
+        const gx = gridStartX + col * spacing;
+        const gy = gridStartY + row * spacing;
+        ball.originalPos = { x: gx, y: gy };
+        Matter.Body.setPosition(ball.body, { x: gx, y: gy });
+        Matter.Body.setVelocity(ball.body, { x: 0, y: 0 });
+        Matter.Body.setStatic(ball.body, true);
+        Matter.Body.setAngle(ball.body, 0);
+        try { Matter.Composite.remove(this.world, ball.body); } catch (_) {}
+        ball.inOriginalPosition = true;
+        ball.x = gx;
+        ball.y = gy;
+
+        col++;
+        if (col >= gridCols) {
+          col = 0;
+          row++;
+        }
+      }
+    });
+  }
+
   // ── Private: layout computation ────────────────────────────────────────
 
   _computeLayout() {
@@ -626,9 +764,20 @@ export default class Game {
     const goalX = 0.33 * iconSize;
     const goalY = h * 0.4;
     const goalWidth = iconSize * 1.4;
-    const gridStartX = goalX + goalWidth + 2 * iconSize;
-    let gridStartY = goalY;
-    if (portrait) gridStartY -= iconSize;
+
+    // Tighter grid on portrait / mobile
+    const gridGap = portrait ? 1.2 * iconSize : 2 * iconSize;
+    const gridStartX = goalX + goalWidth + gridGap;
+    let gridStartY = portrait ? h * 0.22 : goalY;
+
+    const spacing = iconSize * config.gridSpacingMultiplier;
+
+    // Calculate how many balls fit on screen
+    const availW = w - gridStartX - iconSize * 0.5;
+    const availH = h - gridStartY - iconSize * 1.5;
+    const cols = Math.max(1, Math.floor(availW / spacing) + 1);
+    const rows = Math.max(1, Math.floor(availH / spacing) + 1);
+    this.ballsPerPage = cols * rows;
 
     this.vp = {
       width: w,
@@ -643,6 +792,9 @@ export default class Game {
       goalWidth,
       gridStartX,
       gridStartY,
+      spacing,
+      gridCols: cols,
+      gridRows: rows,
     };
   }
 }

@@ -3,6 +3,9 @@
  *
  * Creates a p5 instance bound to a DOM container, wires all p5 lifecycle
  * and input events to the Game class. Cleans up on unmount.
+ *
+ * IMPORTANT: Touch/mouse handlers only return false (preventDefault) when
+ * the event originates on the canvas itself, so React UI buttons stay clickable.
  */
 
 import { useEffect, useRef } from 'react';
@@ -14,24 +17,49 @@ export default function GameCanvas() {
 
   useEffect(() => {
     let game;
+    let canvasEl = null;
 
     const sketch = (p) => {
       game = new Game(p);
 
       p.preload = () => game.preload();
-      p.setup   = () => game.setup();
+      p.setup   = () => {
+        game.setup();
+        canvasEl = containerRef.current?.querySelector('canvas');
+      };
       p.draw    = () => game.draw();
 
       p.windowResized = () => game.windowResized();
       p.keyPressed    = () => game.keyPressed();
-      p.mousePressed  = () => game.mousePressed();
-      p.mouseDragged  = () => game.mouseDragged();
-      p.mouseReleased = () => game.mouseReleased();
 
-      // Touch equivalents for mobile
-      p.touchStarted = () => game.mousePressed();
-      p.touchMoved   = () => game.mouseDragged();
-      p.touchEnded   = () => game.mouseReleased();
+      // Only handle mouse/touch if the event is on our canvas
+      p.mousePressed  = (e) => {
+        if (e?.target && e.target !== canvasEl) return;
+        return game.mousePressed();
+      };
+      p.mouseDragged  = (e) => {
+        if (e?.target && e.target !== canvasEl) return;
+        return game.mouseDragged();
+      };
+      p.mouseReleased = (e) => {
+        // Always handle release (to clear drag state) but only preventDefault on canvas
+        game.mouseReleased();
+        if (e?.target === canvasEl) return false;
+      };
+
+      // Touch equivalents — same canvas-only filtering
+      p.touchStarted = (e) => {
+        if (e?.target && e.target !== canvasEl) return;
+        return game.mousePressed();
+      };
+      p.touchMoved = (e) => {
+        if (e?.target && e.target !== canvasEl) return;
+        return game.mouseDragged();
+      };
+      p.touchEnded = (e) => {
+        game.mouseReleased();
+        if (e?.target === canvasEl) return false;
+      };
     };
 
     const instance = new p5(sketch, containerRef.current);
