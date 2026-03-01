@@ -14,7 +14,7 @@ export default class Goal {
       isStatic: true,
       restitution: config.goal.restitution,
     });
-    this.body.id = `Goal${index}`;
+    this.body.label = `Goal${index}`;
     Matter.Composite.add(world, this.body);
   }
 

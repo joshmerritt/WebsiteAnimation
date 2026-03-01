@@ -7,8 +7,8 @@
 
 const config = {
   // ── Identity ──────────────────────────────────────────────────────────
-  titleText: 'Hello world, I am Josh Merritt.',
-  subtitleText: 'Honest. Analytical. Data Dreamer.',
+  titleText: 'Honest. Analytical. Data Dreamer.',
+  ctaText: 'What can I build for you?',
   contactEmail: 'josh@DaDataDad.com',
 
   // ── Colors (CSS values — also used by p5 draw calls) ─────────────────
@@ -21,7 +21,7 @@ const config = {
   },
 
   // ── Layout ────────────────────────────────────────────────────────────
-  iconScale: 7,          // viewport / iconScale = icon size
+  iconScale: 5,          // viewport / iconScale = icon size (lower = larger balls)
   gridSpacingMultiplier: 2,
 
   // ── Physics tuning ────────────────────────────────────────────────────

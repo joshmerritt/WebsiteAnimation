@@ -8,12 +8,13 @@
 import { useCallback } from 'react';
 
 function ctaLabel(link) {
-  if (!link) return 'View Project \u2197';
-  if (link.includes('linkedin.com'))  return 'View LinkedIn \u2197';
-  if (link.includes('github.com'))    return 'View on GitHub \u2197';
-  if (link.includes('upwork.com'))    return 'View Upwork Profile \u2197';
-  if (link.includes('.html'))         return 'View Dashboard \u2197';
-  return 'Open App \u2197';
+  if (!link) return null;
+  if (link.includes('linkedin.com'))  return 'View LinkedIn ↗';
+  if (link.includes('github.com'))    return 'View on GitHub ↗';
+  if (link.includes('upwork.com'))    return 'View Upwork Profile ↗';
+  if (link.includes('.html'))         return 'View Dashboard ↗';
+  if (link.includes('.app'))          return 'Open App ↗';
+  return 'View Project ↗';
 }
 
 export default function DetailModal({ detail, onClose }) {
@@ -37,7 +38,7 @@ export default function DetailModal({ detail, onClose }) {
     <div className="modal-overlay" onClick={handleBackdrop}>
       <div className="modal-card">
         <button className="modal-close" onClick={onClose} aria-label="Close">
-          \u2715
+          {'✕'}
         </button>
 
         {detail.imageSrc && (

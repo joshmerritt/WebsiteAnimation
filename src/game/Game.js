@@ -296,7 +296,7 @@ export default class Game {
         world: this.world, p: this.p,
         x: goalX + i * goalWidth,
         y: goalY,
-        radius: iconSize / 7.5,
+        radius: iconSize / 15,
         index: i,
       }));
       this.nets.push(new Net({
@@ -439,18 +439,6 @@ export default class Game {
   }
 
   _drawGoals() {
-    if (this.goals.length >= 2) {
-      const g0 = this.goals[0];
-      const g1 = this.goals[1];
-      const rimY = g0.body.position.y - g0.radius * 1.5;
-      const p = this.p;
-      p.push();
-      p.stroke(config.colors.accent);
-      p.strokeWeight(g0.radius * 0.6);
-      p.noFill();
-      p.line(g0.body.position.x, rimY, g1.body.position.x, rimY);
-      p.pop();
-    }
     this.goals.forEach((g) => g.show());
   }
 
@@ -497,19 +485,21 @@ export default class Game {
     const { iconSize, portrait, width, height } = this.vp;
     const ctx = p.drawingContext;
 
+    const titleLines = config.titleText.split('. ').map((s) => s.replace(/\.$/, '') + '.');
+    const ctaLine = config.ctaText;
+
     if (portrait) {
-      const splitTitle = config.titleText.replace('.', '').split(', ');
-      const splitSub   = config.subtitleText.split('. ');
-      const titleSize  = iconSize / 2.5;
-      const subSize    = iconSize / 4;
+      const titleSize  = iconSize / 3;
+      const ctaSize    = iconSize / 4.5;
       const xPos       = width / 8;
-      const yStart     = height * 0.07;
+      const yStart     = height * 0.05;
+      const lineHeight = titleSize * 1.2;
 
       // Gradient panel
       const panelX = xPos - iconSize * 0.22;
       const panelY = yStart - titleSize * 0.85;
-      const panelW = width * 0.38;
-      const panelH = titleSize * (splitTitle.length * 1.15 + splitSub.length + 0.8);
+      const panelW = width * 0.45;
+      const panelH = lineHeight * titleLines.length + ctaSize * 2;
 
       ctx.save();
       const grad = ctx.createLinearGradient(panelX, panelY, panelX + panelW, panelY);
@@ -536,26 +526,28 @@ export default class Game {
 
       p.push();
       p.textFont('Syne');
-      splitTitle.forEach((item, i) => {
-        p.textSize(titleSize);
-        p.textStyle(i === 0 ? p.NORMAL : p.BOLD);
-        p.fill(i === 0 ? 'rgba(199, 214, 213, 0.7)' : config.colors.main);
-        p.text(item, xPos + 6, yStart + titleSize * 1.15 * i);
-      });
-      p.textSize(subSize);
-      p.textStyle(p.NORMAL);
-      p.textFont('DM Sans');
-      splitSub.forEach((item, i) => {
+      p.textSize(titleSize);
+      p.textStyle(p.BOLD);
+      titleLines.forEach((line, i) => {
         p.fill(config.colors.secondary);
-        p.text(item, xPos + 6, yStart + titleSize * splitTitle.length * 1.15 + i * titleSize);
+        p.text(line, xPos + 6, yStart + lineHeight * i);
       });
+
+      // CTA line
+      p.textFont('DM Sans');
+      p.textSize(ctaSize);
+      p.textStyle(p.NORMAL);
+      p.fill(config.colors.main);
+      p.text(ctaLine, xPos + 6, yStart + lineHeight * titleLines.length + ctaSize * 0.5);
       p.pop();
     } else {
       const xPos      = width / 8;
-      const titleSize = iconSize / 2.5;
-      const subSize   = iconSize / 4;
-      const yTitle    = height / 6;
-      const ySub      = height / 4.2;
+      const titleSize = iconSize / 3;
+      const ctaSize   = iconSize / 5;
+      const yStart    = height / 7;
+      const lineHeight = titleSize * 1.2;
+
+      const totalHeight = lineHeight * titleLines.length + ctaSize * 1.5;
 
       // Accent line
       ctx.save();
@@ -563,8 +555,8 @@ export default class Game {
       ctx.lineWidth   = 2;
       ctx.lineCap     = 'round';
       ctx.beginPath();
-      ctx.moveTo(xPos - iconSize * 0.14, yTitle - titleSize * 0.8);
-      ctx.lineTo(xPos - iconSize * 0.14, ySub + subSize * 0.5);
+      ctx.moveTo(xPos - iconSize * 0.14, yStart - titleSize * 0.8);
+      ctx.lineTo(xPos - iconSize * 0.14, yStart + totalHeight - titleSize * 0.3);
       ctx.stroke();
       ctx.restore();
 
@@ -572,13 +564,17 @@ export default class Game {
       p.textFont('Syne');
       p.textSize(titleSize);
       p.textStyle(p.BOLD);
-      p.fill(config.colors.main);
-      p.text(config.titleText, xPos, yTitle);
+      titleLines.forEach((line, i) => {
+        p.fill(config.colors.secondary);
+        p.text(line, xPos, yStart + lineHeight * i);
+      });
+
+      // CTA line
       p.textFont('DM Sans');
-      p.textSize(subSize);
+      p.textSize(ctaSize);
       p.textStyle(p.NORMAL);
-      p.fill(config.colors.secondary);
-      p.text(config.subtitleText, xPos, ySub);
+      p.fill(config.colors.main);
+      p.text(ctaLine, xPos, yStart + lineHeight * titleLines.length + ctaSize * 0.3);
       p.pop();
     }
   }

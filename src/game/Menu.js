@@ -28,7 +28,7 @@ export default class Menu {
         },
       },
     );
-    this.body.id       = category;
+    this.body.label    = `Menu_${category}`;
     this.body.category = category;
     Matter.Composite.add(world, this.body);
   }

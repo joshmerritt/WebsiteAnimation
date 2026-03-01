@@ -52,7 +52,7 @@ export default function BallEngagement() {
       <div className="panel-header">
         <span className="panel-title">Ball Engagement Funnel</span>
         <span className="panel-badge">
-          \uD83C\uDFB1 physics playground metrics
+          {'🎱'} physics playground metrics
         </span>
       </div>
 
@@ -72,7 +72,7 @@ export default function BallEngagement() {
 
       {/* Insight */}
       <div className="insight-box">
-        <span className="insight-icon">\uD83D\uDCA1 Insight:</span>{' '}
+        <span className="insight-icon">{'💡'} Insight:</span>{' '}
         <span className="insight-text">
           &ldquo;{topClicks.ball}&rdquo; has the highest click volume ({topClicks.clicks})
           but &ldquo;{topConv.ball}&rdquo; has the best conversion rate

@@ -16,10 +16,10 @@ export default function HUD() {
         target="_blank"
         rel="noopener noreferrer"
       >
-        \u2709 Contact Me
+        {'✉'} Contact Me
       </a>
       <button className="hud-btn hud-reset" onClick={() => bus.emit('game:reset')}>
-        \u21BA Reset
+        {'↺'} Reset
       </button>
     </div>
   );

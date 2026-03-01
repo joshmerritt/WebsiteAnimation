@@ -37,7 +37,7 @@ export default class Ball {
     this.body.label    = 'Ball';
     this.body.ballRef  = this;            // back-reference for collision lookup
     this.body.category = project.category;
-    this.body.id       = project.name;
+    this.body.customId = project.name;
 
     // Image — crop to square for circular clipping
     this.fullImage = img;

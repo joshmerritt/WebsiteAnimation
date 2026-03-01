@@ -15,7 +15,7 @@ export default class Net {
       isStatic: true,
       restitution: config.goal.restitution,
     });
-    this.body.id = 'Net';
+    this.body.label = 'Net';
     Matter.Composite.add(world, this.body);
   }
 
