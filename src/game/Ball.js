@@ -104,7 +104,12 @@ export default class Ball {
   show(viewport) {
     if (this.launchCount) this._checkReset(viewport);
 
-    const pos   = this.body.position;
+    // Read physics position, but if body is at (0,0) and we haven't launched,
+    // fall back to our stored position (defensive against engine glitches)
+    let pos = this.body.position;
+    if (this.inOriginalPosition || (pos.x === 0 && pos.y === 0 && this.launchCount === 0)) {
+      pos = this.originalPos;
+    }
     const angle = this.body.angle;
     const p = this.p;
     const ctx = p.drawingContext;

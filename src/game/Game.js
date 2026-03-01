@@ -385,27 +385,34 @@ export default class Game {
   // ── Private: actions ───────────────────────────────────────────────────
 
   _launchBall(ball) {
-    const sens  = Math.pow(this.vp.width * this.vp.height, 1 / 3);
-    const padj  = this.vp.mobile
-      ? Math.pow(this.vp.iconSize, 2.2) * (this.vp.portrait ? 0.95 : 1)
-      : Math.pow(this.vp.iconSize, 2);
+    // Convert drag power into a velocity vector
+    // Negative because dragging away from target = launching toward it
+    const speedScale = this.vp.mobile ? 0.35 : 0.25;
+    const vx = -ball.xPower * speedScale;
+    const vy = -ball.yPower * speedScale;
 
-    const strength = Matter.Vector.create(
-      (-ball.xPower * sens) / padj,
-      (-ball.yPower * sens) / padj,
-    );
-    const pos = Matter.Vector.create(ball.x, ball.y);
     const catIdx = this.categories.indexOf(ball.category);
 
-    if (ball.inOriginalPosition) Matter.Composite.add(this.world, ball.body);
+    // Ensure body position matches the ball's current visual position
+    Matter.Body.setPosition(ball.body, { x: ball.x, y: ball.y });
+    Matter.Body.setVelocity(ball.body, { x: 0, y: 0 });
+    Matter.Body.setAngle(ball.body, 0);
 
+    // Add to physics world if not already there
+    if (ball.inOriginalPosition) {
+      Matter.Composite.add(this.world, ball.body);
+    }
+
+    // Set collision filter for category matching
     ball.body.collisionFilter = {
       group:    catIdx + 1,
       category: Math.pow(2, catIdx),
       mask:     this.categories.reduce((m, _, i) => m | config.categoryBits[i], 0),
     };
+
+    // Make dynamic and launch with velocity
     Matter.Body.setStatic(ball.body, false);
-    Matter.Body.applyForce(ball.body, pos, strength);
+    Matter.Body.setVelocity(ball.body, { x: vx, y: vy });
     ball.launched();
 
     // Small launch burst
@@ -513,24 +520,25 @@ export default class Game {
 
   _drawTitle() {
     const p = this.p;
-    const { iconSize, portrait, width, height } = this.vp;
+    const { iconSize, portrait, width, height, titleZoneBottom, gridStartX } = this.vp;
     const ctx = p.drawingContext;
 
     const titleLines = config.titleText.split('. ').map((s) => s.replace(/\.$/, '') + '.');
     const ctaLine = config.ctaText;
 
     if (portrait) {
-      const titleSize  = iconSize / 3;
-      const ctaSize    = iconSize / 4.5;
-      const xPos       = width / 8;
+      // Title sits in the top zone, full width available
+      const availH = titleZoneBottom - height * 0.04;
+      const titleSize  = Math.min(iconSize / 3.5, width / 16, availH / (titleLines.length + 1.5));
+      const ctaSize    = titleSize * 0.75;
+      const xPos       = width * 0.06;
       const yStart     = height * 0.05;
-      const lineHeight = titleSize * 1.2;
+      const lineHeight = titleSize * 1.3;
 
-      // Gradient panel
-      const panelX = xPos - iconSize * 0.22;
-      const panelY = yStart - titleSize * 0.85;
-      const panelW = width * 0.45;
-      const panelH = lineHeight * titleLines.length + ctaSize * 2;
+      const panelX = xPos - 8;
+      const panelY = yStart - titleSize * 0.6;
+      const panelW = width * 0.55;
+      const panelH = lineHeight * titleLines.length + ctaSize * 2.2;
 
       ctx.save();
       const grad = ctx.createLinearGradient(panelX, panelY, panelX + panelW, panelY);
@@ -544,8 +552,6 @@ export default class Game {
       } else {
         ctx.fillRect(panelX, panelY, panelW, panelH);
       }
-
-      // Accent line
       ctx.strokeStyle = 'rgba(89, 133, 177, 0.65)';
       ctx.lineWidth   = 2;
       ctx.lineCap     = 'round';
@@ -563,31 +569,30 @@ export default class Game {
         p.fill(config.colors.secondary);
         p.text(line, xPos + 6, yStart + lineHeight * i);
       });
-
-      // CTA line
       p.textFont('DM Sans');
       p.textSize(ctaSize);
       p.textStyle(p.NORMAL);
       p.fill(config.colors.main);
-      p.text(ctaLine, xPos + 6, yStart + lineHeight * titleLines.length + ctaSize * 0.5);
+      p.text(ctaLine, xPos + 6, yStart + lineHeight * titleLines.length + ctaSize * 0.4);
       p.pop();
+
     } else {
-      const xPos      = width / 8;
-      const titleSize = iconSize / 3;
-      const ctaSize   = iconSize / 5;
-      const yStart    = height / 7;
-      const lineHeight = titleSize * 1.2;
+      // Landscape — title above the ball grid, right of goal/menu column
+      const xPos      = gridStartX;
+      const titleSize = Math.min(iconSize / 3.5, height / 18, width / 40);
+      const ctaSize   = titleSize * 0.7;
+      const yStart    = height * 0.08;
+      const lineHeight = titleSize * 1.25;
 
       const totalHeight = lineHeight * titleLines.length + ctaSize * 1.5;
 
-      // Accent line
       ctx.save();
       ctx.strokeStyle = 'rgba(89, 133, 177, 0.65)';
       ctx.lineWidth   = 2;
       ctx.lineCap     = 'round';
       ctx.beginPath();
-      ctx.moveTo(xPos - iconSize * 0.14, yStart - titleSize * 0.8);
-      ctx.lineTo(xPos - iconSize * 0.14, yStart + totalHeight - titleSize * 0.3);
+      ctx.moveTo(xPos - 12, yStart - titleSize * 0.5);
+      ctx.lineTo(xPos - 12, yStart + totalHeight - titleSize * 0.3);
       ctx.stroke();
       ctx.restore();
 
@@ -599,8 +604,6 @@ export default class Game {
         p.fill(config.colors.secondary);
         p.text(line, xPos, yStart + lineHeight * i);
       });
-
-      // CTA line
       p.textFont('DM Sans');
       p.textSize(ctaSize);
       p.textStyle(p.NORMAL);
@@ -761,20 +764,34 @@ export default class Game {
         : area / Math.pow(iconSize, 3);
     }
 
-    const goalX = 0.33 * iconSize;
-    const goalY = h * 0.4;
     const goalWidth = iconSize * 1.4;
-
-    // Tighter grid on portrait / mobile
-    const gridGap = portrait ? 1.2 * iconSize : 2 * iconSize;
-    const gridStartX = goalX + goalWidth + gridGap;
-    let gridStartY = portrait ? h * 0.22 : goalY;
-
     const spacing = iconSize * config.gridSpacingMultiplier;
 
+    let goalX, goalY, gridStartX, gridStartY, titleZoneBottom;
+
+    if (portrait) {
+      // PORTRAIT LAYOUT:
+      // Row 1 (top ~20%): Title text
+      // Row 2 (remaining): Goals/menu on left, ball grid on right
+      titleZoneBottom = h * 0.20;
+      goalX = iconSize * 0.25;
+      goalY = titleZoneBottom + iconSize * 0.8;
+      gridStartX = goalX + goalWidth + iconSize * 0.8;
+      gridStartY = titleZoneBottom + iconSize * 0.3;
+    } else {
+      // LANDSCAPE LAYOUT:
+      // Left column: Goals/menu
+      // Right of that: Title text at top, ball grid below
+      goalX = iconSize * 0.25;
+      goalY = h * 0.35;
+      titleZoneBottom = h * 0.28;
+      gridStartX = goalX + goalWidth + iconSize * 1.5;
+      gridStartY = titleZoneBottom + iconSize * 0.2;
+    }
+
     // Calculate how many balls fit on screen
-    const availW = w - gridStartX - iconSize * 0.5;
-    const availH = h - gridStartY - iconSize * 1.5;
+    const availW = w - gridStartX - iconSize * 0.3;
+    const availH = h - gridStartY - iconSize * 1.0;
     const cols = Math.max(1, Math.floor(availW / spacing) + 1);
     const rows = Math.max(1, Math.floor(availH / spacing) + 1);
     this.ballsPerPage = cols * rows;
@@ -792,6 +809,7 @@ export default class Game {
       goalWidth,
       gridStartX,
       gridStartY,
+      titleZoneBottom,
       spacing,
       gridCols: cols,
       gridRows: rows,

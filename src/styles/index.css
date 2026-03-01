@@ -312,12 +312,11 @@ body {
 
 .hud {
   position: fixed;
-  bottom: 0;
-  left: 0;
+  top: 0;
   right: 0;
   display: flex;
-  justify-content: space-between;
-  padding: 0 clamp(12px, 2.5vmin, 24px) clamp(10px, 2vmin, 20px);
+  gap: 8px;
+  padding: clamp(10px, 2vmin, 18px) clamp(12px, 2.5vmin, 24px);
   pointer-events: none;
   z-index: 15;
 }
