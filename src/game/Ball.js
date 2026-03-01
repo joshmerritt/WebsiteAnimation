@@ -27,13 +27,14 @@ export default class Ball {
     this.index = index;
     this.r = size / 2;
 
-    // Physics body — starts static
+    // Physics body — create dynamic first so Matter.js stores real mass,
+    // then set static. This ensures setStatic(false) restores proper mass.
     this.body = Matter.Bodies.circle(x, y, this.r, {
       friction:    config.ball.friction,
       frictionAir: config.ball.frictionAir,
       restitution: config.ball.restitution,
-      isStatic:    true,
     });
+    Matter.Body.setStatic(this.body, true);
     this.body.label    = 'Ball';
     this.body.ballRef  = this;            // back-reference for collision lookup
     this.body.category = project.category;
@@ -104,12 +105,8 @@ export default class Ball {
   show(viewport) {
     if (this.launchCount) this._checkReset(viewport);
 
-    // Read physics position, but if body is at (0,0) and we haven't launched,
-    // fall back to our stored position (defensive against engine glitches)
-    let pos = this.body.position;
-    if (this.inOriginalPosition || (pos.x === 0 && pos.y === 0 && this.launchCount === 0)) {
-      pos = this.originalPos;
-    }
+    // Static balls use stored position; launched balls use physics position
+    const pos = this.inOriginalPosition ? this.originalPos : this.body.position;
     const angle = this.body.angle;
     const p = this.p;
     const ctx = p.drawingContext;

@@ -15,7 +15,6 @@ import Goal from './Goal.js';
 import Net from './Net.js';
 import MenuObj from './Menu.js';
 import Boundary from './Boundary.js';
-import ParticleSystem from './Particles.js';
 import projects from '../data/projects.js';
 
 export default class Game {
@@ -52,9 +51,6 @@ export default class Game {
     // Pagination
     this.currentPage      = 0;
     this.ballsPerPage     = 999; // calculated in _computeLayout
-
-    // Particle effects
-    this.particles = new ParticleSystem();
 
     // Loading state
     this._loaded = false;
@@ -119,10 +115,6 @@ export default class Game {
     } else {
       this._drawBalls();
     }
-
-    // Particle effects (always on top)
-    this.particles.update();
-    this.particles.draw(p);
   }
 
   windowResized() {
@@ -369,11 +361,6 @@ export default class Game {
         const ballBody = bodyA.label === 'Ball' ? bodyA : bodyB.label === 'Ball' ? bodyB : null;
         if (ballBody?.ballRef) {
           const ball = ballBody.ballRef;
-          // Particle burst at the goal!
-          const bx = ball.body.position.x;
-          const by = ball.body.position.y;
-          this.particles.burst(bx, by, 40, config.colors.accent);
-          this.particles.burst(bx, by, 15, config.colors.main);
           this._openBallDetail(ball);
           this.totalMakes++;
           this._emitStats();
@@ -414,9 +401,6 @@ export default class Game {
     Matter.Body.setStatic(ball.body, false);
     Matter.Body.setVelocity(ball.body, { x: vx, y: vy });
     ball.launched();
-
-    // Small launch burst
-    this.particles.burst(ball.x, ball.y, 12, 'rgba(199, 214, 213, 0.6)');
   }
 
   _openBallDetail(ball) {
@@ -431,7 +415,6 @@ export default class Game {
   _onDetailClosed() {
     this.detailOpen = false;
     this.selectedCategory = 'All';
-    this.particles.clear();
 
     const startIdx = this.currentPage * this.ballsPerPage;
     const endIdx   = Math.min(startIdx + this.ballsPerPage, projects.length);
@@ -446,7 +429,6 @@ export default class Game {
 
   _onReset() {
     this.currentPage = 0;
-    this.particles.clear();
     this.windowResized();
   }
 
@@ -485,7 +467,8 @@ export default class Game {
 
     const p = this.p;
     this.balls.forEach((ball) => {
-      if (!ball.display) return;
+      // Always show balls that are in flight (launched and not yet reset)
+      if (!ball.display && ball.inOriginalPosition) return;
 
       ball.show(this.vp);
 
