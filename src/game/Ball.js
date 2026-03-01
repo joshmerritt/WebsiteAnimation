@@ -116,8 +116,10 @@ export default class Ball {
     p.translate(pos.x, pos.y);
     p.rotate(angle);
 
-    // Circular clipping (non-destructive)
+    // Circular clipping (non-destructive) with high-quality scaling
     ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.beginPath();
     ctx.arc(0, 0, this.r, 0, Math.PI * 2);
     ctx.clip();

@@ -30,11 +30,12 @@ export default function GameCanvas() {
       p.mouseDragged  = () => game.mouseDragged();
       p.mouseReleased = () => game.mouseReleased();
 
-      // Touch handlers — DO NOT return false, so React buttons stay clickable.
-      // CSS touch-action:none on the canvas handles scroll prevention.
-      p.touchStarted = () => { game.mousePressed(); };
-      p.touchMoved   = () => { game.mouseDragged(); };
-      p.touchEnded   = () => { game.mouseReleased(); };
+      // Touch handlers — return false to prevent p5 from also firing mouse events,
+      // which caused double-tap detection to trigger on every single tap.
+      // React buttons still work because they sit on a higher z-index layer.
+      p.touchStarted = () => { game.mousePressed(); return false; };
+      p.touchMoved   = () => { game.mouseDragged(); return false; };
+      p.touchEnded   = () => { game.mouseReleased(); return false; };
     };
 
     const instance = new p5(sketch, containerRef.current);

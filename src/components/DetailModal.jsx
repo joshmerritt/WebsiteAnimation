@@ -48,12 +48,11 @@ export default function DetailModal({ detail, onClose }) {
           <div className={heroClass}>
             <img src={detail.imageSrc} alt={detail.name} />
             <div className="modal-hero-gradient" />
-            <h2 className="modal-hero-title">{detail.name}</h2>
           </div>
         )}
 
         <div className="modal-content">
-          {!detail.imageSrc && <h2 className="modal-title">{detail.name}</h2>}
+          <h2 className="modal-title modal-title--centered">{detail.name}</h2>
 
           <table className="modal-table">
             <tbody>
