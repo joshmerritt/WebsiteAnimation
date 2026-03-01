@@ -11,6 +11,7 @@ const projects = [
     name: 'Josh Merritt',
     link: 'https://www.linkedin.com/in/josh-merritt',
     category: 'Me',
+    heroMode: 'full',
     goal: 'To leave things better than I found them.',
     role: 'Analyst, Creator, Engineer, Project Manager',
     technology:
@@ -23,6 +24,7 @@ const projects = [
     name: 'Smart Chicken Coop',
     link: 'https://github.com/joshmerritt/arduinoChickenCoopDoor',
     category: 'Technology',
+    heroMode: 'full',
     goal: 'Build an automated door to allow the chickens to free range from sun-up to sun-down, while keeping them safely enclosed in their coop overnight.',
     role: 'Creator and Engineer',
     technology: 'C++, Arduino, Motors, Programmable RGB LEDs, Woodworking',

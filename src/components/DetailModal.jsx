@@ -34,15 +34,18 @@ export default function DetailModal({ detail, onClose }) {
     { label: 'Summary',    value: detail.description },
   ].filter((r) => r.value);
 
+  const heroMode = detail.heroMode || 'banner';
+  const heroClass = `modal-hero modal-hero--${heroMode}`;
+
   return (
     <div className="modal-overlay" onClick={handleBackdrop}>
-      <div className="modal-card">
+      <div className={`modal-card ${heroMode === 'full' ? 'modal-card--full-hero' : ''}`}>
         <button className="modal-close" onClick={onClose} aria-label="Close">
           {'✕'}
         </button>
 
         {detail.imageSrc && (
-          <div className="modal-hero">
+          <div className={heroClass}>
             <img src={detail.imageSrc} alt={detail.name} />
             <div className="modal-hero-gradient" />
             <h2 className="modal-hero-title">{detail.name}</h2>

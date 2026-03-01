@@ -1,7 +1,8 @@
 /**
  * HUD.jsx — Overlay buttons: Contact + Reset
  *
- * Only visible when the detail modal is not open.
+ * On mobile: bottom bar with Contact centered (plain link) and Reset right.
+ * On desktop: top-right pill buttons.
  */
 
 import config from '../game/config.js';
@@ -13,13 +14,13 @@ export default function HUD() {
       <a
         className="hud-btn hud-contact"
         href={`mailto:${config.contactEmail}`}
-        target="_blank"
-        rel="noopener noreferrer"
       >
-        {'✉'} Contact Me
+        <span className="hud-icon">✉</span>
+        <span className="hud-label">Contact Me</span>
       </a>
       <button className="hud-btn hud-reset" onClick={() => bus.emit('game:reset')}>
-        {'↺'} Reset
+        <span className="hud-reset-icon">↺</span>
+        <span className="hud-label">Reset</span>
       </button>
     </div>
   );
