@@ -80,6 +80,10 @@ body {
   position: fixed;
   top: 0;
   left: 0;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 
@@ -349,9 +353,226 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .modal-overlay, .modal-card { animation: none; }
+  .modal-overlay, .modal-card,
+  .loading-content, .loading-fill,
+  .stats-overlay { animation: none; transition: none; }
+  .loading-screen { transition: none; }
 }
 
 
 /* ─── General ───────────────────────────────────────────────────────────────── */
 a { color: var(--main); text-decoration: none; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LOADING SCREEN
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  transition: opacity 0.5s var(--ease-out), visibility 0.5s;
+}
+
+.loading-screen--out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: loadFadeIn 0.6s var(--ease-out) both;
+}
+
+.loading-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  letter-spacing: -0.03em;
+  color: var(--main);
+}
+
+.loading-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--main-dim);
+  letter-spacing: 0.04em;
+}
+
+.loading-track {
+  width: clamp(180px, 50vw, 280px);
+  height: 3px;
+  background: rgba(89, 133, 177, 0.12);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.loading-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), rgba(199, 214, 213, 0.7));
+  border-radius: var(--radius-pill);
+  transition: width 0.3s var(--ease-out);
+}
+
+.loading-pct {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--main-dim);
+  letter-spacing: 0.05em;
+}
+
+@keyframes loadFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   STATS OVERLAY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.stats-overlay {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  padding: 6px 16px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-sm);
+  animation: statsSlideIn 0.5s var(--ease-spring) both;
+  z-index: 14;  /* below HUD (15) so buttons remain clickable */
+}
+
+.stats-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  min-width: 36px;
+}
+
+.stats-value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--main);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.stats-value--accent {
+  color: var(--accent);
+}
+
+.stats-label {
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  color: var(--main-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.stats-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(89, 133, 177, 0.2);
+}
+
+@keyframes statsSlideIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MOBILE & TOUCH POLISH
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Ensure HUD buttons have comfortable touch targets */
+@media (pointer: coarse) {
+  .hud-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.6em 1.4em;
+  }
+
+  .stats-overlay {
+    bottom: 12px;
+    padding: 5px 12px;
+    gap: 10px;
+  }
+
+  .stats-value { font-size: 0.78rem; }
+  .stats-label { font-size: 0.5rem; }
+}
+
+/* Small phones — stack HUD vertically */
+@media screen and (max-width: 380px) {
+  .hud {
+    flex-direction: column;
+    right: 10px;
+    top: 10px;
+    gap: 6px;
+  }
+
+  .stats-overlay {
+    bottom: 10px;
+  }
+}
+
+/* Landscape phones — tighter layout */
+@media screen and (max-height: 420px) and (orientation: landscape) {
+  .hud-btn {
+    font-size: 0.7rem;
+    padding: 0.4em 0.9em;
+  }
+
+  .modal-card {
+    max-height: 95vh;
+  }
+
+  .modal-hero {
+    height: 100px;
+  }
+
+  .stats-overlay {
+    bottom: 8px;
+  }
+}
+
+/* Tablet portrait */
+@media screen and (min-width: 600px) and (max-width: 1024px) and (orientation: portrait) {
+  .modal-card {
+    max-width: 90vw;
+  }
+}
+
+/* Safe areas for notched phones */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .hud {
+    padding-top: env(safe-area-inset-top, 0);
+    padding-right: env(safe-area-inset-right, 0);
+  }
+
+  .stats-overlay {
+    margin-bottom: env(safe-area-inset-bottom, 0);
+  }
+}

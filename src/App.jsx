@@ -2,8 +2,9 @@
  * App.jsx — Root component
  *
  * Layers:
- *   1. GameCanvas (p5.js physics + rendering)
- *   2. React overlay (modal + HUD buttons)
+ *   1. LoadingScreen (fades out when p5 finishes preloading)
+ *   2. GameCanvas (p5.js physics + rendering)
+ *   3. React overlay (modal + HUD + stats)
  *
  * Listens to EventBus for game ↔ UI communication.
  */
@@ -12,6 +13,8 @@ import { useState, useEffect, useCallback } from 'react';
 import GameCanvas from './components/GameCanvas.jsx';
 import DetailModal from './components/DetailModal.jsx';
 import HUD from './components/HUD.jsx';
+import LoadingScreen from './components/LoadingScreen.jsx';
+import StatsOverlay from './components/StatsOverlay.jsx';
 import bus from './game/EventBus.js';
 
 export default function App() {
@@ -42,10 +45,16 @@ export default function App() {
 
   return (
     <>
+      <LoadingScreen />
       <GameCanvas />
       <div className="ui-overlay">
         <DetailModal detail={detail} onClose={handleClose} />
-        {!detail && <HUD />}
+        {!detail && (
+          <>
+            <HUD />
+            <StatsOverlay />
+          </>
+        )}
       </div>
     </>
   );

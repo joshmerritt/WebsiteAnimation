@@ -15,6 +15,7 @@ import Goal from './Goal.js';
 import Net from './Net.js';
 import MenuObj from './Menu.js';
 import Boundary from './Boundary.js';
+import ParticleSystem from './Particles.js';
 import projects from '../data/projects.js';
 
 export default class Game {
@@ -48,6 +49,13 @@ export default class Game {
     this.totalOpens       = 0;
     this.clickedToOpen    = false;
 
+    // Particle effects
+    this.particles = new ParticleSystem();
+
+    // Loading state
+    this._loaded = false;
+    this._loadProgress = 0;
+
     // Double-tap tracking (sketch-level, survives mouseReleased)
     this._lastTapTime = 0;
     this._lastTappedBall = null;
@@ -57,14 +65,24 @@ export default class Game {
       bus.on('detail:close', () => this._onDetailClosed()),
       bus.on('game:reset', () => this._onReset()),
     ];
+
+    // Collision listener (one-time, on the engine — NOT per-build)
+    this._collisionHandler = (event) => this._handleCollisions(event);
+    Matter.Events.on(this.engine, 'collisionActive', this._collisionHandler);
   }
 
   // ── p5 lifecycle ───────────────────────────────────────────────────────
 
   preload() {
     const p = this.p;
+    const total = projects.length;
+    let loaded = 0;
     for (const proj of projects) {
-      this.images.push(p.loadImage(`assets/images/${proj.id}.jpg`));
+      this.images.push(p.loadImage(`assets/images/${proj.id}.jpg`, () => {
+        loaded++;
+        this._loadProgress = loaded / total;
+        bus.emit('load:progress', this._loadProgress);
+      }));
     }
   }
 
@@ -73,6 +91,8 @@ export default class Game {
     p.createCanvas(p.windowWidth, p.windowHeight);
     this._computeLayout();
     this._buildWorld();
+    this._loaded = true;
+    bus.emit('load:complete');
   }
 
   draw() {
@@ -94,6 +114,10 @@ export default class Game {
     } else {
       this._drawBalls();
     }
+
+    // Particle effects (always on top)
+    this.particles.update();
+    this.particles.draw(p);
   }
 
   windowResized() {
@@ -102,7 +126,7 @@ export default class Game {
     this._computeLayout();
 
     this.balls.forEach((ball) => {
-      if (ball.pageOpen) return;
+      if (ball.pageOpen || ball.inOriginalPosition) return;
       ball.reset();
     });
 
@@ -201,6 +225,7 @@ export default class Game {
 
   destroy() {
     this._unsubs.forEach((fn) => fn());
+    Matter.Events.off(this.engine, 'collisionActive', this._collisionHandler);
     Matter.Engine.clear(this.engine);
   }
 
@@ -211,7 +236,7 @@ export default class Game {
     this._createGoals();
     this._createMenus();
     this._createBoundary();
-    this._trackCollisions();
+    // Collision listener lives on the engine (registered once in constructor)
   }
 
   _teardownWorld() {
@@ -307,25 +332,28 @@ export default class Game {
     });
   }
 
-  _trackCollisions() {
-    Matter.Events.on(this.engine, 'collisionActive', (event) => {
-      if (this.detailOpen) return;
+  _handleCollisions(event) {
+    if (this.detailOpen) return;
 
-      event.pairs.forEach(({ bodyA, bodyB }) => {
-        if (
-          bodyA.category && bodyB.category &&
-          bodyA.category === bodyB.category &&
-          bodyA.id !== bodyB.id
-        ) {
-          const ballBody = bodyA.label === 'Ball' ? bodyA : bodyB.label === 'Ball' ? bodyB : null;
-          if (ballBody?.ballRef) {
-            const ball = ballBody.ballRef;
-            this._openBallDetail(ball);
-            this.totalMakes++;
-            this._emitStats();
-          }
+    event.pairs.forEach(({ bodyA, bodyB }) => {
+      if (
+        bodyA.category && bodyB.category &&
+        bodyA.category === bodyB.category &&
+        bodyA.id !== bodyB.id
+      ) {
+        const ballBody = bodyA.label === 'Ball' ? bodyA : bodyB.label === 'Ball' ? bodyB : null;
+        if (ballBody?.ballRef) {
+          const ball = ballBody.ballRef;
+          // Particle burst at the goal!
+          const bx = ball.body.position.x;
+          const by = ball.body.position.y;
+          this.particles.burst(bx, by, 40, config.colors.accent);
+          this.particles.burst(bx, by, 15, config.colors.main);
+          this._openBallDetail(ball);
+          this.totalMakes++;
+          this._emitStats();
         }
-      });
+      }
     });
   }
 
@@ -349,11 +377,14 @@ export default class Game {
     ball.body.collisionFilter = {
       group:    catIdx + 1,
       category: Math.pow(2, catIdx),
-      mask:     config.categoryBits[0] | config.categoryBits[1] | config.categoryBits[2],
+      mask:     this.categories.reduce((m, _, i) => m | config.categoryBits[i], 0),
     };
     Matter.Body.setStatic(ball.body, false);
     Matter.Body.applyForce(ball.body, pos, strength);
     ball.launched();
+
+    // Small launch burst
+    this.particles.burst(ball.x, ball.y, 12, 'rgba(199, 214, 213, 0.6)');
   }
 
   _openBallDetail(ball) {
@@ -368,6 +399,7 @@ export default class Game {
   _onDetailClosed() {
     this.detailOpen = false;
     this.selectedCategory = 'All';
+    this.particles.clear();
     this.balls.forEach((ball) => {
       ball.display = true;
       ball.closeDetail();
@@ -376,6 +408,7 @@ export default class Game {
   }
 
   _onReset() {
+    this.particles.clear();
     this.windowResized();
   }
 
@@ -564,7 +597,10 @@ export default class Game {
   }
 
   _captureWebsite() {
-    // Ball index 4 is 'thisWebsite' — capture the canvas as its image
+    // Throttle: capturing p.get() is expensive — only do it every 60 frames
+    this._captureCounter = (this._captureCounter || 0) + 1;
+    if (this._captureCounter % 60 !== 1) return;
+
     const thisSiteBall = this.balls.find((b) => b.project.id === 'thisWebsite');
     if (thisSiteBall) {
       const minDim = Math.min(this.vp.width, this.vp.height);

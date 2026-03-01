@@ -36,4 +36,6 @@ export default bus;
  *   'detail:close'   —                React → Game: modal was closed
  *   'game:reset'     —                React → Game: reset all balls
  *   'stats:update'   { shots, makes, opens }  — Game → React: live stats
+ *   'load:progress'  number (0–1)   — Game → React: image loading progress
+ *   'load:complete'  —               Game → React: all assets loaded, setup done
  */
