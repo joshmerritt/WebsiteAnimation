@@ -108,7 +108,7 @@ export default class Game {
       this._drawTitle();
       this._drawGoals();
       this.menus.forEach((m) => m.show());
-      // Hide net dashed lines once a ball has been launched
+      // Only show net dashed lines before any ball has been launched
       if (this.totalShots === 0) {
         this.nets.forEach((n) => n.show());
       }
@@ -508,13 +508,13 @@ export default class Game {
     const ball = this.balls[0];
     if (!ball) return;
 
-    // Compute target direction: ball → first goal dot
+    // Compute target direction: ball → goal center (between the two dots)
     if (!this._demoTarget) {
       const { dotCenterX, dotSpan, gridStartY, iconSize } = this.vp;
       const dotRadius = iconSize / 15;
-      // Target the left goal dot (visual position)
-      const targetX = dotCenterX - dotSpan / 2;
-      const targetY = gridStartY; // dots are aligned with ball centers
+      // Target the center between the two goal dots for best chance of scoring
+      const targetX = dotCenterX;
+      const targetY = gridStartY;
       const dx = ball.x - targetX;
       const dy = ball.y - targetY;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -523,7 +523,7 @@ export default class Game {
       this._demoTarget = {
         xDir: dx / dist,
         yDir: dy / dist,
-        totalPower: this.vp.power,
+        totalPower: this.vp.power * 1.05, // slight boost to ensure it reaches
       };
     }
 
@@ -554,8 +554,9 @@ export default class Game {
       const availH = titleZoneBottom - height * 0.055;
       const titleSize  = Math.min(iconSize / 2.2, width / 11, availH / (titleLines.length + 1.5));
       const ctaSize    = titleSize * 0.7;
+      const lineHeight = titleSize * 1.3;
 
-      // Measure longest line to right-align the block near the right edge
+      // Measure longest line to position the block
       p.push();
       p.textFont('Syne');
       p.textSize(titleSize);
@@ -564,20 +565,18 @@ export default class Game {
       titleLines.forEach((line) => { maxTitleW = Math.max(maxTitleW, p.textWidth(line)); });
       p.pop();
       const xPos = Math.max(width * 0.06, width * 0.93 - maxTitleW);
-      const lineHeight = titleSize * 1.3;
 
-      // Compute text block vertical extent (ascender top → CTA baseline + descender)
-      const textTopY  = height * 0.055 - titleSize * 0.7;
-      const textBotY  = height * 0.055 + lineHeight * titleLines.length + ctaSize * 0.7;
-      const textBlockH = textBotY - textTopY;
+      // Compute full text block height: title lines + CTA
+      const totalTextH = lineHeight * titleLines.length + ctaSize * 1.1;
 
       // Center the text block vertically within the title zone
-      const yStart = (titleZoneBottom - textBlockH) / 2 + titleSize * 0.7;
+      const yStart = (titleZoneBottom - totalTextH) / 2 + titleSize * 0.35;
 
+      // Accent bar and background panel
+      const accentTopY = yStart - titleSize * 0.4;
+      const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
       const panelX = xPos - 8;
       const panelW = width * 0.60;
-      const accentTopY = yStart - titleSize * 0.7;
-      const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
       const panelY = accentTopY - 4;
       const panelH = (accentBotY - accentTopY) + 8;
 
@@ -593,6 +592,7 @@ export default class Game {
       } else {
         ctx.fillRect(panelX, panelY, panelW, panelH);
       }
+      // Accent line — vertically centered on the text block
       ctx.strokeStyle = 'rgba(89, 133, 177, 0.65)';
       ctx.lineWidth   = 2;
       ctx.lineCap     = 'round';
@@ -619,7 +619,6 @@ export default class Game {
 
     } else {
       // Landscape — title centered-right, left-justified text near the right edge
-      // Position so the text block ends near the right ~15% margin
       const titleSize = Math.min(iconSize / 3, height / 16, width / 36);
       const ctaSize   = titleSize * 0.7;
       const lineHeight = titleSize * 1.25;
@@ -637,10 +636,13 @@ export default class Game {
 
       // Left edge of the title block: right-aligned with ~8% right margin
       const xPos   = width * 0.92 - maxW;
-      const yStart = height * 0.10;
+
+      // Vertically center in the title zone
+      const totalTextH = lineHeight * titleLines.length + ctaSize * 1.1;
+      const yStart = (titleZoneBottom - totalTextH) / 2 + titleSize * 0.35;
 
       // Accent line spans from text top (ascender) to CTA bottom (descender)
-      const accentTopY = yStart - titleSize * 0.7;
+      const accentTopY = yStart - titleSize * 0.4;
       const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
 
       ctx.save();
@@ -674,10 +676,12 @@ export default class Game {
     if (this.totalShots > 2 && this.totalShots < 10 && !this.clickedToOpen && !this.detailOpen) {
       const p = this.p;
       const { gridStartY, spacing, gridRows, iconSize, portrait, width, height } = this.vp;
-      // Position fully below the ball grid so it's never obscured
+      // Position fully below the ball grid so it's never obscured by balls or buttons
       const gridBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
       const yPos = portrait
-        ? Math.min(gridBottom + iconSize * 0.6, height - iconSize * 1.2)
+        // On mobile, ensure it clears the reset button area (keep well above bottom HUD)
+        ? Math.min(gridBottom + iconSize * 0.6, height - iconSize * 2.0)
+        // On desktop, place just below the ball grid
         : gridBottom + iconSize * 0.5;
       p.push();
       p.textFont('Syne');
@@ -708,7 +712,7 @@ export default class Game {
     p.textFont('JetBrains Mono');
     p.noStroke();
 
-    // Divider line
+    // Divider line (solid, not dashed — avoids looking like net lines)
     const divW = dotSpan * 0.5;
     p.stroke('rgba(89, 133, 177, 0.2)');
     p.strokeWeight(1);
@@ -757,10 +761,11 @@ export default class Game {
     const canvas = this.p.drawingContext.canvas;
     if (this.vp.portrait) {
       // Capture from left edge to just past the ball grid, vertically from
-      // below the title to partway down the ball area
+      // below the title to partway down the ball area — zoomed enough to
+      // see the menu and at least a couple of the balls
       const srcX = 0;
-      const srcY = this.vp.titleZoneBottom * 0.5;
-      const srcW = Math.min(this.vp.width, this.vp.gridStartX + this.vp.spacing * 2);
+      const srcY = this.vp.titleZoneBottom * 0.4;
+      const srcW = Math.min(this.vp.width * 0.85, this.vp.gridStartX + this.vp.spacing * 1.8);
       const srcH = srcW; // keep square
       this._captureCtx.drawImage(
         canvas,
@@ -826,59 +831,48 @@ export default class Game {
     }
 
     p.pop();
-
-    // Store hit areas for click detection
-    this._pageNavAreas = {
-      y: navY, x: navX, size: arrowSize,
-    };
   }
 
   _checkPageNavClick(mx, my) {
-    if (!this._pageNavAreas) return false;
-    const { x, y, size } = this._pageNavAreas;
-    const hitPad = size * 2;
+    const { width, height, iconSize } = this.vp;
+    const navY = height - iconSize * 0.6;
+    const navX = width * 0.65;
+    const arrowSize = iconSize / 5;
+    const hitZone = arrowSize * 2;
 
-    // Left arrow hit
-    if (this.currentPage > 0 &&
-        mx > x - size * 4 && mx < x - size &&
-        my > y - hitPad && my < y + hitPad) {
-      this._changePage(this.currentPage - 1);
+    // Left arrow
+    if (this.currentPage > 0 && mx < navX - arrowSize && mx > navX - arrowSize * 4 && Math.abs(my - navY) < hitZone) {
+      this.currentPage--;
+      this._teardownWorld();
+      this._buildWorld();
       return true;
     }
-    // Right arrow hit
-    if (this.currentPage < this.totalPages - 1 &&
-        mx > x + size && mx < x + size * 4 &&
-        my > y - hitPad && my < y + hitPad) {
-      this._changePage(this.currentPage + 1);
+    // Right arrow
+    if (this.currentPage < this.totalPages - 1 && mx > navX + arrowSize && mx < navX + arrowSize * 4 && Math.abs(my - navY) < hitZone) {
+      this.currentPage++;
+      this._teardownWorld();
+      this._buildWorld();
       return true;
     }
     return false;
   }
 
-  _changePage(newPage) {
-    this.currentPage = newPage;
-
-    // Reposition balls for the current page
+  _repositionBalls() {
     const { gridStartX, gridStartY, spacing, gridCols } = this.vp;
     const startIdx = this.currentPage * this.ballsPerPage;
     const endIdx   = Math.min(startIdx + this.ballsPerPage, projects.length);
-
     let col = 0;
     let row = 0;
 
     this.balls.forEach((ball) => {
       const isOnPage = ball.index >= startIdx && ball.index < endIdx;
-      ball.display = isOnPage;
+      ball.display = isOnPage && (this.selectedCategory === 'All' || ball.category === this.selectedCategory);
 
-      if (isOnPage) {
+      if (isOnPage && ball.inOriginalPosition) {
         const gx = gridStartX + col * spacing;
         const gy = gridStartY + row * spacing;
-        ball.originalPos = { x: gx, y: gy };
         Matter.Body.setPosition(ball.body, { x: gx, y: gy });
-        Matter.Body.setVelocity(ball.body, { x: 0, y: 0 });
-        Matter.Body.setStatic(ball.body, true);
-        Matter.Body.setAngle(ball.body, 0);
-        try { Matter.Composite.remove(this.world, ball.body); } catch (_) {}
+        ball.originalPos = { x: gx, y: gy };
         ball.inOriginalPosition = true;
         ball.x = gx;
         ball.y = gy;
@@ -919,7 +913,6 @@ export default class Game {
       goalY = titleZoneBottom + goalWidth * 0.55;
 
       // Pre-compute ball size to determine dot span (1.3× ball diameter)
-      // We need iconSize first, so estimate using the full available width
       const estGridLeft = goalX + goalWidth + w * 0.10;
       const estAvailW = w - estGridLeft - w * 0.03;
       const estAvailH = h - titleZoneBottom - h * 0.12;
@@ -930,7 +923,6 @@ export default class Game {
       const gridRows = neededRows;
 
       // Dot span = 1.3× ball diameter, centered on the goal column
-      // Ensure left dot has enough clearance from the screen edge
       const dotSpan = iconSize * 1.3;
       const dotCenterX = Math.max(dotSpan / 2 + iconSize / 5, goalX + goalWidth / 2);
       const rightDotX = dotCenterX + dotSpan / 2;

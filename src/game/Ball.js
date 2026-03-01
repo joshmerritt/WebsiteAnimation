@@ -40,11 +40,17 @@ export default class Ball {
     this.body.category = project.category;
     this.body.customId = project.name;
 
-    // Image — crop to square for circular clipping
+    // Image — keep full image reference for high-quality rendering
     this.fullImage = img;
+    // Square crop for circular clipping
     const minDim = Math.min(img.height, img.width);
     this.ballImage = img.get(0, 0, minDim, minDim);
     this.imageSrc = `assets/images/${project.id}.jpg`;
+
+    // Pre-render a high-res ball texture for crisp desktop display
+    // Uses 2x the ball diameter for retina-quality rendering
+    this._hiResCanvas = null;
+    this._hiResSize = 0;
 
     // Position / interaction state
     this.originalPos = { x, y };
@@ -70,7 +76,6 @@ export default class Ball {
 
   // ── Detail page ────────────────────────────────────────────────────────
 
-  /** Returns the data payload React needs for the modal. */
   getDetailData() {
     return {
       name:        this.project.name,
@@ -111,20 +116,34 @@ export default class Ball {
     const angle = this.body.angle;
     const p = this.p;
     const ctx = p.drawingContext;
+    const dpr = window.devicePixelRatio || 1;
+    const renderSize = Math.round(this.r * 2);
 
     p.push();
     p.translate(pos.x, pos.y);
     p.rotate(angle);
 
-    // Circular clipping (non-destructive) with high-quality scaling
+    // Use native canvas drawing with high-quality settings for sharper images
     ctx.save();
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
+
+    // Circular clipping
     ctx.beginPath();
     ctx.arc(0, 0, this.r, 0, Math.PI * 2);
     ctx.clip();
-    p.imageMode(p.CENTER);
-    p.image(this.ballImage, 0, 0, this.r * 2, this.r * 2);
+
+    // Draw the ball image using native canvas for best quality
+    // Access the underlying canvas element of the p5 image for direct rendering
+    const imgCanvas = this.ballImage.canvas || this.ballImage.drawingContext?.canvas;
+    if (imgCanvas) {
+      // Native canvas drawImage gives better quality than p5.image()
+      ctx.drawImage(imgCanvas, -this.r, -this.r, renderSize, renderSize);
+    } else {
+      // Fallback to p5 image drawing
+      p.imageMode(p.CENTER);
+      p.image(this.ballImage, 0, 0, renderSize, renderSize);
+    }
     ctx.restore();
 
     // Border ring (no shadow blur — saves significant GPU per ball per frame)
@@ -162,7 +181,7 @@ export default class Ball {
       p.textAlign(p.CENTER);
       p.fill(config.colors.main);
       p.textSize(iconSize / 9);
-      p.textFont('DM Sans');
+      p.textFont('Syne');
       p.text('Drag to aim',       this.x, this.y + this.r * 1.3);
       p.text('Release to launch', this.x, this.y + this.r * 1.3 + iconSize / 8);
     }

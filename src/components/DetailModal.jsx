@@ -3,6 +3,13 @@
  *
  * Shown when a ball scores or is double-clicked. Displays project info
  * with hero image, metadata table, and CTA link.
+ *
+ * Layout (top → bottom):
+ *   1. Close button (centered above image, large X, tight padding)
+ *   2. Hero image with subtle bottom-only gradient (10%)
+ *   3. Title (centered, Syne font — matches homepage)
+ *   4. Info table (goal, role, tech, summary)
+ *   5. CTA link button (centered)
  */
 
 import { useCallback } from 'react';
@@ -17,8 +24,8 @@ function ctaLabel(link) {
   return 'View Project ↗';
 }
 
-/** Stop all touch/mouse events from leaking through to the p5 canvas */
-function stopPropagation(e) {
+/** Block ALL pointer/touch events from reaching the p5 canvas beneath */
+function blockCanvas(e) {
   e.stopPropagation();
 }
 
@@ -27,6 +34,11 @@ export default function DetailModal({ detail, onClose }) {
     (e) => { if (e.target === e.currentTarget) onClose(); },
     [onClose],
   );
+
+  /** Shared handler for interactive elements — stop propagation AND handle click */
+  const handleButtonClick = useCallback((e) => {
+    e.stopPropagation();
+  }, []);
 
   if (!detail) return null;
 
@@ -46,16 +58,27 @@ export default function DetailModal({ detail, onClose }) {
     <div
       className="modal-overlay"
       onClick={handleBackdrop}
-      onTouchStart={stopPropagation}
-      onTouchEnd={stopPropagation}
-      onTouchMove={stopPropagation}
-      onMouseDown={stopPropagation}
+      onPointerDown={blockCanvas}
+      onTouchStart={blockCanvas}
+      onTouchEnd={blockCanvas}
+      onTouchMove={blockCanvas}
+      onMouseDown={blockCanvas}
     >
-      <div className={`modal-card ${heroMode === 'full' ? 'modal-card--full-hero' : ''}`}>
-        {/* Close button above the hero image */}
+      <div
+        className={`modal-card ${heroMode === 'full' ? 'modal-card--full-hero' : ''}`}
+        onClick={blockCanvas}
+        onPointerDown={blockCanvas}
+      >
+        {/* Close button — above the hero image, centered, large X */}
         <div className="modal-close-bar">
-          <button className="modal-close" onClick={onClose} aria-label="Close">
-            {'✕'}
+          <button
+            className="modal-close"
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            onPointerDown={handleButtonClick}
+            onTouchStart={handleButtonClick}
+            aria-label="Close"
+          >
+            ✕
           </button>
         </div>
 
@@ -86,6 +109,9 @@ export default function DetailModal({ detail, onClose }) {
               href={detail.link}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={handleButtonClick}
+              onPointerDown={handleButtonClick}
+              onTouchStart={handleButtonClick}
             >
               {ctaLabel(detail.link)}
             </a>
