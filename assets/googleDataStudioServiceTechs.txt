@@ -1,7 +1,0 @@
-Name: Google Data Studio Streaming Dashboard
-Link: https://www.upwork.com/fl/joshuapmerritt
-Category: Business
-Goal: Educate and motivate employees about their contribution to the business and performance metrics relative to their colleagues.
-My Role: BI Developer
-Technology: Google Data Studio, Data Modeling, Screencloud, Amazon Firestick
-Description: I created a TV dashboard to help track key performance indicators and display it within a business. By providing goals and showcasing performance over the year, employees can understand their contribution to the company in real-time and track how their metrics compare to those of their colleagues.
