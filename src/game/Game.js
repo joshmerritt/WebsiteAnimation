@@ -109,6 +109,7 @@ export default class Game {
       this._drawGoals();
       this.menus.forEach((m) => m.show());
       this.nets.forEach((n) => n.show());
+      this._drawStats();
       this._drawHelpMessage();
       if (this.totalPages > 1) this._drawPageNav();
     }
@@ -315,7 +316,7 @@ export default class Game {
     const dotY = goalY - dotRadius * 4;
     // Widen dot spacing to align with the rough span of category text below
     const dotSpan = goalWidth * 1.3;
-    const dotLeftX = goalX + goalWidth / 2 - dotSpan / 2;
+    const dotLeftX = Math.max(dotRadius * 3, goalX + goalWidth / 2 - dotSpan / 2);
 
     for (let i = 0; i < 2; i++) {
       this.goals.push(new Goal({
@@ -643,6 +644,46 @@ export default class Game {
     }
   }
 
+  _drawStats() {
+    if (this.totalShots === 0) return;
+
+    const p = this.p;
+    const { goalX, goalWidth, goalY, iconSize } = this.vp;
+    const centerX = goalX + goalWidth / 2;
+    // Position below the last menu item
+    const lastMenuY = goalY + (this.categories.length + 1) * 0.4 * iconSize;
+    const fontSize = iconSize / 7;
+    const lineH = fontSize * 1.6;
+    const pct = Math.round((this.totalMakes / this.totalShots) * 100);
+
+    p.push();
+    p.textAlign(p.CENTER);
+    p.textFont('JetBrains Mono');
+    p.noStroke();
+
+    // Divider line
+    const divW = goalWidth * 0.5;
+    p.stroke('rgba(89, 133, 177, 0.2)');
+    p.strokeWeight(1);
+    p.line(centerX - divW / 2, lastMenuY, centerX + divW / 2, lastMenuY);
+    p.noStroke();
+
+    const startY = lastMenuY + lineH;
+
+    p.textSize(fontSize * 0.75);
+    p.fill('rgba(199, 214, 213, 0.45)');
+    p.text(`${this.totalShots} shot${this.totalShots !== 1 ? 's' : ''}`, centerX, startY);
+
+    p.fill('rgba(199, 214, 213, 0.45)');
+    p.text(`${this.totalMakes} make${this.totalMakes !== 1 ? 's' : ''}`, centerX, startY + lineH);
+
+    p.textSize(fontSize);
+    p.fill(config.colors.accent);
+    p.text(`${pct}%`, centerX, startY + lineH * 2.2);
+
+    p.pop();
+  }
+
   _captureWebsite() {
     // Throttle: capture every 8 frames (~7.5 fps at 60fps) using drawImage
     // which is much cheaper than p.get() since it stays on the GPU
@@ -812,8 +853,8 @@ export default class Game {
       goalX = w * 0.04;
       const goalWidth = w * 0.18;
       goalY = titleZoneBottom + goalWidth * 0.55;
-      // Extra padding between menu column and ball grid so balls don't overlap text
-      const gridLeft = goalX + goalWidth + w * 0.16;
+      // Extra padding between menu column and ball grid — enough room to aim at the basket
+      const gridLeft = goalX + goalWidth + w * 0.20;
 
       // Size balls so needed rows fit with breathing room
       const availH = h - titleZoneBottom - h * 0.12;

@@ -14,7 +14,6 @@ import GameCanvas from './components/GameCanvas.jsx';
 import DetailModal from './components/DetailModal.jsx';
 import HUD from './components/HUD.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
-import StatsOverlay from './components/StatsOverlay.jsx';
 import bus from './game/EventBus.js';
 
 export default function App() {
@@ -52,7 +51,6 @@ export default function App() {
         {!detail && (
           <>
             <HUD />
-            <StatsOverlay />
           </>
         )}
       </div>
