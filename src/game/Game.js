@@ -309,14 +309,11 @@ export default class Game {
   }
 
   _createGoals() {
-    const { goalX, goalY, goalWidth, iconSize } = this.vp;
+    const { goalY, iconSize, dotCenterX, dotSpan } = this.vp;
     const netHeight = 0.4 * this.categories.length * iconSize;
     const dotRadius = iconSize / 15;
-    // Move dots up by 2× dot diameter so they sit well above the menu text
     const dotY = goalY - dotRadius * 4;
-    // Widen dot spacing to align with the rough span of category text below
-    const dotSpan = goalWidth * 1.3;
-    const dotLeftX = Math.max(dotRadius * 3, goalX + goalWidth / 2 - dotSpan / 2);
+    const dotLeftX = dotCenterX - dotSpan / 2;
 
     for (let i = 0; i < 2; i++) {
       this.goals.push(new Goal({
@@ -328,23 +325,23 @@ export default class Game {
       }));
       this.nets.push(new Net({
         world: this.world, p: this.p,
-        x: goalX + i * goalWidth,
+        x: dotLeftX + i * dotSpan,
         y: goalY + netHeight / 2,
         height: netHeight,
-        goalWidth,
+        goalWidth: dotSpan,
       }));
     }
   }
 
   _createMenus() {
-    const { goalX, goalWidth, goalY, iconSize } = this.vp;
+    const { dotCenterX, dotSpan, goalY, iconSize } = this.vp;
     this.categories.forEach((cat, i) => {
       this.menus.push(new MenuObj({
         world: this.world, p: this.p,
-        position: { x: goalX + goalWidth / 2, y: goalY + (i + 1) * 0.4 * iconSize },
+        position: { x: dotCenterX, y: goalY + (i + 1) * 0.4 * iconSize },
         category: cat,
         index: i,
-        goalWidth,
+        goalWidth: dotSpan,
         iconSize,
       }));
     });
@@ -534,14 +531,22 @@ export default class Game {
       titleLines.forEach((line) => { maxTitleW = Math.max(maxTitleW, p.textWidth(line)); });
       p.pop();
       const xPos = Math.max(width * 0.06, width * 0.93 - maxTitleW);
-      // Push below HUD buttons on non-touch portrait screens
-      const yStart     = height * 0.055;
       const lineHeight = titleSize * 1.3;
 
+      // Compute text block vertical extent (ascender top → CTA baseline + descender)
+      const textTopY  = height * 0.055 - titleSize * 0.7;
+      const textBotY  = height * 0.055 + lineHeight * titleLines.length + ctaSize * 0.7;
+      const textBlockH = textBotY - textTopY;
+
+      // Center the text block vertically within the title zone
+      const yStart = (titleZoneBottom - textBlockH) / 2 + titleSize * 0.7;
+
       const panelX = xPos - 8;
-      const panelY = yStart - titleSize * 0.6;
       const panelW = width * 0.60;
-      const panelH = lineHeight * titleLines.length + ctaSize * 2.2;
+      const accentTopY = yStart - titleSize * 0.7;
+      const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
+      const panelY = accentTopY - 4;
+      const panelH = (accentBotY - accentTopY) + 8;
 
       ctx.save();
       const grad = ctx.createLinearGradient(panelX, panelY, panelX + panelW, panelY);
@@ -559,8 +564,8 @@ export default class Game {
       ctx.lineWidth   = 2;
       ctx.lineCap     = 'round';
       ctx.beginPath();
-      ctx.moveTo(panelX + 1, panelY + 6);
-      ctx.lineTo(panelX + 1, panelY + panelH - 6);
+      ctx.moveTo(panelX + 1, accentTopY);
+      ctx.lineTo(panelX + 1, accentBotY);
       ctx.stroke();
       ctx.restore();
 
@@ -598,19 +603,20 @@ export default class Game {
       p.pop();
 
       // Left edge of the title block: right-aligned with ~8% right margin
-      // Start below HUD buttons (~42px) with breathing room
       const xPos   = width * 0.92 - maxW;
       const yStart = height * 0.10;
 
-      const totalHeight = lineHeight * titleLines.length + ctaSize * 1.5;
+      // Accent line spans from text top (ascender) to CTA bottom (descender)
+      const accentTopY = yStart - titleSize * 0.7;
+      const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
 
       ctx.save();
       ctx.strokeStyle = 'rgba(89, 133, 177, 0.65)';
       ctx.lineWidth   = 2;
       ctx.lineCap     = 'round';
       ctx.beginPath();
-      ctx.moveTo(xPos - 12, yStart - titleSize * 0.5);
-      ctx.lineTo(xPos - 12, yStart + totalHeight - titleSize * 0.3);
+      ctx.moveTo(xPos - 12, accentTopY);
+      ctx.lineTo(xPos - 12, accentBotY);
       ctx.stroke();
       ctx.restore();
 
@@ -648,8 +654,8 @@ export default class Game {
     if (this.totalShots === 0) return;
 
     const p = this.p;
-    const { goalX, goalWidth, goalY, iconSize } = this.vp;
-    const centerX = goalX + goalWidth / 2;
+    const { dotCenterX, dotSpan, goalY, iconSize } = this.vp;
+    const centerX = dotCenterX;
     // Position below the last menu item
     const lastMenuY = goalY + (this.categories.length + 1) * 0.4 * iconSize;
     const fontSize = iconSize / 7;
@@ -662,7 +668,7 @@ export default class Game {
     p.noStroke();
 
     // Divider line
-    const divW = goalWidth * 0.5;
+    const divW = dotSpan * 0.5;
     p.stroke('rgba(89, 133, 177, 0.2)');
     p.strokeWeight(1);
     p.line(centerX - divW / 2, lastMenuY, centerX + divW / 2, lastMenuY);
@@ -704,13 +710,30 @@ export default class Game {
       this._captureCtx = this._captureCanvas.getContext('2d');
     }
 
-    // Draw a scaled-down copy of the main canvas onto the small offscreen canvas
-    const srcSize = Math.min(this.vp.width, this.vp.height);
-    this._captureCtx.drawImage(
-      this.p.drawingContext.canvas,
-      0, 0, srcSize, srcSize,
-      0, 0, size, size,
-    );
+    // Draw a scaled-down copy of the main canvas onto the small offscreen canvas.
+    // On portrait/mobile, zoom into the menu + ball area so the self-reflecting
+    // ball shows meaningful content instead of a tiny overview.
+    const canvas = this.p.drawingContext.canvas;
+    if (this.vp.portrait) {
+      // Capture from left edge to just past the ball grid, vertically from
+      // below the title to partway down the ball area
+      const srcX = 0;
+      const srcY = this.vp.titleZoneBottom * 0.5;
+      const srcW = Math.min(this.vp.width, this.vp.gridStartX + this.vp.spacing * 2);
+      const srcH = srcW; // keep square
+      this._captureCtx.drawImage(
+        canvas,
+        srcX, srcY, srcW, srcH,
+        0, 0, size, size,
+      );
+    } else {
+      const srcSize = Math.min(this.vp.width, this.vp.height);
+      this._captureCtx.drawImage(
+        canvas,
+        0, 0, srcSize, srcSize,
+        0, 0, size, size,
+      );
+    }
 
     // Reuse a single p5.Image to avoid GC pressure from creating a new one each capture
     if (!this._capturePImg || this._capturePImg.width !== size) {
@@ -853,20 +876,28 @@ export default class Game {
       goalX = w * 0.04;
       const goalWidth = w * 0.18;
       goalY = titleZoneBottom + goalWidth * 0.55;
-      // Extra padding between menu column and ball grid — enough room to aim at the basket
-      const gridLeft = goalX + goalWidth + w * 0.20;
 
-      // Size balls so needed rows fit with breathing room
-      const availH = h - titleZoneBottom - h * 0.12;
-      const availW = w - gridLeft - w * 0.03;
-      const iconFromH = availH / (neededRows * 1.45);
-      const iconFromW = availW / (gridCols * 1.45);
-      const iconSize = Math.min(iconFromH, iconFromW);
+      // Pre-compute ball size to determine dot span (1.3× ball diameter)
+      // We need iconSize first, so estimate using the full available width
+      const estGridLeft = goalX + goalWidth + w * 0.10;
+      const estAvailW = w - estGridLeft - w * 0.03;
+      const estAvailH = h - titleZoneBottom - h * 0.12;
+      const estIconW = estAvailW / (gridCols * 1.45);
+      const estIconH = estAvailH / (neededRows * 1.45);
+      const iconSize = Math.min(estIconH, estIconW);
       const spacing = iconSize * 1.45;
       const gridRows = neededRows;
 
-      // Ensure balls start below the title zone with padding
-      gridStartX = gridLeft;
+      // Dot span = 1.3× ball diameter, centered on the goal column
+      // Ensure left dot has enough clearance from the screen edge
+      const dotSpan = iconSize * 1.3;
+      const dotCenterX = Math.max(dotSpan / 2 + iconSize / 5, goalX + goalWidth / 2);
+      const rightDotX = dotCenterX + dotSpan / 2;
+
+      // Center ball grid between right dot and right screen edge
+      const gridCenterX = rightDotX + (w - rightDotX) / 2;
+      const gridW = (gridCols - 1) * spacing;
+      gridStartX = gridCenterX - gridW / 2;
       gridStartY = titleZoneBottom + iconSize * 0.8;
 
       let power = Math.sqrt(iconSize) * (area / 350000);
@@ -875,7 +906,7 @@ export default class Game {
       this.ballsPerPage = gridCols * gridRows;
       this.vp = {
         width: w, height: h, portrait, mobile, area, iconSize, power,
-        goalX, goalY, goalWidth,
+        goalX, goalY, goalWidth, dotSpan, dotCenterX,
         gridStartX, gridStartY, titleZoneBottom, spacing,
         gridCols, gridRows,
       };
@@ -890,11 +921,14 @@ export default class Game {
       // Size balls to fit vertically with the actual number of rows needed
       const availH = h - titleZoneBottom - h * 0.06;
       const iconFromH = availH / (neededRows * 1.45);
-      // Cap ball size so the grid stays proportional
       const maxIcon = Math.min(w / 8, h / 5);
       const iconSize = Math.min(iconFromH, maxIcon);
       const spacing = iconSize * 1.45;
       const gridRows = neededRows;
+
+      // Dot span = 1.3× ball diameter
+      const dotSpan = iconSize * 1.3;
+      const dotCenterX = goalX + goalWidth / 2;
 
       // Center the 2-column grid between goal column end and ~55% of screen width
       const gridW = (gridCols - 1) * spacing + iconSize;
@@ -908,7 +942,7 @@ export default class Game {
       this.ballsPerPage = gridCols * gridRows;
       this.vp = {
         width: w, height: h, portrait, mobile, area, iconSize, power,
-        goalX, goalY, goalWidth,
+        goalX, goalY, goalWidth, dotSpan, dotCenterX,
         gridStartX, gridStartY, titleZoneBottom, spacing,
         gridCols, gridRows,
       };
