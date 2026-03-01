@@ -1,5 +1,4 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/dadacikk/public_html/
-    - /bin/cp -r $TRAVIS_BUILD_DIR/dist/. $DEPLOYPATH
+    - /bin/cp -R dist/. /home/dadacikk/public_html/
