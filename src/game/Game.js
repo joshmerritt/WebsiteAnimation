@@ -97,7 +97,10 @@ export default class Game {
 
   draw() {
     const p = this.p;
-    Matter.Engine.update(this.engine);
+    // Only step physics when balls are in flight
+    if (this._hasActiveBalls()) {
+      Matter.Engine.update(this.engine);
+    }
     p.background(config.colors.bg);
     this._drawBackgroundGradient();
 
@@ -307,13 +310,19 @@ export default class Game {
   _createGoals() {
     const { goalX, goalY, goalWidth, iconSize } = this.vp;
     const netHeight = 0.4 * this.categories.length * iconSize;
+    const dotRadius = iconSize / 15;
+    // Move dots up by 2× dot diameter so they sit well above the menu text
+    const dotY = goalY - dotRadius * 4;
+    // Widen dot spacing to align with the rough span of category text below
+    const dotSpan = goalWidth * 1.3;
+    const dotLeftX = goalX + goalWidth / 2 - dotSpan / 2;
 
     for (let i = 0; i < 2; i++) {
       this.goals.push(new Goal({
         world: this.world, p: this.p,
-        x: goalX + i * goalWidth,
-        y: goalY,
-        radius: iconSize / 15,
+        x: dotLeftX + i * dotSpan,
+        y: dotY,
+        radius: dotRadius,
         index: i,
       }));
       this.nets.push(new Net({
@@ -510,17 +519,27 @@ export default class Game {
     const ctaLine = config.ctaText;
 
     if (portrait) {
-      // Title sits in the top zone, full width available
-      const availH = titleZoneBottom - height * 0.04;
-      const titleSize  = Math.min(iconSize / 3.5, width / 16, availH / (titleLines.length + 1.5));
+      // Title in top zone, left-justified but pushed toward center-right
+      const availH = titleZoneBottom - height * 0.055;
+      const titleSize  = Math.min(iconSize / 3, width / 14, availH / (titleLines.length + 1.5));
       const ctaSize    = titleSize * 0.75;
-      const xPos       = width * 0.06;
-      const yStart     = height * 0.05;
+
+      // Measure longest line to right-align the block near the right edge
+      p.push();
+      p.textFont('Syne');
+      p.textSize(titleSize);
+      p.textStyle(p.BOLD);
+      let maxTitleW = 0;
+      titleLines.forEach((line) => { maxTitleW = Math.max(maxTitleW, p.textWidth(line)); });
+      p.pop();
+      const xPos = Math.max(width * 0.06, width * 0.93 - maxTitleW);
+      // Push below HUD buttons on non-touch portrait screens
+      const yStart     = height * 0.055;
       const lineHeight = titleSize * 1.3;
 
       const panelX = xPos - 8;
       const panelY = yStart - titleSize * 0.6;
-      const panelW = width * 0.55;
+      const panelW = width * 0.60;
       const panelH = lineHeight * titleLines.length + ctaSize * 2.2;
 
       ctx.save();
@@ -560,12 +579,27 @@ export default class Game {
       p.pop();
 
     } else {
-      // Landscape — title above the ball grid, right of goal/menu column
-      const xPos      = gridStartX;
-      const titleSize = Math.min(iconSize / 3.5, height / 18, width / 40);
+      // Landscape — title centered-right, left-justified text near the right edge
+      // Position so the text block ends near the right ~15% margin
+      const titleSize = Math.min(iconSize / 3, height / 16, width / 36);
       const ctaSize   = titleSize * 0.7;
-      const yStart    = height * 0.08;
       const lineHeight = titleSize * 1.25;
+
+      // Measure the longest line to right-align the block near right edge
+      p.push();
+      p.textFont('Syne');
+      p.textSize(titleSize);
+      p.textStyle(p.BOLD);
+      let maxW = 0;
+      titleLines.forEach((line) => {
+        maxW = Math.max(maxW, p.textWidth(line));
+      });
+      p.pop();
+
+      // Left edge of the title block: right-aligned with ~8% right margin
+      // Start below HUD buttons (~42px) with breathing room
+      const xPos   = width * 0.92 - maxW;
+      const yStart = height * 0.10;
 
       const totalHeight = lineHeight * titleLines.length + ctaSize * 1.5;
 
@@ -610,17 +644,40 @@ export default class Game {
   }
 
   _captureWebsite() {
-    // Throttle: capturing p.get() is expensive — only do it every 60 frames
+    // Throttle: capture every 8 frames (~7.5 fps at 60fps) using drawImage
+    // which is much cheaper than p.get() since it stays on the GPU
     this._captureCounter = (this._captureCounter || 0) + 1;
-    if (this._captureCounter % 60 !== 1) return;
+    if (this._captureCounter % 8 !== 1) return;
 
     const thisSiteBall = this.balls.find((b) => b.project.id === 'thisWebsite');
-    if (thisSiteBall) {
-      const minDim = Math.min(this.vp.width, this.vp.height);
-      const cap = this.p.get(0, 0, minDim, minDim);
-      thisSiteBall.ballImage = cap;
-      thisSiteBall.fullImage = cap;
+    if (!thisSiteBall) return;
+
+    const size = Math.round(thisSiteBall.r * 2);
+    if (size <= 0) return;
+
+    // Lazily create an offscreen canvas sized to the ball
+    if (!this._captureCanvas || this._captureCanvas.width !== size) {
+      this._captureCanvas = document.createElement('canvas');
+      this._captureCanvas.width = size;
+      this._captureCanvas.height = size;
+      this._captureCtx = this._captureCanvas.getContext('2d');
     }
+
+    // Draw a scaled-down copy of the main canvas onto the small offscreen canvas
+    const srcSize = Math.min(this.vp.width, this.vp.height);
+    this._captureCtx.drawImage(
+      this.p.drawingContext.canvas,
+      0, 0, srcSize, srcSize,
+      0, 0, size, size,
+    );
+
+    // Reuse a single p5.Image to avoid GC pressure from creating a new one each capture
+    if (!this._capturePImg || this._capturePImg.width !== size) {
+      this._capturePImg = this.p.createImage(size, size);
+    }
+    this._capturePImg.drawingContext.drawImage(this._captureCanvas, 0, 0);
+    thisSiteBall.ballImage = this._capturePImg;
+    thisSiteBall.fullImage = this._capturePImg;
   }
 
   // ── Private: page navigation ─────────────────────────────────────────
@@ -730,6 +787,11 @@ export default class Game {
     });
   }
 
+  _hasActiveBalls() {
+    if (this.showDemo) return true;
+    return this.balls.some((b) => !b.inOriginalPosition);
+  }
+
   // ── Private: layout computation ────────────────────────────────────────
 
   _computeLayout() {
@@ -738,64 +800,77 @@ export default class Game {
     const portrait = h > w;
     const mobile   = Math.max(h, w) <= 1000;
     const area     = w * h;
-    const iconSize = Math.min(w / config.iconScale, h / config.iconScale);
 
-    let power = Math.sqrt(iconSize) * (area / 350000);
-    if (mobile) {
-      power = portrait
-        ? area / Math.pow(iconSize, 2.7)
-        : area / Math.pow(iconSize, 3);
-    }
-
-    const goalWidth = iconSize * 1.4;
-    const spacing = iconSize * config.gridSpacingMultiplier;
+    // 2-column grid — rows determined by project count
+    const gridCols = 2;
+    const neededRows = Math.ceil(projects.length / gridCols);
 
     let goalX, goalY, gridStartX, gridStartY, titleZoneBottom;
 
     if (portrait) {
-      // PORTRAIT LAYOUT:
-      // Row 1 (top ~20%): Title text
-      // Row 2 (remaining): Goals/menu on left, ball grid on right
-      titleZoneBottom = h * 0.20;
-      goalX = iconSize * 0.25;
-      goalY = titleZoneBottom + iconSize * 0.8;
-      gridStartX = goalX + goalWidth + iconSize * 0.8;
-      gridStartY = titleZoneBottom + iconSize * 0.3;
+      titleZoneBottom = h * 0.15;
+      goalX = w * 0.04;
+      const goalWidth = w * 0.18;
+      goalY = titleZoneBottom + goalWidth * 0.55;
+      // Extra padding between menu column and ball grid so balls don't overlap text
+      const gridLeft = goalX + goalWidth + w * 0.16;
+
+      // Size balls so needed rows fit with breathing room
+      const availH = h - titleZoneBottom - h * 0.12;
+      const availW = w - gridLeft - w * 0.03;
+      const iconFromH = availH / (neededRows * 1.45);
+      const iconFromW = availW / (gridCols * 1.45);
+      const iconSize = Math.min(iconFromH, iconFromW);
+      const spacing = iconSize * 1.45;
+      const gridRows = neededRows;
+
+      // Ensure balls start below the title zone with padding
+      gridStartX = gridLeft;
+      gridStartY = titleZoneBottom + iconSize * 0.8;
+
+      let power = Math.sqrt(iconSize) * (area / 350000);
+      if (mobile) power = area / Math.pow(iconSize, 2.7);
+
+      this.ballsPerPage = gridCols * gridRows;
+      this.vp = {
+        width: w, height: h, portrait, mobile, area, iconSize, power,
+        goalX, goalY, goalWidth,
+        gridStartX, gridStartY, titleZoneBottom, spacing,
+        gridCols, gridRows,
+      };
     } else {
-      // LANDSCAPE LAYOUT:
-      // Left column: Goals/menu
-      // Right of that: Title text at top, ball grid below
-      goalX = iconSize * 0.25;
+      // LANDSCAPE — goal/menu left, ball grid center-left, title near right edge
+      goalX = w * 0.03;
+      const goalWidth = w * 0.12;
       goalY = h * 0.35;
-      titleZoneBottom = h * 0.28;
-      gridStartX = goalX + goalWidth + iconSize * 1.5;
-      gridStartY = titleZoneBottom + iconSize * 0.2;
+      titleZoneBottom = h * 0.25;
+      const goalColumnEnd = goalX + goalWidth + w * 0.04;
+
+      // Size balls to fit vertically with the actual number of rows needed
+      const availH = h - titleZoneBottom - h * 0.06;
+      const iconFromH = availH / (neededRows * 1.45);
+      // Cap ball size so the grid stays proportional
+      const maxIcon = Math.min(w / 8, h / 5);
+      const iconSize = Math.min(iconFromH, maxIcon);
+      const spacing = iconSize * 1.45;
+      const gridRows = neededRows;
+
+      // Center the 2-column grid between goal column end and ~55% of screen width
+      const gridW = (gridCols - 1) * spacing + iconSize;
+      const gridAreaLeft = goalColumnEnd;
+      const gridAreaRight = w * 0.55;
+      gridStartX = gridAreaLeft + (gridAreaRight - gridAreaLeft - gridW) / 2 + iconSize / 2;
+      gridStartY = titleZoneBottom + iconSize * 0.3;
+
+      let power = Math.sqrt(iconSize) * (area / 350000);
+
+      this.ballsPerPage = gridCols * gridRows;
+      this.vp = {
+        width: w, height: h, portrait, mobile, area, iconSize, power,
+        goalX, goalY, goalWidth,
+        gridStartX, gridStartY, titleZoneBottom, spacing,
+        gridCols, gridRows,
+      };
     }
-
-    // Calculate how many balls fit on screen
-    const availW = w - gridStartX - iconSize * 0.3;
-    const availH = h - gridStartY - iconSize * 1.0;
-    const cols = Math.max(1, Math.floor(availW / spacing) + 1);
-    const rows = Math.max(1, Math.floor(availH / spacing) + 1);
-    this.ballsPerPage = cols * rows;
-
-    this.vp = {
-      width: w,
-      height: h,
-      portrait,
-      mobile,
-      area,
-      iconSize,
-      power,
-      goalX,
-      goalY,
-      goalWidth,
-      gridStartX,
-      gridStartY,
-      titleZoneBottom,
-      spacing,
-      gridCols: cols,
-      gridRows: rows,
-    };
   }
 }

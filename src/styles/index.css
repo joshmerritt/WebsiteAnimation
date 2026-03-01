@@ -111,9 +111,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(3, 6, 10, 0.72);
-  backdrop-filter: blur(12px) saturate(1.2);
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  background: rgba(3, 6, 10, 0.55);
+  backdrop-filter: blur(6px) saturate(1.1);
+  -webkit-backdrop-filter: blur(6px) saturate(1.1);
   pointer-events: all;
   animation: overlayIn 0.25s var(--ease-out) both;
 }
@@ -180,6 +180,8 @@ body {
 
 
 /* ─── Hero Image ────────────────────────────────────────────────────────────── */
+
+/* Default banner mode — horizontal crop, fixed height */
 .modal-hero {
   position: relative;
   height: 220px;
@@ -197,14 +199,28 @@ body {
   filter: brightness(1.1);
 }
 
+/* Full hero mode — show nearly the entire image (aspect-ratio preserved) */
+.modal-hero--full {
+  height: auto;
+  max-height: 55vh;
+}
+.modal-hero--full img {
+  height: auto;
+  max-height: 55vh;
+  object-fit: contain;
+  object-position: center;
+  background: rgba(10, 14, 18, 0.5);
+}
+
 .modal-hero-gradient {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
     rgba(10, 14, 18, 0) 0%,
-    rgba(10, 14, 18, 0.15) 50%,
-    rgba(10, 14, 18, 0.75) 100%
+    rgba(10, 14, 18, 0) 35%,
+    rgba(10, 14, 18, 0.5) 65%,
+    rgba(10, 14, 18, 0.92) 100%
   );
 }
 
@@ -315,6 +331,7 @@ body {
   top: 0;
   right: 0;
   display: flex;
+  align-items: center;
   gap: 8px;
   padding: clamp(10px, 2vmin, 18px) clamp(12px, 2.5vmin, 24px);
   pointer-events: none;
@@ -337,6 +354,9 @@ body {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: background 0.2s, border-color 0.2s, box-shadow 0.25s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
 }
 
 .hud-btn:hover {
@@ -345,13 +365,19 @@ body {
   box-shadow: 0 0 14px rgba(89, 133, 177, 0.15);
 }
 
+.hud-icon { font-size: 1.1em; }
+.hud-reset-icon { font-size: 1.1em; }
+.hud-label { white-space: nowrap; }
+
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media screen and (max-height: 600px), screen and (max-width: 420px) {
-  .modal-hero { height: 115px; }
+  .modal-hero:not(.modal-hero--full) { height: 115px; }
+  .modal-hero--full { max-height: 40vh; }
+  .modal-hero--full img { max-height: 40vh; }
   .modal-content { padding: 14px 16px 20px; gap: 12px; }
   .modal-table td { font-size: clamp(0.68rem, 2.2vmin, 0.82rem); padding: 0.4em; }
 }
@@ -510,8 +536,80 @@ a { color: var(--main); text-decoration: none; }
    MOBILE & TOUCH POLISH
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Ensure HUD buttons have comfortable touch targets */
-@media (pointer: coarse) {
+/* Mobile portrait — bottom bar layout */
+@media (pointer: coarse) and (orientation: portrait) {
+  .hud {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    justify-content: center;
+    gap: 0;
+    padding: 0 16px env(safe-area-inset-bottom, 12px);
+    background: linear-gradient(to top, rgba(10, 14, 18, 0.85) 0%, transparent 100%);
+    padding-top: 18px;
+  }
+
+  /* Contact Me: centered, plain link style (no pill background) */
+  .hud-contact {
+    background: none;
+    border: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    font-size: clamp(0.8rem, 3.5vw, 1rem);
+    padding: 0.8em 1.5em;
+    color: var(--secondary);
+    order: 1;
+  }
+  .hud-contact:hover {
+    background: none;
+    border: none;
+    box-shadow: none;
+    color: var(--main);
+  }
+  .hud-contact .hud-icon { font-size: 1.2em; }
+
+  /* Reset: right side, large icon, small text */
+  .hud-reset {
+    position: absolute;
+    right: 16px;
+    bottom: env(safe-area-inset-bottom, 12px);
+    padding: 0.6em 0.9em;
+    font-size: 0.7rem;
+    order: 2;
+    flex-direction: column;
+    gap: 0.15em;
+    background: rgba(89, 133, 177, 0.08);
+    border: 1px solid rgba(89, 133, 177, 0.15);
+  }
+  .hud-reset .hud-reset-icon {
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+  .hud-reset .hud-label {
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+  }
+
+  .hud-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .stats-overlay {
+    bottom: 72px;
+    padding: 5px 12px;
+    gap: 10px;
+  }
+
+  .stats-value { font-size: 0.78rem; }
+  .stats-label { font-size: 0.5rem; }
+}
+
+/* Desktop/landscape touch devices */
+@media (pointer: coarse) and (orientation: landscape) {
   .hud-btn {
     min-height: 44px;
     min-width: 44px;
@@ -528,17 +626,10 @@ a { color: var(--main); text-decoration: none; }
   .stats-label { font-size: 0.5rem; }
 }
 
-/* Small phones — stack HUD vertically */
+/* Small phones — ensure bottom stats don't overlap HUD */
 @media screen and (max-width: 380px) {
-  .hud {
-    flex-direction: column;
-    right: 10px;
-    top: 10px;
-    gap: 6px;
-  }
-
   .stats-overlay {
-    bottom: 10px;
+    bottom: 76px;
   }
 }
 

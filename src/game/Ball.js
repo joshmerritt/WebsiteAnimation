@@ -80,6 +80,7 @@ export default class Ball {
       technology:  this.project.technology,
       description: this.project.description,
       imageSrc:    this.imageSrc,
+      heroMode:    this.project.heroMode || 'banner',
     };
   }
 
@@ -124,16 +125,12 @@ export default class Ball {
     p.image(this.ballImage, 0, 0, this.r * 2, this.r * 2);
     ctx.restore();
 
-    // Subtle glow border
-    ctx.save();
-    ctx.shadowColor = config.colors.glow;
-    ctx.shadowBlur  = this.r / 5;
+    // Border ring (no shadow blur — saves significant GPU per ball per frame)
     p.noFill();
     p.stroke(config.colors.main);
     p.strokeWeight(this.r / 25);
     p.ellipseMode(p.CENTER);
     p.circle(0, 0, this.r * 2);
-    ctx.restore();
 
     p.pop();
 
