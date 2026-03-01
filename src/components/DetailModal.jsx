@@ -17,6 +17,11 @@ function ctaLabel(link) {
   return 'View Project ↗';
 }
 
+/** Stop all touch/mouse events from leaking through to the p5 canvas */
+function stopPropagation(e) {
+  e.stopPropagation();
+}
+
 export default function DetailModal({ detail, onClose }) {
   const handleBackdrop = useCallback(
     (e) => { if (e.target === e.currentTarget) onClose(); },
@@ -38,11 +43,21 @@ export default function DetailModal({ detail, onClose }) {
   const heroClass = `modal-hero modal-hero--${heroMode}`;
 
   return (
-    <div className="modal-overlay" onClick={handleBackdrop}>
+    <div
+      className="modal-overlay"
+      onClick={handleBackdrop}
+      onTouchStart={stopPropagation}
+      onTouchEnd={stopPropagation}
+      onTouchMove={stopPropagation}
+      onMouseDown={stopPropagation}
+    >
       <div className={`modal-card ${heroMode === 'full' ? 'modal-card--full-hero' : ''}`}>
-        <button className="modal-close" onClick={onClose} aria-label="Close">
-          {'✕'}
-        </button>
+        {/* Close button above the hero image */}
+        <div className="modal-close-bar">
+          <button className="modal-close" onClick={onClose} aria-label="Close">
+            {'✕'}
+          </button>
+        </div>
 
         {detail.imageSrc && (
           <div className={heroClass}>

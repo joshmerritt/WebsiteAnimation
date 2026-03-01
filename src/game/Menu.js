@@ -40,8 +40,8 @@ export default class Menu {
     p.push();
     p.noStroke();
     p.textAlign(p.CENTER);
-    p.textFont('DM Sans');
-    p.textSize(this.height / 2.25);
+    p.textFont('Syne');
+    p.textSize(this.height / 2.5);
     p.textStyle(this.selected || isHover ? p.BOLD : p.NORMAL);
 
     if (this.selected) {

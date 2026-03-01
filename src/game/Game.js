@@ -108,7 +108,10 @@ export default class Game {
       this._drawTitle();
       this._drawGoals();
       this.menus.forEach((m) => m.show());
-      this.nets.forEach((n) => n.show());
+      // Hide net dashed lines once a ball has been launched
+      if (this.totalShots === 0) {
+        this.nets.forEach((n) => n.show());
+      }
       this._drawStats();
       this._drawHelpMessage();
       if (this.totalPages > 1) this._drawPageNav();
@@ -309,10 +312,12 @@ export default class Game {
   }
 
   _createGoals() {
-    const { goalY, iconSize, dotCenterX, dotSpan } = this.vp;
+    const { iconSize, dotCenterX, dotSpan, gridStartY } = this.vp;
     const netHeight = 0.4 * this.categories.length * iconSize;
     const dotRadius = iconSize / 15;
-    const dotY = goalY - dotRadius * 4;
+    // Align dots visually with the center of the first row of balls
+    // Goal.show() draws at body.y - radius*1.5, so set body.y accordingly
+    const dotY = gridStartY + dotRadius * 1.5;
     const dotLeftX = dotCenterX - dotSpan / 2;
 
     for (let i = 0; i < 2; i++) {
@@ -326,7 +331,7 @@ export default class Game {
       this.nets.push(new Net({
         world: this.world, p: this.p,
         x: dotLeftX + i * dotSpan,
-        y: goalY + netHeight / 2,
+        y: dotY + netHeight / 2,
         height: netHeight,
         goalWidth: dotSpan,
       }));
@@ -334,11 +339,14 @@ export default class Game {
   }
 
   _createMenus() {
-    const { dotCenterX, dotSpan, goalY, iconSize } = this.vp;
+    const { dotCenterX, dotSpan, gridStartY, iconSize } = this.vp;
+    const dotRadius = iconSize / 15;
+    // Position menus below the goal dots (which are aligned with gridStartY)
+    const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
     this.categories.forEach((cat, i) => {
       this.menus.push(new MenuObj({
         world: this.world, p: this.p,
-        position: { x: dotCenterX, y: goalY + (i + 1) * 0.4 * iconSize },
+        position: { x: dotCenterX, y: menuStartY + i * 0.4 * iconSize },
         category: cat,
         index: i,
         goalWidth: dotSpan,
@@ -499,12 +507,37 @@ export default class Game {
   _runDemo() {
     const ball = this.balls[0];
     if (!ball) return;
-    ball.xPower += this.vp.power / 100;
-    ball.yPower += this.vp.power / 80;
+
+    // Compute target direction: ball → first goal dot
+    if (!this._demoTarget) {
+      const { dotCenterX, dotSpan, gridStartY, iconSize } = this.vp;
+      const dotRadius = iconSize / 15;
+      // Target the left goal dot (visual position)
+      const targetX = dotCenterX - dotSpan / 2;
+      const targetY = gridStartY; // dots are aligned with ball centers
+      const dx = ball.x - targetX;
+      const dy = ball.y - targetY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      // Normalize direction and scale to required power
+      // The launch velocity = -power * speedScale, so positive power = move left/up
+      this._demoTarget = {
+        xDir: dx / dist,
+        yDir: dy / dist,
+        totalPower: this.vp.power,
+      };
+    }
+
+    const { xDir, yDir, totalPower } = this._demoTarget;
+    const step = totalPower / 100;
+    ball.xPower += step * xDir;
+    ball.yPower += step * yDir;
     ball.demoAim();
-    if (ball.xPower > this.vp.power) {
+
+    const currentPower = Math.sqrt(ball.xPower * ball.xPower + ball.yPower * ball.yPower);
+    if (currentPower > totalPower) {
       this._launchBall(ball);
       this.showDemo = false;
+      this._demoTarget = null;
     }
   }
 
@@ -519,8 +552,8 @@ export default class Game {
     if (portrait) {
       // Title in top zone, left-justified but pushed toward center-right
       const availH = titleZoneBottom - height * 0.055;
-      const titleSize  = Math.min(iconSize / 3, width / 14, availH / (titleLines.length + 1.5));
-      const ctaSize    = titleSize * 0.75;
+      const titleSize  = Math.min(iconSize / 2.2, width / 11, availH / (titleLines.length + 1.5));
+      const ctaSize    = titleSize * 0.7;
 
       // Measure longest line to right-align the block near the right edge
       p.push();
@@ -577,7 +610,7 @@ export default class Game {
         p.fill(config.colors.secondary);
         p.text(line, xPos + 6, yStart + lineHeight * i);
       });
-      p.textFont('DM Sans');
+      p.textFont('Syne');
       p.textSize(ctaSize);
       p.textStyle(p.NORMAL);
       p.fill(config.colors.main);
@@ -628,7 +661,7 @@ export default class Game {
         p.fill(config.colors.secondary);
         p.text(line, xPos, yStart + lineHeight * i);
       });
-      p.textFont('DM Sans');
+      p.textFont('Syne');
       p.textSize(ctaSize);
       p.textStyle(p.NORMAL);
       p.fill(config.colors.main);
@@ -640,12 +673,18 @@ export default class Game {
   _drawHelpMessage() {
     if (this.totalShots > 2 && this.totalShots < 10 && !this.clickedToOpen && !this.detailOpen) {
       const p = this.p;
-      const yPos = this.vp.portrait ? this.vp.height * 0.9 : this.vp.height * 0.85;
+      const { gridStartY, spacing, gridRows, iconSize, portrait, width, height } = this.vp;
+      // Position fully below the ball grid so it's never obscured
+      const gridBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
+      const yPos = portrait
+        ? Math.min(gridBottom + iconSize * 0.6, height - iconSize * 1.2)
+        : gridBottom + iconSize * 0.5;
       p.push();
-      p.textFont('DM Sans');
-      p.textSize(this.vp.iconSize / 6);
+      p.textFont('Syne');
+      p.textSize(iconSize / 6);
       p.fill(config.colors.main);
-      p.text("Double click the image if you're tired of playing.", this.vp.width / 8, yPos);
+      p.textAlign(p.CENTER);
+      p.text("Double click the image if you're tired of playing.", width / 2, yPos);
       p.pop();
     }
   }
@@ -654,10 +693,12 @@ export default class Game {
     if (this.totalShots === 0) return;
 
     const p = this.p;
-    const { dotCenterX, dotSpan, goalY, iconSize } = this.vp;
+    const { dotCenterX, dotSpan, gridStartY, iconSize } = this.vp;
     const centerX = dotCenterX;
+    const dotRadius = iconSize / 15;
     // Position below the last menu item
-    const lastMenuY = goalY + (this.categories.length + 1) * 0.4 * iconSize;
+    const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
+    const lastMenuY = menuStartY + this.categories.length * 0.4 * iconSize;
     const fontSize = iconSize / 7;
     const lineH = fontSize * 1.6;
     const pct = Math.round((this.totalMakes / this.totalShots) * 100);

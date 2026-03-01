@@ -126,7 +126,7 @@ body {
 .modal-card {
   position: relative;
   width: min(580px, 92vw);
-  max-height: 88vh;
+  max-height: 92vh;
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--glass-bg);
@@ -148,26 +148,32 @@ body {
 }
 
 
+/* ─── Close Bar (above hero image) ─────────────────────────────────────────── */
+.modal-close-bar {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 2px;
+  flex-shrink: 0;
+}
+
 /* ─── Close Button ──────────────────────────────────────────────────────────── */
 .modal-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
   z-index: 5;
-  width: 36px;
-  height: 36px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
   border-radius: 50%;
   background: rgba(10, 14, 18, 0.7);
   border: 1px solid rgba(199, 214, 213, 0.3);
   color: var(--main);
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
 
@@ -184,10 +190,11 @@ body {
 /* Default banner mode — horizontal crop, fixed height */
 .modal-hero {
   position: relative;
-  height: 220px;
+  height: min(200px, 22vh);
+  min-height: 60px;
   overflow: hidden;
   border-radius: var(--radius-md) var(--radius-md) 0 0;
-  flex-shrink: 0;
+  flex-shrink: 1;
 }
 
 .modal-hero img {
@@ -202,11 +209,11 @@ body {
 /* Full hero mode — show nearly the entire image (aspect-ratio preserved) */
 .modal-hero--full {
   height: auto;
-  max-height: 55vh;
+  max-height: min(22vh, 130px);
 }
 .modal-hero--full img {
   height: auto;
-  max-height: 55vh;
+  max-height: min(22vh, 130px);
   object-fit: contain;
   object-position: center;
   background: rgba(10, 14, 18, 0.5);
@@ -228,8 +235,9 @@ body {
 .modal-content {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 22px 24px 28px;
+  gap: 12px;
+  padding: 14px 20px 18px;
+  flex-shrink: 0;
 }
 
 .modal-title {
@@ -255,11 +263,11 @@ body {
 }
 
 .modal-table td {
-  padding: 0.55em 0.65em;
+  padding: 0.4em 0.55em;
   font-size: clamp(0.74rem, 1.55vmin, 0.88rem);
   color: var(--main);
   vertical-align: top;
-  line-height: 1.65;
+  line-height: 1.55;
 }
 
 .modal-label {
@@ -293,7 +301,7 @@ body {
   font-size: clamp(0.72rem, 1.45vmin, 0.88rem);
   font-weight: 500;
   letter-spacing: 0.02em;
-  align-self: flex-start;
+  align-self: center;
   transition: background 0.2s, border-color 0.2s, box-shadow 0.25s, transform 0.2s;
 }
 
@@ -365,11 +373,12 @@ body {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media screen and (max-height: 600px), screen and (max-width: 420px) {
-  .modal-hero:not(.modal-hero--full) { height: 115px; }
-  .modal-hero--full { max-height: 40vh; }
-  .modal-hero--full img { max-height: 40vh; }
-  .modal-content { padding: 14px 16px 20px; gap: 12px; }
-  .modal-table td { font-size: clamp(0.68rem, 2.2vmin, 0.82rem); padding: 0.4em; }
+  .modal-hero:not(.modal-hero--full) { height: 100px; }
+  .modal-hero--full { max-height: 25vh; }
+  .modal-hero--full img { max-height: 25vh; }
+  .modal-content { padding: 12px 14px 18px; gap: 10px; }
+  .modal-table td { font-size: clamp(0.68rem, 2.2vmin, 0.82rem); padding: 0.35em; }
+  .modal-close-bar { padding: 4px 0 2px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -523,6 +532,31 @@ a { color: var(--main); text-decoration: none; }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   DESKTOP LAYOUT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Desktop: position reset at bottom center, contact bottom-left, both with extra padding */
+@media (pointer: fine) {
+  .hud {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    justify-content: center;
+    gap: 16px;
+    padding-bottom: clamp(18px, 3vmin, 36px);
+  }
+
+  .hud-contact {
+    order: 1;
+  }
+
+  .hud-reset {
+    order: 2;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    MOBILE & TOUCH POLISH
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -570,7 +604,8 @@ a { color: var(--main); text-decoration: none; }
     flex-direction: column;
     gap: 0.15em;
     background: rgba(89, 133, 177, 0.08);
-    border: 1px solid rgba(89, 133, 177, 0.15);
+    border: none;
+    outline: none;
   }
   .hud-reset .hud-reset-icon {
     font-size: 1.6rem;
