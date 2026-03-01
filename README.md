@@ -1,108 +1,97 @@
-## Portfolio Website by Josh Merritt
+# Da Data Dad — Portfolio v2
 
-### Overview
+Interactive physics-based portfolio by Josh Merritt. Rebuilt with Vite, React 18, p5.js (instance mode), and matter.js.
 
-My aim is to create an interactive personal website to display my portfolio and development skills.
-Each "project" has an image and an about file with details. When an image is hovered over, the user is
-prompted to "aim," if they click and drag they can launch the "ball" towards the "goal" which is actually the menu.
-If the ball goes through the goal, the selected project is loaded full screen.
+## Quick Start
 
-#### Technology
+```bash
+npm install
+npm run dev
+```
 
-JavaScript, CSS3, HTML5, Git, cPanel. I used a visualization library based upon the respected Processing.org, called p5.js, 
-along with a simple physics engine, matter.js. Both libraries are open-source and were easily accessible to an amatuer developer. 
+## Project Structure
 
-### Creating your own website
+```
+├── index.html                 # Vite entry — main portfolio
+├── analytics-dashboard.html   # Vite entry — analytics dashboard
+├── package.json
+├── vite.config.js
+├── public/
+│   └── assets/
+│       └── images/            # ← Place your project images here
+│           ├── aboutMe.jpg
+│           ├── arduinoCoopDoor.jpg
+│           ├── googleDataStudioServiceTechs.jpg
+│           ├── powerBIMetrics.jpg
+│           ├── thisWebsite.jpg
+│           ├── SiteAnalytics.jpg
+│           ├── thewineyoudrink.jpg
+│           ├── dartleague.jpg
+│           └── favicon.png
+└── src/
+    ├── main.jsx               # React entry (portfolio)
+    ├── analytics-main.jsx     # React entry (dashboard)
+    ├── App.jsx                # Root component (canvas + overlay)
+    ├── analytics/             # Analytics dashboard page
+    │   ├── AnalyticsDashboard.jsx
+    │   ├── AreaChart.jsx
+    │   ├── BallEngagement.jsx
+    │   ├── DonutChart.jsx
+    │   ├── Sparkline.jsx
+    │   ├── StatCard.jsx
+    │   ├── data.js
+    │   └── hooks.js
+    ├── components/
+    │   ├── GameCanvas.jsx     # p5 instance mode wrapper
+    │   ├── DetailModal.jsx    # Project detail modal
+    │   └── HUD.jsx            # Contact + Reset buttons
+    ├── data/
+    │   └── projects.js        # All project data (replaces .txt files)
+    ├── game/
+    │   ├── Game.js            # Main orchestrator (replaces sketch.js)
+    │   ├── Ball.js            # Physics ball (replaces imageBall.js)
+    │   ├── Goal.js            # Goal posts
+    │   ├── Boundary.js        # Left/right walls
+    │   ├── Net.js             # Invisible barriers
+    │   ├── Menu.js            # Category menu items
+    │   ├── EventBus.js        # Pub/sub for game ↔ React
+    │   └── config.js          # All tunable constants
+    └── styles/
+        ├── index.css          # Portfolio styles
+        └── analytics.css      # Dashboard styles
+```
 
-If you are interested in using my code to run your website, you'll need to:
+## Architecture Changes from v1
 
-    - Clone this repository
-    - Update the sketch.js file to set your desired project display order
-    - Create your description files for each project (see template)
-    - Add your image and text files
-    - Host on a server of your choosing (I use cpanel linked to github for automated deployment)
-    - Send prospective employers and colleagues your site to show off your skills
+| v1 (Old)                              | v2 (New)                                  |
+|---------------------------------------|-------------------------------------------|
+| 7 script tags, global scope           | ES modules with imports/exports           |
+| `window.ui` / `window.onReset` bridge | EventBus pub/sub                          |
+| p5 global mode                        | p5 instance mode inside React             |
+| Babel CDN runtime JSX transform       | Vite + @vitejs/plugin-react               |
+| .txt files loaded at runtime          | `projects.js` static data module          |
+| 30+ naked global variables            | `Game` class owns all state               |
+| `Matter.World` (deprecated)           | `Matter.Composite` throughout             |
+| `img.mask()` (destructive in p5 v1)   | Canvas clipping (`drawingContext.clip()`) |
 
-## Project Plan
+## Adding a New Project
 
-#### Requirements
+1. Add your image to `public/assets/images/{id}.jpg`
+2. Add an entry to `src/data/projects.js`
+3. That's it — the game picks it up automatically
 
-    - Accepts 1 or more images to display as thumbnails/balls
-    - Scales responsively based upon screen size and the number of projects
-    - Shows direction and power arrow when user hovers over thumbnail
-    - Allows for user to "launch" the thumbnail by clicking on it
-    - Releasing the mouse sends the thumbnail in the applicable direction
-    - A "goal" is created by the menu
-    - A successful attempt will result in the applicable thumbnail launching it's info page
-    - The thumbnail will only load the page if it passes through the goal posts
-    - An invisible barrier will surround the menu/goal in order to only allow access through the goalposts
-    - Each thumbnail will have an information page
-    - Categories will be dynamically derived from the project text files
-    - Each category for the menu will be clickable
-    - The names of the subcategories should be ordered in descending length
-    - The playfield should always fill the screen
-    - There should be a title
-    - There should be an about footer, with links to contact
-    - Info pages should contain images, descriptions, and/or links
-    - There should be a boundary outside the playfield to deflect the ball back
-    - The thumbnail resets to it's position if it remains offscreen
+## Deploying
 
-##### Collision Rules
-    - All balls will collide with the boundary.
-    - All balls will collide with other balls
-    - All balls will collide with the goal posts
-    - All balls will collide with the invisible boundaries
-    - Balls will only collide with the menu category that matches their own category
+```bash
+npm run build
+```
 
-###### In progress notes
-    X Add text descriptions of images
-    X Add categories to array
-    X Add menu item for each category
-    X Add invisible rectangle for each menu item
-    X Add in collision filtering so ball bounces on applicable menu item when made
-    X Add invisible side bars to prevent reaching menu other than through goal
-    X Refactor HTML elements to be added when they are displayed, rather than having multiple elements hidden
-    X Add in close button
-    X Disable launching when detail page is open
-    X Add in reset button
-    X When detail page is closed, reset all balls
-    X Add doubleclick to allow for opening of item
-    X Add configuration object
-    X Refactor Reset logic
-    X Test side wall permeability
-    X Add a mimic'd version of the website as the first ball
-    X Add title
-    X Add footer with contact links
-    X Add invisible box around contact link to have balls bounce off
-    X Add thin border to balls, only have thick border for 'Portfolio Website' ball
-    X Need to fix arrow rotation
-    X Implement round png images for balls to remove thick border effect
-    X Fix detail page image to be original and square
-    X Improve title responsiveness
-    X Rework screen size function to resize everything
-    X Make sure refresh button is centered
-    X Styling with CSS
-    X Implement detail page opening
-    X Remove old masks when resizing
-    X Improve "launch" sensitivity based upon screen size
-    X Resize contact us div to be 2/3rds of screen
-    X Add Josh tile with headshot and about me blurb
-    X Improve descriptions to include: role/contribution, technology used (languages, hardward, aka tech stack)
-    X Refactor detail page sizing and position logic
-    X Reset image on detail page when screen resized, or if not Close detail page
-    X Lower restitution on menu bars, make less bouncy
-    X Make detail page title it's own h1/2 element
-    X Add double click ability to menu, display applicable subset of balls
-    X Prompt that double clicking is okay
-    X Fix iphone support for double click, add in timestamp to mouse released
-    _ Add loading screen that is actually button that says start
-    X Create new site named: dadatadad.com, joshalytics.com, numbersaurusrex.com, joshuapaulmerritt.com, modernmetricmonk.com, dataproblemsolving.com
+Upload the `dist/` folder to your hosting provider. For cPanel + GitHub auto-deploy, point the deploy path to `dist/`.
 
-Secondary tasks
-    _ Reorg codebase and complete documentation
-    X Test slanted net
-    _ Add some visual of the stats for number of shots and number made, % of projects opened
-    _ Build display page to appear like the imageball is simply expanded to allow for full view of the page
-    _ Add some special effect when a ball is made
-    X Troubleshoot simultaneous collision issues
-    
+## Tech Stack
+
+- **Vite** — fast dev server + optimized builds
+- **React 18** — UI overlay (modal, buttons)
+- **p5.js** — canvas rendering (instance mode)
+- **matter.js** — 2D physics engine
+- **Syne + DM Sans + JetBrains Mono** — typography
