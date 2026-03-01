@@ -31,7 +31,7 @@ const config = {
     restitution: 0.66,
   },
   goal: {
-    restitution: 0.99,
+    restitution: 0.3,
   },
   boundary: {
     restitution: 0.5,

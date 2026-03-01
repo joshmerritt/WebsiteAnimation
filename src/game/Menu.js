@@ -20,7 +20,7 @@ export default class Menu {
       position.x, position.y, this.width, this.height,
       {
         isStatic: true,
-        restitution: 1,
+        restitution: 0.3,
         collisionFilter: {
           group:    index + 1,
           category: Math.pow(2, index),
