@@ -167,7 +167,7 @@ export default class Ball {
     }
   }
 
-  hover(iconSize, totalShots) {
+  hover(iconSize, showHint) {
     const p = this.p;
     p.angleMode(p.DEGREES);
 
@@ -183,7 +183,7 @@ export default class Ball {
     const pC = { x: le.x - p.cos(angle) * arrowLen,     y: le.y + p.sin(angle) * arrowLen };
 
     p.push();
-    if (totalShots < 3) {
+    if (showHint) {
       p.textAlign(p.CENTER);
       p.fill(config.colors.main);
       p.textSize(iconSize / 9);

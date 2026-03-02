@@ -69,7 +69,7 @@ export default function DetailModal({ detail, onClose }) {
         onClick={blockCanvas}
         onPointerDown={blockCanvas}
       >
-        {/* FIX 4: Close button — absolute positioned in upper right corner */}
+        {/* Sleek close icon — no button chrome */}
         <button
           className="modal-close"
           onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -77,7 +77,10 @@ export default function DetailModal({ detail, onClose }) {
           onTouchStart={handleButtonClick}
           aria-label="Close"
         >
-          ✕
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <line x1="3" y1="3" x2="13" y2="13" />
+            <line x1="13" y1="3" x2="3" y2="13" />
+          </svg>
         </button>
 
         {detail.imageSrc && (
