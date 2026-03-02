@@ -581,19 +581,12 @@ export default class Game {
     const ball = this.balls[0];
     if (!ball) return;
 
-    // Demo launch: 60° angle (more vertical), reduced power
-    // Power reduced 33% from previous iteration
+    // Demo launch: 60° angle (more vertical)
     if (!this._demoTarget) {
-      // 60° from horizontal: cos(60°) = 0.5, sin(60°) = √3/2
       const xDir = 0.5;
       const yDir = Math.sqrt(3) / 2;  // 0.866
 
-      let demoPower;
-      if (this.vp.portrait || this.vp.mobile) {
-        demoPower = this.vp.power * 6.8 * 0.67;
-      } else {
-        demoPower = this.vp.power * 1.12 * 0.67;
-      }
+      const demoPower = this._computeDemoPower(ball);
 
       this._demoTarget = {
         xDir,
@@ -613,6 +606,32 @@ export default class Game {
       this._launchBall(ball);
       this.showDemo = false;
       this._demoTarget = null;
+    }
+  }
+
+  /**
+   * Compute demo launch power based on the pixel distance between
+   * the ball and the goal dots. Uses vp.power as the physics-tuned
+   * base, modulated by (dist / iconSize) so the demo adapts to any
+   * screen size and layout.
+   *
+   * Targets: desktop ≈ 70% of v1, mobile/portrait ≈ 200% of v1
+   */
+  _computeDemoPower(ball) {
+    const dx = ball.x - this.vp.dotCenterX;
+    const dy = ball.y - this.vp.gridStartY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const factor = dist / this.vp.iconSize;
+
+    if (this.vp.portrait) {
+      // Portrait (phone + tablet): 2× old power
+      return this.vp.power * factor * 5.69;
+    } else if (this.vp.mobile) {
+      // Mobile landscape: 2× old power (different base power formula)
+      return this.vp.power * factor * 3.36;
+    } else {
+      // Desktop landscape: 70% of old power
+      return this.vp.power * factor * 0.15;
     }
   }
 
@@ -803,7 +822,9 @@ export default class Game {
     p.pop();
   }
 
-  // ── FIX 9 & 10: Better capture for portfolio ball ──
+  // ── Portrait + Desktop capture for "thisWebsite" ball ──
+  // DPR-aware: p5's canvas backing store is at pixelDensity() resolution,
+  // so all source coordinates must be in physical pixels (CSS × density).
   _captureWebsite() {
     this._captureCounter = (this._captureCounter || 0) + 1;
     if (this._captureCounter % 30 !== 1) return;
@@ -811,41 +832,52 @@ export default class Game {
     const thisSiteBall = this.balls.find((b) => b.project.id === 'thisWebsite');
     if (!thisSiteBall) return;
 
-    const size = Math.round(thisSiteBall.r * 2);
-    if (size <= 0) return;
+    const dpr = this.p.pixelDensity ? this.p.pixelDensity() : (window.devicePixelRatio || 1);
+    // Capture at DPR resolution for sharp rendering
+    const cssSize = Math.round(thisSiteBall.r * 2);
+    const physSize = Math.round(cssSize * dpr);
+    if (physSize <= 0) return;
 
-    if (!this._captureCanvas || this._captureCanvas.width !== size) {
+    if (!this._captureCanvas || this._captureCanvas.width !== physSize) {
       this._captureCanvas = document.createElement('canvas');
-      this._captureCanvas.width = size;
-      this._captureCanvas.height = size;
+      this._captureCanvas.width = physSize;
+      this._captureCanvas.height = physSize;
       this._captureCtx = this._captureCanvas.getContext('2d');
     }
 
     const canvas = this.p.drawingContext.canvas;
+
     if (this.vp.portrait) {
-      // FIX 9: Center the capture vertically on the content area
-      // instead of capturing from the top-left corner
-      const srcSize = this.vp.width;
-      const srcY = Math.max(0, (this.vp.height - srcSize) / 2);
-      this._captureCtx.drawImage(canvas, 0, srcY, srcSize, srcSize, 0, 0, size, size);
+      // Zoom into the goal area + first row of balls
+      // CSS coordinates of the content region we want to capture:
+      const captureTop = this.vp.titleZoneBottom;
+      const captureLeft = 0;
+      const captureSize = this.vp.width * 0.75; // 1.33× zoom
+
+      // Convert to physical pixel coordinates
+      const srcX = Math.round(captureLeft * dpr);
+      const srcY = Math.round(captureTop * dpr);
+      const srcSize = Math.round(captureSize * dpr);
+      this._captureCtx.drawImage(canvas, srcX, srcY, srcSize, srcSize, 0, 0, physSize, physSize);
     } else {
-      // FIX 10: Use height as source size since height < width on landscape.
-      // Previously used width, which exceeded canvas height → transparent bottom.
-      const srcSize = Math.min(this.vp.width, this.vp.height);
-      // Center horizontally to show menu + balls
-      const srcX = Math.max(0, (this.vp.width - srcSize) / 4); // bias left to show menu
-      this._captureCtx.drawImage(canvas, srcX, 0, srcSize, srcSize, 0, 0, size, size);
+      // Desktop/landscape: capture centered, using height as constraint
+      const cssSrcSize = Math.min(this.vp.width, this.vp.height);
+      const cssSrcX = Math.max(0, (this.vp.width - cssSrcSize) / 4); // bias left for menu
+
+      const srcX = Math.round(cssSrcX * dpr);
+      const srcSize = Math.round(cssSrcSize * dpr);
+      this._captureCtx.drawImage(canvas, srcX, 0, srcSize, srcSize, 0, 0, physSize, physSize);
     }
 
-    if (!this._capturePImg || this._capturePImg.width !== size) {
-      this._capturePImg = this.p.createImage(size, size);
+    if (!this._capturePImg || this._capturePImg.width !== physSize) {
+      this._capturePImg = this.p.createImage(physSize, physSize);
     }
     this._capturePImg.drawingContext.drawImage(this._captureCanvas, 0, 0);
     thisSiteBall.ballImage = this._capturePImg;
     thisSiteBall.fullImage = this._capturePImg;
     thisSiteBall._cropX = 0;
     thisSiteBall._cropY = 0;
-    thisSiteBall._cropSize = size;
+    thisSiteBall._cropSize = physSize;
     // Invalidate pre-rendered circle so it re-renders from new capture
     thisSiteBall._circleCanvas = null;
   }
@@ -1097,8 +1129,9 @@ export default class Game {
       let power = Math.sqrt(iconSize) * (area / 350000);
 
       // Title and menu font sizes
+      // Menu reduced ~40% from previous (titleSize/1.35 → titleSize/2.25)
       const titleSize = Math.min(iconSize / 3, h / 16, w / 36);
-      const menuFontSize = titleSize / 1.35;
+      const menuFontSize = titleSize / 2.25;
 
       this.ballsPerPage = gridCols * gridRows;
       this.vp = {

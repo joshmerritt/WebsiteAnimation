@@ -4,6 +4,9 @@
  * Image quality: Uses native canvas drawImage with source-rectangle
  * cropping from the full-resolution loaded image, bypassing p5's
  * internal scaling for much sharper rendering on desktop/retina.
+ *
+ * DPR-aware: The offscreen circle canvas is rendered at devicePixelRatio
+ * resolution, then drawn at CSS-pixel size so it stays sharp on retina.
  */
 
 import Matter from 'matter-js';
@@ -37,7 +40,7 @@ export default class Ball {
     const srcH = img.height;
     const minDim = Math.min(srcW, srcH);
     this._cropX = Math.floor((srcW - minDim) / 2);
-    this._cropY = Math.floor((srcH - minDim) / 3);
+    this._cropY = Math.floor((srcH - minDim) / 2);
     this._cropSize = minDim;
 
     // Fallback p5 cropped image (used by _captureWebsite override)
@@ -95,24 +98,26 @@ export default class Ball {
   show(viewport) {
     if (this.launchCount) this._checkReset(viewport);
 
-    const pos = this.inOriginalPosition ?
-      this.originalPos : this.body.position;
+    const pos = this.inOriginalPosition ? this.originalPos : this.body.position;
     const angle = this.body.angle;
     const p = this.p;
     const ctx = p.drawingContext;
     const diameter = this.r * 2;
 
-    // Pre-render circular image once (or when size changes)
-    if (!this._circleCanvas || this._circleSize !== diameter) {
-      this._renderCircleImage(diameter);
+    // Pre-render circular image once (or when size/DPR changes)
+    const dpr = window.devicePixelRatio || 1;
+    if (!this._circleCanvas || this._circleSize !== diameter || this._circleDpr !== dpr) {
+      this._renderCircleImage(diameter, dpr);
     }
 
     p.push();
     p.translate(pos.x, pos.y);
     p.rotate(angle);
 
-    // Draw pre-rendered circular image — no clip path needed
-    ctx.drawImage(this._circleCanvas, -this.r, -this.r);
+    // Draw pre-rendered circular image at CSS pixel size
+    // The offscreen canvas is dpr× larger, so specifying explicit
+    // destination width/height ensures it maps to sharp physical pixels.
+    ctx.drawImage(this._circleCanvas, -this.r, -this.r, diameter, diameter);
 
     // Border ring
     p.noFill();
@@ -127,20 +132,28 @@ export default class Ball {
     this.y = pos.y;
   }
 
-  /** Pre-render the ball image clipped to a circle on an offscreen canvas. */
-  _renderCircleImage(diameter) {
-    const size = Math.round(diameter);
+  /**
+   * Pre-render the ball image clipped to a circle on an offscreen canvas.
+   * Canvas is rendered at devicePixelRatio resolution for retina sharpness.
+   */
+  _renderCircleImage(diameter, dpr) {
+    const cssSize = Math.round(diameter);
+    const physSize = Math.round(diameter * dpr);
     this._circleSize = diameter;
+    this._circleDpr = dpr;
     this._circleCanvas = document.createElement('canvas');
-    this._circleCanvas.width = size;
-    this._circleCanvas.height = size;
+    this._circleCanvas.width = physSize;
+    this._circleCanvas.height = physSize;
     const octx = this._circleCanvas.getContext('2d');
+
+    // Scale so we draw in CSS-pixel coordinates, but at physical resolution
+    octx.scale(dpr, dpr);
     octx.imageSmoothingEnabled = true;
     octx.imageSmoothingQuality = 'high';
 
-    // Clip to circle
+    // Clip to circle (CSS-pixel coordinates)
     octx.beginPath();
-    octx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    octx.arc(cssSize / 2, cssSize / 2, cssSize / 2, 0, Math.PI * 2);
     octx.clip();
 
     // Draw from full-res source with square crop
@@ -149,7 +162,7 @@ export default class Ball {
       octx.drawImage(
         srcCanvas,
         this._cropX, this._cropY, this._cropSize, this._cropSize,
-        0, 0, size, size,
+        0, 0, cssSize, cssSize,
       );
     }
   }

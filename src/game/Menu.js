@@ -3,6 +3,9 @@
  *
  * Body height = iconSize/5 so balls bounce closer to the text.
  * `highlighted` flag set by Game when a ball of this category is being aimed.
+ *
+ * Font auto-shrinks if the label text would exceed `goalWidth` (dotSpan),
+ * ensuring category names never extend past the two goal dots above.
  */
 
 import Matter from 'matter-js';
@@ -46,8 +49,16 @@ export default class Menu {
     p.noStroke();
     p.textAlign(p.CENTER);
     p.textFont('Syne');
-    p.textSize(this.fontSize);
     p.textStyle(p.BOLD);
+
+    // Start at requested fontSize, then shrink if label exceeds dotSpan
+    let drawSize = this.fontSize;
+    p.textSize(drawSize);
+    let tw = p.textWidth(this.category);
+    if (tw > this.width) {
+      drawSize = drawSize * (this.width / tw);
+      p.textSize(drawSize);
+    }
 
     if (this.selected) {
       p.fill(config.colors.main);
