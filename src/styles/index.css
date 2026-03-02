@@ -363,6 +363,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.35em;
+  touch-action: auto;
+  -webkit-touch-callout: default;
 }
 
 .hud-btn:hover {
@@ -544,7 +546,33 @@ a { color: var(--main); text-decoration: none; }
 
 @media (pointer: fine) {
   .hud {
-    padding-bottom: clamp(24px, 4vmin, 48px);
+    bottom: 0;
+    top: auto;
+    padding-bottom: clamp(32px, 6vmin, 64px);
+  }
+
+  .hud-contact {
+    font-size: clamp(0.82rem, 1.8vmin, 1.05rem);
+    padding: 0.7em 1.8em;
+    border: 1px solid rgba(89, 133, 177, 0.45);
+    background: rgba(89, 133, 177, 0.15);
+    box-shadow: 0 0 20px rgba(89, 133, 177, 0.1);
+  }
+
+  .hud-contact:hover {
+    background: rgba(89, 133, 177, 0.3);
+    border-color: rgba(89, 133, 177, 0.7);
+    box-shadow: 0 0 28px rgba(89, 133, 177, 0.25);
+    transform: translateY(-2px);
+  }
+
+  .hud-contact .hud-icon {
+    font-size: 1.3em;
+  }
+
+  .hud-contact .hud-label {
+    font-size: 1em;
+    letter-spacing: 0.08em;
   }
 }
 
@@ -559,6 +587,8 @@ a { color: var(--main); text-decoration: none; }
     padding: 0 16px env(safe-area-inset-bottom, 12px);
     background: linear-gradient(to top, rgba(10, 14, 18, 0.85) 0%, transparent 100%);
     padding-top: 18px;
+    z-index: 25;
+    pointer-events: auto;
   }
 
   /* Contact Me: centered, plain link style */
@@ -571,6 +601,13 @@ a { color: var(--main); text-decoration: none; }
     font-size: clamp(0.8rem, 3.5vw, 1rem);
     padding: 0.8em 1.5em;
     color: var(--secondary);
+    pointer-events: auto;
+    touch-action: auto;
+    -webkit-touch-callout: default;
+    -webkit-user-select: auto;
+    user-select: auto;
+    position: relative;
+    z-index: 30;
   }
   .hud-contact:hover {
     background: none;
@@ -583,6 +620,8 @@ a { color: var(--main); text-decoration: none; }
   .hud-btn {
     min-height: 44px;
     min-width: 44px;
+    pointer-events: auto;
+    touch-action: auto;
   }
 
   .stats-overlay {

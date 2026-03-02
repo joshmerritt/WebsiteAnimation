@@ -95,7 +95,8 @@ export default class Ball {
   show(viewport) {
     if (this.launchCount) this._checkReset(viewport);
 
-    const pos = this.inOriginalPosition ? this.originalPos : this.body.position;
+    const pos = this.inOriginalPosition ?
+      this.originalPos : this.body.position;
     const angle = this.body.angle;
     const p = this.p;
     const ctx = p.drawingContext;
@@ -127,9 +128,9 @@ export default class Ball {
     }
     ctx.restore();
 
-    // Border ring
+    // Border ring — decreased contrast: darker grey instead of bright white
     p.noFill();
-    p.stroke(config.colors.main);
+    p.stroke('rgba(199, 214, 213, 0.3)');
     p.strokeWeight(this.r / 25);
     p.ellipseMode(p.CENTER);
     p.circle(0, 0, diameter);
@@ -186,7 +187,8 @@ export default class Ball {
     const ls = { x: this.x - this.r * p.sin(45), y: this.y - this.r * p.cos(45) };
     const cx = ls.x - this.xPower * 2;
     const cy = ls.y - this.yPower * 2;
-    const arrowLen = this.r / 4;
+    // Match hover arrow proportions: iconSize/22 = this.r/11
+    const arrowLen = this.r / 11;
     const angle = p.atan2(this.xPower, this.yPower);
     const pA = { x: cx - p.sin(angle) * arrowLen * 2, y: cy - p.cos(angle) * arrowLen * 2 };
     const pB = { x: cx + p.cos(angle) * arrowLen,     y: cy - p.sin(angle) * arrowLen };
@@ -194,7 +196,8 @@ export default class Ball {
 
     p.push();
     p.stroke(config.colors.accent);
-    p.strokeWeight(5);
+    // Match hover strokeWeight: iconSize/20 = this.r/10
+    p.strokeWeight(this.r / 10);
     p.noFill();
     p.ellipseMode(p.CENTER);
     p.circle(this.x, this.y, this.r * 2);
@@ -212,7 +215,8 @@ export default class Ball {
     const ls = { x: this.x - this.r * p.sin(45), y: this.y - this.r * p.cos(45) };
     const cx = ls.x - this.xPower * 2;
     const cy = ls.y - this.yPower * 2;
-    const arrowLen = this.r / 4;
+    // Match hover arrow proportions
+    const arrowLen = this.r / 11;
     const angle = p.atan2(this.xPower, this.yPower);
     const pA = { x: cx - p.sin(angle) * arrowLen * 2, y: cy - p.cos(angle) * arrowLen * 2 };
     const pB = { x: cx + p.cos(angle) * arrowLen,     y: cy - p.sin(angle) * arrowLen };
@@ -220,7 +224,8 @@ export default class Ball {
 
     p.push();
     p.stroke(config.colors.accent);
-    p.strokeWeight(5);
+    // Match hover strokeWeight
+    p.strokeWeight(this.r / 10);
     p.noFill();
     p.ellipseMode(p.CENTER);
     p.circle(this.x, this.y, this.r * 2);

@@ -292,7 +292,7 @@ export default class Game {
     const { iconSize, dotCenterX, dotSpan, gridStartY } = this.vp;
     const netHeight = 0.4 * this.categories.length * iconSize;
     const dotRadius = iconSize / 15;
-    const dotY = gridStartY + dotRadius * 1.5;
+    const dotY = gridStartY - dotRadius * 1.5;
     const dotLeftX = dotCenterX - dotSpan / 2;
 
     for (let i = 0; i < 2; i++) {
@@ -466,29 +466,41 @@ export default class Game {
     const netW    = rightX - leftX;
     const cellSize = netW / 4;          // 4 diamonds across
 
+    // Trapezoid: top = dot span width, bottom = wider to follow text contour
+    const flare = iconSize * 0.5;
+    const topLeftX  = leftX;
+    const topRightX = rightX;
+    const botLeftX  = leftX - flare;
+    const botRightX = rightX + flare;
+
     ctx.save();
     ctx.strokeStyle = 'rgba(89, 133, 177, 0.055)';
     ctx.lineWidth = 0.6;
 
-    // Clip to the net area so lines don't bleed
+    // Clip to trapezoid shape (like a real basketball net)
     ctx.beginPath();
-    ctx.rect(leftX - 1, topY, netW + 2, botY - topY);
+    ctx.moveTo(topLeftX - 1, topY);
+    ctx.lineTo(topRightX + 1, topY);
+    ctx.lineTo(botRightX + 1, botY);
+    ctx.lineTo(botLeftX - 1, botY);
+    ctx.closePath();
     ctx.clip();
 
     // Diagonal lines going ↘  (top-left to bottom-right)
     const span = botY - topY;
-    for (let offset = -span; offset < netW + span; offset += cellSize) {
+    const extendedW = botRightX - botLeftX;
+    for (let offset = -span - flare; offset < extendedW + span + flare; offset += cellSize) {
       ctx.beginPath();
-      ctx.moveTo(leftX + offset, topY);
-      ctx.lineTo(leftX + offset + span, botY);
+      ctx.moveTo(botLeftX + offset, topY);
+      ctx.lineTo(botLeftX + offset + span, botY);
       ctx.stroke();
     }
 
     // Diagonal lines going ↙  (top-right to bottom-left)
-    for (let offset = -span; offset < netW + span; offset += cellSize) {
+    for (let offset = -span - flare; offset < extendedW + span + flare; offset += cellSize) {
       ctx.beginPath();
-      ctx.moveTo(leftX + offset, topY);
-      ctx.lineTo(leftX + offset - span, botY);
+      ctx.moveTo(botLeftX + offset, topY);
+      ctx.lineTo(botLeftX + offset - span, botY);
       ctx.stroke();
     }
 
@@ -532,9 +544,9 @@ export default class Game {
 
       let demoPower;
       if (this.vp.portrait || this.vp.mobile) {
-        demoPower = this.vp.power * 20;     // was 10, doubled
+        demoPower = this.vp.power * 10;     // halved from 20
       } else {
-        demoPower = this.vp.power * 1.40;   // was 0.70, doubled
+        demoPower = this.vp.power * 0.70;   // halved from 1.40
       }
 
       this._demoTarget = {
@@ -711,12 +723,13 @@ export default class Game {
     p.noStroke();
 
     const divW = dotSpan * 0.5;
+    const dividerY = lastMenuY + lineH * 0.2;
     p.stroke('rgba(89, 133, 177, 0.15)');
     p.strokeWeight(1);
-    p.line(centerX - divW / 2, lastMenuY, centerX + divW / 2, lastMenuY);
+    p.line(centerX - divW / 2, dividerY, centerX + divW / 2, dividerY);
     p.noStroke();
 
-    const startY = lastMenuY + lineH;
+    const startY = lastMenuY + lineH * 1.2;
 
     // Stats are subtle — low opacity
     p.textSize(fontSize * 0.7);
@@ -952,7 +965,7 @@ export default class Game {
       const idealCenter = (minFirstBallCenter + w * 0.55) / 2;
       gridStartX = Math.max(minFirstBallCenter, idealCenter - gridW / 2);
 
-      gridStartY = titleZoneBottom + iconSize * 0.3;
+      gridStartY = titleZoneBottom + iconSize * 0.7;
 
       // Ensure lowest ball has drag room
       const lowestBallBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
