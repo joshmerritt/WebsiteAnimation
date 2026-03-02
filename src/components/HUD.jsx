@@ -3,7 +3,7 @@
  *
  * Uses explicit onClick + onTouchEnd handlers to ensure mailto works
  * on mobile, where p5's touchStarted returning false calls preventDefault()
- * and can interfere with native <a> tag behavior.
+ * and swallows native <a> tag touch events on the canvas layer.
  */
 
 import { useRef } from 'react';
@@ -13,7 +13,6 @@ export default function HUD() {
   const handledRef = useRef(false);
 
   const openMailto = () => {
-    // Prevent double-fire from both touchEnd and click
     if (handledRef.current) return;
     handledRef.current = true;
     setTimeout(() => { handledRef.current = false; }, 400);

@@ -566,14 +566,8 @@ a { color: var(--main); text-decoration: none; }
     transform: translateY(-2px);
   }
 
-  .hud-contact .hud-icon {
-    font-size: 1.3em;
-  }
-
-  .hud-contact .hud-label {
-    font-size: 1em;
-    letter-spacing: 0.08em;
-  }
+  .hud-contact .hud-icon { font-size: 1.3em; }
+  .hud-contact .hud-label { font-size: 1em; letter-spacing: 0.08em; }
 }
 
 

@@ -3,6 +3,7 @@
  *
  * Dots are subtle — thin stroke, reduced opacity to keep visual
  * hierarchy focused on balls and title.
+ * Body position = visual position (no offset).
  */
 
 import Matter from 'matter-js';
@@ -24,10 +25,10 @@ export default class Goal {
   show() {
     const p = this.p;
     const drawX = this.body.position.x;
-    const drawY = this.body.position.y - this.radius * 1.5;
+    const drawY = this.body.position.y;
 
     p.push();
-    // 20% thicker than 0.25 → 0.30
+    // 20% thicker: 0.25 → 0.30
     p.stroke('rgba(89, 133, 177, 0.55)');
     p.strokeWeight(this.radius * 0.30);
     p.noFill();
