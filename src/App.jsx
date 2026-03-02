@@ -5,8 +5,7 @@
  *   1. LoadingScreen (fades out when p5 finishes preloading)
  *   2. GameCanvas (p5.js physics + rendering)
  *   3. React overlay (modal + HUD + stats)
- *
- * Listens to EventBus for game ↔ UI communication.
+ *   4. GA4 event tracking (wired to EventBus)
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -15,6 +14,7 @@ import DetailModal from './components/DetailModal.jsx';
 import HUD from './components/HUD.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import bus from './game/EventBus.js';
+import { initGA4Tracking } from './game/ga4.js';
 
 export default function App() {
   const [detail, setDetail] = useState(null);
@@ -29,6 +29,12 @@ export default function App() {
       setDetail(data);
     });
     return unsub;
+  }, []);
+
+  // Initialize GA4 tracking on mount
+  useEffect(() => {
+    const cleanup = initGA4Tracking();
+    return cleanup;
   }, []);
 
   // ESC to close

@@ -1,8 +1,11 @@
 /**
  * AnalyticsDashboard.jsx — Main dashboard layout
  *
- * Composed from smaller components. Uses mock data (swap for real
- * analytics API calls in production).
+ * Reflects the actual DaDataDad.com physics portfolio with 8 project
+ * balls across 4 categories (Me, Technology, Business, Apps).
+ *
+ * Uses deterministic mock data. Swap generateTimeSeriesData() with
+ * real GA4 Data API calls in production.
  */
 
 import { useState, useMemo } from 'react';
@@ -24,19 +27,21 @@ export default function AnalyticsDashboard() {
 
   const fullData = useMemo(() => generateTimeSeriesData(90), []);
 
-  // Slice data based on selected time range
   const rangeDays = TIME_RANGES.find((r) => r.key === timeRange)?.days ?? 90;
   const timeSeriesData = fullData.slice(-rangeDays);
 
   // Compute KPIs
-  const totalVisitors  = timeSeriesData.reduce((s, d) => s + d.visitors, 0);
-  const totalPageviews = timeSeriesData.reduce((s, d) => s + d.pageviews, 0);
-  const avgBounce      = Math.round(timeSeriesData.reduce((s, d) => s + d.bounceRate, 0) / timeSeriesData.length);
-  const avgDuration    = Math.round(timeSeriesData.reduce((s, d) => s + d.avgDuration, 0) / timeSeriesData.length);
+  const totalVisitors      = timeSeriesData.reduce((s, d) => s + d.visitors, 0);
+  const totalPageviews     = timeSeriesData.reduce((s, d) => s + d.pageviews, 0);
+  const avgBounce          = Math.round(timeSeriesData.reduce((s, d) => s + d.bounceRate, 0) / timeSeriesData.length);
+  const avgDuration        = Math.round(timeSeriesData.reduce((s, d) => s + d.avgDuration, 0) / timeSeriesData.length);
+  const totalInteractions  = timeSeriesData.reduce((s, d) => s + d.ballInteractions, 0);
+  const interactionRate    = Math.round((totalInteractions / totalVisitors) * 100);
 
   const metrics = [
-    { key: 'visitors',  label: 'Visitors', color: METRIC_COLORS.visitors },
-    { key: 'pageviews', label: 'Views',    color: METRIC_COLORS.pageviews },
+    { key: 'visitors',         label: 'Visitors',     color: METRIC_COLORS.visitors },
+    { key: 'pageviews',        label: 'Views',        color: METRIC_COLORS.pageviews },
+    { key: 'ballInteractions', label: 'Interactions', color: METRIC_COLORS.ballInteractions },
   ];
 
   return (
@@ -75,27 +80,33 @@ export default function AnalyticsDashboard() {
       <div className="kpi-row">
         <StatCard
           label="Unique Visitors" value={totalVisitors}
-          trend={18} delay={100}
+          trend={15} delay={100}
           sparkData={timeSeriesData.slice(-30).map((d) => d.visitors)}
           color={METRIC_COLORS.visitors}
         />
         <StatCard
           label="Pageviews" value={totalPageviews}
-          trend={24} delay={200}
+          trend={22} delay={200}
           sparkData={timeSeriesData.slice(-30).map((d) => d.pageviews)}
           color={METRIC_COLORS.pageviews}
         />
         <StatCard
           label="Avg. Duration" value={avgDuration} suffix="s"
-          trend={12} delay={300}
+          trend={8} delay={300}
           sparkData={timeSeriesData.slice(-30).map((d) => d.avgDuration)}
           color={METRIC_COLORS.avgDuration}
         />
         <StatCard
           label="Bounce Rate" value={avgBounce} suffix="%"
-          trend={-8} delay={400}
+          trend={-5} delay={400}
           sparkData={timeSeriesData.slice(-30).map((d) => d.bounceRate)}
           color={METRIC_COLORS.bounceRate}
+        />
+        <StatCard
+          label="Ball Interaction Rate" value={interactionRate} suffix="%"
+          trend={12} delay={500}
+          sparkData={timeSeriesData.slice(-30).map((d) => Math.round((d.ballInteractions / d.visitors) * 100))}
+          color={METRIC_COLORS.ballInteractions}
         />
       </div>
 
@@ -169,7 +180,7 @@ export default function AnalyticsDashboard() {
                 <span className="page-views">{pg.views.toLocaleString()}</span>
                 <span className="page-time">{pg.avgTime}</span>
                 <span className={`page-trend ${pg.trend >= 0 ? 'up' : 'down'}`}>
-                  {pg.trend >= 0 ? '+' : ''}{pg.trend}%
+                  {pg.trend >= 0 ? '↑' : '↓'} {Math.abs(pg.trend)}%
                 </span>
               </div>
             </div>
@@ -177,14 +188,17 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
-      {/* ── Ball Engagement ── */}
+      {/* ── Ball Engagement Funnel ── */}
       <BallEngagement />
 
       {/* ── Footer ── */}
-      <footer className="dash-footer">
-        <a href="/">← Back to Portfolio</a>
-        <span>Built by Da Data Dad &middot; Powered by curiosity and too much coffee</span>
-      </footer>
+      <div className="dash-footer fade-in" style={{ animationDelay: '1000ms' }}>
+        <p>
+          Mock data shown above. Connect GA4 property <code>G-JXCE49FJ7J</code> via
+          the Data API to display real metrics.
+          See <code>src/game/ga4.js</code> for event tracking implementation.
+        </p>
+      </div>
     </div>
   );
 }
