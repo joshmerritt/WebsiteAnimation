@@ -3,7 +3,6 @@
  *
  * Dots are subtle — thin stroke, reduced opacity to keep visual
  * hierarchy focused on balls and title.
- * Dots rendered at 50% of physics radius for smaller visual footprint.
  */
 
 import Matter from 'matter-js';
@@ -27,15 +26,13 @@ export default class Goal {
     const drawX = this.body.position.x;
     const drawY = this.body.position.y - this.radius * 1.5;
 
-    // Visual radius is 50% of physics radius for smaller dots
-    const visualRadius = this.radius * 0.5;
-
     p.push();
+    // 20% thicker than 0.25 → 0.30
     p.stroke('rgba(89, 133, 177, 0.55)');
-    p.strokeWeight(visualRadius * 0.3);
+    p.strokeWeight(this.radius * 0.30);
     p.noFill();
     p.ellipseMode(p.CENTER);
-    p.circle(drawX, drawY, visualRadius * 2);
+    p.circle(drawX, drawY, this.radius * 2);
     p.pop();
   }
 

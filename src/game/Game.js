@@ -292,7 +292,7 @@ export default class Game {
     const { iconSize, dotCenterX, dotSpan, gridStartY } = this.vp;
     const netHeight = 0.4 * this.categories.length * iconSize;
     const dotRadius = iconSize / 15;
-    const dotY = gridStartY - dotRadius * 1.5;
+    const dotY = gridStartY;
     const dotLeftX = dotCenterX - dotSpan / 2;
 
     for (let i = 0; i < 2; i++) {
@@ -464,9 +464,9 @@ export default class Game {
     if (botY <= topY) return;
 
     const netW    = rightX - leftX;
-    const cellSize = netW / 4;          // 4 diamonds across
+    const cellSize = netW / 4;
 
-    // Trapezoid: top = dot span width, bottom = wider to follow text contour
+    // Trapezoid: top = dot span, bottom = wider to follow text contour
     const flare = iconSize * 0.5;
     const topLeftX  = leftX;
     const topRightX = rightX;
@@ -477,7 +477,7 @@ export default class Game {
     ctx.strokeStyle = 'rgba(89, 133, 177, 0.055)';
     ctx.lineWidth = 0.6;
 
-    // Clip to trapezoid shape (like a real basketball net)
+    // Clip to trapezoid (like a real basketball net)
     ctx.beginPath();
     ctx.moveTo(topLeftX - 1, topY);
     ctx.lineTo(topRightX + 1, topY);
@@ -486,7 +486,7 @@ export default class Game {
     ctx.closePath();
     ctx.clip();
 
-    // Diagonal lines going ↘  (top-left to bottom-right)
+    // Diagonal lines going ↘
     const span = botY - topY;
     const extendedW = botRightX - botLeftX;
     for (let offset = -span - flare; offset < extendedW + span + flare; offset += cellSize) {
@@ -496,7 +496,7 @@ export default class Game {
       ctx.stroke();
     }
 
-    // Diagonal lines going ↙  (top-right to bottom-left)
+    // Diagonal lines going ↙
     for (let offset = -span - flare; offset < extendedW + span + flare; offset += cellSize) {
       ctx.beginPath();
       ctx.moveTo(botLeftX + offset, topY);
@@ -544,7 +544,7 @@ export default class Game {
 
       let demoPower;
       if (this.vp.portrait || this.vp.mobile) {
-        demoPower = this.vp.power * 10;     // halved from 20
+        demoPower = this.vp.power * 20;     // was 10, doubled
       } else {
         demoPower = this.vp.power * 0.70;   // halved from 1.40
       }
@@ -690,10 +690,10 @@ export default class Game {
     if (this.totalShots > 2 && this.totalShots < 10 && !this.clickedToOpen && !this.detailOpen) {
       const p = this.p;
       const { gridStartY, spacing, gridRows, iconSize, portrait, width, height } = this.vp;
-      const gridBottom = gridStartY + (gridRows - 1) * spacing + iconSize * 0.6;
+      const gridBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
       const yPos = portrait
-        ? Math.min(gridBottom + iconSize * 0.4, height - iconSize * 1.5)
-        : gridBottom + iconSize * 0.4;
+        ? Math.min(gridBottom + iconSize * 0.5, height - iconSize * 1.5)
+        : gridBottom + iconSize * 0.5;
       p.push();
       p.textFont('Syne');
       p.textSize(iconSize / 6);
@@ -770,7 +770,8 @@ export default class Game {
       const srcH = srcW;
       this._captureCtx.drawImage(canvas, srcX, srcY, srcW, srcH, 0, 0, size, size);
     } else {
-      const srcSize = Math.min(this.vp.width, this.vp.height);
+      // Desktop: use full viewport width to capture menu + balls
+      const srcSize = this.vp.width;
       this._captureCtx.drawImage(canvas, 0, 0, srcSize, srcSize, 0, 0, size, size);
     }
 
@@ -965,7 +966,7 @@ export default class Game {
       const idealCenter = (minFirstBallCenter + w * 0.55) / 2;
       gridStartX = Math.max(minFirstBallCenter, idealCenter - gridW / 2);
 
-      gridStartY = titleZoneBottom + iconSize * 0.7;
+      gridStartY = titleZoneBottom + iconSize * 1.1;
 
       // Ensure lowest ball has drag room
       const lowestBallBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;

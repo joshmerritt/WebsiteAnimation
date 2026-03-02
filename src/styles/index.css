@@ -548,7 +548,7 @@ a { color: var(--main); text-decoration: none; }
   .hud {
     bottom: 0;
     top: auto;
-    padding-bottom: clamp(32px, 6vmin, 64px);
+    padding-bottom: clamp(40px, 8vmin, 80px);
   }
 
   .hud-contact {
