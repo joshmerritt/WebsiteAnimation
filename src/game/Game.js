@@ -147,7 +147,13 @@ export default class Game {
     // Wake from idle framerate immediately
     if (this._wasIdle) { p.frameRate(60); this._wasIdle = false; }
 
-    if (Date.now() - this._lastReleaseTime < 300) return false;
+    if (Date.now() - this._lastReleaseTime < 300) {
+      // Allow through if this is a potential double-tap on the same ball
+      const isDoubleTapCandidate = this._lastTappedBall &&
+        Date.now() - this._lastTapTime < config.doubleTapWindow &&
+        this._lastTappedBall.onBall(p.mouseX, p.mouseY);
+      if (!isDoubleTapCandidate) return false;
+    }
 
     if (this.totalPages > 1 && this._checkPageNavClick(p.mouseX, p.mouseY)) {
       return false;
@@ -177,9 +183,10 @@ export default class Game {
   }
 
   mouseDragged() {
-    const powerScale =
-      this.vp.portrait || this.vp.mobile
-        ? config.powerScaleMobile
+    const powerScale = this.vp.portrait
+      ? config.powerScaleMobile
+      : this.vp.mobile
+        ? config.powerScaleMobileLandscape
         : config.powerScaleDesktop;
 
     this.balls.forEach((ball) => {
@@ -544,9 +551,11 @@ export default class Game {
       if (p.mouseIsPressed) {
         if (ball.clicked) {
           ball.aim(
-            this.vp.portrait || this.vp.mobile
+            this.vp.portrait
               ? config.powerScaleMobile
-              : config.powerScaleDesktop,
+              : this.vp.mobile
+                ? config.powerScaleMobileLandscape
+                : config.powerScaleDesktop,
           );
           this._aimingCategory = ball.category;
         }
@@ -754,14 +763,16 @@ export default class Game {
     p.textFont('JetBrains Mono');
     p.noStroke();
 
+    const statsBlockH = lineH * 3.2;
+    const availSpace = this.vp.height - lastMenuY;
+    const startY = lastMenuY + (availSpace - statsBlockH) / 2;
+
     const divW = dotSpan * 0.5;
-    const dividerY = lastMenuY + lineH * 1.0;
+    const dividerY = startY - lineH * 0.6;
     p.stroke('rgba(89, 133, 177, 0.15)');
     p.strokeWeight(1);
     p.line(centerX - divW / 2, dividerY, centerX + divW / 2, dividerY);
     p.noStroke();
-
-    const startY = lastMenuY + lineH * 2.2;
 
     // Stats are subtle — low opacity
     p.textSize(fontSize * 0.7);
@@ -793,6 +804,10 @@ export default class Game {
       this._captureCanvas.height = size;
       this._captureCtx = this._captureCanvas.getContext('2d');
     }
+
+    // Fill with site bg color to prevent transparent pixels at edges
+    this._captureCtx.fillStyle = config.colors.bg;
+    this._captureCtx.fillRect(0, 0, size, size);
 
     const canvas = this.p.drawingContext.canvas;
     if (this.vp.portrait) {
@@ -933,7 +948,7 @@ export default class Game {
       // Cap gap at half the ball size to prevent extreme vertical stretching
       // on wide portrait screens (e.g. iPad portrait)
       const availW = w - rightDotEdge;
-      const maxGap = iconSize * 0.30;
+      const maxGap = iconSize * 0.15;
       const gap = Math.min(
         Math.max((availW - gridCols * iconSize) / (gridCols + 1), iconSize * 0.08),
         maxGap,
@@ -957,6 +972,57 @@ export default class Game {
       this.vp = {
         width: w, height: h, portrait, mobile, area, iconSize, power,
         goalX, goalY, goalWidth: goalWidth, dotSpan, dotCenterX,
+        gridStartX, gridStartY, titleZoneBottom, spacing,
+        gridCols, gridRows, menuFontSize,
+      };
+
+    } else if (mobile) {
+      // ══════════════════════════════════════════════════════════
+      //  MOBILE LANDSCAPE: 5-column × 2-row grid
+      // ══════════════════════════════════════════════════════════
+      const gridCols = 5;
+      const neededRows = Math.ceil(projects.length / gridCols);
+
+      goalX = w * 0.02;
+      const goalWidth = w * 0.10;
+      goalY = h * 0.40;
+      titleZoneBottom = h * 0.30;
+
+      const spacingFactor = 1.25;
+      const topOffset = 0.6;
+      const dragRoomFactor = 0.8;
+      const totalVertical = topOffset
+        + (neededRows - 1) * spacingFactor
+        + 0.5
+        + dragRoomFactor;
+      const availH = h - titleZoneBottom;
+      const iconFromH = availH / totalVertical;
+      const maxIcon = Math.min(w / 9, h / 4);
+      const iconSize = Math.min(iconFromH, maxIcon);
+      const spacing = iconSize * spacingFactor;
+      const gridRows = neededRows;
+
+      const dotSpan = iconSize * 1.2;
+      const dotRadius = iconSize / 15;
+      const dotCenterX = goalX + goalWidth / 2;
+
+      const menuRightEdge = dotCenterX + dotSpan / 2 + dotRadius + iconSize * 0.1;
+      const minFirstBallCenter = menuRightEdge + iconSize * 0.7;
+
+      const gridW = (gridCols - 1) * spacing;
+      gridStartX = Math.max(minFirstBallCenter, w / 2 - gridW / 2);
+
+      gridStartY = titleZoneBottom + iconSize * topOffset;
+
+      let power = area / Math.pow(iconSize, 2.7);
+
+      const titleSize = Math.min(iconSize / 3, h / 14, w / 40);
+      const menuFontSize = titleSize / 1.35;
+
+      this.ballsPerPage = gridCols * gridRows;
+      this.vp = {
+        width: w, height: h, portrait, mobile, area, iconSize, power,
+        goalX, goalY, goalWidth, dotSpan, dotCenterX,
         gridStartX, gridStartY, titleZoneBottom, spacing,
         gridCols, gridRows, menuFontSize,
       };

@@ -69,18 +69,16 @@ export default function DetailModal({ detail, onClose }) {
         onClick={blockCanvas}
         onPointerDown={blockCanvas}
       >
-        {/* Close button — above the hero image, centered, large X */}
-        <div className="modal-close-bar">
-          <button
-            className="modal-close"
-            onClick={(e) => { e.stopPropagation(); onClose(); }}
-            onPointerDown={handleButtonClick}
-            onTouchStart={handleButtonClick}
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        </div>
+        {/* Close button — upper-right corner */}
+        <button
+          className="modal-close"
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          onPointerDown={handleButtonClick}
+          onTouchStart={handleButtonClick}
+          aria-label="Close"
+        >
+          ✕
+        </button>
 
         {detail.imageSrc && (
           <div className={heroClass}>
