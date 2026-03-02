@@ -1,25 +1,15 @@
 /**
  * Ball.js — Physics-enabled project ball
  *
- * Replaces imageBall.js. All state is local; the engine/world are
- * passed in rather than reached for as globals.
+ * Image quality: Uses native canvas drawImage with source-rectangle
+ * cropping from the full-resolution loaded image, bypassing p5's
+ * internal scaling for much sharper rendering on desktop/retina.
  */
 
 import Matter from 'matter-js';
 import config from './config.js';
 
 export default class Ball {
-  /**
-   * @param {object} opts
-   * @param {object} opts.p        — p5 instance
-   * @param {object} opts.world    — Matter.js world
-   * @param {object} opts.project  — project data object
-   * @param {object} opts.img      — p5 image
-   * @param {number} opts.x
-   * @param {number} opts.y
-   * @param {number} opts.size     — diameter
-   * @param {number} opts.index
-   */
   constructor({ p, world, project, img, x, y, size, index }) {
     this.p = p;
     this.world = world;
@@ -36,21 +26,23 @@ export default class Ball {
     });
     Matter.Body.setStatic(this.body, true);
     this.body.label    = 'Ball';
-    this.body.ballRef  = this;            // back-reference for collision lookup
+    this.body.ballRef  = this;
     this.body.category = project.category;
     this.body.customId = project.name;
 
-    // Image — keep full image reference for high-quality rendering
+    // Keep full image reference for high-quality rendering
     this.fullImage = img;
-    // Square crop for circular clipping
-    const minDim = Math.min(img.height, img.width);
-    this.ballImage = img.get(0, 0, minDim, minDim);
-    this.imageSrc = `assets/images/${project.id}.jpg`;
+    // Compute square crop region from center of the source image
+    const srcW = img.width;
+    const srcH = img.height;
+    const minDim = Math.min(srcW, srcH);
+    this._cropX = Math.floor((srcW - minDim) / 2);
+    this._cropY = Math.floor((srcH - minDim) / 2);
+    this._cropSize = minDim;
 
-    // Pre-render a high-res ball texture for crisp desktop display
-    // Uses 2x the ball diameter for retina-quality rendering
-    this._hiResCanvas = null;
-    this._hiResSize = 0;
+    // Fallback p5 cropped image (used by _captureWebsite override)
+    this.ballImage = img.get(this._cropX, this._cropY, minDim, minDim);
+    this.imageSrc = `assets/images/${project.id}.jpg`;
 
     // Position / interaction state
     this.originalPos = { x, y };
@@ -69,12 +61,8 @@ export default class Ball {
     this.opens = 0;
   }
 
-  // ── Accessors ──────────────────────────────────────────────────────────
-
   get category() { return this.project.category; }
   get name()     { return this.project.name; }
-
-  // ── Detail page ────────────────────────────────────────────────────────
 
   getDetailData() {
     return {
@@ -96,11 +84,7 @@ export default class Ball {
     return this.getDetailData();
   }
 
-  closeDetail() {
-    this.pageOpen = false;
-  }
-
-  // ── Hit testing ────────────────────────────────────────────────────────
+  closeDetail() { this.pageOpen = false; }
 
   onBall(mx, my) {
     return this.p.dist(mx, my, this.x, this.y) < this.r;
@@ -111,47 +95,44 @@ export default class Ball {
   show(viewport) {
     if (this.launchCount) this._checkReset(viewport);
 
-    // Static balls use stored position; launched balls use physics position
     const pos = this.inOriginalPosition ? this.originalPos : this.body.position;
     const angle = this.body.angle;
     const p = this.p;
     const ctx = p.drawingContext;
-    const dpr = window.devicePixelRatio || 1;
-    const renderSize = Math.round(this.r * 2);
+    const diameter = this.r * 2;
 
     p.push();
     p.translate(pos.x, pos.y);
     p.rotate(angle);
 
-    // Use native canvas drawing with high-quality settings for sharper images
     ctx.save();
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-
-    // Circular clipping
     ctx.beginPath();
     ctx.arc(0, 0, this.r, 0, Math.PI * 2);
     ctx.clip();
 
-    // Draw the ball image using native canvas for best quality
-    // Access the underlying canvas element of the p5 image for direct rendering
-    const imgCanvas = this.ballImage.canvas || this.ballImage.drawingContext?.canvas;
-    if (imgCanvas) {
-      // Native canvas drawImage gives better quality than p5.image()
-      ctx.drawImage(imgCanvas, -this.r, -this.r, renderSize, renderSize);
+    // Draw directly from full-res source with square crop
+    // Browser bicubic interpolation >> p5's software scaling
+    const srcCanvas = this.fullImage.canvas || this.fullImage.drawingContext?.canvas;
+    if (srcCanvas) {
+      ctx.drawImage(
+        srcCanvas,
+        this._cropX, this._cropY, this._cropSize, this._cropSize,
+        -this.r, -this.r, diameter, diameter,
+      );
     } else {
-      // Fallback to p5 image drawing
       p.imageMode(p.CENTER);
-      p.image(this.ballImage, 0, 0, renderSize, renderSize);
+      p.image(this.ballImage, 0, 0, diameter, diameter);
     }
     ctx.restore();
 
-    // Border ring (no shadow blur — saves significant GPU per ball per frame)
+    // Border ring
     p.noFill();
     p.stroke(config.colors.main);
     p.strokeWeight(this.r / 25);
     p.ellipseMode(p.CENTER);
-    p.circle(0, 0, this.r * 2);
+    p.circle(0, 0, diameter);
 
     p.pop();
 
@@ -159,7 +140,6 @@ export default class Ball {
     this.y = pos.y;
   }
 
-  /** Arrow shown on hover (not clicked). */
   hover(iconSize, totalShots) {
     const p = this.p;
     p.angleMode(p.DEGREES);
@@ -171,7 +151,6 @@ export default class Ball {
       y: this.y - this.r * p.cos(angle),
     };
     const le = { x: ls.x - this.r / 2, y: ls.y - this.r / 2 };
-
     const pA = { x: le.x - p.sin(angle) * arrowLen * 2, y: le.y - p.cos(angle) * arrowLen * 2 };
     const pB = { x: le.x + p.cos(angle) * arrowLen,     y: le.y - p.sin(angle) * arrowLen };
     const pC = { x: le.x - p.cos(angle) * arrowLen,     y: le.y + p.sin(angle) * arrowLen };
@@ -197,7 +176,6 @@ export default class Ball {
     p.angleMode(p.RADIANS);
   }
 
-  /** Arrow drawn while dragging to aim. */
   aim(powerScale) {
     const p = this.p;
     p.angleMode(p.DEGREES);
@@ -205,15 +183,11 @@ export default class Ball {
     this.xPower += ((p.mouseX - p.pmouseX) / this._sensitivity()) * powerScale;
     this.yPower += ((p.mouseY - p.pmouseY) / this._sensitivity()) * powerScale;
 
-    const ls = {
-      x: this.x - this.r * p.sin(45),
-      y: this.y - this.r * p.cos(45),
-    };
+    const ls = { x: this.x - this.r * p.sin(45), y: this.y - this.r * p.cos(45) };
     const cx = ls.x - this.xPower * 2;
     const cy = ls.y - this.yPower * 2;
     const arrowLen = this.r / 4;
     const angle = p.atan2(this.xPower, this.yPower);
-
     const pA = { x: cx - p.sin(angle) * arrowLen * 2, y: cy - p.cos(angle) * arrowLen * 2 };
     const pB = { x: cx + p.cos(angle) * arrowLen,     y: cy - p.sin(angle) * arrowLen };
     const pC = { x: cx - p.cos(angle) * arrowLen,     y: cy + p.sin(angle) * arrowLen };
@@ -231,16 +205,11 @@ export default class Ball {
     p.angleMode(p.RADIANS);
   }
 
-  /** Demo-mode aim (power increases over time). */
   demoAim() {
-    this.show({ width: 9999, height: 9999 }); // never off-screen during demo
-    // Reuse aim drawing logic at current power
+    this.show({ width: 9999, height: 9999 });
     const p = this.p;
     p.angleMode(p.DEGREES);
-    const ls = {
-      x: this.x - this.r * p.sin(45),
-      y: this.y - this.r * p.cos(45),
-    };
+    const ls = { x: this.x - this.r * p.sin(45), y: this.y - this.r * p.cos(45) };
     const cx = ls.x - this.xPower * 2;
     const cy = ls.y - this.yPower * 2;
     const arrowLen = this.r / 4;
@@ -261,8 +230,6 @@ export default class Ball {
     p.pop();
     p.angleMode(p.RADIANS);
   }
-
-  // ── Launch / reset ─────────────────────────────────────────────────────
 
   launched() {
     this.launchCount++;
@@ -278,8 +245,6 @@ export default class Ball {
     this.inOriginalPosition = true;
   }
 
-  // ── Internal ───────────────────────────────────────────────────────────
-
   _sensitivity() {
     const area = this.p.width * this.p.height;
     return Math.pow(area, 1 / 3);
@@ -288,12 +253,7 @@ export default class Ball {
   _checkReset(viewport) {
     const { x, y } = this.body.position;
     const r2 = this.r * 2;
-    if (
-      x + r2 < 0 ||
-      x - r2 > viewport.width ||
-      y + r2 < -viewport.height * 4 ||
-      y - r2 > viewport.height
-    ) {
+    if (x + r2 < 0 || x - r2 > viewport.width || y + r2 < -viewport.height * 4 || y - r2 > viewport.height) {
       this.reset();
     }
   }

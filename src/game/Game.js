@@ -1,9 +1,7 @@
 /**
  * Game.js — Main game orchestrator
  *
- * Owns all state that was previously global in sketch.js:
- * engine, world, balls, goals, nets, menus, boundary, viewport, stats.
- *
+ * Owns all state: engine, world, balls, goals, nets, menus, boundary, viewport, stats.
  * Instantiated by the p5 sketch function inside GameCanvas.jsx.
  */
 
@@ -21,25 +19,20 @@ export default class Game {
   constructor(p) {
     this.p = p;
 
-    // Matter.js
     this.engine = Matter.Engine.create();
     this.world  = this.engine.world;
 
-    // Game objects
     this.balls    = [];
     this.goals    = [];
     this.nets     = [];
     this.menus    = [];
     this.boundary = null;
 
-    // Data
     this.images     = [];
     this.categories = [];
 
-    // Viewport (computed in _computeLayout)
     this.vp = {};
 
-    // State
     this.detailOpen       = false;
     this.selectedCategory = 'All';
     this.showDemo         = true;
@@ -48,25 +41,20 @@ export default class Game {
     this.totalOpens       = 0;
     this.clickedToOpen    = false;
 
-    // Pagination
     this.currentPage      = 0;
-    this.ballsPerPage     = 999; // calculated in _computeLayout
+    this.ballsPerPage     = 999;
 
-    // Loading state
     this._loaded = false;
     this._loadProgress = 0;
 
-    // Double-tap tracking (sketch-level, survives mouseReleased)
     this._lastTapTime = 0;
     this._lastTappedBall = null;
 
-    // Listen for React events
     this._unsubs = [
       bus.on('detail:close', () => this._onDetailClosed()),
       bus.on('game:reset', () => this._onReset()),
     ];
 
-    // Collision listener (one-time, on the engine — NOT per-build)
     this._collisionHandler = (event) => this._handleCollisions(event);
     Matter.Events.on(this.engine, 'collisionActive', this._collisionHandler);
   }
@@ -97,7 +85,6 @@ export default class Game {
 
   draw() {
     const p = this.p;
-    // Only step physics when balls are in flight
     if (this._hasActiveBalls()) {
       Matter.Engine.update(this.engine);
     }
@@ -108,12 +95,10 @@ export default class Game {
       this._drawTitle();
       this._drawGoals();
       this.menus.forEach((m) => m.show());
-      // Only show net dashed lines before any ball has been launched
       if (this.totalShots === 0) {
         this.nets.forEach((n) => n.show());
       }
       this._drawStats();
-      this._drawHelpMessage();
       if (this.totalPages > 1) this._drawPageNav();
     }
 
@@ -121,6 +106,8 @@ export default class Game {
       this._runDemo();
     } else {
       this._drawBalls();
+      // Draw help message AFTER balls so it renders on top
+      if (!this.detailOpen) this._drawHelpMessage();
     }
   }
 
@@ -140,13 +127,12 @@ export default class Game {
     }
   }
 
-  // ── Input handlers (called by p5 sketch) ───────────────────────────────
+  // ── Input handlers ─────────────────────────────────────────────────────
 
   mousePressed() {
     if (this.detailOpen) return false;
     const p = this.p;
 
-    // Page navigation click
     if (this.totalPages > 1 && this._checkPageNavClick(p.mouseX, p.mouseY)) {
       return false;
     }
@@ -157,7 +143,6 @@ export default class Game {
       ball.display = onPage && (this.selectedCategory === 'All' || ball.category === this.selectedCategory);
 
       if (ball.onBall(p.mouseX, p.mouseY)) {
-        // Double-tap detection
         const now = Date.now();
         if (this._lastTappedBall === ball && now - this._lastTapTime < config.doubleTapWindow) {
           this._openBallDetail(ball);
@@ -190,7 +175,6 @@ export default class Game {
   mouseReleased() {
     const p = this.p;
 
-    // Menu selection
     this.menus.forEach((item) => {
       if (item.onMenu(p.mouseX, p.mouseY)) {
         if (item.selected) {
@@ -202,7 +186,6 @@ export default class Game {
         }
       }
     });
-    // Sync menu selection state
     this.menus.forEach((item) => {
       item.selected = this.selectedCategory === item.category;
     });
@@ -234,8 +217,6 @@ export default class Game {
     }
   }
 
-  // ── Cleanup ────────────────────────────────────────────────────────────
-
   destroy() {
     this._unsubs.forEach((fn) => fn());
     Matter.Events.off(this.engine, 'collisionActive', this._collisionHandler);
@@ -249,12 +230,11 @@ export default class Game {
     this._createGoals();
     this._createMenus();
     this._createBoundary();
-    // Collision listener lives on the engine (registered once in constructor)
   }
 
   _teardownWorld() {
     this.balls.forEach((b) => {
-      try { Matter.Composite.remove(this.world, b.body); } catch (_) { /* already removed */ }
+      try { Matter.Composite.remove(this.world, b.body); } catch (_) {}
     });
     this.goals.forEach((g) => g.remove());
     this.nets.forEach((n) => n.remove());
@@ -296,10 +276,7 @@ export default class Game {
 
       if (isOnPage) {
         col++;
-        if (col >= gridCols) {
-          col = 0;
-          row++;
-        }
+        if (col >= gridCols) { col = 0; row++; }
       }
 
       if (!this.categories.includes(proj.category)) {
@@ -315,8 +292,6 @@ export default class Game {
     const { iconSize, dotCenterX, dotSpan, gridStartY } = this.vp;
     const netHeight = 0.4 * this.categories.length * iconSize;
     const dotRadius = iconSize / 15;
-    // Align dots visually with the center of the first row of balls
-    // Goal.show() draws at body.y - radius*1.5, so set body.y accordingly
     const dotY = gridStartY + dotRadius * 1.5;
     const dotLeftX = dotCenterX - dotSpan / 2;
 
@@ -341,7 +316,6 @@ export default class Game {
   _createMenus() {
     const { dotCenterX, dotSpan, gridStartY, iconSize } = this.vp;
     const dotRadius = iconSize / 15;
-    // Position menus below the goal dots (which are aligned with gridStartY)
     const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
     this.categories.forEach((cat, i) => {
       this.menus.push(new MenuObj({
@@ -387,32 +361,26 @@ export default class Game {
   // ── Private: actions ───────────────────────────────────────────────────
 
   _launchBall(ball) {
-    // Convert drag power into a velocity vector
-    // Negative because dragging away from target = launching toward it
     const speedScale = this.vp.mobile ? 0.35 : 0.25;
     const vx = -ball.xPower * speedScale;
     const vy = -ball.yPower * speedScale;
 
     const catIdx = this.categories.indexOf(ball.category);
 
-    // Ensure body position matches the ball's current visual position
     Matter.Body.setPosition(ball.body, { x: ball.x, y: ball.y });
     Matter.Body.setVelocity(ball.body, { x: 0, y: 0 });
     Matter.Body.setAngle(ball.body, 0);
 
-    // Add to physics world if not already there
     if (ball.inOriginalPosition) {
       Matter.Composite.add(this.world, ball.body);
     }
 
-    // Set collision filter for category matching
     ball.body.collisionFilter = {
       group:    catIdx + 1,
       category: Math.pow(2, catIdx),
       mask:     this.categories.reduce((m, _, i) => m | config.categoryBits[i], 0),
     };
 
-    // Make dynamic and launch with velocity
     Matter.Body.setStatic(ball.body, false);
     Matter.Body.setVelocity(ball.body, { x: vx, y: vy });
     ball.launched();
@@ -420,7 +388,7 @@ export default class Game {
 
   _openBallDetail(ball) {
     const data = ball.openDetail();
-    if (!data) return; // already open
+    if (!data) return;
     this.totalOpens++;
     this.detailOpen = true;
     this._emitStats();
@@ -482,7 +450,6 @@ export default class Game {
 
     const p = this.p;
     this.balls.forEach((ball) => {
-      // Always show balls that are in flight (launched and not yet reset)
       if (!ball.display && ball.inOriginalPosition) return;
 
       ball.show(this.vp);
@@ -508,22 +475,24 @@ export default class Game {
     const ball = this.balls[0];
     if (!ball) return;
 
-    // Compute target direction: ball → goal center (between the two dots)
+    // Demo launch: always at 45° angle (upper-left direction)
+    // Power tuned separately for desktop vs mobile
     if (!this._demoTarget) {
-      const { dotCenterX, dotSpan, gridStartY, iconSize } = this.vp;
-      const dotRadius = iconSize / 15;
-      // Target the center between the two goal dots for best chance of scoring
-      const targetX = dotCenterX;
-      const targetY = gridStartY;
-      const dx = ball.x - targetX;
-      const dy = ball.y - targetY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      // Normalize direction and scale to required power
-      // The launch velocity = -power * speedScale, so positive power = move left/up
+      const SQRT1_2 = Math.SQRT1_2; // 0.7071 — gives exact 45°
+
+      // Tune demo power: desktop needs ~70% of computed power,
+      // mobile needs ~10× because the power formula yields very low values
+      let demoPower;
+      if (this.vp.portrait || this.vp.mobile) {
+        demoPower = this.vp.power * 10;
+      } else {
+        demoPower = this.vp.power * 0.70;
+      }
+
       this._demoTarget = {
-        xDir: dx / dist,
-        yDir: dy / dist,
-        totalPower: this.vp.power * 1.05, // slight boost to ensure it reaches
+        xDir: SQRT1_2,   // positive → launches left (velocity = -power * speedScale)
+        yDir: SQRT1_2,   // positive → launches up
+        totalPower: demoPower,
       };
     }
 
@@ -543,20 +512,18 @@ export default class Game {
 
   _drawTitle() {
     const p = this.p;
-    const { iconSize, portrait, width, height, titleZoneBottom, gridStartX } = this.vp;
+    const { iconSize, portrait, width, height, titleZoneBottom } = this.vp;
     const ctx = p.drawingContext;
 
     const titleLines = config.titleText.split('. ').map((s) => s.replace(/\.$/, '') + '.');
     const ctaLine = config.ctaText;
 
     if (portrait) {
-      // Title in top zone, left-justified but pushed toward center-right
       const availH = titleZoneBottom - height * 0.055;
       const titleSize  = Math.min(iconSize / 2.2, width / 11, availH / (titleLines.length + 1.5));
       const ctaSize    = titleSize * 0.7;
       const lineHeight = titleSize * 1.3;
 
-      // Measure longest line to position the block
       p.push();
       p.textFont('Syne');
       p.textSize(titleSize);
@@ -566,13 +533,9 @@ export default class Game {
       p.pop();
       const xPos = Math.max(width * 0.06, width * 0.93 - maxTitleW);
 
-      // Compute full text block height: title lines + CTA
       const totalTextH = lineHeight * titleLines.length + ctaSize * 1.1;
-
-      // Center the text block vertically within the title zone
       const yStart = (titleZoneBottom - totalTextH) / 2 + titleSize * 0.35;
 
-      // Accent bar and background panel
       const accentTopY = yStart - titleSize * 0.4;
       const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
       const panelX = xPos - 8;
@@ -592,7 +555,6 @@ export default class Game {
       } else {
         ctx.fillRect(panelX, panelY, panelW, panelH);
       }
-      // Accent line — vertically centered on the text block
       ctx.strokeStyle = 'rgba(89, 133, 177, 0.65)';
       ctx.lineWidth   = 2;
       ctx.lineCap     = 'round';
@@ -618,30 +580,22 @@ export default class Game {
       p.pop();
 
     } else {
-      // Landscape — title centered-right, left-justified text near the right edge
       const titleSize = Math.min(iconSize / 3, height / 16, width / 36);
       const ctaSize   = titleSize * 0.7;
       const lineHeight = titleSize * 1.25;
 
-      // Measure the longest line to right-align the block near right edge
       p.push();
       p.textFont('Syne');
       p.textSize(titleSize);
       p.textStyle(p.BOLD);
       let maxW = 0;
-      titleLines.forEach((line) => {
-        maxW = Math.max(maxW, p.textWidth(line));
-      });
+      titleLines.forEach((line) => { maxW = Math.max(maxW, p.textWidth(line)); });
       p.pop();
 
-      // Left edge of the title block: right-aligned with ~8% right margin
-      const xPos   = width * 0.92 - maxW;
-
-      // Vertically center in the title zone
+      const xPos = width * 0.92 - maxW;
       const totalTextH = lineHeight * titleLines.length + ctaSize * 1.1;
       const yStart = (titleZoneBottom - totalTextH) / 2 + titleSize * 0.35;
 
-      // Accent line spans from text top (ascender) to CTA bottom (descender)
       const accentTopY = yStart - titleSize * 0.4;
       const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
 
@@ -676,13 +630,12 @@ export default class Game {
     if (this.totalShots > 2 && this.totalShots < 10 && !this.clickedToOpen && !this.detailOpen) {
       const p = this.p;
       const { gridStartY, spacing, gridRows, iconSize, portrait, width, height } = this.vp;
-      // Position fully below the ball grid so it's never obscured by balls or buttons
-      const gridBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
+      // Position fully below the LAST row of balls (bottom edge of last ball + padding)
+      const gridBottom = gridStartY + (gridRows - 1) * spacing + iconSize * 0.6;
       const yPos = portrait
-        // On mobile, ensure it clears the reset button area (keep well above bottom HUD)
-        ? Math.min(gridBottom + iconSize * 0.6, height - iconSize * 2.0)
-        // On desktop, place just below the ball grid
-        : gridBottom + iconSize * 0.5;
+        // On mobile, ensure well below balls and above the Contact Me HUD
+        ? Math.min(gridBottom + iconSize * 0.4, height - iconSize * 1.5)
+        : gridBottom + iconSize * 0.4;
       p.push();
       p.textFont('Syne');
       p.textSize(iconSize / 6);
@@ -700,7 +653,6 @@ export default class Game {
     const { dotCenterX, dotSpan, gridStartY, iconSize } = this.vp;
     const centerX = dotCenterX;
     const dotRadius = iconSize / 15;
-    // Position below the last menu item
     const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
     const lastMenuY = menuStartY + this.categories.length * 0.4 * iconSize;
     const fontSize = iconSize / 7;
@@ -712,7 +664,6 @@ export default class Game {
     p.textFont('JetBrains Mono');
     p.noStroke();
 
-    // Divider line (solid, not dashed — avoids looking like net lines)
     const divW = dotSpan * 0.5;
     p.stroke('rgba(89, 133, 177, 0.2)');
     p.strokeWeight(1);
@@ -724,7 +675,6 @@ export default class Game {
     p.textSize(fontSize * 0.75);
     p.fill('rgba(199, 214, 213, 0.45)');
     p.text(`${this.totalShots} shot${this.totalShots !== 1 ? 's' : ''}`, centerX, startY);
-
     p.fill('rgba(199, 214, 213, 0.45)');
     p.text(`${this.totalMakes} make${this.totalMakes !== 1 ? 's' : ''}`, centerX, startY + lineH);
 
@@ -736,8 +686,6 @@ export default class Game {
   }
 
   _captureWebsite() {
-    // Throttle: capture every 8 frames (~7.5 fps at 60fps) using drawImage
-    // which is much cheaper than p.get() since it stays on the GPU
     this._captureCounter = (this._captureCounter || 0) + 1;
     if (this._captureCounter % 8 !== 1) return;
 
@@ -747,7 +695,6 @@ export default class Game {
     const size = Math.round(thisSiteBall.r * 2);
     if (size <= 0) return;
 
-    // Lazily create an offscreen canvas sized to the ball
     if (!this._captureCanvas || this._captureCanvas.width !== size) {
       this._captureCanvas = document.createElement('canvas');
       this._captureCanvas.width = size;
@@ -755,39 +702,28 @@ export default class Game {
       this._captureCtx = this._captureCanvas.getContext('2d');
     }
 
-    // Draw a scaled-down copy of the main canvas onto the small offscreen canvas.
-    // On portrait/mobile, zoom into the menu + ball area so the self-reflecting
-    // ball shows meaningful content instead of a tiny overview.
     const canvas = this.p.drawingContext.canvas;
     if (this.vp.portrait) {
-      // Capture from left edge to just past the ball grid, vertically from
-      // below the title to partway down the ball area — zoomed enough to
-      // see the menu and at least a couple of the balls
       const srcX = 0;
       const srcY = this.vp.titleZoneBottom * 0.4;
       const srcW = Math.min(this.vp.width * 0.85, this.vp.gridStartX + this.vp.spacing * 1.8);
-      const srcH = srcW; // keep square
-      this._captureCtx.drawImage(
-        canvas,
-        srcX, srcY, srcW, srcH,
-        0, 0, size, size,
-      );
+      const srcH = srcW;
+      this._captureCtx.drawImage(canvas, srcX, srcY, srcW, srcH, 0, 0, size, size);
     } else {
       const srcSize = Math.min(this.vp.width, this.vp.height);
-      this._captureCtx.drawImage(
-        canvas,
-        0, 0, srcSize, srcSize,
-        0, 0, size, size,
-      );
+      this._captureCtx.drawImage(canvas, 0, 0, srcSize, srcSize, 0, 0, size, size);
     }
 
-    // Reuse a single p5.Image to avoid GC pressure from creating a new one each capture
     if (!this._capturePImg || this._capturePImg.width !== size) {
       this._capturePImg = this.p.createImage(size, size);
     }
     this._capturePImg.drawingContext.drawImage(this._captureCanvas, 0, 0);
     thisSiteBall.ballImage = this._capturePImg;
     thisSiteBall.fullImage = this._capturePImg;
+    // Reset crop to full captured image
+    thisSiteBall._cropX = 0;
+    thisSiteBall._cropY = 0;
+    thisSiteBall._cropSize = size;
   }
 
   // ── Private: page navigation ─────────────────────────────────────────
@@ -801,10 +737,9 @@ export default class Game {
 
     p.push();
     p.textAlign(p.CENTER, p.CENTER);
-    p.textFont('DM Sans');
+    p.textFont('Syne');
     p.textSize(arrowSize * 0.8);
 
-    // Left arrow
     if (this.currentPage > 0) {
       p.fill(config.colors.accent);
       p.noStroke();
@@ -815,11 +750,9 @@ export default class Game {
       );
     }
 
-    // Page indicator
     p.fill(config.colors.main);
     p.text(`${this.currentPage + 1} / ${this.totalPages}`, navX, navY);
 
-    // Right arrow
     if (this.currentPage < this.totalPages - 1) {
       p.fill(config.colors.accent);
       p.noStroke();
@@ -840,14 +773,12 @@ export default class Game {
     const arrowSize = iconSize / 5;
     const hitZone = arrowSize * 2;
 
-    // Left arrow
     if (this.currentPage > 0 && mx < navX - arrowSize && mx > navX - arrowSize * 4 && Math.abs(my - navY) < hitZone) {
       this.currentPage--;
       this._teardownWorld();
       this._buildWorld();
       return true;
     }
-    // Right arrow
     if (this.currentPage < this.totalPages - 1 && mx > navX + arrowSize && mx < navX + arrowSize * 4 && Math.abs(my - navY) < hitZone) {
       this.currentPage++;
       this._teardownWorld();
@@ -860,12 +791,11 @@ export default class Game {
   _repositionBalls() {
     const { gridStartX, gridStartY, spacing, gridCols } = this.vp;
     const startIdx = this.currentPage * this.ballsPerPage;
-    const endIdx   = Math.min(startIdx + this.ballsPerPage, projects.length);
     let col = 0;
     let row = 0;
 
     this.balls.forEach((ball) => {
-      const isOnPage = ball.index >= startIdx && ball.index < endIdx;
+      const isOnPage = ball.index >= startIdx && ball.index < startIdx + this.ballsPerPage;
       ball.display = isOnPage && (this.selectedCategory === 'All' || ball.category === this.selectedCategory);
 
       if (isOnPage && ball.inOriginalPosition) {
@@ -873,15 +803,11 @@ export default class Game {
         const gy = gridStartY + row * spacing;
         Matter.Body.setPosition(ball.body, { x: gx, y: gy });
         ball.originalPos = { x: gx, y: gy };
-        ball.inOriginalPosition = true;
         ball.x = gx;
         ball.y = gy;
 
         col++;
-        if (col >= gridCols) {
-          col = 0;
-          row++;
-        }
+        if (col >= gridCols) { col = 0; row++; }
       }
     });
   }
@@ -900,19 +826,18 @@ export default class Game {
     const mobile   = Math.max(h, w) <= 1000;
     const area     = w * h;
 
-    // 2-column grid — rows determined by project count
-    const gridCols = 2;
-    const neededRows = Math.ceil(projects.length / gridCols);
-
     let goalX, goalY, gridStartX, gridStartY, titleZoneBottom;
 
     if (portrait) {
+      // ── PORTRAIT: 2-column grid ──
+      const gridCols = 2;
+      const neededRows = Math.ceil(projects.length / gridCols);
+
       titleZoneBottom = h * 0.15;
       goalX = w * 0.04;
       const goalWidth = w * 0.18;
       goalY = titleZoneBottom + goalWidth * 0.55;
 
-      // Pre-compute ball size to determine dot span (1.3× ball diameter)
       const estGridLeft = goalX + goalWidth + w * 0.10;
       const estAvailW = w - estGridLeft - w * 0.03;
       const estAvailH = h - titleZoneBottom - h * 0.12;
@@ -922,12 +847,10 @@ export default class Game {
       const spacing = iconSize * 1.45;
       const gridRows = neededRows;
 
-      // Dot span = 1.3× ball diameter, centered on the goal column
       const dotSpan = iconSize * 1.3;
       const dotCenterX = Math.max(dotSpan / 2 + iconSize / 5, goalX + goalWidth / 2);
       const rightDotX = dotCenterX + dotSpan / 2;
 
-      // Center ball grid between right dot and right screen edge
       const gridCenterX = rightDotX + (w - rightDotX) / 2;
       const gridW = (gridCols - 1) * spacing;
       gridStartX = gridCenterX - gridW / 2;
@@ -943,30 +866,32 @@ export default class Game {
         gridStartX, gridStartY, titleZoneBottom, spacing,
         gridCols, gridRows,
       };
+
     } else {
-      // LANDSCAPE — goal/menu left, ball grid center-left, title near right edge
+      // ── LANDSCAPE: 3-column grid ──
+      const gridCols = 3;
+      const neededRows = Math.ceil(projects.length / gridCols);
+
       goalX = w * 0.03;
       const goalWidth = w * 0.12;
       goalY = h * 0.35;
       titleZoneBottom = h * 0.25;
       const goalColumnEnd = goalX + goalWidth + w * 0.04;
 
-      // Size balls to fit vertically with the actual number of rows needed
       const availH = h - titleZoneBottom - h * 0.06;
       const iconFromH = availH / (neededRows * 1.45);
-      const maxIcon = Math.min(w / 8, h / 5);
+      const maxIcon = Math.min(w / 7, h / 4);  // slightly larger caps for bigger balls
       const iconSize = Math.min(iconFromH, maxIcon);
       const spacing = iconSize * 1.45;
       const gridRows = neededRows;
 
-      // Dot span = 1.3× ball diameter
       const dotSpan = iconSize * 1.3;
       const dotCenterX = goalX + goalWidth / 2;
 
-      // Center the 2-column grid between goal column end and ~55% of screen width
+      // Center the 3-column grid between goal column end and ~60% of screen width
       const gridW = (gridCols - 1) * spacing + iconSize;
       const gridAreaLeft = goalColumnEnd;
-      const gridAreaRight = w * 0.55;
+      const gridAreaRight = w * 0.62;  // wider area for 3 columns
       gridStartX = gridAreaLeft + (gridAreaRight - gridAreaLeft - gridW) / 2 + iconSize / 2;
       gridStartY = titleZoneBottom + iconSize * 0.3;
 

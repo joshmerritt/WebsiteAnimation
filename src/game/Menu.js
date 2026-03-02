@@ -1,5 +1,7 @@
 /**
  * Menu.js — Category menu item (physics body + label)
+ *
+ * Font: Syne BOLD to match the homepage title styling.
  */
 
 import Matter from 'matter-js';
@@ -41,8 +43,9 @@ export default class Menu {
     p.noStroke();
     p.textAlign(p.CENTER);
     p.textFont('Syne');
-    p.textSize(this.height / 2.5);
-    p.textStyle(this.selected || isHover ? p.BOLD : p.NORMAL);
+    // Slightly larger text, always bold to match the title font weight
+    p.textSize(this.height / 2.2);
+    p.textStyle(p.BOLD);
 
     if (this.selected) {
       p.fill(config.colors.main);

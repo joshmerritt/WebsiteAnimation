@@ -1,12 +1,10 @@
 /**
- * HUD.jsx — Overlay buttons: Contact + Reset
+ * HUD.jsx — Overlay button: Contact Me
  *
- * On mobile: bottom bar with Contact centered (plain link) and Reset right.
- * On desktop: top-right pill buttons.
+ * Reset button removed per user preference.
  */
 
 import config from '../game/config.js';
-import bus from '../game/EventBus.js';
 
 export default function HUD() {
   return (
@@ -18,10 +16,6 @@ export default function HUD() {
         <span className="hud-icon">✉</span>
         <span className="hud-label">Contact Me</span>
       </a>
-      <button className="hud-btn hud-reset" onClick={() => bus.emit('game:reset')}>
-        <span className="hud-reset-icon">↺</span>
-        <span className="hud-label">Reset</span>
-      </button>
     </div>
   );
 }

@@ -328,16 +328,17 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   HUD (Contact + Reset buttons)
+   HUD (Contact Me only — Reset removed)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .hud {
   position: fixed;
   bottom: 0;
   left: 0;
+  right: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   padding: clamp(10px, 2vmin, 18px) clamp(12px, 2.5vmin, 24px);
   pointer-events: none;
   z-index: 15;
@@ -371,7 +372,6 @@ body {
 }
 
 .hud-icon { font-size: 1.1em; }
-.hud-reset-icon { font-size: 1.1em; }
 .hud-label { white-space: nowrap; }
 
 
@@ -493,7 +493,7 @@ a { color: var(--main); text-decoration: none; }
   -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--shadow-sm);
   animation: statsSlideIn 0.5s var(--ease-spring) both;
-  z-index: 14;  /* below HUD (15) so buttons remain clickable */
+  z-index: 14;
 }
 
 .stats-item {
@@ -542,23 +542,9 @@ a { color: var(--main); text-decoration: none; }
    DESKTOP LAYOUT
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Desktop: both buttons centered at bottom with generous padding */
 @media (pointer: fine) {
   .hud {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    justify-content: center;
-    gap: 16px;
     padding-bottom: clamp(24px, 4vmin, 48px);
-  }
-
-  .hud-contact {
-    order: 1;
-  }
-
-  .hud-reset {
-    order: 2;
   }
 }
 
@@ -570,18 +556,12 @@ a { color: var(--main); text-decoration: none; }
 /* Mobile portrait — bottom bar layout */
 @media (pointer: coarse) and (orientation: portrait) {
   .hud {
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    justify-content: center;
-    gap: 0;
     padding: 0 16px env(safe-area-inset-bottom, 12px);
     background: linear-gradient(to top, rgba(10, 14, 18, 0.85) 0%, transparent 100%);
     padding-top: 18px;
   }
 
-  /* Contact Me: centered, plain link style (no pill background) */
+  /* Contact Me: centered, plain link style */
   .hud-contact {
     background: none;
     border: none;
@@ -591,7 +571,6 @@ a { color: var(--main); text-decoration: none; }
     font-size: clamp(0.8rem, 3.5vw, 1rem);
     padding: 0.8em 1.5em;
     color: var(--secondary);
-    order: 1;
   }
   .hud-contact:hover {
     background: none;
@@ -600,37 +579,6 @@ a { color: var(--main); text-decoration: none; }
     color: var(--main);
   }
   .hud-contact .hud-icon { font-size: 1.2em; }
-
-  /* Reset: right side, large icon, small text — NO outline/border */
-  .hud-reset {
-    position: absolute;
-    right: 16px;
-    bottom: calc(env(safe-area-inset-bottom, 12px) + 22px);
-    padding: 0.6em 0.9em;
-    font-size: 0.7rem;
-    order: 2;
-    flex-direction: column;
-    gap: 0.15em;
-    background: rgba(89, 133, 177, 0.08);
-    border: none;
-    outline: none;
-  }
-  .hud-reset:hover,
-  .hud-reset:active,
-  .hud-reset:focus {
-    border: none;
-    outline: none;
-  }
-  .hud-reset .hud-reset-icon {
-    font-size: 1.6rem;
-    line-height: 1;
-  }
-  .hud-reset .hud-label {
-    font-size: 0.55rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    opacity: 0.7;
-  }
 
   .hud-btn {
     min-height: 44px;
@@ -665,38 +613,22 @@ a { color: var(--main); text-decoration: none; }
   .stats-label { font-size: 0.5rem; }
 }
 
-/* Small phones — ensure bottom stats don't overlap HUD */
+/* Small phones */
 @media screen and (max-width: 380px) {
-  .stats-overlay {
-    bottom: 76px;
-  }
+  .stats-overlay { bottom: 76px; }
 }
 
-/* Landscape phones — tighter layout */
+/* Landscape phones */
 @media screen and (max-height: 420px) and (orientation: landscape) {
-  .hud-btn {
-    font-size: 0.7rem;
-    padding: 0.4em 0.9em;
-  }
-
-  .modal-card {
-    max-height: 95vh;
-  }
-
-  .modal-hero {
-    height: 100px;
-  }
-
-  .stats-overlay {
-    bottom: 8px;
-  }
+  .hud-btn { font-size: 0.7rem; padding: 0.4em 0.9em; }
+  .modal-card { max-height: 95vh; }
+  .modal-hero { height: 100px; }
+  .stats-overlay { bottom: 8px; }
 }
 
 /* Tablet portrait */
 @media screen and (min-width: 600px) and (max-width: 1024px) and (orientation: portrait) {
-  .modal-card {
-    max-width: 90vw;
-  }
+  .modal-card { max-width: 90vw; }
 }
 
 /* Safe areas for notched phones */
@@ -705,7 +637,6 @@ a { color: var(--main); text-decoration: none; }
     padding-bottom: env(safe-area-inset-bottom, 0);
     padding-left: env(safe-area-inset-left, 0);
   }
-
   .stats-overlay {
     margin-bottom: env(safe-area-inset-bottom, 0);
   }
