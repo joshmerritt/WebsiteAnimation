@@ -123,10 +123,11 @@ body {
   to   { opacity: 1; }
 }
 
+/* ── FIX 1: Larger modal card so image + text are easily digestible ───────── */
 .modal-card {
   position: relative;
   width: min(720px, 92vw);
-  max-height: 88vh;
+  max-height: 90vh;
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--glass-bg);
@@ -148,18 +149,18 @@ body {
 }
 
 
-/* ─── Close Button (upper-right corner) ────────────────────────────────────── */
+/* ── FIX 4: Close Button — absolute positioned in upper right corner ──────── */
 .modal-close {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 5;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
   width: 38px;
   height: 38px;
   min-width: 44px;
   min-height: 44px;
   border-radius: 50%;
-  background: rgba(10, 14, 18, 0.7);
+  background: rgba(10, 14, 18, 0.80);
   border: 1px solid rgba(199, 214, 213, 0.3);
   color: var(--main);
   font-size: 1.4rem;
@@ -180,13 +181,13 @@ body {
 }
 
 
-/* ─── Hero Image ────────────────────────────────────────────────────────────── */
+/* ── FIX 1: Hero Image — show full images, filling ≥50% of modal ─────────── */
 
-/* Default banner mode — horizontal crop, fixed height */
+/* Default banner mode — show full image, generous height */
 .modal-hero {
   position: relative;
-  height: min(340px, 45vh);
-  min-height: 80px;
+  height: min(50vh, 400px);
+  min-height: 150px;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -194,20 +195,21 @@ body {
 .modal-hero img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  object-fit: contain;
+  object-position: center;
   display: block;
   filter: brightness(1.1);
+  background: rgba(10, 14, 18, 0.4);
 }
 
 /* Full hero mode — show nearly the entire image (aspect-ratio preserved) */
 .modal-hero--full {
   height: auto;
-  max-height: min(28vh, 180px);
+  max-height: min(55vh, 450px);
 }
 .modal-hero--full img {
   height: auto;
-  max-height: min(28vh, 180px);
+  max-height: min(55vh, 450px);
   object-fit: contain;
   object-position: center;
   background: rgba(10, 14, 18, 0.5);
@@ -373,16 +375,61 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   STATS OVERLAY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.stats-overlay {
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  padding: 6px 16px;
+  background: rgba(10, 14, 18, 0.65);
+  border: 1px solid rgba(89, 133, 177, 0.12);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 14;
+  pointer-events: none;
+  animation: fadeUp 0.35s var(--ease-out) both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.stats-item { text-align: center; }
+
+.stats-value {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--main);
+  letter-spacing: 0.02em;
+}
+
+.stats-label {
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  color: var(--main-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    RESPONSIVE — Small screens
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media screen and (max-height: 600px), screen and (max-width: 420px) {
-  .modal-hero:not(.modal-hero--full) { height: 120px; }
-  .modal-hero--full { max-height: 25vh; }
-  .modal-hero--full img { max-height: 25vh; }
+  .modal-hero:not(.modal-hero--full) { height: min(35vh, 200px); }
+  .modal-hero--full { max-height: 35vh; }
+  .modal-hero--full img { max-height: 35vh; }
   .modal-content { padding: 12px 14px 18px; gap: 10px; }
   .modal-table td { font-size: clamp(0.68rem, 2.2vmin, 0.82rem); padding: 0.35em; }
-  .modal-close-bar { padding: 4px 0 2px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -465,111 +512,13 @@ a { color: var(--main); text-decoration: none; }
 }
 
 @keyframes loadFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   STATS OVERLAY
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.stats-overlay {
-  position: fixed;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-pill);
-  padding: 6px 16px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-sm);
-  animation: statsSlideIn 0.5s var(--ease-spring) both;
-  z-index: 14;
-}
-
-.stats-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  min-width: 36px;
-}
-
-.stats-value {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--main);
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
-
-.stats-value--accent {
-  color: var(--accent);
-}
-
-.stats-label {
-  font-family: var(--font-body);
-  font-size: 0.55rem;
-  color: var(--main-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  line-height: 1;
-}
-
-.stats-divider {
-  width: 1px;
-  height: 22px;
-  background: rgba(89, 133, 177, 0.2);
-}
-
-@keyframes statsSlideIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.95); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-}
-
-
-/* ═══════════════════════════════════════════════════════════════════════════════
-   DESKTOP LAYOUT
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-@media (pointer: fine) {
-  .hud {
-    bottom: 0;
-    top: auto;
-    padding-bottom: clamp(40px, 8vmin, 80px);
-  }
-
-  .hud-contact {
-    font-size: clamp(0.75rem, 1.5vmin, 0.95rem);
-    padding: 0.5em 0.8em;
-    background: none;
-    border: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    box-shadow: none;
-    color: rgba(89, 133, 177, 0.7);
-    letter-spacing: 0.06em;
-  }
-
-  .hud-contact:hover {
-    background: none;
-    border: none;
-    box-shadow: none;
-    color: var(--main);
-    transform: none;
-  }
-}
-
-
-/* ═══════════════════════════════════════════════════════════════════════════════
-   MOBILE & TOUCH POLISH
+   RESPONSIVE — Touch & Mobile Overrides
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Mobile portrait — bottom bar layout */
@@ -651,7 +600,7 @@ a { color: var(--main); text-decoration: none; }
 @media screen and (max-height: 420px) and (orientation: landscape) {
   .hud-btn { font-size: 0.7rem; padding: 0.4em 0.9em; }
   .modal-card { max-height: 95vh; }
-  .modal-hero { height: 100px; }
+  .modal-hero { height: min(40vh, 180px); }
   .stats-overlay { bottom: 8px; }
 }
 

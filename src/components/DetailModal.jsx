@@ -5,8 +5,8 @@
  * with hero image, metadata table, and CTA link.
  *
  * Layout (top → bottom):
- *   1. Close button (centered above image, large X, tight padding)
- *   2. Hero image with subtle bottom-only gradient (10%)
+ *   1. Hero image with subtle bottom-only gradient (10%)
+ *   2. Close button (absolute positioned, upper right corner)
  *   3. Title (centered, Syne font — matches homepage)
  *   4. Info table (goal, role, tech, summary)
  *   5. CTA link button (centered)
@@ -69,7 +69,7 @@ export default function DetailModal({ detail, onClose }) {
         onClick={blockCanvas}
         onPointerDown={blockCanvas}
       >
-        {/* Close button — upper-right corner */}
+        {/* FIX 4: Close button — absolute positioned in upper right corner */}
         <button
           className="modal-close"
           onClick={(e) => { e.stopPropagation(); onClose(); }}
