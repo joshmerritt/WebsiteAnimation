@@ -100,12 +100,12 @@ export default class Game {
     }
 
     p.background(config.colors.bg);
+    this._drawBackgroundGradient();
 
     if (!this.detailOpen) {
-      // ── Static layer: bg gradient + title + netting + goals ──
-      // Rendered to offscreen canvas once, redrawn only on resize
-      this._drawStaticLayer();
-
+      this._drawTitle();
+      this._drawGoals();
+      this._drawNetting();
       this.menus.forEach((m) => {
         m.highlighted = (this._aimingCategory && m.category === this._aimingCategory);
         m.show();
@@ -452,40 +452,6 @@ export default class Game {
 
   // ── Private: drawing ───────────────────────────────────────────────────
 
-  // ── Static layer: caches bg gradient + title + netting + goals ────────
-
-  /**
-   * Draw static elements (bg gradient, title, netting, goals).
-   * On first call (or after resize), renders them via p5 and caches
-   * the result to an offscreen canvas. Subsequent frames just blit.
-   * Saves ~5-8ms/frame by avoiding textWidth, clip paths, gradients.
-   */
-  _drawStaticLayer() {
-    const ctx = this.p.drawingContext;
-    const canvas = ctx.canvas;
-
-    // Invalidate cache on resize (canvas pixel dimensions change)
-    if (!this._staticCanvas
-        || this._staticCanvas.width !== canvas.width
-        || this._staticCanvas.height !== canvas.height) {
-      // Render static content onto the live p5 canvas (after background fill)
-      this._drawBackgroundGradient();
-      this._drawTitle();
-      this._drawGoals();
-      this._drawNetting();
-
-      // Capture to offscreen canvas at actual pixel dimensions
-      this._staticCanvas = document.createElement('canvas');
-      this._staticCanvas.width = canvas.width;
-      this._staticCanvas.height = canvas.height;
-      const sctx = this._staticCanvas.getContext('2d');
-      sctx.drawImage(canvas, 0, 0);
-    } else {
-      // Blit cached layer — covers entire canvas including background
-      ctx.drawImage(this._staticCanvas, 0, 0);
-    }
-  }
-
   _drawBackgroundGradient() {
     const ctx = this.p.drawingContext;
     ctx.save();
@@ -599,21 +565,23 @@ export default class Game {
     const ball = this.balls[0];
     if (!ball) return;
 
-    // Demo launch: always at 45° angle (upper-left direction)
-    // Power doubled from previous iteration (100% increase)
+    // Demo launch: 60° angle (more vertical), reduced power
+    // Power reduced 33% from previous iteration
     if (!this._demoTarget) {
-      const SQRT1_2 = Math.SQRT1_2; // 0.7071 — gives exact 45°
+      // 60° from horizontal: cos(60°) = 0.5, sin(60°) = √3/2
+      const xDir = 0.5;
+      const yDir = Math.sqrt(3) / 2;  // 0.866
 
       let demoPower;
       if (this.vp.portrait || this.vp.mobile) {
-        demoPower = this.vp.power * 6.8;
+        demoPower = this.vp.power * 6.8 * 0.67;
       } else {
-        demoPower = this.vp.power * 1.12;
+        demoPower = this.vp.power * 1.12 * 0.67;
       }
 
       this._demoTarget = {
-        xDir: SQRT1_2,
-        yDir: SQRT1_2,
+        xDir,
+        yDir,
         totalPower: demoPower,
       };
     }
@@ -1030,10 +998,9 @@ export default class Game {
       const menuRightEdge = dotCenterX + dotSpan / 2 + dotRadius + iconSize * 0.15;
       const minFirstBallCenter = menuRightEdge + iconSize;
 
-      // Center the 3-column grid, respecting minimum separation
+      // Center the 3-column grid on the screen, respecting minimum menu separation
       const gridW = (gridCols - 1) * spacing;
-      const idealCenter = (minFirstBallCenter + w * 0.55) / 2;
-      gridStartX = Math.max(minFirstBallCenter, idealCenter - gridW / 2);
+      gridStartX = Math.max(minFirstBallCenter, w / 2 - gridW / 2);
 
       gridStartY = titleZoneBottom + iconSize * topOffset;
 
