@@ -3,7 +3,7 @@
  *
  * Uses explicit onClick + onTouchEnd handlers to ensure mailto works
  * on mobile, where p5's touchStarted returning false calls preventDefault()
- * and swallows native <a> tag touch events on the canvas layer.
+ * and swallows native <a> tag touch events.
  */
 
 import { useRef } from 'react';

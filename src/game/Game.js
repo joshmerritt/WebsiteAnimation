@@ -463,29 +463,30 @@ export default class Game {
     const { dotCenterX, dotSpan, gridStartY, iconSize } = this.vp;
     const dotRadius = iconSize / 15;
 
-    const leftX  = dotCenterX - dotSpan / 2;
-    const rightX = dotCenterX + dotSpan / 2;
+    // Net is 66% of dotSpan, centered on dotCenterX
+    const netW = dotSpan * 0.66;
+    const leftX  = dotCenterX - netW / 2;
+    const rightX = dotCenterX + netW / 2;
     const topY   = gridStartY + dotRadius * 2;
     const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
     const botY   = menuStartY + this.categories.length * 0.4 * iconSize;
 
     if (botY <= topY) return;
 
-    const netW    = rightX - leftX;
-    const cellSize = netW / 4;
+    const cellSize = netW / 3;
 
-    // Trapezoid: wide at top (dots), narrowing toward bottom category
-    const flare = iconSize * 0.5;
+    // Trapezoid: wide at top (near dots), narrowing toward bottom category
+    const flare = netW * 0.15;
     const topLeftX  = leftX - flare;
     const topRightX = rightX + flare;
-    const botLeftX  = leftX;
-    const botRightX = rightX;
+    const botLeftX  = leftX + flare;
+    const botRightX = rightX - flare;
 
     ctx.save();
     ctx.strokeStyle = 'rgba(89, 133, 177, 0.07)';
     ctx.lineWidth = 0.7;
 
-    // Clip to trapezoid shape
+    // Clip to trapezoid
     ctx.beginPath();
     ctx.moveTo(topLeftX - 1, topY);
     ctx.lineTo(topRightX + 1, topY);
@@ -496,8 +497,8 @@ export default class Game {
 
     // Diagonal lines going ↘
     const span = botY - topY;
-    const extendedW = topRightX - topLeftX;
-    for (let offset = -span - flare; offset < extendedW + span + flare; offset += cellSize) {
+    const fullW = topRightX - topLeftX;
+    for (let offset = -span - fullW; offset < fullW + span * 2; offset += cellSize) {
       ctx.beginPath();
       ctx.moveTo(topLeftX + offset, topY);
       ctx.lineTo(topLeftX + offset + span, botY);
@@ -505,7 +506,7 @@ export default class Game {
     }
 
     // Diagonal lines going ↙
-    for (let offset = -span - flare; offset < extendedW + span + flare; offset += cellSize) {
+    for (let offset = -span - fullW; offset < fullW + span * 2; offset += cellSize) {
       ctx.beginPath();
       ctx.moveTo(topLeftX + offset, topY);
       ctx.lineTo(topLeftX + offset - span, botY);
@@ -556,9 +557,9 @@ export default class Game {
 
       let demoPower;
       if (this.vp.portrait || this.vp.mobile) {
-        demoPower = this.vp.power * 20;
+        demoPower = this.vp.power * 6.8;     // reduced 66% from 20
       } else {
-        demoPower = this.vp.power * 0.70;   // halved from 1.40
+        demoPower = this.vp.power * 1.12;    // reduced 20% from 1.40
       }
 
       this._demoTarget = {
@@ -610,10 +611,10 @@ export default class Game {
 
       const accentTopY = yStart - titleSize * 1.0;
       const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
-      const panelX = xPos - 8;
+      const panelX = xPos;
       const panelW = width * 0.60;
-      const panelY = accentTopY - 4;
-      const panelH = (accentBotY - accentTopY) + 8;
+      const panelY = accentTopY;
+      const panelH = accentBotY - accentTopY;
 
       ctx.save();
       const grad = ctx.createLinearGradient(panelX, panelY, panelX + panelW, panelY);
@@ -776,13 +777,15 @@ export default class Game {
 
     const canvas = this.p.drawingContext.canvas;
     if (this.vp.portrait) {
+      // Zoom in so balls in image ≈ 25% of actual ball size
+      // Ball appears as iconSize * (size / srcW), want = 0.25 * size → srcW = 4 * iconSize
+      const srcW = this.vp.iconSize * 4;
       const srcX = 0;
-      const srcY = this.vp.titleZoneBottom * 0.4;
-      const srcW = Math.min(this.vp.width * 0.85, this.vp.gridStartX + this.vp.spacing * 1.8);
+      const srcY = this.vp.titleZoneBottom * 0.5;
       const srcH = srcW;
       this._captureCtx.drawImage(canvas, srcX, srcY, srcW, srcH, 0, 0, size, size);
     } else {
-      // Desktop: capture from top-left using full width to show menu + all ball columns
+      // Desktop: capture full width to show menu + all ball columns
       const srcSize = this.vp.width;
       this._captureCtx.drawImage(canvas, 0, 0, srcSize, srcSize, 0, 0, size, size);
     }
@@ -978,7 +981,7 @@ export default class Game {
       const idealCenter = (minFirstBallCenter + w * 0.55) / 2;
       gridStartX = Math.max(minFirstBallCenter, idealCenter - gridW / 2);
 
-      gridStartY = titleZoneBottom + iconSize * 0.9;
+      gridStartY = titleZoneBottom + iconSize * 0.8;
 
       // Ensure lowest ball has drag room
       const lowestBallBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;

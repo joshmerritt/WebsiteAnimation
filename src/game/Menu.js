@@ -1,9 +1,6 @@
 /**
  * Menu.js — Category menu item (physics body + label)
  *
- * Font size is passed in from Game.js so the title/menu size hierarchy
- * (title always ≥10% bigger) is guaranteed.
- *
  * Body height reduced to iconSize/5 so balls bounce closer to the text.
  * `highlighted` property set by Game when a ball of this category is being aimed.
  */
@@ -19,7 +16,7 @@ export default class Menu {
     this.position = position;
     this.index = index;
     this.width = goalWidth;
-    this.height = iconSize / 5;       // thinner body — ball bounces closer to text
+    this.height = iconSize / 5;
     this.fontSize = fontSize || iconSize / 5;
     this.selected = false;
     this.highlighted = false;
@@ -55,12 +52,10 @@ export default class Menu {
     if (this.selected) {
       p.fill(config.colors.main);
     } else if (this.highlighted) {
-      // Category highlight when its ball is being aimed
       p.fill(config.colors.main);
     } else if (isHover) {
       p.fill('rgba(199, 214, 213, 0.75)');
     } else {
-      // Subtler than title — lower opacity
       p.fill('rgba(89, 133, 177, 0.72)');
     }
     p.text(this.category, this.position.x, this.position.y);
