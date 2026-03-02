@@ -102,33 +102,19 @@ export default class Ball {
     const ctx = p.drawingContext;
     const diameter = this.r * 2;
 
+    // Pre-render circular image once (or when size changes)
+    if (!this._circleCanvas || this._circleSize !== diameter) {
+      this._renderCircleImage(diameter);
+    }
+
     p.push();
     p.translate(pos.x, pos.y);
     p.rotate(angle);
 
-    ctx.save();
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.beginPath();
-    ctx.arc(0, 0, this.r, 0, Math.PI * 2);
-    ctx.clip();
+    // Draw pre-rendered circular image — no clip path needed
+    ctx.drawImage(this._circleCanvas, -this.r, -this.r);
 
-    // Draw directly from full-res source with square crop
-    // Browser bicubic interpolation >> p5's software scaling
-    const srcCanvas = this.fullImage.canvas || this.fullImage.drawingContext?.canvas;
-    if (srcCanvas) {
-      ctx.drawImage(
-        srcCanvas,
-        this._cropX, this._cropY, this._cropSize, this._cropSize,
-        -this.r, -this.r, diameter, diameter,
-      );
-    } else {
-      p.imageMode(p.CENTER);
-      p.image(this.ballImage, 0, 0, diameter, diameter);
-    }
-    ctx.restore();
-
-    // Border ring — decreased contrast: darker grey instead of bright white
+    // Border ring
     p.noFill();
     p.stroke('rgba(199, 214, 213, 0.3)');
     p.strokeWeight(this.r / 25);
@@ -139,6 +125,33 @@ export default class Ball {
 
     this.x = pos.x;
     this.y = pos.y;
+  }
+
+  /** Pre-render the ball image clipped to a circle on an offscreen canvas. */
+  _renderCircleImage(diameter) {
+    const size = Math.round(diameter);
+    this._circleSize = diameter;
+    this._circleCanvas = document.createElement('canvas');
+    this._circleCanvas.width = size;
+    this._circleCanvas.height = size;
+    const octx = this._circleCanvas.getContext('2d');
+    octx.imageSmoothingEnabled = true;
+    octx.imageSmoothingQuality = 'high';
+
+    // Clip to circle
+    octx.beginPath();
+    octx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    octx.clip();
+
+    // Draw from full-res source with square crop
+    const srcCanvas = this.fullImage.canvas || this.fullImage.drawingContext?.canvas;
+    if (srcCanvas) {
+      octx.drawImage(
+        srcCanvas,
+        this._cropX, this._cropY, this._cropSize, this._cropSize,
+        0, 0, size, size,
+      );
+    }
   }
 
   hover(iconSize, totalShots) {

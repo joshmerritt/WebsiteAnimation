@@ -87,16 +87,25 @@ export default class Game {
 
   draw() {
     const p = this.p;
-    if (this._hasActiveBalls()) {
+    const hasActive = this._hasActiveBalls();
+    if (hasActive) {
       Matter.Engine.update(this.engine);
     }
+
+    // ── Idle framerate: drop to 15fps when nothing is changing ──
+    const isIdle = !hasActive && !p.mouseIsPressed && !this.showDemo && !this.detailOpen;
+    if (isIdle !== this._wasIdle) {
+      p.frameRate(isIdle ? 15 : 60);
+      this._wasIdle = isIdle;
+    }
+
     p.background(config.colors.bg);
-    this._drawBackgroundGradient();
 
     if (!this.detailOpen) {
-      this._drawTitle();
-      this._drawGoals();
-      this._drawNetting();
+      // ── Static layer: bg gradient + title + netting + goals ──
+      // Rendered to offscreen canvas once, redrawn only on resize
+      this._drawStaticLayer();
+
       this.menus.forEach((m) => {
         m.highlighted = (this._aimingCategory && m.category === this._aimingCategory);
         m.show();
@@ -134,6 +143,9 @@ export default class Game {
   mousePressed() {
     if (this.detailOpen) return false;
     const p = this.p;
+
+    // Wake from idle framerate immediately
+    if (this._wasIdle) { p.frameRate(60); this._wasIdle = false; }
 
     if (Date.now() - this._lastReleaseTime < 300) return false;
 
@@ -440,9 +452,42 @@ export default class Game {
 
   // ── Private: drawing ───────────────────────────────────────────────────
 
+  // ── Static layer: caches bg gradient + title + netting + goals ────────
+
+  /**
+   * Draw static elements (bg gradient, title, netting, goals).
+   * On first call (or after resize), renders them via p5 and caches
+   * the result to an offscreen canvas. Subsequent frames just blit.
+   * Saves ~5-8ms/frame by avoiding textWidth, clip paths, gradients.
+   */
+  _drawStaticLayer() {
+    const ctx = this.p.drawingContext;
+    const canvas = ctx.canvas;
+
+    // Invalidate cache on resize (canvas pixel dimensions change)
+    if (!this._staticCanvas
+        || this._staticCanvas.width !== canvas.width
+        || this._staticCanvas.height !== canvas.height) {
+      // Render static content onto the live p5 canvas (after background fill)
+      this._drawBackgroundGradient();
+      this._drawTitle();
+      this._drawGoals();
+      this._drawNetting();
+
+      // Capture to offscreen canvas at actual pixel dimensions
+      this._staticCanvas = document.createElement('canvas');
+      this._staticCanvas.width = canvas.width;
+      this._staticCanvas.height = canvas.height;
+      const sctx = this._staticCanvas.getContext('2d');
+      sctx.drawImage(canvas, 0, 0);
+    } else {
+      // Blit cached layer — covers entire canvas including background
+      ctx.drawImage(this._staticCanvas, 0, 0);
+    }
+  }
+
   _drawBackgroundGradient() {
-    const p = this.p;
-    const ctx = p.drawingContext;
+    const ctx = this.p.drawingContext;
     ctx.save();
     const grad = ctx.createRadialGradient(
       this.vp.width * 0.7, this.vp.height * 0.5, 0,
@@ -766,7 +811,7 @@ export default class Game {
 
   _captureWebsite() {
     this._captureCounter = (this._captureCounter || 0) + 1;
-    if (this._captureCounter % 8 !== 1) return;
+    if (this._captureCounter % 30 !== 1) return;
 
     const thisSiteBall = this.balls.find((b) => b.project.id === 'thisWebsite');
     if (!thisSiteBall) return;
@@ -802,6 +847,8 @@ export default class Game {
     thisSiteBall._cropX = 0;
     thisSiteBall._cropY = 0;
     thisSiteBall._cropSize = size;
+    // Invalidate pre-rendered circle so it re-renders from new capture
+    thisSiteBall._circleCanvas = null;
   }
 
   // ── Private: page navigation ─────────────────────────────────────────
