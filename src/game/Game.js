@@ -322,9 +322,9 @@ export default class Game {
     const dotY = gridStartY;
     const dotLeftX = dotCenterX - dotSpan / 2;
 
-    // Ensure left dot isn't clipped or trapping balls against the left edge
-    // Left dot center must be at least dotRadius from x=0
-    const safeLeftX = Math.max(dotLeftX, dotRadius + 2);
+    // Ensure left dot isn't fully off-screen but keep it tight to the edge
+    // so balls can't balance between the dot and the left wall
+    const safeLeftX = Math.max(dotLeftX, 1);
 
     // Net height: just enough to cover the category labels
     const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
@@ -645,8 +645,8 @@ export default class Game {
       // Portrait (phone + tablet): 2× old power, then -10% fine-tune
       return this.vp.power * factor * 5.69 * 0.9;
     } else if (this.vp.mobile) {
-      // Mobile landscape: 2× old power (different base power formula)
-      return this.vp.power * factor * 3.36;
+      // Mobile landscape: 25% of previous tuning
+      return this.vp.power * factor * 3.36 * 0.25;
     } else {
       // Desktop landscape: 70% of old power
       return this.vp.power * factor * 0.15;
