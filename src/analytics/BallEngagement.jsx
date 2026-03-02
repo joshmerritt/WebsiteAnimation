@@ -1,27 +1,22 @@
 /**
- * BallEngagement.jsx — Ball interaction funnel table
+ * BallEngagement.jsx — Ball interaction funnel visualization + table
  *
- * Unique to DaDataDad.com — tracks the 4-step engagement funnel:
- *   Click → Launch → Score → Open
- * for each of the 8 project balls in the physics playground.
+ * Features:
+ *   - Visual funnel diagram (Click→Launch→Score→Open)
+ *   - Per-ball data table with 7 columns
+ *   - Category conversion chips
+ *   - Auto-generated insight
  */
 
-import { BALL_ENGAGEMENT } from './data.js';
+import { BALL_ENGAGEMENT, FUNNEL_TOTALS } from './data.js';
+import FunnelViz from './FunnelViz.jsx';
 
 function BallRow({ ball, maxClicks, index }) {
   const convRate = ((ball.opens / ball.clicks) * 100).toFixed(1);
   const barWidth = `${(ball.clicks / maxClicks) * 100}%`;
 
-  // Mini funnel visualization — 4 segments proportional to each step
-  const launchPct = (ball.launches / ball.clicks * 100).toFixed(0);
-  const scorePct  = (ball.scores / ball.launches * 100).toFixed(0);
-  const openPct   = (ball.opens / ball.scores * 100).toFixed(0);
-
   return (
-    <div
-      className="ball-row fade-in"
-      style={{ animationDelay: `${index * 80}ms` }}
-    >
+    <div className="ball-row fade-in" style={{ animationDelay: `${index * 60}ms` }}>
       <div className="ball-name">
         <span className="ball-dot" style={{ background: ball.color }} />
         <span>{ball.ball}</span>
@@ -31,7 +26,7 @@ function BallRow({ ball, maxClicks, index }) {
           className="ball-funnel-fill"
           style={{
             width: barWidth,
-            background: `linear-gradient(90deg, ${ball.color}88, ${ball.color}33)`,
+            background: `linear-gradient(90deg, ${ball.color}88, ${ball.color}22)`,
           }}
         />
       </div>
@@ -48,6 +43,7 @@ function BallRow({ ball, maxClicks, index }) {
 
 export default function BallEngagement() {
   const maxClicks = Math.max(...BALL_ENGAGEMENT.map((b) => b.clicks));
+
   const sorted = [...BALL_ENGAGEMENT].sort((a, b) => b.clicks - a.clicks);
   const topClicks = sorted[0];
   const topConv = [...BALL_ENGAGEMENT].sort(
@@ -57,42 +53,49 @@ export default function BallEngagement() {
   // Category breakdown
   const categories = {};
   BALL_ENGAGEMENT.forEach((b) => {
-    if (!categories[b.category]) categories[b.category] = { clicks: 0, opens: 0 };
+    if (!categories[b.category]) categories[b.category] = { clicks: 0, opens: 0, count: 0 };
     categories[b.category].clicks += b.clicks;
     categories[b.category].opens += b.opens;
+    categories[b.category].count++;
   });
 
   return (
-    <div className="panel ball-engagement" style={{ animationDelay: '800ms' }}>
+    <div className="panel ball-engagement-section" style={{ animationDelay: '700ms' }}>
       <div className="panel-header">
         <span className="panel-title">Ball Engagement Funnel</span>
-        <span className="panel-badge">
-          {'🎱'} physics playground metrics
-        </span>
+        <span className="panel-badge">physics playground metrics</span>
       </div>
 
-      {/* Column headers */}
-      <div className="ball-row ball-header">
-        <span>Ball</span>
-        <span>Volume</span>
-        <span className="ball-stat">Clicks</span>
-        <span className="ball-stat">Launches</span>
-        <span className="ball-stat">Scores</span>
-        <span className="ball-stat">Opens</span>
-        <span className="ball-stat">Conv%</span>
+      {/* Visual funnel + table side by side on desktop */}
+      <div className="engagement-layout">
+        <FunnelViz totals={FUNNEL_TOTALS} />
+
+        <div className="engagement-table-wrap">
+          {/* Column headers */}
+          <div className="ball-row ball-header">
+            <span>Ball</span>
+            <span>Volume</span>
+            <span className="ball-stat">Clicks</span>
+            <span className="ball-stat">Launches</span>
+            <span className="ball-stat">Scores</span>
+            <span className="ball-stat">Opens</span>
+            <span className="ball-stat">Conv%</span>
+          </div>
+
+          {BALL_ENGAGEMENT.map((ball, i) => (
+            <BallRow key={ball.id} ball={ball} maxClicks={maxClicks} index={i} />
+          ))}
+        </div>
       </div>
 
-      {BALL_ENGAGEMENT.map((ball, i) => (
-        <BallRow key={ball.id} ball={ball} maxClicks={maxClicks} index={i} />
-      ))}
-
-      {/* Category breakdown */}
+      {/* Category breakdown chips */}
       <div className="category-breakdown">
         {Object.entries(categories).map(([cat, data]) => {
           const conv = ((data.opens / data.clicks) * 100).toFixed(0);
           return (
             <div key={cat} className="cat-chip">
               <span className="cat-name">{cat}</span>
+              <span className="cat-count">{data.count} balls</span>
               <span className="cat-conv">{conv}%</span>
             </div>
           );
@@ -101,12 +104,13 @@ export default function BallEngagement() {
 
       {/* Insight */}
       <div className="insight-box">
-        <span className="insight-icon">{'💡'} Insight:</span>{' '}
+        <span className="insight-icon">Insight:</span>{' '}
         <span className="insight-text">
-          &ldquo;{topClicks.ball}&rdquo; has the highest engagement ({topClicks.clicks} clicks)
+          &ldquo;{topClicks.ball}&rdquo; drives the most engagement ({topClicks.clicks} clicks),
           while &ldquo;{topConv.ball}&rdquo; converts best at
           {' '}{((topConv.opens / topConv.clicks) * 100).toFixed(0)}% click-to-open.
-          The demo ball (first launch) drives most initial exploration.
+          Overall, {((FUNNEL_TOTALS.opens / FUNNEL_TOTALS.clicks) * 100).toFixed(1)}% of
+          ball interactions lead to a project detail view — the demo ball drives most initial exploration.
         </span>
       </div>
     </div>
