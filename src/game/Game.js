@@ -418,6 +418,9 @@ export default class Game {
       const isOnPage = ball.index >= startIdx && ball.index < endIdx;
       ball.display = isOnPage;
       ball.closeDetail();
+      ball.clicked = false;
+      ball.xPower = 0;
+      ball.yPower = 0;
       if (!ball.inOriginalPosition) ball.reset();
     });
   }
@@ -705,9 +708,11 @@ export default class Game {
       const p = this.p;
       const { gridStartY, spacing, gridRows, iconSize, portrait, width, height } = this.vp;
       const gridBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
-      const yPos = portrait
-        ? Math.min(gridBottom + iconSize * 0.6, height - iconSize * 1.5)
-        : gridBottom + iconSize * 0.6;
+      const yPos = gridBottom + iconSize * 0.8;
+
+      // Don't draw if it would go off screen or overlap the HUD
+      if (yPos > height - iconSize * 0.8) return;
+
       p.push();
       p.textFont('Syne');
       p.textSize(iconSize / 6);
@@ -726,7 +731,7 @@ export default class Game {
     const centerX = dotCenterX;
     const dotRadius = iconSize / 15;
     const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
-    const lastMenuY = menuStartY + this.categories.length * 0.4 * iconSize;
+    const lastMenuY = menuStartY + (this.categories.length - 1) * 0.4 * iconSize;
     const fontSize = iconSize / 7;
     const lineH = fontSize * 1.6;
     const pct = Math.round((this.totalMakes / this.totalShots) * 100);
@@ -889,16 +894,17 @@ export default class Game {
       const goalWidth = w * 0.18;
       goalY = titleZoneBottom + goalWidth * 0.55;
 
-      // Reserve generous bottom space for drag room + HUD
-      const bottomReserve = h * 0.16;
-      const gridAvailH = h - titleZoneBottom - bottomReserve;
-
-      // Estimate available width (will refine after computing dot positions)
       const estAvailW = w * 0.55;
 
-      // Icon size: constrained by height (tighter spacing: 1.30 gap ratio)
-      const spacingFactor = 1.30;     // was 1.45 — 33% less gap
-      const iconFromH = gridAvailH / (neededRows * spacingFactor);
+      // ── Icon size: account for ALL vertical consumers ──
+      const topOffset = 0.8;        // ball center below titleZoneBottom
+      const dragRoomFactor = 1.0;   // minimum drag space below lowest ball
+      const spacingFactor = 1.30;
+      const totalVertical = topOffset
+        + (neededRows - 1) * spacingFactor
+        + 0.5                        // bottom half of lowest ball
+        + dragRoomFactor;
+      const iconFromH = (h - titleZoneBottom) / totalVertical;
       const iconFromW = estAvailW / (gridCols * spacingFactor);
       const iconSize = Math.min(iconFromH, iconFromW);
 
@@ -909,22 +915,19 @@ export default class Game {
       const rightDotEdge = dotCenterX + dotSpan / 2 + dotRadius;
 
       // ── Equal horizontal spacing ──
-      // Three equal gaps: dot→ball1, ball1→ball2, ball2→screen edge
+      // Cap gap at half the ball size to prevent extreme vertical stretching
+      // on wide portrait screens (e.g. iPad portrait)
       const availW = w - rightDotEdge;
-      const gap = Math.max((availW - gridCols * iconSize) / (gridCols + 1), iconSize * 0.08);
+      const maxGap = iconSize * 0.30;
+      const gap = Math.min(
+        Math.max((availW - gridCols * iconSize) / (gridCols + 1), iconSize * 0.08),
+        maxGap,
+      );
       gridStartX = rightDotEdge + gap + iconSize / 2;
       const spacing = iconSize + gap;
 
-      gridStartY = titleZoneBottom + iconSize * 0.8;
+      gridStartY = titleZoneBottom + iconSize * topOffset;
       const gridRows = neededRows;
-
-      // Ensure the lowest ball leaves enough drag room
-      const lowestBallBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
-      const dragRoom = h - lowestBallBottom;
-      // If drag room is less than 1.5× iconSize, shift grid up
-      if (dragRoom < iconSize * 1.5) {
-        gridStartY -= (iconSize * 1.5 - dragRoom);
-      }
 
       // Power: scale so lowest ball can reach goal with available drag distance
       let power = Math.sqrt(iconSize) * (area / 350000);
@@ -955,11 +958,18 @@ export default class Game {
       goalY = h * 0.35;
       titleZoneBottom = h * 0.25;
 
-      // Reserve bottom space for drag room
-      const bottomReserve = h * 0.12;
-      const gridAvailH = h - titleZoneBottom - bottomReserve;
-      const spacingFactor = 1.30;  // 33% less gap
-      const iconFromH = gridAvailH / (neededRows * spacingFactor);
+      // ── Icon size: account for ALL vertical consumers ──
+      // From titleZoneBottom to screen bottom, iconSize units needed:
+      //   topOffset (center below title) + rows of spacing + half ball + drag room
+      const spacingFactor = 1.30;
+      const topOffset = 0.7;        // ball center = titleZoneBottom + 0.7*iconSize
+      const dragRoomFactor = 1.2;   // minimum drag space below lowest ball
+      const totalVertical = topOffset
+        + (neededRows - 1) * spacingFactor
+        + 0.5                        // bottom half of lowest ball
+        + dragRoomFactor;
+      const availH = h - titleZoneBottom;
+      const iconFromH = availH / totalVertical;
       const maxIcon = Math.min(w / 7, h / 4);
       const iconSize = Math.min(iconFromH, maxIcon);
       const spacing = iconSize * spacingFactor;
@@ -970,23 +980,15 @@ export default class Game {
       const dotCenterX = goalX + goalWidth / 2;
 
       // ── Enforce at least 1 ball width between menu right edge and first ball ──
-      // Menu text extends roughly to right dot + some overhang
       const menuRightEdge = dotCenterX + dotSpan / 2 + dotRadius + iconSize * 0.15;
-      const minFirstBallCenter = menuRightEdge + iconSize;  // 1 ball-width gap + half ball
+      const minFirstBallCenter = menuRightEdge + iconSize;
 
       // Center the 3-column grid, respecting minimum separation
       const gridW = (gridCols - 1) * spacing;
       const idealCenter = (minFirstBallCenter + w * 0.55) / 2;
       gridStartX = Math.max(minFirstBallCenter, idealCenter - gridW / 2);
 
-      gridStartY = titleZoneBottom + iconSize * 1.0;
-
-      // Ensure lowest ball has drag room
-      const lowestBallBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
-      const dragRoom = h - lowestBallBottom;
-      if (dragRoom < iconSize * 1.5) {
-        gridStartY -= (iconSize * 1.5 - dragRoom);
-      }
+      gridStartY = titleZoneBottom + iconSize * topOffset;
 
       let power = Math.sqrt(iconSize) * (area / 350000);
 
