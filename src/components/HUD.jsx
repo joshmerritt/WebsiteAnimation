@@ -1,9 +1,8 @@
 /**
- * HUD.jsx — Overlay button: Contact Me
+ * HUD.jsx — Overlay: Contact Me
  *
- * Uses explicit onClick + onTouchEnd handlers to ensure mailto works
- * on mobile, where p5's touchStarted returning false calls preventDefault()
- * and swallows native <a> tag touch events.
+ * Uses explicit onClick + onTouchEnd to bypass p5's preventDefault
+ * that swallows native touch events on mobile.
  */
 
 import { useRef } from 'react';

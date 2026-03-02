@@ -551,7 +551,6 @@ a { color: var(--main); text-decoration: none; }
     padding-bottom: clamp(40px, 8vmin, 80px);
   }
 
-  /* Plain text link — no button styling */
   .hud-contact {
     font-size: clamp(0.75rem, 1.5vmin, 0.95rem);
     padding: 0.5em 0.8em;
@@ -588,7 +587,6 @@ a { color: var(--main); text-decoration: none; }
     pointer-events: auto;
   }
 
-  /* Contact Me: centered, plain link style */
   .hud-contact {
     background: none;
     border: none;

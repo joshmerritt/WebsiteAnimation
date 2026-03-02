@@ -1,8 +1,8 @@
 /**
  * Menu.js — Category menu item (physics body + label)
  *
- * Body height reduced to iconSize/5 so balls bounce closer to the text.
- * `highlighted` property set by Game when a ball of this category is being aimed.
+ * Body height = iconSize/5 so balls bounce closer to the text.
+ * `highlighted` flag set by Game when a ball of this category is being aimed.
  */
 
 import Matter from 'matter-js';

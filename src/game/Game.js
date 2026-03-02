@@ -135,7 +135,6 @@ export default class Game {
     if (this.detailOpen) return false;
     const p = this.p;
 
-    // Post-release cooldown: prevent accidental ball selection after launching
     if (Date.now() - this._lastReleaseTime < 300) return false;
 
     if (this.totalPages > 1 && this._checkPageNavClick(p.mouseX, p.mouseY)) {
@@ -298,10 +297,14 @@ export default class Game {
 
   _createGoals() {
     const { iconSize, dotCenterX, dotSpan, gridStartY } = this.vp;
-    const netHeight = 0.4 * this.categories.length * iconSize;
     const dotRadius = iconSize / 15;
     const dotY = gridStartY;
     const dotLeftX = dotCenterX - dotSpan / 2;
+
+    // Net height: just enough to cover the category labels
+    const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
+    const lastMenuCenterY = menuStartY + (this.categories.length - 1) * 0.4 * iconSize;
+    const netHeight = (lastMenuCenterY - dotY) + iconSize * 0.1;
 
     for (let i = 0; i < 2; i++) {
       this.goals.push(new Goal({
@@ -314,7 +317,7 @@ export default class Game {
       this.nets.push(new Net({
         world: this.world, p: this.p,
         x: dotLeftX + i * dotSpan,
-        y: dotY + netHeight / 2 + dotRadius * 2,
+        y: dotY + netHeight / 2,
         height: netHeight,
         goalWidth: dotSpan,
       }));
@@ -463,19 +466,20 @@ export default class Game {
     const { dotCenterX, dotSpan, gridStartY, iconSize } = this.vp;
     const dotRadius = iconSize / 15;
 
-    // Net is 66% of dotSpan, centered on dotCenterX
+    // Net is 66% of dotSpan, centered
     const netW = dotSpan * 0.66;
     const leftX  = dotCenterX - netW / 2;
     const rightX = dotCenterX + netW / 2;
     const topY   = gridStartY + dotRadius * 2;
     const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
-    const botY   = menuStartY + this.categories.length * 0.4 * iconSize;
+    // End right at the last category center, not below it
+    const botY   = menuStartY + (this.categories.length - 1) * 0.4 * iconSize + iconSize * 0.1;
 
     if (botY <= topY) return;
 
     const cellSize = netW / 3;
 
-    // Trapezoid: wide at top (near dots), narrowing toward bottom category
+    // Trapezoid: wide at top (near dots), narrowing toward bottom
     const flare = netW * 0.15;
     const topLeftX  = leftX - flare;
     const topRightX = rightX + flare;
@@ -495,7 +499,6 @@ export default class Game {
     ctx.closePath();
     ctx.clip();
 
-    // Diagonal lines going ↘
     const span = botY - topY;
     const fullW = topRightX - topLeftX;
     for (let offset = -span - fullW; offset < fullW + span * 2; offset += cellSize) {
@@ -504,8 +507,6 @@ export default class Game {
       ctx.lineTo(topLeftX + offset + span, botY);
       ctx.stroke();
     }
-
-    // Diagonal lines going ↙
     for (let offset = -span - fullW; offset < fullW + span * 2; offset += cellSize) {
       ctx.beginPath();
       ctx.moveTo(topLeftX + offset, topY);
@@ -557,9 +558,9 @@ export default class Game {
 
       let demoPower;
       if (this.vp.portrait || this.vp.mobile) {
-        demoPower = this.vp.power * 6.8;     // reduced 66% from 20
+        demoPower = this.vp.power * 6.8;
       } else {
-        demoPower = this.vp.power * 1.12;    // reduced 20% from 1.40
+        demoPower = this.vp.power * 1.12;
       }
 
       this._demoTarget = {
@@ -736,13 +737,13 @@ export default class Game {
     p.noStroke();
 
     const divW = dotSpan * 0.5;
-    const dividerY = lastMenuY + lineH * 0.2;
+    const dividerY = lastMenuY + lineH * 1.0;
     p.stroke('rgba(89, 133, 177, 0.15)');
     p.strokeWeight(1);
     p.line(centerX - divW / 2, dividerY, centerX + divW / 2, dividerY);
     p.noStroke();
 
-    const startY = lastMenuY + lineH * 1.2;
+    const startY = lastMenuY + lineH * 2.2;
 
     // Stats are subtle — low opacity
     p.textSize(fontSize * 0.7);
@@ -777,15 +778,12 @@ export default class Game {
 
     const canvas = this.p.drawingContext.canvas;
     if (this.vp.portrait) {
-      // Zoom in so balls in image ≈ 25% of actual ball size
-      // Ball appears as iconSize * (size / srcW), want = 0.25 * size → srcW = 4 * iconSize
-      const srcW = this.vp.iconSize * 4;
-      const srcX = 0;
-      const srcY = this.vp.titleZoneBottom * 0.5;
+      // Capture full screen width from top — balls appear ~25% of actual size
+      const srcW = this.vp.width;
       const srcH = srcW;
-      this._captureCtx.drawImage(canvas, srcX, srcY, srcW, srcH, 0, 0, size, size);
+      this._captureCtx.drawImage(canvas, 0, 0, srcW, srcH, 0, 0, size, size);
     } else {
-      // Desktop: capture full width to show menu + all ball columns
+      // Desktop: full viewport width to show menu + all ball columns
       const srcSize = this.vp.width;
       this._captureCtx.drawImage(canvas, 0, 0, srcSize, srcSize, 0, 0, size, size);
     }
@@ -981,7 +979,7 @@ export default class Game {
       const idealCenter = (minFirstBallCenter + w * 0.55) / 2;
       gridStartX = Math.max(minFirstBallCenter, idealCenter - gridW / 2);
 
-      gridStartY = titleZoneBottom + iconSize * 0.8;
+      gridStartY = titleZoneBottom + iconSize * 1.0;
 
       // Ensure lowest ball has drag room
       const lowestBallBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
