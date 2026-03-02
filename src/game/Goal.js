@@ -1,5 +1,8 @@
 /**
  * Goal.js — Goal post physics body + rendering
+ *
+ * Dots are subtle — thin stroke, reduced opacity to keep visual
+ * hierarchy focused on balls and title.
  */
 
 import Matter from 'matter-js';
@@ -24,8 +27,10 @@ export default class Goal {
     const drawY = this.body.position.y - this.radius * 1.5;
 
     p.push();
-    p.stroke(config.colors.accent);
-    p.strokeWeight(this.radius * 0.6);
+    // 50%+ thinner: was radius * 0.6, now radius * 0.25
+    // Also dimmer: 55% opacity instead of full
+    p.stroke('rgba(89, 133, 177, 0.55)');
+    p.strokeWeight(this.radius * 0.25);
     p.noFill();
     p.ellipseMode(p.CENTER);
     p.circle(drawX, drawY, this.radius * 2);

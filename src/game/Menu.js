@@ -1,14 +1,15 @@
 /**
  * Menu.js — Category menu item (physics body + label)
  *
- * Font: Syne BOLD to match the homepage title styling.
+ * Font size is passed in from Game.js so the title/menu size hierarchy
+ * (title always ≥10% bigger) is guaranteed.
  */
 
 import Matter from 'matter-js';
 import config from './config.js';
 
 export default class Menu {
-  constructor({ world, position, category, index, goalWidth, iconSize, p }) {
+  constructor({ world, position, category, index, goalWidth, iconSize, fontSize, p }) {
     this.p = p;
     this.world = world;
     this.category = category;
@@ -16,6 +17,7 @@ export default class Menu {
     this.index = index;
     this.width = goalWidth;
     this.height = iconSize / 2;
+    this.fontSize = fontSize || this.height / 2.5;   // fallback
     this.selected = false;
 
     this.body = Matter.Bodies.rectangle(
@@ -43,16 +45,16 @@ export default class Menu {
     p.noStroke();
     p.textAlign(p.CENTER);
     p.textFont('Syne');
-    // Slightly larger text, always bold to match the title font weight
-    p.textSize(this.height / 2.2);
+    p.textSize(this.fontSize);
     p.textStyle(p.BOLD);
 
     if (this.selected) {
       p.fill(config.colors.main);
     } else if (isHover) {
-      p.fill('rgba(199, 214, 213, 0.85)');
+      p.fill('rgba(199, 214, 213, 0.75)');
     } else {
-      p.fill(config.colors.secondary);
+      // Subtler than title — lower opacity
+      p.fill('rgba(89, 133, 177, 0.72)');
     }
     p.text(this.category, this.position.x, this.position.y);
     p.pop();
