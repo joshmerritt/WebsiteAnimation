@@ -37,7 +37,7 @@ export default class Ball {
     const srcH = img.height;
     const minDim = Math.min(srcW, srcH);
     this._cropX = Math.floor((srcW - minDim) / 2);
-    this._cropY = Math.floor((srcH - minDim) / 3);
+    this._cropY = Math.floor((srcH - minDim) / 2);
     this._cropSize = minDim;
 
     // Fallback p5 cropped image (used by _captureWebsite override)
