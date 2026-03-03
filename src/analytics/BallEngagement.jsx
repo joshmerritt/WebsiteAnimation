@@ -1,17 +1,7 @@
-/**
- * BallEngagement.jsx — Ball interaction funnel table
- *
- * Unique to DaDataDad.com — tracks the 4-step engagement funnel:
- *   Click → Launch → Score → Open
- * for each of the 8 project balls in the physics playground.
- *
- * Accepts `data` prop (array of ball engagement objects).
- */
+import { BALL_ENGAGEMENT } from './data.js';
 
 function BallRow({ ball, maxClicks, index }) {
-  const convRate = ball.clicks > 0
-    ? ((ball.opens / ball.clicks) * 100).toFixed(1)
-    : '0.0';
+  const convRate = ball.clicks > 0 ? ((ball.opens / ball.clicks) * 100).toFixed(1) : '0.0';
   const barWidth = maxClicks > 0 ? `${(ball.clicks / maxClicks) * 100}%` : '0%';
 
   return (
@@ -43,26 +33,16 @@ function BallRow({ ball, maxClicks, index }) {
   );
 }
 
-export default function BallEngagement({ data = [] }) {
-  if (!data.length) {
-    return (
-      <div className="panel ball-engagement" style={{ animationDelay: '800ms' }}>
-        <div className="panel-header">
-          <span className="panel-title">Ball Engagement Funnel</span>
-        </div>
-        <p className="empty-state">No ball engagement data yet. Play with the portfolio to generate events!</p>
-      </div>
-    );
-  }
+export default function BallEngagement({ liveData }) {
+  const data = (liveData && liveData.length > 0) ? liveData : BALL_ENGAGEMENT;
 
   const maxClicks = Math.max(...data.map((b) => b.clicks));
   const sorted = [...data].sort((a, b) => b.clicks - a.clicks);
   const topClicks = sorted[0];
   const topConv = [...data].sort(
-    (a, b) => (b.clicks > 0 ? b.opens / b.clicks : 0) - (a.clicks > 0 ? a.opens / a.clicks : 0),
+    (a, b) => (b.opens / b.clicks) - (a.opens / a.clicks),
   )[0];
 
-  // Category breakdown
   const categories = {};
   data.forEach((b) => {
     if (!categories[b.category]) categories[b.category] = { clicks: 0, opens: 0 };
@@ -75,11 +55,10 @@ export default function BallEngagement({ data = [] }) {
       <div className="panel-header">
         <span className="panel-title">Ball Engagement Funnel</span>
         <span className="panel-badge">
-          {'🎱'} physics playground metrics
+          {'\uD83C\uDFB1'} physics playground metrics
         </span>
       </div>
 
-      {/* Column headers */}
       <div className="ball-row ball-header">
         <span>Ball</span>
         <span>Volume</span>
@@ -90,16 +69,13 @@ export default function BallEngagement({ data = [] }) {
         <span className="ball-stat">Conv%</span>
       </div>
 
-      {sorted.map((ball, i) => (
+      {data.map((ball, i) => (
         <BallRow key={ball.id} ball={ball} maxClicks={maxClicks} index={i} />
       ))}
 
-      {/* Category breakdown */}
       <div className="category-breakdown">
         {Object.entries(categories).map(([cat, catData]) => {
-          const conv = catData.clicks > 0
-            ? ((catData.opens / catData.clicks) * 100).toFixed(0)
-            : '0';
+          const conv = catData.clicks > 0 ? ((catData.opens / catData.clicks) * 100).toFixed(0) : '0';
           return (
             <div key={cat} className="cat-chip">
               <span className="cat-name">{cat}</span>
@@ -109,14 +85,14 @@ export default function BallEngagement({ data = [] }) {
         })}
       </div>
 
-      {/* Insight */}
       {topClicks && topConv && (
         <div className="insight-box">
-          <span className="insight-icon">{'💡'} Insight:</span>{' '}
+          <span className="insight-icon">{'\uD83D\uDCA1'} Insight:</span>{' '}
           <span className="insight-text">
             &ldquo;{topClicks.ball}&rdquo; has the highest engagement ({topClicks.clicks} clicks)
             while &ldquo;{topConv.ball}&rdquo; converts best at
             {' '}{topConv.clicks > 0 ? ((topConv.opens / topConv.clicks) * 100).toFixed(0) : 0}% click-to-open.
+            The demo ball (first launch) drives most initial exploration.
           </span>
         </div>
       )}

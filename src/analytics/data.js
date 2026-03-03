@@ -1,48 +1,46 @@
 /**
- * data.js — Analytics data layer for DaDataDad.com
+ * data.js — Analytics data for DaDataDad.com
  *
- * Fetches live data from the GA4 Cloudflare Worker proxy.
- * Falls back to deterministic mock data if the worker is unreachable
- * or if VITE_GA4_WORKER_URL is not set.
+ * Fetches live data from the Cloudflare Worker proxy (GA4 Data API).
+ * Falls back to deterministic mock data if the fetch fails.
  *
- * Usage:
- *   const { data, isLive, loading, error } = useAnalyticsData(days);
+ * In production, the worker URL should match your deployed endpoint.
  */
 
-// ── Worker URL (set in .env or .env.production) ─────────────────────────
-const WORKER_URL = typeof import.meta !== 'undefined'
-  ? (import.meta.env?.VITE_GA4_WORKER_URL || '')
-  : '';
+// ── Worker endpoint ─────────────────────────────────────────────────────
+const GA4_WORKER_URL = 'https://ga4-analytics-api.dadatadad-analytics.workers.dev';
 
-// ── Fetch live data from the Cloudflare Worker ──────────────────────────
+/**
+ * Fetch live analytics data from the GA4 Cloudflare Worker.
+ * Throws on failure so hooks.js can catch and fall back to mock.
+ * Returns { timeSeries, sources, pages, ballEvents, fetchedAt, days }
+ */
 export async function fetchLiveData(days = 90) {
-  if (!WORKER_URL) throw new Error('No worker URL configured');
+  const res = await fetch(`${GA4_WORKER_URL}?days=${days}`);
+  if (!res.ok) throw new Error(`Worker responded ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
 
-  const res = await fetch(`${WORKER_URL}?days=${days}`, {
-    headers: { 'Content-Type': 'application/json' },
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Worker returned ${res.status}: ${text}`);
-  }
-
-  const raw = await res.json();
-
-  // Transform to match dashboard's expected shape
+/**
+ * Returns mock data in the same shape as the live worker response.
+ * Used as fallback when the worker is unavailable.
+ */
+export function getMockData(days = 90) {
   return {
-    timeSeries: raw.timeSeries || [],
-    sources: raw.sources || [],
-    pages: raw.pages || [],
-    ballEvents: raw.ballEvents || [],
-    fetchedAt: raw.fetchedAt,
-    isLive: true,
+    timeSeries: generateTimeSeriesData(days),
+    sources: REFERRER_DATA,
+    pages: PAGE_DATA,
+    ballEvents: BALL_ENGAGEMENT,
+    fetchedAt: new Date().toISOString(),
+    days,
   };
 }
 
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  Mock data fallback (identical to previous implementation)
+//  Mock / fallback data (kept for offline dev & graceful degradation)
 // ═══════════════════════════════════════════════════════════════════════════
 
 function seededRandom(seed) {
@@ -86,7 +84,7 @@ export function generateTimeSeriesData(days = 90) {
   return data;
 }
 
-export const MOCK_REFERRER_DATA = [
+export const REFERRER_DATA = [
   { source: 'LinkedIn',       visits: 287, pct: 33.8, color: '#0A66C2' },
   { source: 'Google Search',  visits: 198, pct: 23.3, color: '#4285F4' },
   { source: 'Direct',         visits: 172, pct: 20.3, color: '#6B9F6B' },
@@ -94,7 +92,7 @@ export const MOCK_REFERRER_DATA = [
   { source: 'Upwork',         visits: 84,  pct: 9.9,  color: '#14A800' },
 ];
 
-export const MOCK_PAGE_DATA = [
+export const PAGE_DATA = [
   { path: '/',                  title: 'Home (Physics Playground)',    views: 849,  avgTime: '1:48', trend: 15 },
   { path: '/detail/powerBI',    title: 'Microsoft Power BI',          views: 312,  avgTime: '2:42', trend: 22 },
   { path: '/detail/wine',       title: 'The Wine You Drink',          views: 267,  avgTime: '3:58', trend: 45 },
@@ -105,7 +103,7 @@ export const MOCK_PAGE_DATA = [
   { path: '/detail/gds',        title: 'Google Data Studio Dashboard',views: 87,   avgTime: '1:55', trend: -5 },
 ];
 
-export const MOCK_BALL_ENGAGEMENT = [
+export const BALL_ENGAGEMENT = [
   { ball: 'Josh Merritt',              id: 'aboutMe',                     clicks: 312, launches: 289, scores: 267, opens: 251, color: '#6B9F6B',  category: 'Me' },
   { ball: 'Microsoft Power BI',        id: 'powerBIMetrics',              clicks: 234, launches: 218, scores: 189, opens: 178, color: '#D4A843',  category: 'Business' },
   { ball: 'The Wine You Drink',        id: 'thewineyoudrink',             clicks: 198, launches: 182, scores: 156, opens: 149, color: '#8B1A32',  category: 'Apps' },
@@ -116,19 +114,6 @@ export const MOCK_BALL_ENGAGEMENT = [
   { ball: 'Portfolio Website',         id: 'thisWebsite',                 clicks: 108, launches: 95,  scores: 84,  opens: 72,  color: '#5985B1',  category: 'Technology' },
 ];
 
-export function getMockData(days = 90) {
-  return {
-    timeSeries: generateTimeSeriesData(days),
-    sources: MOCK_REFERRER_DATA,
-    pages: MOCK_PAGE_DATA,
-    ballEvents: MOCK_BALL_ENGAGEMENT,
-    fetchedAt: null,
-    isLive: false,
-  };
-}
-
-
-// ── Metric colors (shared) ──────────────────────────────────────────────
 export const METRIC_COLORS = {
   visitors:         '#D4A843',
   pageviews:        '#5985B1',
