@@ -648,8 +648,8 @@ export default class Game {
       // Portrait (phone + tablet): 2× old power, then -10% fine-tune
       return this.vp.power * factor * 5.69 * 0.9;
     } else if (this.vp.mobile) {
-      // Mobile landscape: 25% of previous tuning
-      return this.vp.power * factor * 3.36 * 0.25;
+      // Mobile landscape: 2× previous (was 25%, now 50%)
+      return this.vp.power * factor * 3.36 * 0.5;
     } else {
       // Desktop landscape: 70% of old power
       return this.vp.power * factor * 0.15;
@@ -738,8 +738,18 @@ export default class Game {
       titleLines.forEach((line) => { maxW = Math.max(maxW, p.textWidth(line)); });
       p.pop();
 
-      const xPos = width * 0.92 - maxW;
       const totalTextH = lineHeight * titleLines.length + ctaSize * 1.1;
+
+      // Mobile landscape: push title to the right of the ball field
+      let xPos;
+      if (this.vp.mobile) {
+        const rightmostBallEdge = this.vp.gridStartX
+          + (this.vp.gridCols - 1) * this.vp.spacing
+          + iconSize / 2;
+        xPos = Math.max(rightmostBallEdge + titleSize, width * 0.92 - maxW);
+      } else {
+        xPos = width * 0.92 - maxW;
+      }
 
       // The title block must fit entirely above the ball tops.
       // First ball top = gridStartY - iconSize/2. Add padding below.
@@ -753,8 +763,9 @@ export default class Game {
       // Center the block within the safe zone; if it doesn't fit, pin to top
       const yStart = zoneTop + Math.max(0, (zoneH - totalTextH) / 2);
 
-      const accentTopY = yStart - titleSize * 1.0;
-      const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
+      // Clamp accent line to never extend into ball field
+      const accentTopY = Math.max(titleSize * 0.5, yStart - titleSize * 1.0);
+      const accentBotY = Math.min(zoneBot, yStart + lineHeight * titleLines.length + ctaSize * 0.7);
 
       ctx.save();
       ctx.strokeStyle = 'rgba(89, 133, 177, 0.65)';
@@ -1095,10 +1106,11 @@ export default class Game {
 
     } else if (mobile) {
       // ══════════════════════════════════════════════════════════
-      //  MOBILE LANDSCAPE — 5-column (2×5) grid
+      //  MOBILE LANDSCAPE — even 2-row grid (4+4 for 8 balls)
       // ══════════════════════════════════════════════════════════
-      const gridCols = 5;
-      const neededRows = Math.ceil(projects.length / gridCols);
+      const totalBalls = projects.length;
+      const gridCols = Math.ceil(totalBalls / 2); // even split: 8→4, 9→5, 10→5
+      const neededRows = Math.ceil(totalBalls / gridCols);
 
       goalX = w * 0.02;
       const goalWidth = w * 0.09;
@@ -1116,7 +1128,7 @@ export default class Game {
       const availH = h - titleZoneBottom;
       const iconFromH = availH / totalVertical;
 
-      // Horizontal constraint: goal area + 5 balls
+      // Horizontal constraint: goal area + ball columns
       const dotSpan_est = iconFromH * 1.3;
       const menuAreaW = goalX + goalWidth / 2 + dotSpan_est / 2 + iconFromH * 0.3;
       const availHoriz = w - menuAreaW;
@@ -1136,7 +1148,7 @@ export default class Game {
       const menuRightEdge = dotCenterX + dotSpan / 2 + dotRadius + iconSize * 0.15;
       const minFirstBallCenter = menuRightEdge + iconSize * 0.7;
 
-      // Center the 5-column grid between menu and right edge
+      // Center the grid between menu and right edge
       const gridW = (gridCols - 1) * spacing;
       const gridAreaCenter = (menuRightEdge + w) / 2;
       gridStartX = Math.max(minFirstBallCenter, gridAreaCenter - gridW / 2);
