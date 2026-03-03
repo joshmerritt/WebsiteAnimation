@@ -740,9 +740,18 @@ export default class Game {
 
       const xPos = width * 0.92 - maxW;
       const totalTextH = lineHeight * titleLines.length + ctaSize * 1.1;
-      // ── FIX 8: Clamp yStart so title never goes above safe top margin ──
-      const rawYStart = (titleZoneBottom - totalTextH) / 2 + titleSize * 0.35;
-      const yStart = Math.max(titleSize * 1.8, rawYStart);
+
+      // The title block must fit entirely above the ball tops.
+      // First ball top = gridStartY - iconSize/2. Add padding below.
+      const firstBallTop = this.vp.gridStartY - iconSize / 2;
+      const topPad = titleSize * 1.5;   // breathing room from screen top
+      const botPad = titleSize * 0.6;   // clearance above ball tops
+      const zoneTop = topPad;
+      const zoneBot = firstBallTop - botPad;
+      const zoneH = zoneBot - zoneTop;
+
+      // Center the block within the safe zone; if it doesn't fit, pin to top
+      const yStart = zoneTop + Math.max(0, (zoneH - totalTextH) / 2);
 
       const accentTopY = yStart - titleSize * 1.0;
       const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
@@ -924,10 +933,13 @@ export default class Game {
     thisSiteBall._cropY = 0;
     thisSiteBall._cropSize = physSize;
 
-    // Update the circle canvas in-place
+    // Update the circle canvas in-place.
+    // CRITICAL: _renderCircleImage applies scale(dpr, dpr) which persists
+    // on the context. We must reset the transform before drawing here.
     if (thisSiteBall._circleCanvas) {
-      const cSize = thisSiteBall._circleCanvas.width;
+      const cSize = thisSiteBall._circleCanvas.width; // physical pixels
       const octx = thisSiteBall._circleCanvas.getContext('2d');
+      octx.setTransform(1, 0, 0, 1, 0, 0); // reset DPR scale
       octx.clearRect(0, 0, cSize, cSize);
       octx.save();
       octx.beginPath();
@@ -1201,5 +1213,12 @@ export default class Game {
         gridCols, gridRows, menuFontSize,
       };
     }
+
+    // Expose ball bottom edge as CSS custom property for HUD positioning.
+    // Ball bottom = last row center Y + ball radius.
+    const vp = this.vp;
+    const lastRowCenterY = vp.gridStartY + (vp.gridRows - 1) * vp.spacing;
+    const ballBottomY = lastRowCenterY + vp.iconSize / 2;
+    document.documentElement.style.setProperty('--ball-bottom', `${ballBottomY}px`);
   }
 }

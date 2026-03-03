@@ -639,9 +639,11 @@ a { color: var(--main); text-decoration: none; }
 /* Desktop/landscape touch devices */
 @media (pointer: coarse) and (orientation: landscape) {
   .hud {
-    bottom: 0;
-    padding: 0 16px env(safe-area-inset-bottom, 4px);
-    padding-top: 8px;
+    /* Center between ball bottom edge and screen bottom */
+    top: calc(var(--ball-bottom, 80%) + (100vh - var(--ball-bottom, 80%)) / 2);
+    bottom: auto;
+    transform: translateY(-50%);
+    padding: 0;
     z-index: 25;
     pointer-events: auto;
   }
