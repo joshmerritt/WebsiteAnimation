@@ -1,12 +1,37 @@
 /**
- * data.js — Analytics mock data for DaDataDad.com
+ * data.js — Analytics data for DaDataDad.com
  *
- * Reflects the actual site structure: 8 project balls across 4 categories
- * (Me, Technology, Business, Apps). Mock data is seeded deterministically
- * so the dashboard renders consistently.
+ * Fetches live data from the Cloudflare Worker proxy (GA4 Data API).
+ * Falls back to deterministic mock data if the fetch fails.
  *
- * In production, replace with real GA4 Data API calls.
+ * In production, the worker URL should match your deployed endpoint.
  */
+
+// ── Worker endpoint ─────────────────────────────────────────────────────
+const GA4_WORKER_URL = 'https://ga4-analytics-api.dadatadad-analytics.workers.dev';
+
+/**
+ * Fetch live analytics data from the GA4 Cloudflare Worker.
+ * Returns { timeSeries, sources, pages, ballEvents, isLive: true }
+ * or null if the fetch fails.
+ */
+export async function fetchGA4Data(days = 90) {
+  try {
+    const res = await fetch(`${GA4_WORKER_URL}?days=${days}`);
+    if (!res.ok) throw new Error(`Worker responded ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return { ...data, isLive: true };
+  } catch (err) {
+    console.warn('GA4 live fetch failed, using mock data:', err.message);
+    return null;
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Mock / fallback data (kept for offline dev & graceful degradation)
+// ═══════════════════════════════════════════════════════════════════════════
 
 // ── Seeded pseudo-random for deterministic "mock" data ──────────────────
 function seededRandom(seed) {

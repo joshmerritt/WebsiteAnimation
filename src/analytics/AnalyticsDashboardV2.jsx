@@ -1,6 +1,9 @@
 /**
  * AnalyticsDashboardV2.jsx — Enhanced analytics dashboard for DaDataDad.com
  *
+ * Fetches live data from the GA4 Cloudflare Worker.
+ * Falls back to deterministic mock data if the fetch fails.
+ *
  * V2 adds: FunnelViz, Device Breakdown, Session Flow, Architecture Showcase.
  * Shares data layer and sub-components (StatCard, AreaChart, DonutChart) with V1.
  *
@@ -17,6 +20,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import {
+  fetchGA4Data,
   generateTimeSeriesData, REFERRER_DATA, PAGE_DATA,
   DEVICE_DATA, SESSION_FLOW, ARCHITECTURE,
   METRIC_COLORS,
@@ -244,26 +248,57 @@ function ArchitectureShowcase() {
 export default function AnalyticsDashboardV2() {
   const [timeRange, setTimeRange] = useState('90d');
   const [activeMetric, setActiveMetric] = useState('visitors');
-  const [simTick, setSimTick] = useState(0);
 
-  const fullData = useMemo(() => generateTimeSeriesData(90), []);
+  // Live data state
+  const [liveData, setLiveData] = useState(null);
+  const [isLive, setIsLive] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Live simulation pulse — subtle counter increment
-  useEffect(() => {
-    const timer = setInterval(() => setSimTick((t) => t + 1), 8000);
-    return () => clearInterval(timer);
-  }, []);
+  // Mock data fallback
+  const mockData = useMemo(() => generateTimeSeriesData(90), []);
 
   const rangeDays = TIME_RANGES.find((r) => r.key === timeRange)?.days ?? 90;
-  const timeSeriesData = fullData.slice(-rangeDays);
 
-  // KPIs
-  const totalVisitors      = timeSeriesData.reduce((s, d) => s + d.visitors, 0) + simTick;
-  const totalPageviews     = timeSeriesData.reduce((s, d) => s + d.pageviews, 0) + simTick * 2;
-  const avgBounce          = Math.round(timeSeriesData.reduce((s, d) => s + d.bounceRate, 0) / timeSeriesData.length);
-  const avgDuration        = Math.round(timeSeriesData.reduce((s, d) => s + d.avgDuration, 0) / timeSeriesData.length);
-  const totalInteractions  = timeSeriesData.reduce((s, d) => s + d.ballInteractions, 0) + simTick;
-  const interactionRate    = Math.round((totalInteractions / totalVisitors) * 100);
+  // Fetch live data when time range changes
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    fetchGA4Data(rangeDays).then((result) => {
+      if (cancelled) return;
+      if (result) {
+        setLiveData(result);
+        setIsLive(true);
+      } else {
+        setIsLive(false);
+      }
+      setLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [rangeDays]);
+
+  // Resolve which data to display — live or mock
+  const timeSeriesData = isLive
+    ? (liveData?.timeSeries || []).filter(d => d && d.visitors != null)
+    : mockData.slice(-rangeDays);
+  const sourcesData    = isLive ? (liveData?.sources || REFERRER_DATA) : REFERRER_DATA;
+  const pagesData      = isLive ? (liveData?.pages || PAGE_DATA) : PAGE_DATA;
+  const ballEventsData = isLive ? (liveData?.ballEvents || null) : null;
+
+  // KPIs (defensive against empty/sparse arrays)
+  const totalVisitors      = timeSeriesData.reduce((s, d) => s + (d.visitors || 0), 0);
+  const totalPageviews     = timeSeriesData.reduce((s, d) => s + (d.pageviews || 0), 0);
+  const avgBounce          = timeSeriesData.length > 0
+    ? Math.round(timeSeriesData.reduce((s, d) => s + (d.bounceRate || 0), 0) / timeSeriesData.length)
+    : 0;
+  const avgDuration        = timeSeriesData.length > 0
+    ? Math.round(timeSeriesData.reduce((s, d) => s + (d.avgDuration || 0), 0) / timeSeriesData.length)
+    : 0;
+  const totalInteractions  = timeSeriesData.reduce((s, d) => s + (d.ballInteractions || 0), 0);
+  const interactionRate    = totalVisitors > 0
+    ? Math.round((totalInteractions / totalVisitors) * 100)
+    : 0;
 
   const metrics = [
     { key: 'visitors',         label: 'Visitors',     color: METRIC_COLORS.visitors },
@@ -281,9 +316,9 @@ export default function AnalyticsDashboardV2() {
         <div>
           <div className="dash-title-row">
             <h1 className="dash-title">Site Analytics</h1>
-            <div className="live-badge">
+            <div className={`live-badge${isLive ? '' : ' demo-badge'}`}>
               <span className="live-dot" />
-              Simulated Live
+              {loading ? 'Loading\u2026' : isLive ? 'Live' : 'Demo'}
             </div>
           </div>
           <p className="dash-subtitle">DaDataDad.com &middot; Last {rangeDays} days</p>
@@ -318,7 +353,9 @@ export default function AnalyticsDashboardV2() {
         <StatCard label="Bounce Rate" value={avgBounce} suffix="%" trend={-5} delay={400}
           sparkData={timeSeriesData.slice(-30).map((d) => d.bounceRate)} color={METRIC_COLORS.bounceRate} />
         <StatCard label="Ball Interaction Rate" value={interactionRate} suffix="%" trend={12} delay={500}
-          sparkData={timeSeriesData.slice(-30).map((d) => Math.round((d.ballInteractions / d.visitors) * 100))} color={METRIC_COLORS.ballInteractions} />
+          sparkData={timeSeriesData.slice(-30).map((d) =>
+            d.visitors > 0 ? Math.round((d.ballInteractions / d.visitors) * 100) : 0,
+          )} color={METRIC_COLORS.ballInteractions} />
       </div>
 
       {/* ── Traffic Chart ── */}
@@ -347,9 +384,9 @@ export default function AnalyticsDashboardV2() {
         <div className="panel" style={{ animationDelay: '500ms' }}>
           <span className="panel-title">Traffic Sources</span>
           <div className="sources-layout">
-            <DonutChart segments={REFERRER_DATA} size={115} strokeWidth={17} />
+            <DonutChart segments={sourcesData} size={115} strokeWidth={17} />
             <div className="sources-list">
-              {REFERRER_DATA.map((r, i) => (
+              {sourcesData.map((r, i) => (
                 <div key={r.source} className="source-row fade-in" style={{ animationDelay: `${600 + i * 80}ms` }}>
                   <div className="source-name">
                     <span className="source-dot" style={{ background: r.color }} />
@@ -367,8 +404,8 @@ export default function AnalyticsDashboardV2() {
 
         <div className="panel" style={{ animationDelay: '600ms' }}>
           <span className="panel-title">Top Pages</span>
-          {PAGE_DATA.map((pg, i) => (
-            <div key={pg.path} className={`page-row fade-in ${i < PAGE_DATA.length - 1 ? 'bordered' : ''}`}
+          {pagesData.map((pg, i) => (
+            <div key={pg.path} className={`page-row fade-in ${i < pagesData.length - 1 ? 'bordered' : ''}`}
               style={{ animationDelay: `${700 + i * 80}ms` }}>
               <div className="page-info">
                 <div className="page-title">{pg.title}</div>
@@ -387,7 +424,7 @@ export default function AnalyticsDashboardV2() {
       </div>
 
       {/* ── Ball Engagement ── */}
-      <BallEngagementV2 />
+      <BallEngagementV2 liveData={ballEventsData} />
 
       {/* ── Device Breakdown ── */}
       <DeviceBreakdown />
@@ -401,8 +438,17 @@ export default function AnalyticsDashboardV2() {
       {/* ── Footer ── */}
       <div className="dash-footer fade-in" style={{ animationDelay: '1100ms' }}>
         <p>
-          Displaying deterministic mock data. Numbers increment in real-time to simulate live traffic.
-          Connect GA4 property <code>G-JXCE49FJ7J</code> via the Data API for real metrics.
+          {isLive ? (
+            <>
+              Live data from GA4 property <code>G-JXCE49FJ7J</code> via Cloudflare Worker.
+              Device breakdown, session flow, and architecture sections use supplementary mock data.
+            </>
+          ) : (
+            <>
+              Mock data shown above. Connect GA4 property <code>G-JXCE49FJ7J</code> via
+              the Data API to display real metrics.
+            </>
+          )}
         </p>
         <p>
           Custom event tracking implemented in <code>src/game/ga4.js</code> — listens to the
