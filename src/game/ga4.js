@@ -41,11 +41,13 @@ export function initGA4Tracking() {
 
   // Per-ball launch tracking (includes project_name for GA4 breakdown)
   unsubs.push(
-    bus.on('ball:launched', ({ name, category }) => {
+    bus.on('ball:launched', ({ name, category, ballLaunches, ballMakes }) => {
       track('ball_launch', {
         project_name: name,
         project_category: category,
-        shot_number: currentShots,
+        ball_launches: ballLaunches,
+        ball_makes: ballMakes,
+        total_shots: currentShots,
         total_makes: currentMakes,
         accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
       });
@@ -54,12 +56,14 @@ export function initGA4Tracking() {
 
   // Per-ball score tracking
   unsubs.push(
-    bus.on('ball:scored', ({ name, category }) => {
+    bus.on('ball:scored', ({ name, category, ballLaunches, ballMakes }) => {
       track('ball_score', {
         project_name: name,
         project_category: category,
-        shot_number: currentShots,
-        make_number: currentMakes,
+        ball_launches: ballLaunches,
+        ball_makes: ballMakes,
+        total_shots: currentShots,
+        total_makes: currentMakes,
         accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
       });
     }),

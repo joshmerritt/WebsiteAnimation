@@ -225,9 +225,14 @@ export default class Game {
 
       if (ball.clicked && (Math.abs(ball.xPower) > config.minLaunchPower || Math.abs(ball.yPower) > config.minLaunchPower)) {
         this._launchBall(ball);
-        bus.emit('ball:launched', { name: ball.name, category: ball.category });
         this.totalShots++;
         this._emitStats();
+        bus.emit('ball:launched', {
+          name: ball.name,
+          category: ball.category,
+          ballLaunches: ball.launchCount,
+          ballMakes: ball.makes,
+        });
       }
 
       ball.clicked = false;
@@ -393,9 +398,14 @@ export default class Game {
         if (ballBody?.ballRef) {
           const ball = ballBody.ballRef;
           this._openBallDetail(ball);
-          bus.emit('ball:scored', { name: ball.name, category: ball.category });
           this.totalMakes++;
           this._emitStats();
+          bus.emit('ball:scored', {
+            name: ball.name,
+            category: ball.category,
+            ballLaunches: ball.launchCount,
+            ballMakes: ball.makes,
+          });
         }
       }
     });
