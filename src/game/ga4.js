@@ -29,29 +29,39 @@ function track(eventName, params = {}) {
 export function initGA4Tracking() {
   const unsubs = [];
 
-  // Stats update — fires after every shot and score
-  let lastShots = 0;
-  let lastMakes = 0;
+  // Track aggregate stats for accuracy calculation
+  let currentShots = 0;
+  let currentMakes = 0;
   unsubs.push(
-    bus.on('stats:update', ({ shots, makes, opens }) => {
-      // Detect new launch
-      if (shots > lastShots) {
-        track('ball_launch', {
-          shot_number: shots,
-          total_makes: makes,
-          accuracy: shots > 0 ? Math.round((makes / shots) * 100) : 0,
-        });
-      }
-      // Detect new score
-      if (makes > lastMakes) {
-        track('ball_score', {
-          shot_number: shots,
-          make_number: makes,
-          accuracy: Math.round((makes / shots) * 100),
-        });
-      }
-      lastShots = shots;
-      lastMakes = makes;
+    bus.on('stats:update', ({ shots, makes }) => {
+      currentShots = shots;
+      currentMakes = makes;
+    }),
+  );
+
+  // Per-ball launch tracking (includes project_name for GA4 breakdown)
+  unsubs.push(
+    bus.on('ball:launched', ({ name, category }) => {
+      track('ball_launch', {
+        project_name: name,
+        project_category: category,
+        shot_number: currentShots,
+        total_makes: currentMakes,
+        accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
+      });
+    }),
+  );
+
+  // Per-ball score tracking
+  unsubs.push(
+    bus.on('ball:scored', ({ name, category }) => {
+      track('ball_score', {
+        project_name: name,
+        project_category: category,
+        shot_number: currentShots,
+        make_number: currentMakes,
+        accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
+      });
     }),
   );
 

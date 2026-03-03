@@ -151,9 +151,9 @@ export default function AnalyticsDashboard() {
       <div className="dash-footer fade-in" style={{ animationDelay: '1000ms' }}>
         <p>
           {isLive ? (
-            <>Live data from GA4 property <code>G-JXCE49FJ7J</code> via Cloudflare Worker. See <code>src/game/ga4.js</code> for event tracking implementation.</>
+            <>Real-time analytics powered by a custom GA4 Data API pipeline &mdash; a Cloudflare Worker authenticates via service account, queries the GA4 reporting endpoint, and returns structured JSON that this React dashboard consumes. Custom events track the full user journey from ball interaction through project discovery.</>
           ) : (
-            <>Mock data shown above. Connect GA4 property <code>G-JXCE49FJ7J</code> via the Data API to display real metrics. See <code>src/game/ga4.js</code> for event tracking implementation.</>
+            <>Deterministic mock data generated client-side for demonstration. In production, this dashboard connects to a Cloudflare Worker proxy that authenticates with the GA4 Data API and returns real visitor metrics, traffic sources, and ball engagement funnels.</>
           )}
         </p>
       </div>
