@@ -726,7 +726,7 @@ export default class Game {
       p.pop();
 
     } else {
-      const titleSize = Math.min(iconSize / 3, height / 16, width / 36);
+      const titleSize = Math.min(iconSize / 3.5, height / 18, width / 40);
       const ctaSize   = titleSize * 0.7;
       const lineHeight = titleSize * 1.25;
 
@@ -751,21 +751,12 @@ export default class Game {
         xPos = width * 0.92 - maxW;
       }
 
-      // The title block must fit entirely above the ball tops.
-      // First ball top = gridStartY - iconSize/2. Add padding below.
-      const firstBallTop = this.vp.gridStartY - iconSize / 2;
-      const topPad = titleSize * 1.5;   // breathing room from screen top
-      const botPad = titleSize * 0.6;   // clearance above ball tops
-      const zoneTop = topPad;
-      const zoneBot = firstBallTop - botPad;
-      const zoneH = zoneBot - zoneTop;
+      // Simple centering within titleZoneBottom
+      const rawYStart = (titleZoneBottom - totalTextH) / 2 + titleSize * 0.35;
+      const yStart = Math.max(titleSize * 0.8, rawYStart);
 
-      // Center the block within the safe zone; if it doesn't fit, pin to top
-      const yStart = zoneTop + Math.max(0, (zoneH - totalTextH) / 2);
-
-      // Clamp accent line to never extend into ball field
-      const accentTopY = Math.max(titleSize * 0.5, yStart - titleSize * 1.0);
-      const accentBotY = Math.min(zoneBot, yStart + lineHeight * titleLines.length + ctaSize * 0.7);
+      const accentTopY = yStart - titleSize * 1.0;
+      const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
 
       ctx.save();
       ctx.strokeStyle = 'rgba(89, 133, 177, 0.65)';
@@ -1178,7 +1169,7 @@ export default class Game {
       goalX = w * 0.03;
       const goalWidth = w * 0.12;
       goalY = h * 0.35;
-      titleZoneBottom = h * 0.25;
+      titleZoneBottom = h * 0.28;
 
       // ── Icon size: account for ALL vertical consumers ──
       const spacingFactor = 1.30;
