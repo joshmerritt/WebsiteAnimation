@@ -166,14 +166,6 @@ async function fetchTimeSeries(token, propId, days) {
       { name: 'bounceRate' },
       { name: 'eventCount' },
     ],
-    dimensionFilter: {
-      orGroup: {
-        expressions: [
-          // Include all rows — no filter needed, but we add ball_launch
-          // count separately below
-        ],
-      },
-    },
     orderBys: [{ dimension: { dimensionName: 'date' } }],
     limit: days + 1,
   });
