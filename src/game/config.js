@@ -7,7 +7,7 @@
 
 const config = {
   // ── Identity ──────────────────────────────────────────────────────────
-  version: '2.7.0',
+  version: typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.0.0',
   titleText: 'Honest. Analytical. Data Dreamer.',
   ctaText: 'What can I build for you?',
   contactEmail: 'josh@DaDataDad.com',
