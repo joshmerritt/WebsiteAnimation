@@ -17,6 +17,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         analytics: resolve(__dirname, 'analytics-dashboard.html'),
+        analyticsV2: resolve(__dirname, 'analytics-v2.html'),
       },
     },
   },
