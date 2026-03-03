@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { fetchLiveData, getMockData } from './data.js';
 
 /**
  * Animates a number from 0 → target with ease-out cubic easing.
@@ -22,4 +23,41 @@ export function useAnimatedNumber(target, duration = 1200, delay = 0) {
   }, [target, duration, delay]);
 
   return value;
+}
+
+/**
+ * Fetches analytics data from the Cloudflare Worker.
+ * Falls back to mock data if the worker is unavailable.
+ *
+ * Returns: { data, isLive, loading, error, refresh }
+ */
+export function useAnalyticsData(days = 90) {
+  const [data, setData] = useState(null);
+  const [isLive, setIsLive] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const live = await fetchLiveData(days);
+      setData(live);
+      setIsLive(true);
+    } catch (err) {
+      console.warn('Live GA4 fetch failed, using mock data:', err.message);
+      setData(getMockData(days));
+      setIsLive(false);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [days]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { data, isLive, loading, error, refresh: load };
 }
