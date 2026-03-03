@@ -7,6 +7,7 @@
 
 const config = {
   // ── Identity ──────────────────────────────────────────────────────────
+  version: '2.4.0',
   titleText: 'Honest. Analytical. Data Dreamer.',
   ctaText: 'What can I build for you?',
   contactEmail: 'josh@DaDataDad.com',
@@ -41,8 +42,7 @@ const config = {
   doubleTapWindow: 500,    // ms
   minLaunchPower:  2,      // minimum xPower or yPower to count as a real launch
   powerScaleDesktop: 33,
-  powerScaleMobile:  33 / 5 * 2,           // portrait: 2× base mobile
-  powerScaleMobileLandscape: 33 / 5 * 1.2, // landscape: 1.2× base mobile
+  powerScaleMobile:  33 / 5,
 
   // ── Category collision bitmasks ───────────────────────────────────────
   categoryBits: [0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080],

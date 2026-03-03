@@ -316,33 +316,37 @@ export default class Game {
   }
 
   _createGoals() {
-    const { iconSize, dotCenterX, dotSpan, gridStartY } = this.vp;
+    const { iconSize, dotCenterX, dotSpan, gridStartY, portrait, mobile } = this.vp;
     // Cap dot radius at 40% of ball diameter (= 20% of diameter each side)
     const dotRadius = Math.min(iconSize / 15, iconSize * 0.2);
     const dotY = gridStartY;
     const dotLeftX = dotCenterX - dotSpan / 2;
+    const dotRightX = dotCenterX + dotSpan / 2;
 
-    // Ensure left dot isn't fully off-screen but keep it tight to the edge
-    // so balls can't balance between the dot and the left wall
-    const safeLeftX = Math.max(dotLeftX, 1);
+    // On desktop: push left dot flush with the wall edge so balls can't
+    // get trapped between the dot and the left boundary wall.
+    // On mobile: use computed position but ensure visibility.
+    const leftDotX = (!portrait && !mobile)
+      ? Math.min(dotLeftX, dotRadius)   // flush or overlapping wall
+      : Math.max(dotLeftX, dotRadius + 2);
 
     // Net height: just enough to cover the category labels
     const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
     const lastMenuCenterY = menuStartY + (this.categories.length - 1) * 0.4 * iconSize;
     const netHeight = (lastMenuCenterY - dotY) + iconSize * 0.1;
 
+    const dotPositions = [leftDotX, dotRightX];
     for (let i = 0; i < 2; i++) {
-      const dotX = i === 0 ? safeLeftX : safeLeftX + dotSpan;
       this.goals.push(new Goal({
         world: this.world, p: this.p,
-        x: dotX,
+        x: dotPositions[i],
         y: dotY,
         radius: dotRadius,
         index: i,
       }));
       this.nets.push(new Net({
         world: this.world, p: this.p,
-        x: dotX,
+        x: dotPositions[i],
         y: dotY + netHeight / 2,
         height: netHeight,
         goalWidth: dotSpan,

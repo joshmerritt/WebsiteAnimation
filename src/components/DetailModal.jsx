@@ -13,6 +13,7 @@
  */
 
 import { useCallback } from 'react';
+import config from '../game/config.js';
 
 function ctaLabel(link) {
   if (!link) return null;
@@ -117,6 +118,8 @@ export default function DetailModal({ detail, onClose }) {
               {ctaLabel(detail.link)}
             </a>
           )}
+
+          <span className="modal-version">v{config.version}</span>
         </div>
       </div>
     </div>

@@ -315,6 +315,17 @@ body {
   transform: translateY(-1px);
 }
 
+.modal-version {
+  display: block;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: rgba(89, 133, 177, 0.25);
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+  user-select: none;
+}
+
 
 /* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
 .modal-card::-webkit-scrollbar       { width: 4px; }
@@ -703,12 +714,13 @@ a { color: var(--main); text-decoration: none; }
     border-radius: var(--radius-md) 0 0 var(--radius-md);
     display: flex;
     align-items: stretch;
+    background: rgba(10, 14, 18, 0.6);
   }
   .modal-hero img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center top;
+    object-fit: contain;
+    object-position: center;
   }
   .modal-hero--full {
     max-height: 95vh;
@@ -717,8 +729,11 @@ a { color: var(--main); text-decoration: none; }
     max-height: 95vh;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center top;
+    object-fit: contain;
+    object-position: center;
+  }
+  .modal-hero-gradient {
+    display: none;
   }
 
   .modal-content {
