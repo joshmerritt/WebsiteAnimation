@@ -9,9 +9,7 @@
  *   ball_score      — ball collides with matching goal → detail opens
  *   detail_open     — project detail modal displayed
  *   detail_close    — modal dismissed
- *   category_select — menu filter chosen
- *   demo_complete   — initial demo animation finishes
- *   game_reset      — user resets the playground
+ *   portfolio_loaded — all images loaded, canvas ready
  */
 
 import bus from './EventBus.js';
@@ -71,13 +69,6 @@ export function initGA4Tracking() {
   unsubs.push(
     bus.on('detail:close', () => {
       track('detail_close');
-    }),
-  );
-
-  // Game reset
-  unsubs.push(
-    bus.on('game:reset', () => {
-      track('game_reset');
     }),
   );
 

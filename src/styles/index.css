@@ -241,14 +241,15 @@ body {
 .modal-title {
   font-family: var(--font-display);
   font-size: clamp(1.1rem, 3vmin, 1.5rem);
-  font-weight: 800;
+  font-weight: 600;
   color: var(--main);
   letter-spacing: -0.02em;
   line-height: 1.2;
+  text-align: left;
 }
 
 .modal-title--centered {
-  text-align: center;
+  text-align: left;
   padding-right: 0;
 }
 
