@@ -5,4 +5,5 @@ compatibility_date = "2024-01-01"
 # Set these via: npx wrangler secret put <NAME>
 # GA4_SERVICE_ACCOUNT_JSON — paste the entire JSON key file contents
 # GA4_PROPERTY_ID          — numeric property ID from GA4 Admin → Property Settings
-# ALLOWED_ORIGIN           — "https://dadatadad.com"
+# ALLOWED_ORIGINS          — comma-separated, e.g. "https://dadatadad.com,https://www.dadatadad.com"
+# ALLOWED_ORIGIN           — legacy single origin (still supported)

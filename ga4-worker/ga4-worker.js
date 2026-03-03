@@ -14,7 +14,7 @@ export default {
   async fetch(request, env) {
     // CORS preflight
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders(env) });
+      return new Response(null, { headers: corsHeaders(env, request) });
     }
 
     try {
@@ -42,24 +42,46 @@ export default {
       });
 
       return new Response(body, {
-        headers: { 'Content-Type': 'application/json', ...corsHeaders(env) },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders(env, request) },
       });
     } catch (err) {
       return new Response(
         JSON.stringify({ error: err.message }),
-        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(env) } },
+        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(env, request) } },
       );
     }
   },
 };
 
-function corsHeaders(env) {
+function corsHeaders(env, request) {
+  const requestOrigin = request.headers.get('Origin');
+  const allowList = parseAllowedOrigins(env);
+
+  const allowOrigin = requestOrigin && allowList.includes(requestOrigin)
+    ? requestOrigin
+    : allowList[0] || '*';
+
   return {
-    'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
+    'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
   };
+}
+
+function parseAllowedOrigins(env) {
+  if (env.ALLOWED_ORIGINS) {
+    return env.ALLOWED_ORIGINS
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+  }
+
+  if (env.ALLOWED_ORIGIN) return [env.ALLOWED_ORIGIN];
+
+  // Safe defaults for this project.
+  return ['https://dadatadad.com', 'https://www.dadatadad.com'];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
