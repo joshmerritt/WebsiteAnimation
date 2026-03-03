@@ -323,12 +323,11 @@ export default class Game {
     const dotLeftX = dotCenterX - dotSpan / 2;
     const dotRightX = dotCenterX + dotSpan / 2;
 
-    // On desktop: push left dot flush with the wall edge so balls can't
-    // get trapped between the dot and the left boundary wall.
-    // On mobile: use computed position but ensure visibility.
-    const leftDotX = (!portrait && !mobile)
-      ? Math.min(dotLeftX, dotRadius)   // flush or overlapping wall
-      : Math.max(dotLeftX, dotRadius + 2);
+    // Cap left dot so the gap between its edge and screen edge is
+    // never more than 40% of ball diameter — prevents ball trapping.
+    const maxGap = iconSize * 0.4;
+    const maxLeftCenter = dotRadius + maxGap;
+    const leftDotX = Math.min(dotLeftX, maxLeftCenter);
 
     // Net height: just enough to cover the category labels
     const menuStartY = gridStartY + dotRadius * 2 + iconSize * 0.35;
@@ -743,7 +742,7 @@ export default class Game {
       const totalTextH = lineHeight * titleLines.length + ctaSize * 1.1;
       // ── FIX 8: Clamp yStart so title never goes above safe top margin ──
       const rawYStart = (titleZoneBottom - totalTextH) / 2 + titleSize * 0.35;
-      const yStart = Math.max(titleSize * 0.8, rawYStart);
+      const yStart = Math.max(titleSize * 1.8, rawYStart);
 
       const accentTopY = yStart - titleSize * 1.0;
       const accentBotY = yStart + lineHeight * titleLines.length + ctaSize * 0.7;
@@ -867,10 +866,10 @@ export default class Game {
     p.pop();
   }
 
-  // ── Portrait + Desktop capture for "thisWebsite" ball ──
-  // DPR-aware: p5's canvas backing store is at pixelDensity() resolution,
-  // so all source coordinates must be in physical pixels (CSS × density).
-  // Captures every 4 frames (~15fps) for smooth portfolio ball updates.
+  // ── Capture for "thisWebsite" ball ──
+  // Centers on the first ball (aboutMe) in the grid so the portfolio ball
+  // shows a zoomed view of the actual layout with visible surrounding balls.
+  // DPR-aware: p5 canvas backing store is at pixelDensity() resolution.
   _captureWebsite() {
     this._captureCounter = (this._captureCounter || 0) + 1;
     if (this._captureCounter % 4 !== 1) return;
@@ -879,7 +878,6 @@ export default class Game {
     if (!thisSiteBall) return;
 
     const dpr = this.p.pixelDensity ? this.p.pixelDensity() : (window.devicePixelRatio || 1);
-    // Capture at DPR resolution for sharp rendering
     const cssSize = Math.round(thisSiteBall.r * 2);
     const physSize = Math.round(cssSize * dpr);
     if (physSize <= 0) return;
@@ -893,24 +891,27 @@ export default class Game {
 
     const canvas = this.p.drawingContext.canvas;
 
-    if (this.vp.portrait) {
-      // Zoom into the goal area + first row of balls
-      const captureTop = this.vp.titleZoneBottom;
-      const captureSize = this.vp.width * 0.75; // 1.33× zoom
+    // Center capture on the first ball (aboutMe) in the grid
+    const firstBall = this.balls.find((b) => b.index === 0);
+    const centerX = firstBall ? firstBall.originalPos.x : this.vp.gridStartX;
+    const centerY = firstBall ? firstBall.originalPos.y : this.vp.gridStartY;
 
-      const srcX = 0;
-      const srcY = Math.round(captureTop * dpr);
-      const srcSize = Math.round(captureSize * dpr);
-      this._captureCtx.drawImage(canvas, srcX, srcY, srcSize, srcSize, 0, 0, physSize, physSize);
-    } else {
-      // Desktop/landscape: capture centered, using height as constraint
-      const cssSrcSize = Math.min(this.vp.width, this.vp.height);
-      const cssSrcX = Math.max(0, (this.vp.width - cssSrcSize) / 4);
+    // Capture region in CSS pixels: ~5× ball diameter so the center ball
+    // is about 20% of the view. On portrait use slightly tighter zoom.
+    const zoomFactor = this.vp.portrait ? 3.5 : 5.0;
+    const captureCSS = this.vp.iconSize * zoomFactor;
 
-      const srcX = Math.round(cssSrcX * dpr);
-      const srcSize = Math.round(cssSrcSize * dpr);
-      this._captureCtx.drawImage(canvas, srcX, 0, srcSize, srcSize, 0, 0, physSize, physSize);
-    }
+    // Clamp so we don't go outside the canvas
+    const halfCSS = captureCSS / 2;
+    const cssLeft = Math.max(0, Math.min(centerX - halfCSS, this.vp.width - captureCSS));
+    const cssTop  = Math.max(0, Math.min(centerY - halfCSS, this.vp.height - captureCSS));
+
+    // Convert to physical pixels
+    const srcX = Math.round(cssLeft * dpr);
+    const srcY = Math.round(cssTop * dpr);
+    const srcSize = Math.round(captureCSS * dpr);
+
+    this._captureCtx.drawImage(canvas, srcX, srcY, srcSize, srcSize, 0, 0, physSize, physSize);
 
     // Update the p5 image
     if (!this._capturePImg || this._capturePImg.width !== physSize) {
@@ -923,8 +924,7 @@ export default class Game {
     thisSiteBall._cropY = 0;
     thisSiteBall._cropSize = physSize;
 
-    // Update the circle canvas in-place instead of nulling it
-    // This avoids expensive full re-creation each capture
+    // Update the circle canvas in-place
     if (thisSiteBall._circleCanvas) {
       const cSize = thisSiteBall._circleCanvas.width;
       const octx = thisSiteBall._circleCanvas.getContext('2d');
@@ -936,7 +936,6 @@ export default class Game {
       octx.drawImage(this._captureCanvas, 0, 0, physSize, physSize, 0, 0, cSize, cSize);
       octx.restore();
     } else {
-      // First time — force a full render next frame
       thisSiteBall._circleCanvas = null;
     }
   }

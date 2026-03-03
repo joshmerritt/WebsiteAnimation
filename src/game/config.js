@@ -7,7 +7,7 @@
 
 const config = {
   // ── Identity ──────────────────────────────────────────────────────────
-  version: '2.4.0',
+  version: '2.5.0',
   titleText: 'Honest. Analytical. Data Dreamer.',
   ctaText: 'What can I build for you?',
   contactEmail: 'josh@DaDataDad.com',
