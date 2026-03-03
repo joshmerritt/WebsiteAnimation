@@ -8,7 +8,18 @@ export default function AreaChart({ data, dataKey, color, width = 680, height = 
   const [hoverIdx, setHoverIdx] = useState(null);
   const svgRef = useRef(null);
 
-  const max = Math.max(...data.map((d) => d[dataKey])) * 1.1;
+  // Guard against empty or incomplete data
+  if (!data || data.length < 2) {
+    return (
+      <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
+        <text x={width / 2} y={height / 2} textAnchor="middle" className="chart-axis-label">
+          No data available
+        </text>
+      </svg>
+    );
+  }
+
+  const max = Math.max(...data.map((d) => d[dataKey] || 0)) * 1.1;
   const min = 0;
   const range = max - min || 1;
 
@@ -20,7 +31,7 @@ export default function AreaChart({ data, dataKey, color, width = 680, height = 
   const toY = (v) => padT + chartH - ((v - min) / range) * chartH;
 
   const linePath = data
-    .map((d, i) => `${i === 0 ? 'M' : 'L'}${toX(i)},${toY(d[dataKey])}`)
+    .map((d, i) => `${i === 0 ? 'M' : 'L'}${toX(i)},${toY(d[dataKey] || 0)}`)
     .join(' ');
   const areaPath = `${linePath} L${toX(data.length - 1)},${padT + chartH} L${toX(0)},${padT + chartH} Z`;
 
@@ -110,35 +121,43 @@ export default function AreaChart({ data, dataKey, color, width = 680, height = 
       />
 
       {/* Hover */}
-      {hoverIdx !== null && (
+      {hoverIdx !== null && data[hoverIdx] && (
         <g>
-          <line
-            x1={toX(hoverIdx)} y1={padT}
-            x2={toX(hoverIdx)} y2={padT + chartH}
-            stroke={color} strokeWidth="1"
-            strokeDasharray="3,3" opacity="0.45"
-          />
-          <circle
-            cx={toX(hoverIdx)}
-            cy={toY(data[hoverIdx][dataKey])}
-            r="4.5" fill={color}
-            stroke="var(--a-bg)" strokeWidth="2"
-          />
-          <rect
-            x={toX(hoverIdx) - 50}
-            y={toY(data[hoverIdx][dataKey]) - 30}
-            width="100" height="24" rx="5"
-            className="chart-tooltip-bg"
-            stroke={`${color}44`} strokeWidth="1"
-          />
-          <text
-            x={toX(hoverIdx)}
-            y={toY(data[hoverIdx][dataKey]) - 15}
-            textAnchor="middle"
-            className="chart-tooltip-text"
-          >
-            {data[hoverIdx].label}: {data[hoverIdx][dataKey].toLocaleString()}
-          </text>
+          {(() => {
+            const hoverVal = data[hoverIdx][dataKey] || 0;
+            const hoverY = toY(hoverVal);
+            return (
+              <>
+                <line
+                  x1={toX(hoverIdx)} y1={padT}
+                  x2={toX(hoverIdx)} y2={padT + chartH}
+                  stroke={color} strokeWidth="1"
+                  strokeDasharray="3,3" opacity="0.45"
+                />
+                <circle
+                  cx={toX(hoverIdx)}
+                  cy={hoverY}
+                  r="4.5" fill={color}
+                  stroke="var(--a-bg)" strokeWidth="2"
+                />
+                <rect
+                  x={toX(hoverIdx) - 50}
+                  y={hoverY - 30}
+                  width="100" height="24" rx="5"
+                  className="chart-tooltip-bg"
+                  stroke={`${color}44`} strokeWidth="1"
+                />
+                <text
+                  x={toX(hoverIdx)}
+                  y={hoverY - 15}
+                  textAnchor="middle"
+                  className="chart-tooltip-text"
+                >
+                  {data[hoverIdx].label}: {hoverVal.toLocaleString()}
+                </text>
+              </>
+            );
+          })()}
         </g>
       )}
     </svg>

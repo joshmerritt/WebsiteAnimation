@@ -28,8 +28,10 @@ export default function AnalyticsDashboard() {
   // Fetch live data (falls back to mock automatically via hooks.js)
   const { data, isLive, loading } = useAnalyticsData(rangeDays);
 
-  // Resolve display data from the unified shape
-  const timeSeriesData = data?.timeSeries || [];
+  // Resolve display data from the unified shape (filter out incomplete entries)
+  const timeSeriesData = (data?.timeSeries || []).filter(
+    (d) => d && typeof d.visitors === 'number',
+  );
   const sourcesData    = data?.sources || [];
   const pagesData      = data?.pages || [];
   const ballEventsData = data?.ballEvents || [];
