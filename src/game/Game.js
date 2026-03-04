@@ -663,13 +663,13 @@ export default class Game {
    * by a power of width normalises across viewport sizes.
    *
    * Mobile (portrait & landscape):  coeff × dist^1.5 / √width
-   *   - Portrait coeff 0.062, landscape coeff 0.157
+   *   - Portrait coeff 0.372, landscape coeff 0.169
    *
-   * Desktop:  194.6 × dist^1.5 / width^1.376
-   *   - The 1.376 exponent is derived by fitting two constraints:
-   *     wide desktop (1920px) = +15% vs prior, narrow (1152px) = −5%.
-   *   - Verified: +15% at 1920, +7% at 1600, +3% at 1440,
-   *              −1% at 1280, −5% at 1152.
+   * Desktop:  0.71 × dist^1.5 / width^0.678
+   *   - The 0.678 exponent is derived by fitting two constraints:
+   *     wide desktop (1920px) = −29% vs prior, narrow (1152px) = −50%.
+   *   - Verified: −29% at 1920, −37% at 1600, −42% at 1440,
+   *              −46% at 1280, −50% at 1152.
    */
   _computeDemoPower(ball) {
     const dx = ball.x - this.vp.dotCenterX;
@@ -680,12 +680,13 @@ export default class Game {
     const distPow = Math.pow(dist, 1.5);
 
     if (portrait) {
-      return 0.062 * distPow / Math.sqrt(width);
+      return 0.372 * distPow / Math.sqrt(width);
     } else if (mobile) {
-      return 0.157 * distPow / Math.sqrt(width);
+      return 0.169 * distPow / Math.sqrt(width);
     } else {
-      // Desktop: width^1.376 — wider screens get more power, narrow screens slightly less
-      return 194.6 * distPow / Math.pow(width, 1.376);
+      // Desktop: width^0.678 — flatter curve reduces power across the board,
+      // with narrower viewports getting a larger reduction
+      return 0.71 * distPow / Math.pow(width, 0.678);
     }
   }
 
