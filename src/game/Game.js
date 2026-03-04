@@ -40,6 +40,7 @@ export default class Game {
     this.totalMakes       = 0;
     this.totalOpens       = 0;
     this.clickedToOpen    = false;
+    this.consecutiveMisses = 0;
 
     this.currentPage      = 0;
     this.ballsPerPage     = 999;
@@ -158,6 +159,8 @@ export default class Game {
         this._lastTappedBall.onBall(p.mouseX, p.mouseY)) {
       this._openBallDetail(this._lastTappedBall);
       this.clickedToOpen = true;
+      this.consecutiveMisses = 0;
+      bus.emit('miss:hint', false);
       this._lastTappedBall = null;
       return false;
     }
@@ -226,6 +229,10 @@ export default class Game {
       if (ball.clicked && (Math.abs(ball.xPower) > config.minLaunchPower || Math.abs(ball.yPower) > config.minLaunchPower)) {
         this._launchBall(ball);
         this.totalShots++;
+        this.consecutiveMisses++;
+        if (this.consecutiveMisses >= 3) {
+          bus.emit('miss:hint', true);
+        }
         this._emitStats();
         bus.emit('ball:launched', {
           name: ball.name,
@@ -399,6 +406,8 @@ export default class Game {
           const ball = ballBody.ballRef;
           this._openBallDetail(ball);
           this.totalMakes++;
+          this.consecutiveMisses = 0;
+          bus.emit('miss:hint', false);
           this._emitStats();
           bus.emit('ball:scored', {
             name: ball.name,
@@ -414,19 +423,29 @@ export default class Game {
   // ── Private: actions ───────────────────────────────────────────────────
 
   _launchBall(ball) {
-    // ── FIX 5: Increase launch power for mobile ──
-    // Portrait: doubled (0.35 → 0.70), Landscape mobile: +20% (0.35 → 0.42)
-    let speedScale;
+    // ── Higher-order launch power ──
+    // Polynomial curve (mag^1.15): matches old linear at typical drags,
+    // gives ~15% boost at large drags (big screens) and ~5% reduction
+    // at small drags (small screens). Coefficients calibrated to match
+    // the original speedScale values at their respective typical magnitudes.
+    const magnitude = Math.sqrt(ball.xPower ** 2 + ball.yPower ** 2);
+    if (magnitude < 0.01) return;
+
+    const exponent = 1.15;
+    let coeff;
     if (this.vp.portrait) {
-      speedScale = 0.70;
+      coeff = 0.50;      // was linear 0.70 — matched at mag ≈ 20
     } else if (this.vp.mobile) {
-      speedScale = 0.42;
+      coeff = 0.29;      // was linear 0.42 — matched at mag ≈ 25
     } else {
-      speedScale = 0.25;
+      coeff = 0.17;      // was linear 0.25 — matched at mag ≈ 30
     }
 
-    const vx = -ball.xPower * speedScale;
-    const vy = -ball.yPower * speedScale;
+    const scaledMag = Math.pow(magnitude, exponent) * coeff;
+    const dirX = ball.xPower / magnitude;
+    const dirY = ball.yPower / magnitude;
+    const vx = -dirX * scaledMag;
+    const vy = -dirY * scaledMag;
 
     const catIdx = this.categories.indexOf(ball.category);
 
@@ -798,23 +817,7 @@ export default class Game {
   }
 
   _drawHelpMessage() {
-    if (this.totalShots > 2 && this.totalShots < 10 && !this.clickedToOpen && !this.detailOpen) {
-      const p = this.p;
-      const { gridStartY, spacing, gridRows, iconSize, portrait, width, height } = this.vp;
-      const gridBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
-      const yPos = gridBottom + iconSize * 0.8;
-
-      // Don't draw if it would go off screen or overlap the HUD
-      if (yPos > height - iconSize * 0.8) return;
-
-      p.push();
-      p.textFont('Syne');
-      p.textSize(iconSize / 6);
-      p.fill(config.colors.main);
-      p.textAlign(p.CENTER);
-      p.text("Double click the image if you're tired of playing.", width / 2, yPos);
-      p.pop();
-    }
+    // Now handled by React miss:hint popup (emitted after 3 consecutive misses)
   }
 
   // ── FIX 3: Stats equidistant between last category and screen bottom ──

@@ -8,13 +8,14 @@ import config from './config.js';
 export default class Boundary {
   constructor({ world, width, height, thickness }) {
     this.world = world;
-    const opts = { isStatic: true, restitution: config.boundary.restitution };
+    const rightOpts = { isStatic: true, restitution: config.boundary.restitution };
+    const leftOpts  = { isStatic: true, restitution: config.boundary.leftRestitution };
 
     this.leftWall = Matter.Bodies.rectangle(
-      -thickness / 2, -height / 2, thickness, height * 3, opts,
+      -thickness / 2, -height / 2, thickness, height * 3, leftOpts,
     );
     this.rightWall = Matter.Bodies.rectangle(
-      width + thickness / 2, -height / 2, thickness, height * 3, opts,
+      width + thickness / 2, -height / 2, thickness, height * 3, rightOpts,
     );
     this.leftWall.label  = 'leftWall';
     this.rightWall.label = 'rightWall';

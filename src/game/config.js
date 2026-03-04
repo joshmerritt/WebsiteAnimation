@@ -36,6 +36,10 @@ const config = {
   },
   boundary: {
     restitution: 0.5,
+    leftRestitution: 0.25,     // left wall — 50% less bounce
+  },
+  menu: {
+    restitution: 0.03,         // ~10% of old 0.3 — heavy dampen on category hit
   },
 
   // ── Interaction ───────────────────────────────────────────────────────

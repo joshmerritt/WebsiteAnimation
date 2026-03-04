@@ -18,6 +18,7 @@ import { initGA4Tracking } from './game/ga4.js';
 
 export default function App() {
   const [detail, setDetail] = useState(null);
+  const [missHint, setMissHint] = useState(false);
 
   const handleClose = useCallback(() => {
     setDetail(null);
@@ -27,6 +28,14 @@ export default function App() {
   useEffect(() => {
     const unsub = bus.on('detail:open', (data) => {
       setDetail(data);
+    });
+    return unsub;
+  }, []);
+
+  // Miss hint popup — shown after 3 consecutive misses
+  useEffect(() => {
+    const unsub = bus.on('miss:hint', (show) => {
+      setMissHint(show);
     });
     return unsub;
   }, []);
@@ -57,6 +66,12 @@ export default function App() {
         {!detail && (
           <>
             <HUD />
+            {missHint && (
+              <div className="miss-hint">
+                <span className="miss-hint-icon">💡</span>
+                <span>Try <strong>double-clicking</strong> a ball to view project details!</span>
+              </div>
+            )}
           </>
         )}
       </div>
