@@ -663,13 +663,13 @@ export default class Game {
    * by a power of width normalises across viewport sizes.
    *
    * Mobile (portrait & landscape):  coeff × dist^1.5 / √width
-   *   - Portrait coeff 0.0062, landscape coeff 0.196
+   *   - Portrait coeff 0.062, landscape coeff 0.157
    *
-   * Desktop:  2860 × dist^1.5 / width^1.75
-   *   - The steeper 1.75 exponent on width means narrower desktop
-   *     viewports get proportionally more power, producing a consistent
-   *     arc whether the browser is 1280px or 1920px wide.
-   *   - Verified: ≈3× at 1920, ≈4.3× at 1440, ≈5× at 1280.
+   * Desktop:  194.6 × dist^1.5 / width^1.376
+   *   - The 1.376 exponent is derived by fitting two constraints:
+   *     wide desktop (1920px) = +15% vs prior, narrow (1152px) = −5%.
+   *   - Verified: +15% at 1920, +7% at 1600, +3% at 1440,
+   *              −1% at 1280, −5% at 1152.
    */
   _computeDemoPower(ball) {
     const dx = ball.x - this.vp.dotCenterX;
@@ -680,12 +680,12 @@ export default class Game {
     const distPow = Math.pow(dist, 1.5);
 
     if (portrait) {
-      return 0.0062 * distPow / Math.sqrt(width);
+      return 0.062 * distPow / Math.sqrt(width);
     } else if (mobile) {
-      return 0.196 * distPow / Math.sqrt(width);
+      return 0.157 * distPow / Math.sqrt(width);
     } else {
-      // Desktop: steeper width^1.75 so narrow and wide screens both hit the goal
-      return 2860 * distPow / Math.pow(width, 1.75);
+      // Desktop: width^1.376 — wider screens get more power, narrow screens slightly less
+      return 194.6 * distPow / Math.pow(width, 1.376);
     }
   }
 
