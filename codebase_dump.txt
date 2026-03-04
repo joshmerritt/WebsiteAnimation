@@ -1,5 +1,5 @@
 =============================
- CODEBASE DUMP - Tue Mar  3 20:25:48 PST 2026
+ CODEBASE DUMP - Tue Mar  3 21:01:35 PST 2026
 =============================
 
 
@@ -179,7 +179,7 @@ FILE: package.json
 {
   "name": "dadatadad-portfolio",
   "private": true,
-  "version": "2.11.2",
+  "version": "3.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -2771,6 +2771,7 @@ FILE: src/components/DetailModal.jsx
 
 import { useCallback } from 'react';
 import config from '../game/config.js';
+import bus from '../game/EventBus.js';
 
 function ctaLabel(link) {
   if (!link) return null;
@@ -2797,6 +2798,18 @@ export default function DetailModal({ detail, onClose }) {
   const handleButtonClick = useCallback((e) => {
     e.stopPropagation();
   }, []);
+
+  /** CTA click handler — emit tracking event then allow default navigation */
+  const handleCtaClick = useCallback((e) => {
+    e.stopPropagation();
+    if (detail) {
+      bus.emit('cta:click', {
+        name: detail.name || 'unknown',
+        link: detail.link || '',
+        category: detail.category || '',
+      });
+    }
+  }, [detail]);
 
   if (!detail) return null;
 
@@ -2868,7 +2881,7 @@ export default function DetailModal({ detail, onClose }) {
               href={detail.link}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={handleButtonClick}
+              onClick={handleCtaClick}
               onPointerDown={handleButtonClick}
               onTouchStart={handleButtonClick}
             >
@@ -4060,14 +4073,51 @@ body { background: var(--a-bg); font-family: var(--font-body); color: var(--a-te
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BALL ENGAGEMENT — 7-column grid (added Launches)
+   BALL ENGAGEMENT — 8-column grid + bar metric toggle
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .ball-engagement { margin-bottom: 0; }
 
+/* ─── Bar Metric Toggle ───────────────────────────────────────────────── */
+.engagement-bar-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.bar-toggle-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--a-text-faint);
+  margin-right: 4px;
+}
+
+.bar-toggle-btn {
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--a-border);
+  background: transparent;
+  color: var(--a-text-muted);
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bar-toggle-btn:hover:not(.active) { color: var(--a-text-dim); border-color: var(--a-border-accent); }
+.bar-toggle-btn.active {
+  background: rgba(89, 133, 177, 0.12);
+  border-color: var(--a-blue);
+  color: var(--a-text);
+}
+
+/* ─── Ball Table Grid — 8 columns ─────────────────────────────────────── */
 .ball-row {
   display: grid;
-  grid-template-columns: 130px 1fr 50px 56px 50px 50px 48px;
+  grid-template-columns: 130px 1fr 50px 46px 42px 42px 42px 42px;
   align-items: center;
   gap: 6px;
   padding: 10px 0;
@@ -4122,6 +4172,10 @@ body { background: var(--a-bg); font-family: var(--font-body); color: var(--a-te
 .ball-conv { font-weight: 600; }
 .ball-conv.high { color: var(--a-green); }
 .ball-conv.mid  { color: var(--a-gold); }
+
+.ball-acc { font-weight: 600; }
+.ball-acc.high { color: var(--a-green); }
+.ball-acc.mid  { color: var(--a-blue); }
 
 
 /* ─── Category Breakdown Chips ──────────────────────────────────────────────── */
@@ -4250,12 +4304,14 @@ body { background: var(--a-bg); font-family: var(--font-body); color: var(--a-te
   .sources-layout { flex-direction: column; align-items: flex-start; }
 
   .ball-row {
-    grid-template-columns: 90px 1fr 38px 42px 38px 38px 38px;
+    grid-template-columns: 90px 1fr 34px 34px 34px 34px 34px 36px;
     gap: 3px;
     font-size: 11px;
   }
   .ball-name { font-size: 10px; gap: 5px; }
   .ball-stat { font-size: 10px; }
+
+  .engagement-bar-toggle { flex-wrap: wrap; }
 
   .kpi-row { flex-wrap: wrap; }
   .stat-card { min-width: calc(50% - 8px); }
@@ -4267,12 +4323,15 @@ body { background: var(--a-bg); font-family: var(--font-body); color: var(--a-te
   .stat-card { min-width: 100%; }
 
   .ball-row {
-    grid-template-columns: 80px 1fr 34px 38px 34px 34px 36px;
+    grid-template-columns: 80px 1fr 30px 30px 32px 28px 28px 34px;
     gap: 2px;
   }
   .ball-name { font-size: 9px; }
   .ball-stat { font-size: 9px; }
   .page-stats { gap: 10px; }
+
+  .bar-toggle-btn { font-size: 8px; padding: 2px 6px; }
+  .bar-toggle-label { font-size: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4665,7 +4724,7 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BALL ENGAGEMENT — 7-column grid + funnel layout
+   BALL ENGAGEMENT — 8-column grid + funnel layout + bar metric toggle
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .ball-engagement-section { margin-bottom: 16px; }
@@ -4681,9 +4740,46 @@ body {
   min-width: 0;
 }
 
+/* ─── Bar Metric Toggle ───────────────────────────────────────────────── */
+.engagement-bar-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.bar-toggle-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--a-text-faint);
+  margin-right: 4px;
+}
+
+.bar-toggle-btn {
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--a-border);
+  background: transparent;
+  color: var(--a-text-muted);
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bar-toggle-btn:hover:not(.active) { color: var(--a-text-dim); border-color: var(--a-border-accent); }
+.bar-toggle-btn.active {
+  background: rgba(89, 133, 177, 0.12);
+  border-color: var(--a-blue);
+  color: var(--a-text);
+}
+
+/* ─── Ball Table Grid — 8 columns ─────────────────────────────────────── */
 .ball-row {
   display: grid;
-  grid-template-columns: 130px 1fr 48px 54px 48px 48px 46px;
+  grid-template-columns: 130px 1fr 48px 46px 42px 42px 40px 42px;
   align-items: center;
   gap: 5px;
   padding: 9px 0;
@@ -4729,6 +4825,10 @@ body {
 .ball-conv { font-weight: 600; }
 .ball-conv.high { color: var(--a-green); }
 .ball-conv.mid  { color: var(--a-gold); }
+
+.ball-acc { font-weight: 600; }
+.ball-acc.high { color: var(--a-green); }
+.ball-acc.mid  { color: var(--a-blue); }
 
 
 /* ─── Category Chips ───────────────────────────────────────────────────── */
@@ -5091,11 +5191,13 @@ body {
   .sources-layout { flex-direction: column; align-items: flex-start; }
 
   .ball-row {
-    grid-template-columns: 90px 1fr 36px 40px 36px 36px 36px;
+    grid-template-columns: 90px 1fr 34px 34px 34px 34px 34px 36px;
     gap: 3px;
   }
   .ball-name { font-size: 9px; gap: 5px; }
   .ball-stat { font-size: 9px; }
+
+  .engagement-bar-toggle { flex-wrap: wrap; }
 
   .kpi-row { flex-wrap: wrap; }
   .stat-card { min-width: calc(50% - 8px); }
@@ -5111,12 +5213,17 @@ body {
   .stat-card { min-width: 100%; }
 
   .ball-row {
-    grid-template-columns: 80px 1fr 32px 36px 32px 32px 34px;
+    grid-template-columns: 80px 1fr 30px 30px 28px 28px 32px 34px;
     gap: 2px;
   }
+  .ball-stat { font-size: 8px; }
+  .ball-name { font-size: 8px; }
   .page-stats { gap: 10px; }
   .flow-columns { grid-template-columns: 1fr; }
   .flow-arrows  { grid-template-columns: 1fr; }
+
+  .bar-toggle-btn { font-size: 8px; padding: 2px 6px; }
+  .bar-toggle-label { font-size: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -5230,26 +5337,29 @@ export const PAGE_DATA = [
 ];
 
 // ── Ball engagement funnel (all 8 project balls) ────────────────────────
+// clicks field retained for V1 compatibility (equals launches)
+// ctaClicks = CTA link clicks from the detail modal
 export const BALL_ENGAGEMENT = [
-  { ball: 'Josh Merritt',            id: 'aboutMe',                      clicks: 312, launches: 289, scores: 267, opens: 251, color: '#6B9F6B',  category: 'Me' },
-  { ball: 'Microsoft Power BI',      id: 'powerBIMetrics',               clicks: 234, launches: 218, scores: 189, opens: 178, color: '#D4A843',  category: 'Business' },
-  { ball: 'The Wine You Drink',      id: 'thewineyoudrink',              clicks: 198, launches: 182, scores: 156, opens: 149, color: '#8B1A32',  category: 'Apps' },
-  { ball: 'Black Sheep Dart League', id: 'dartleague',                   clicks: 178, launches: 165, scores: 141, opens: 132, color: '#7B5EA7',  category: 'Apps' },
-  { ball: 'Smart Chicken Coop',      id: 'arduinoCoopDoor',              clicks: 156, launches: 142, scores: 122, opens: 108, color: '#BF360C',  category: 'Technology' },
-  { ball: 'Site Analytics',          id: 'SiteAnalytics',                clicks: 145, launches: 131, scores: 112, opens: 98,  color: '#5985B1',  category: 'Technology' },
-  { ball: 'Google Data Studio',      id: 'googleDataStudioServiceTechs', clicks: 123, launches: 108, scores: 89,  opens: 78,  color: '#4285F4',  category: 'Business' },
-  { ball: 'Portfolio Website',       id: 'thisWebsite',                  clicks: 108, launches: 95,  scores: 84,  opens: 72,  color: '#5985B1',  category: 'Technology' },
+  { ball: 'Josh Merritt',            id: 'aboutMe',                      clicks: 312, launches: 289, scores: 267, opens: 251, ctaClicks: 198, color: '#6B9F6B',  category: 'Me' },
+  { ball: 'Microsoft Power BI',      id: 'powerBIMetrics',               clicks: 234, launches: 218, scores: 189, opens: 178, ctaClicks: 132, color: '#D4A843',  category: 'Business' },
+  { ball: 'The Wine You Drink',      id: 'thewineyoudrink',              clicks: 198, launches: 182, scores: 156, opens: 149, ctaClicks: 121, color: '#8B1A32',  category: 'Apps' },
+  { ball: 'Black Sheep Dart League', id: 'dartleague',                   clicks: 178, launches: 165, scores: 141, opens: 132, ctaClicks: 104, color: '#7B5EA7',  category: 'Apps' },
+  { ball: 'Smart Chicken Coop',      id: 'arduinoCoopDoor',              clicks: 156, launches: 142, scores: 122, opens: 108, ctaClicks: 79,  color: '#BF360C',  category: 'Technology' },
+  { ball: 'Site Analytics',          id: 'SiteAnalytics',                clicks: 145, launches: 131, scores: 112, opens: 98,  ctaClicks: 71,  color: '#5985B1',  category: 'Technology' },
+  { ball: 'Google Data Studio',      id: 'googleDataStudioServiceTechs', clicks: 123, launches: 108, scores: 89,  opens: 78,  ctaClicks: 52,  color: '#4285F4',  category: 'Business' },
+  { ball: 'Portfolio Website',       id: 'thisWebsite',                  clicks: 108, launches: 95,  scores: 84,  opens: 72,  ctaClicks: 48,  color: '#5985B1',  category: 'Technology' },
 ];
 
 // ── Aggregate funnel totals (derived from BALL_ENGAGEMENT) ──────────────
 export const FUNNEL_TOTALS = BALL_ENGAGEMENT.reduce(
   (acc, b) => ({
-    clicks:   acc.clicks + b.clicks,
-    launches: acc.launches + b.launches,
-    scores:   acc.scores + b.scores,
-    opens:    acc.opens + b.opens,
+    clicks:    acc.clicks + b.clicks,
+    launches:  acc.launches + b.launches,
+    scores:    acc.scores + b.scores,
+    opens:     acc.opens + b.opens,
+    ctaClicks: acc.ctaClicks + b.ctaClicks,
   }),
-  { clicks: 0, launches: 0, scores: 0, opens: 0 },
+  { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 },
 );
 
 // ── Device / viewport breakdown ─────────────────────────────────────────
@@ -5279,6 +5389,7 @@ export const ARCHITECTURE = {
     { name: 'ball_score',       params: ['shot_number', 'make_number', 'accuracy'] },
     { name: 'detail_open',      params: ['project_name', 'project_link'] },
     { name: 'detail_close',     params: [] },
+    { name: 'cta_click',        params: ['project_name', 'project_link', 'project_category'] },
     { name: 'portfolio_loaded', params: ['load_time_ms'] },
   ],
 };
@@ -5630,15 +5741,15 @@ FILE: src/analytics/FunnelViz.jsx
 /**
  * FunnelViz.jsx — Animated visual funnel for the 4-step ball engagement
  *
- * Click → Launch → Score → Open
+ * Launch → Score → Open → CTA Click
  * Renders as a narrowing SVG trapezoid with animated fill and labels.
  */
 
 const STEPS = [
-  { key: 'clicks',   label: 'Click',  desc: 'Ball touched / dragged' },
-  { key: 'launches', label: 'Launch', desc: 'Released with power' },
-  { key: 'scores',   label: 'Score',  desc: 'Hit matching goal' },
-  { key: 'opens',    label: 'Open',   desc: 'Detail page viewed' },
+  { key: 'launches',  label: 'Launch',    desc: 'Released with power' },
+  { key: 'scores',    label: 'Score',     desc: 'Hit matching goal' },
+  { key: 'opens',     label: 'Open',      desc: 'Detail page viewed' },
+  { key: 'ctaClicks', label: 'CTA Click', desc: 'Clicked project link' },
 ];
 
 const COLORS = ['#5985B1', '#D4A843', '#6B9F6B', '#7B5EA7'];
@@ -5653,8 +5764,10 @@ export default function FunnelViz({ totals }) {
   const stepH = (h - 50) / STEPS.length;
   const topY = 24;
 
-  const maxVal = totals.clicks;
-  const overallConv = ((totals.opens / totals.clicks) * 100).toFixed(1);
+  const maxVal = totals.launches || 1;
+  const overallConv = totals.launches > 0
+    ? ((totals.ctaClicks / totals.launches) * 100).toFixed(1)
+    : '0.0';
 
   return (
     <div className="funnel-viz">
@@ -5669,14 +5782,16 @@ export default function FunnelViz({ totals }) {
         </defs>
 
         {STEPS.map((step, i) => {
-          const val = totals[step.key];
+          const val = totals[step.key] || 0;
           const barW = (val / maxVal) * maxWidth;
-          const nextVal = i < STEPS.length - 1 ? totals[STEPS[i + 1].key] : val * 0.85;
+          const nextVal = i < STEPS.length - 1 ? (totals[STEPS[i + 1].key] || 0) : val * 0.85;
           const nextBarW = (nextVal / maxVal) * maxWidth;
           const y = topY + i * stepH;
           const nextY = topY + (i + 1) * stepH;
           const pct = i > 0
-            ? ((val / totals[STEPS[i - 1].key]) * 100).toFixed(0)
+            ? (totals[STEPS[i - 1].key] > 0
+                ? ((val / totals[STEPS[i - 1].key]) * 100).toFixed(0)
+                : '0')
             : '100';
 
           const x1 = cx - barW / 2;
@@ -5726,7 +5841,7 @@ export default function FunnelViz({ totals }) {
 
         {/* Overall label */}
         <text x={cx} y={h - 6} textAnchor="middle" className="funnel-overall">
-          {overallConv}% overall click-to-open conversion
+          {overallConv}% overall launch-to-CTA conversion
         </text>
       </svg>
     </div>
@@ -5737,11 +5852,32 @@ export default function FunnelViz({ totals }) {
 ========================================
 FILE: src/analytics/BallEngagement.jsx
 ========================================
+/**
+ * BallEngagement.jsx — Ball engagement table (V1)
+ *
+ * Columns: Ball, Volume, Launches, Scores, Acc%, Opens, Clicks (CTA), %CTR
+ *   - Acc% = scores / launches
+ *   - Clicks = CTA clicks from the detail modal
+ *   - %CTR = ctaClicks / opens
+ *
+ * Volume bar metric is toggleable: Launches, Scores, Opens, Clicks
+ */
+
+import { useState } from 'react';
 import { BALL_ENGAGEMENT } from './data.js';
 
-function BallRow({ ball, maxClicks, index }) {
-  const convRate = ball.clicks > 0 ? ((ball.opens / ball.clicks) * 100).toFixed(1) : '0.0';
-  const barWidth = maxClicks > 0 ? `${(ball.clicks / maxClicks) * 100}%` : '0%';
+const BAR_METRICS = [
+  { key: 'launches',  label: 'Launches' },
+  { key: 'scores',    label: 'Scores' },
+  { key: 'opens',     label: 'Opens' },
+  { key: 'ctaClicks', label: 'Clicks' },
+];
+
+function BallRow({ ball, maxBarVal, barMetric, index }) {
+  const accuracy = ball.launches > 0 ? ((ball.scores / ball.launches) * 100).toFixed(1) : '0.0';
+  const ctr = ball.opens > 0 ? (((ball.ctaClicks || 0) / ball.opens) * 100).toFixed(1) : '0.0';
+  const barVal = ball[barMetric] || 0;
+  const barWidth = maxBarVal > 0 ? `${(barVal / maxBarVal) * 100}%` : '0%';
 
   return (
     <div
@@ -5761,32 +5897,41 @@ function BallRow({ ball, maxClicks, index }) {
           }}
         />
       </div>
-      <span className="ball-stat">{ball.clicks}</span>
       <span className="ball-stat">{ball.launches}</span>
       <span className="ball-stat">{ball.scores}</span>
+      <span className={`ball-stat ball-acc ${parseFloat(accuracy) > 80 ? 'high' : 'mid'}`}>
+        {accuracy}%
+      </span>
       <span className="ball-stat">{ball.opens}</span>
-      <span className={`ball-stat ball-conv ${parseFloat(convRate) > 70 ? 'high' : 'mid'}`}>
-        {convRate}%
+      <span className="ball-stat">{ball.ctaClicks || 0}</span>
+      <span className={`ball-stat ball-conv ${parseFloat(ctr) > 70 ? 'high' : 'mid'}`}>
+        {ctr}%
       </span>
     </div>
   );
 }
 
 export default function BallEngagement({ liveData }) {
+  const [barMetric, setBarMetric] = useState('launches');
+
   const data = (liveData && liveData.length > 0) ? liveData : BALL_ENGAGEMENT;
 
-  const maxClicks = Math.max(...data.map((b) => b.clicks));
-  const sorted = [...data].sort((a, b) => b.clicks - a.clicks);
-  const topClicks = sorted[0];
-  const topConv = [...data].sort(
-    (a, b) => (b.opens / b.clicks) - (a.opens / a.clicks),
+  const maxBarVal = Math.max(...data.map((b) => b[barMetric] || 0));
+  const sorted = [...data].sort((a, b) => (b.launches || 0) - (a.launches || 0));
+  const topLaunches = sorted[0];
+  const topCtr = [...data].sort(
+    (a, b) => {
+      const aCtr = a.opens > 0 ? ((a.ctaClicks || 0) / a.opens) : 0;
+      const bCtr = b.opens > 0 ? ((b.ctaClicks || 0) / b.opens) : 0;
+      return bCtr - aCtr;
+    },
   )[0];
 
   const categories = {};
   data.forEach((b) => {
-    if (!categories[b.category]) categories[b.category] = { clicks: 0, opens: 0 };
-    categories[b.category].clicks += b.clicks;
-    categories[b.category].opens += b.opens;
+    if (!categories[b.category]) categories[b.category] = { opens: 0, ctaClicks: 0 };
+    categories[b.category].opens += (b.opens || 0);
+    categories[b.category].ctaClicks += (b.ctaClicks || 0);
   });
 
   return (
@@ -5798,40 +5943,54 @@ export default function BallEngagement({ liveData }) {
         </span>
       </div>
 
+      {/* Bar metric toggle */}
+      <div className="engagement-bar-toggle">
+        <span className="bar-toggle-label">Volume bars:</span>
+        {BAR_METRICS.map((m) => (
+          <button
+            key={m.key}
+            className={`bar-toggle-btn ${barMetric === m.key ? 'active' : ''}`}
+            onClick={() => setBarMetric(m.key)}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+
       <div className="ball-row ball-header">
         <span>Ball</span>
         <span>Volume</span>
-        <span className="ball-stat">Clicks</span>
         <span className="ball-stat">Launches</span>
         <span className="ball-stat">Scores</span>
+        <span className="ball-stat">Acc%</span>
         <span className="ball-stat">Opens</span>
-        <span className="ball-stat">Conv%</span>
+        <span className="ball-stat">Clicks</span>
+        <span className="ball-stat">%CTR</span>
       </div>
 
       {data.map((ball, i) => (
-        <BallRow key={ball.id} ball={ball} maxClicks={maxClicks} index={i} />
+        <BallRow key={ball.id} ball={ball} maxBarVal={maxBarVal} barMetric={barMetric} index={i} />
       ))}
 
       <div className="category-breakdown">
         {Object.entries(categories).map(([cat, catData]) => {
-          const conv = catData.clicks > 0 ? ((catData.opens / catData.clicks) * 100).toFixed(0) : '0';
+          const ctr = catData.opens > 0 ? ((catData.ctaClicks / catData.opens) * 100).toFixed(0) : '0';
           return (
             <div key={cat} className="cat-chip">
               <span className="cat-name">{cat}</span>
-              <span className="cat-conv">{conv}%</span>
+              <span className="cat-conv">{ctr}%</span>
             </div>
           );
         })}
       </div>
 
-      {topClicks && topConv && (
+      {topLaunches && topCtr && (
         <div className="insight-box">
           <span className="insight-icon">{'\uD83D\uDCA1'} Insight:</span>{' '}
           <span className="insight-text">
-            &ldquo;{topClicks.ball}&rdquo; has the highest engagement ({topClicks.clicks} clicks)
-            while &ldquo;{topConv.ball}&rdquo; converts best at
-            {' '}{topConv.clicks > 0 ? ((topConv.opens / topConv.clicks) * 100).toFixed(0) : 0}% click-to-open.
-            The demo ball (first launch) drives most initial exploration.
+            &ldquo;{topLaunches.ball}&rdquo; has the highest engagement ({topLaunches.launches} launches)
+            while &ldquo;{topCtr.ball}&rdquo; converts best at
+            {' '}{topCtr.opens > 0 ? (((topCtr.ctaClicks || 0) / topCtr.opens) * 100).toFixed(0) : 0}% open-to-CTA.
           </span>
         </div>
       )}
@@ -5850,18 +6009,32 @@ FILE: src/analytics/BallEngagementV2.jsx
  * Falls back to mock BALL_ENGAGEMENT data when liveData is null.
  *
  * Features:
- *   - Visual funnel diagram (Click→Launch→Score→Open)
- *   - Per-ball data table with 7 columns
+ *   - Visual funnel diagram (Launch→Score→Open→CTA Click)
+ *   - Per-ball data table with metric toggle for volume bars
+ *   - Columns: Ball, Volume, Launches, Scores, Opens, Clicks*, Acc%, Conv%
+ *     *Clicks = CTA clicks on the detail modal links
+ *   - Acc% = scores / launches
+ *   - Conv% = ctaClicks / opens
  *   - Category conversion chips
  *   - Auto-generated insight
  */
 
+import { useState } from 'react';
 import { BALL_ENGAGEMENT, FUNNEL_TOTALS } from './data.js';
 import FunnelViz from './FunnelViz.jsx';
 
-function BallRow({ ball, maxClicks, index }) {
-  const convRate = ball.clicks > 0 ? ((ball.opens / ball.clicks) * 100).toFixed(1) : '0.0';
-  const barWidth = maxClicks > 0 ? `${(ball.clicks / maxClicks) * 100}%` : '0%';
+const BAR_METRICS = [
+  { key: 'launches',  label: 'Launches' },
+  { key: 'scores',    label: 'Scores' },
+  { key: 'opens',     label: 'Opens' },
+  { key: 'ctaClicks', label: 'Clicks' },
+];
+
+function BallRow({ ball, maxBarVal, barMetric, index }) {
+  const accuracy = ball.launches > 0 ? ((ball.scores / ball.launches) * 100).toFixed(1) : '0.0';
+  const convRate = ball.opens > 0 ? (((ball.ctaClicks || 0) / ball.opens) * 100).toFixed(1) : '0.0';
+  const barVal = ball[barMetric] || 0;
+  const barWidth = maxBarVal > 0 ? `${(barVal / maxBarVal) * 100}%` : '0%';
 
   return (
     <div className="ball-row fade-in" style={{ animationDelay: `${index * 60}ms` }}>
@@ -5878,10 +6051,13 @@ function BallRow({ ball, maxClicks, index }) {
           }}
         />
       </div>
-      <span className="ball-stat">{ball.clicks}</span>
       <span className="ball-stat">{ball.launches}</span>
       <span className="ball-stat">{ball.scores}</span>
       <span className="ball-stat">{ball.opens}</span>
+      <span className="ball-stat">{ball.ctaClicks || 0}</span>
+      <span className={`ball-stat ball-acc ${parseFloat(accuracy) > 80 ? 'high' : 'mid'}`}>
+        {accuracy}%
+      </span>
       <span className={`ball-stat ball-conv ${parseFloat(convRate) > 70 ? 'high' : 'mid'}`}>
         {convRate}%
       </span>
@@ -5890,6 +6066,8 @@ function BallRow({ ball, maxClicks, index }) {
 }
 
 export default function BallEngagement({ liveData }) {
+  const [barMetric, setBarMetric] = useState('launches');
+
   // Use live data from the worker if available, otherwise fall back to mock
   const data = (liveData && liveData.length > 0) ? liveData : BALL_ENGAGEMENT;
 
@@ -5897,23 +6075,24 @@ export default function BallEngagement({ liveData }) {
   const funnelTotals = (liveData && liveData.length > 0)
     ? data.reduce(
         (acc, b) => ({
-          clicks:   acc.clicks + (b.clicks || 0),
-          launches: acc.launches + (b.launches || 0),
-          scores:   acc.scores + (b.scores || 0),
-          opens:    acc.opens + (b.opens || 0),
+          clicks:    acc.clicks + (b.clicks || 0),
+          launches:  acc.launches + (b.launches || 0),
+          scores:    acc.scores + (b.scores || 0),
+          opens:     acc.opens + (b.opens || 0),
+          ctaClicks: acc.ctaClicks + (b.ctaClicks || 0),
         }),
-        { clicks: 0, launches: 0, scores: 0, opens: 0 },
+        { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 },
       )
     : FUNNEL_TOTALS;
 
-  const maxClicks = Math.max(...data.map((b) => b.clicks || 0));
+  const maxBarVal = Math.max(...data.map((b) => b[barMetric] || 0));
 
-  const sorted = [...data].sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
-  const topClicks = sorted[0];
+  const sorted = [...data].sort((a, b) => (b.launches || 0) - (a.launches || 0));
+  const topLaunches = sorted[0];
   const topConv = [...data].sort(
     (a, b) => {
-      const aConv = a.clicks > 0 ? (a.opens / a.clicks) : 0;
-      const bConv = b.clicks > 0 ? (b.opens / b.clicks) : 0;
+      const aConv = a.opens > 0 ? ((a.ctaClicks || 0) / a.opens) : 0;
+      const bConv = b.opens > 0 ? ((b.ctaClicks || 0) / b.opens) : 0;
       return bConv - aConv;
     },
   )[0];
@@ -5921,9 +6100,10 @@ export default function BallEngagement({ liveData }) {
   // Category breakdown
   const categories = {};
   data.forEach((b) => {
-    if (!categories[b.category]) categories[b.category] = { clicks: 0, opens: 0, count: 0 };
-    categories[b.category].clicks += (b.clicks || 0);
+    if (!categories[b.category]) categories[b.category] = { launches: 0, opens: 0, ctaClicks: 0, count: 0 };
+    categories[b.category].launches += (b.launches || 0);
     categories[b.category].opens += (b.opens || 0);
+    categories[b.category].ctaClicks += (b.ctaClicks || 0);
     categories[b.category].count++;
   });
 
@@ -5939,19 +6119,34 @@ export default function BallEngagement({ liveData }) {
         <FunnelViz totals={funnelTotals} />
 
         <div className="engagement-table-wrap">
+          {/* Bar metric toggle */}
+          <div className="engagement-bar-toggle">
+            <span className="bar-toggle-label">Volume bars:</span>
+            {BAR_METRICS.map((m) => (
+              <button
+                key={m.key}
+                className={`bar-toggle-btn ${barMetric === m.key ? 'active' : ''}`}
+                onClick={() => setBarMetric(m.key)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+
           {/* Column headers */}
           <div className="ball-row ball-header">
             <span>Ball</span>
             <span>Volume</span>
-            <span className="ball-stat">Clicks</span>
             <span className="ball-stat">Launches</span>
             <span className="ball-stat">Scores</span>
             <span className="ball-stat">Opens</span>
+            <span className="ball-stat">Clicks</span>
+            <span className="ball-stat">Acc%</span>
             <span className="ball-stat">Conv%</span>
           </div>
 
           {data.map((ball, i) => (
-            <BallRow key={ball.id} ball={ball} maxClicks={maxClicks} index={i} />
+            <BallRow key={ball.id} ball={ball} maxBarVal={maxBarVal} barMetric={barMetric} index={i} />
           ))}
         </div>
       </div>
@@ -5959,7 +6154,7 @@ export default function BallEngagement({ liveData }) {
       {/* Category breakdown chips */}
       <div className="category-breakdown">
         {Object.entries(categories).map(([cat, catData]) => {
-          const conv = catData.clicks > 0 ? ((catData.opens / catData.clicks) * 100).toFixed(0) : '0';
+          const conv = catData.opens > 0 ? (((catData.ctaClicks) / catData.opens) * 100).toFixed(0) : '0';
           return (
             <div key={cat} className="cat-chip">
               <span className="cat-name">{cat}</span>
@@ -5971,15 +6166,17 @@ export default function BallEngagement({ liveData }) {
       </div>
 
       {/* Insight */}
-      {topClicks && topConv && (
+      {topLaunches && topConv && (
         <div className="insight-box">
           <span className="insight-icon">Insight:</span>{' '}
           <span className="insight-text">
-            &ldquo;{topClicks.ball}&rdquo; drives the most engagement ({topClicks.clicks} clicks),
+            &ldquo;{topLaunches.ball}&rdquo; drives the most engagement ({topLaunches.launches} launches),
             while &ldquo;{topConv.ball}&rdquo; converts best at
-            {' '}{topConv.clicks > 0 ? ((topConv.opens / topConv.clicks) * 100).toFixed(0) : 0}% click-to-open.
-            Overall, {funnelTotals.clicks > 0 ? ((funnelTotals.opens / funnelTotals.clicks) * 100).toFixed(1) : '0.0'}% of
-            ball interactions lead to a project detail view — the demo ball drives most initial exploration.
+            {' '}{topConv.opens > 0 ? (((topConv.ctaClicks || 0) / topConv.opens) * 100).toFixed(0) : 0}% open-to-CTA.
+            Overall accuracy is{' '}
+            {funnelTotals.launches > 0 ? ((funnelTotals.scores / funnelTotals.launches) * 100).toFixed(1) : '0.0'}% and{' '}
+            {funnelTotals.opens > 0 ? ((funnelTotals.ctaClicks / funnelTotals.opens) * 100).toFixed(1) : '0.0'}% of
+            detail views lead to a CTA click.
           </span>
         </div>
       )}
@@ -6446,11 +6643,11 @@ function SessionFlow() {
 
 function ArchitectureShowcase() {
   const pipeline = [
-    { label: 'User Action',  items: ['Drag ball', 'Release (launch)', 'Collision (score)', 'Double-tap (open)'], color: '#D4A843', icon: '👆' },
+    { label: 'User Action',  items: ['Drag ball', 'Release (launch)', 'Collision (score)', 'Double-tap (open)', 'CTA link click'], color: '#D4A843', icon: '👆' },
     { label: 'Game.js',      items: ['Physics engine', 'Collision detection', 'State management'],                color: '#5985B1', icon: '⚙️' },
-    { label: 'EventBus',     items: ['stats:update', 'detail:open', 'detail:close', 'load:complete'],            color: '#6B9F6B', icon: '📡' },
+    { label: 'EventBus',     items: ['stats:update', 'detail:open', 'detail:close', 'cta:click', 'load:complete'],            color: '#6B9F6B', icon: '📡' },
     { label: 'ga4.js',       items: ['Delta detection', 'Event mapping', 'Parameter enrichment'],                color: '#7B5EA7', icon: '🔗' },
-    { label: 'GA4',          items: ['ball_launch', 'ball_score', 'detail_open', 'portfolio_loaded'],            color: '#4285F4', icon: '📊' },
+    { label: 'GA4',          items: ['ball_launch', 'ball_score', 'detail_open', 'cta_click', 'portfolio_loaded'],            color: '#4285F4', icon: '📊' },
   ];
 
   return (
@@ -6719,9 +6916,9 @@ export default function AnalyticsDashboardV2() {
           )}
         </p>
         <p>
-          Five custom GA4 events track the full user journey from ball
-          interaction through project discovery, with enriched parameters
-          for per-project attribution and accuracy tracking.
+          Six custom GA4 events track the full user journey from ball
+          interaction through project discovery and CTA conversion, with
+          enriched parameters for per-project attribution and accuracy tracking.
         </p>
       </div>
     </div>
@@ -7063,56 +7260,70 @@ function friendlyPageTitle(path) {
 // ── Ball engagement events ──────────────────────────────────────────────
 
 async function fetchBallEvents(token, propId, days) {
-  // Get ball_launch and ball_score counts by project
-  const launchReport = await runReport(token, propId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
-    dimensions: [{ name: 'customEvent:project_name' }],
-    metrics: [{ name: 'eventCount' }],
-    dimensionFilter: {
-      filter: {
-        fieldName: 'eventName',
-        stringFilter: { matchType: 'EXACT', value: 'ball_launch' },
+  // Get ball_launch, ball_score, detail_open, and cta_click counts by project
+  const [launchReport, scoreReport, openReport, ctaReport] = await Promise.all([
+    runReport(token, propId, {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dimensions: [{ name: 'customEvent:project_name' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'ball_launch' },
+        },
       },
-    },
-    limit: 20,
-  });
-
-  const scoreReport = await runReport(token, propId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
-    dimensions: [{ name: 'customEvent:project_name' }],
-    metrics: [{ name: 'eventCount' }],
-    dimensionFilter: {
-      filter: {
-        fieldName: 'eventName',
-        stringFilter: { matchType: 'EXACT', value: 'ball_score' },
+      limit: 20,
+    }),
+    runReport(token, propId, {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dimensions: [{ name: 'customEvent:project_name' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'ball_score' },
+        },
       },
-    },
-    limit: 20,
-  });
-
-  const openReport = await runReport(token, propId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
-    dimensions: [{ name: 'customEvent:project_name' }],
-    metrics: [{ name: 'eventCount' }],
-    dimensionFilter: {
-      filter: {
-        fieldName: 'eventName',
-        stringFilter: { matchType: 'EXACT', value: 'detail_open' },
+      limit: 20,
+    }),
+    runReport(token, propId, {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dimensions: [{ name: 'customEvent:project_name' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'detail_open' },
+        },
       },
-    },
-    limit: 20,
-  });
+      limit: 20,
+    }),
+    runReport(token, propId, {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dimensions: [{ name: 'customEvent:project_name' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'cta_click' },
+        },
+      },
+      limit: 20,
+    }),
+  ]);
 
   // Index by project name
-  const launches = indexByDimension(launchReport);
-  const scores = indexByDimension(scoreReport);
-  const opens = indexByDimension(openReport);
+  const launches  = indexByDimension(launchReport);
+  const scores    = indexByDimension(scoreReport);
+  const opens     = indexByDimension(openReport);
+  const ctaClicks = indexByDimension(ctaReport);
 
   // Merge all known project names
   const allNames = new Set([
     ...Object.keys(launches),
     ...Object.keys(scores),
     ...Object.keys(opens),
+    ...Object.keys(ctaClicks),
   ]);
 
   const BALL_META = {
@@ -7131,23 +7342,25 @@ async function fetchBallEvents(token, propId, days) {
   let i = 0;
   for (const name of allNames) {
     const meta = BALL_META[name] || { id: name, color: palette[i % palette.length], category: 'Other' };
-    const launchCount = launches[name] || 0;
-    const scoreCount = scores[name] || 0;
-    const openCount = opens[name] || 0;
+    const launchCount   = launches[name] || 0;
+    const scoreCount    = scores[name] || 0;
+    const openCount     = opens[name] || 0;
+    const ctaClickCount = ctaClicks[name] || 0;
     result.push({
       ball: name,
       id: meta.id,
-      clicks: launchCount,      // ball_launch = user interacted
+      clicks: launchCount,      // V1 compat: clicks = launches
       launches: launchCount,
       scores: scoreCount,
       opens: openCount,
+      ctaClicks: ctaClickCount,
       color: meta.color,
       category: meta.category,
     });
     i++;
   }
 
-  return result.sort((a, b) => b.clicks - a.clicks);
+  return result.sort((a, b) => b.launches - a.launches);
 }
 
 function indexByDimension(report) {

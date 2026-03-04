@@ -423,29 +423,22 @@ export default class Game {
   // ── Private: actions ───────────────────────────────────────────────────
 
   _launchBall(ball) {
-    // ── Higher-order launch power ──
-    // Polynomial curve (mag^1.15): matches old linear at typical drags,
-    // gives ~15% boost at large drags (big screens) and ~5% reduction
-    // at small drags (small screens). Coefficients calibrated to match
-    // the original speedScale values at their respective typical magnitudes.
+    // ── Linear launch power ──
+    // Drag twice as far → twice as much power. Simple and predictable.
     const magnitude = Math.sqrt(ball.xPower ** 2 + ball.yPower ** 2);
     if (magnitude < 0.01) return;
 
-    const exponent = 1.15;
-    let coeff;
+    let speedScale;
     if (this.vp.portrait) {
-      coeff = 0.50;      // was linear 0.70 — matched at mag ≈ 20
+      speedScale = 0.70;
     } else if (this.vp.mobile) {
-      coeff = 0.29;      // was linear 0.42 — matched at mag ≈ 25
+      speedScale = 0.42;
     } else {
-      coeff = 0.17;      // was linear 0.25 — matched at mag ≈ 30
+      speedScale = 0.25;
     }
 
-    const scaledMag = Math.pow(magnitude, exponent) * coeff;
-    const dirX = ball.xPower / magnitude;
-    const dirY = ball.yPower / magnitude;
-    const vx = -dirX * scaledMag;
-    const vy = -dirY * scaledMag;
+    const vx = -ball.xPower * speedScale;
+    const vy = -ball.yPower * speedScale;
 
     const catIdx = this.categories.indexOf(ball.category);
 
@@ -662,29 +655,38 @@ export default class Game {
   }
 
   /**
-   * Compute demo launch power based on the pixel distance between
-   * the ball and the goal dots. Uses vp.power as the physics-tuned
-   * base, modulated by (dist / iconSize) so the demo adapts to any
-   * screen size and layout.
+   * Compute demo launch power using a higher-order formula that
+   * accounts for both screen width and ball-to-goal distance.
    *
-   * Targets: desktop ≈ 70% of v1, mobile/portrait ≈ 200% of v1
+   * Formula:  coeff × dist^1.5 / √width
+   *
+   * Why higher-order?  The physics engine applies gravity over time,
+   * so longer trajectories lose proportionally more energy to the
+   * downward pull.  A linear distance→power mapping under-shoots on
+   * large screens and over-shoots on small ones.  The 1.5 exponent on
+   * distance compensates for this, while dividing by √width normalises
+   * across viewport sizes so the same visual arc is produced everywhere.
    */
   _computeDemoPower(ball) {
     const dx = ball.x - this.vp.dotCenterX;
     const dy = ball.y - this.vp.gridStartY;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const factor = dist / this.vp.iconSize;
+    const { width, portrait, mobile } = this.vp;
 
-    if (this.vp.portrait) {
-      // Portrait (phone + tablet): 2× old power, then -10% fine-tune
-      return this.vp.power * factor * 5.69 * 0.9;
-    } else if (this.vp.mobile) {
-      // Mobile landscape: 2× previous (was 25%, now 50%)
-      return this.vp.power * factor * 3.36 * 0.5;
+    // Higher-order base: dist^1.5 / √width
+    const base = Math.pow(dist, 1.5) / Math.sqrt(width);
+
+    // Per-device coefficients calibrated so the demo ball arcs into the goal
+    let coeff;
+    if (portrait) {
+      coeff = 0.62;       // tall viewports — ball is far below goal
+    } else if (mobile) {
+      coeff = 0.098;      // landscape phones — compact layout
     } else {
-      // Desktop landscape: 70% of old power
-      return this.vp.power * factor * 0.15;
+      coeff = 0.075;      // desktop — long horizontal distance
     }
+
+    return coeff * base;
   }
 
   _drawTitle() {
@@ -1240,3 +1242,5 @@ export default class Game {
     document.documentElement.style.setProperty('--ball-bottom', `${ballBottomY}px`);
   }
 }
+
+
