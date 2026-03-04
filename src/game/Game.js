@@ -665,11 +665,11 @@ export default class Game {
    * Mobile (portrait & landscape):  coeff × dist^1.5 / √width
    *   - Portrait coeff 0.129, landscape coeff 0.169
    *
-   * Desktop:  11.42 × dist^1.5 / width^1.045
+   * Desktop:  11.99 × dist^1.5 / width^1.045
    *   - The 1.045 exponent gives a gentle boost to narrower viewports
    *     while leaving wide desktops untouched.
-   *   - Verified: +7.5% at 960, +5.5% at 1152, +4.3% at 1280,
-   *              +3% at 1440, +1.9% at 1600, 0% at 1920.
+   *   - +5% uniform bump vs prior round; narrow-to-wide ratio preserved.
+   *   - Narrower viewports still get a gentle relative boost via the exponent.
    */
   _computeDemoPower(ball) {
     const dx = ball.x - this.vp.dotCenterX;
@@ -685,7 +685,7 @@ export default class Game {
       return 0.169 * distPow / Math.sqrt(width);
     } else {
       // Desktop: width^1.045 — slight boost at narrow viewports, unchanged at wide
-      return 11.42 * distPow / Math.pow(width, 1.045);
+      return 11.99 * distPow / Math.pow(width, 1.045);
     }
   }
 
