@@ -665,7 +665,7 @@ export default class Game {
    * Mobile (portrait & landscape):  coeff × dist^1.5 / √width
    *   - Portrait coeff 0.129, landscape coeff 0.169
    *
-   * Desktop:  11.99 × dist^1.5 / width^1.045
+   * Desktop:  12.59 × dist^1.5 / width^1.045
    *   - The 1.045 exponent gives a gentle boost to narrower viewports
    *     while leaving wide desktops untouched.
    *   - +5% uniform bump vs prior round; narrow-to-wide ratio preserved.
@@ -684,8 +684,8 @@ export default class Game {
     } else if (mobile) {
       return 0.169 * distPow / Math.sqrt(width);
     } else {
-      // Desktop: width^1.045 — slight boost at narrow viewports, unchanged at wide
-      return 11.99 * distPow / Math.pow(width, 1.045);
+      // Desktop: width^1.045 — slight boost at narrow viewports
+      return 12.59 * distPow / Math.pow(width, 1.045);
     }
   }
 
@@ -780,6 +780,8 @@ export default class Game {
           + (this.vp.gridCols - 1) * this.vp.spacing
           + iconSize / 2;
         xPos = Math.max(rightmostBallEdge + titleSize, width * 0.92 - maxW);
+        // Clamp so the longest line doesn't get cut off at the right edge
+        xPos = Math.min(xPos, width - maxW - titleSize * 0.4);
       } else {
         xPos = width * 0.92 - maxW;
       }
