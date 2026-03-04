@@ -9,6 +9,7 @@
  *   ball_score      — ball collides with matching goal → detail opens
  *   detail_open     — project detail modal displayed
  *   detail_close    — modal dismissed
+ *   cta_click       — user clicks the CTA link in the detail modal
  *   portfolio_loaded — all images loaded, canvas ready
  */
 
@@ -83,6 +84,17 @@ export function initGA4Tracking() {
   unsubs.push(
     bus.on('detail:close', () => {
       track('detail_close');
+    }),
+  );
+
+  // CTA clicked from detail modal
+  unsubs.push(
+    bus.on('cta:click', ({ name, link, category }) => {
+      track('cta_click', {
+        project_name: name || 'unknown',
+        project_link: link || '',
+        project_category: category || '',
+      });
     }),
   );
 
