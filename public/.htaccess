@@ -1,0 +1,162 @@
+# ============================================================================
+# .htaccess — Security & Performance Hardening for dadatadad.com
+# Drop this file into your dist/ folder (it deploys to public_html via cpanel.yml)
+# ============================================================================
+
+# ── 1. FORCE HTTPS ──────────────────────────────────────────────────────────
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Also handle www → non-www (or vice versa — pick one and be consistent)
+# Uncomment the version you want:
+# www → non-www (canonical: dadatadad.com)
+RewriteCond %{HTTP_HOST} ^www\.dadatadad\.com [NC]
+RewriteRule ^(.*)$ https://dadatadad.com/$1 [L,R=301]
+
+# ── 2. SECURITY HEADERS ────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+
+  # Strict-Transport-Security: tell browsers to always use HTTPS
+  # max-age=31536000 = 1 year; includeSubDomains covers all subdomains
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+
+  # Prevent MIME-type sniffing (stops browsers from interpreting files as something else)
+  Header always set X-Content-Type-Options "nosniff"
+
+  # Clickjacking protection: only allow your own site to frame your pages
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  # XSS filter: belt-and-suspenders (modern browsers use CSP, but older ones use this)
+  Header always set X-XSS-Protection "1; mode=block"
+
+  # Referrer Policy: send origin only to external sites, full referrer to same-origin
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Permissions Policy: disable browser features you don't use
+  # Your site uses canvas + touch — keep those enabled; lock down everything else
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+
+  # Content-Security-Policy
+  # Tuned for your stack: React/Vite (inline scripts from build), p5.js canvas,
+  # Google Analytics, Google Fonts, and your own assets.
+  Header always set Content-Security-Policy "\
+    default-src 'self'; \
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; \
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; \
+    font-src 'self' https://fonts.gstatic.com; \
+    img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com; \
+    connect-src 'self' https://ga4-analytics-api.dadatadad-analytics.workers.dev https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com; \
+    frame-ancestors 'self'; \
+    base-uri 'self'; \
+    form-action 'self'; \
+    object-src 'none'"
+
+  # Prevent browsers from caching sensitive pages if you ever add auth
+  Header always set X-Permitted-Cross-Domain-Policies "none"
+
+  # Remove server version info (Apache often leaks this)
+  Header always unset X-Powered-By
+  Header unset Server
+
+</IfModule>
+
+# ── 3. DISABLE DIRECTORY LISTING ───────────────────────────────────────────
+Options -Indexes
+
+# ── 4. BLOCK ACCESS TO SENSITIVE FILES ─────────────────────────────────────
+# Prevent access to dotfiles (.git, .env, .htaccess itself, etc.)
+<FilesMatch "^\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Block specific files that should never be publicly accessible
+<FilesMatch "(package\.json|package-lock\.json|\.cpanel\.yml|vite\.config\.js|\.env|\.gitignore|README\.md)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Block source map files from being served in production
+<FilesMatch "\.map$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# ── 5. BLOCK COMMON ATTACK PATHS ──────────────────────────────────────────
+# Block access to paths commonly probed by bots (wp-admin, phpMyAdmin, etc.)
+RewriteRule ^(wp-admin|wp-login|wp-content|wp-includes|xmlrpc\.php|administrator|phpmyadmin|mysql|sql|backup) - [R=404,L]
+
+# Block suspicious query strings (SQL injection, script injection attempts)
+RewriteCond %{QUERY_STRING} (<script|union.*select|insert.*into|delete.*from|drop.*table) [NC]
+RewriteRule .* - [F,L]
+
+# ── 6. CACHE CONTROL FOR STATIC ASSETS ────────────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Hashed assets (Vite adds content hashes to filenames: main-C-O1Lkxf.js)
+  # These are safe to cache aggressively since the hash changes on every build
+  <FilesMatch "\.(js|css)$">
+    ExpiresDefault "access plus 1 year"
+    <IfModule mod_headers.c>
+      Header set Cache-Control "public, max-age=31536000, immutable"
+    </IfModule>
+  </FilesMatch>
+
+  # Images — cache for 30 days (your project images rarely change)
+  <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+    ExpiresDefault "access plus 1 month"
+    <IfModule mod_headers.c>
+      Header set Cache-Control "public, max-age=2592000"
+    </IfModule>
+  </FilesMatch>
+
+  # Fonts — cache for 1 year
+  <FilesMatch "\.(woff|woff2|ttf|otf|eot)$">
+    ExpiresDefault "access plus 1 year"
+    <IfModule mod_headers.c>
+      Header set Cache-Control "public, max-age=31536000, immutable"
+    </IfModule>
+  </FilesMatch>
+
+  # HTML — don't cache (so users always get the latest build)
+  <FilesMatch "\.html$">
+    ExpiresDefault "access plus 0 seconds"
+    <IfModule mod_headers.c>
+      Header set Cache-Control "no-cache, no-store, must-revalidate"
+      Header set Pragma "no-cache"
+    </IfModule>
+  </FilesMatch>
+</IfModule>
+
+# ── 7. COMPRESSION ─────────────────────────────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE application/font-woff application/font-woff2
+</IfModule>
+
+# ── 8. SPA FALLBACK ────────────────────────────────────────────────────────
+# If a requested file/directory doesn't exist, serve index.html
+# (needed if you ever add client-side routing)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/analytics-dashboard\.html
+RewriteRule ^(.*)$ /index.html [L]

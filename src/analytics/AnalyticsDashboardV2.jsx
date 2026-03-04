@@ -440,19 +440,25 @@ export default function AnalyticsDashboardV2() {
         <p>
           {isLive ? (
             <>
-              Live data from GA4 property <code>G-JXCE49FJ7J</code> via Cloudflare Worker.
-              Device breakdown, session flow, and architecture sections use supplementary mock data.
+              Real-time analytics powered by a custom GA4 Data API pipeline &mdash;
+              a Cloudflare Worker authenticates via service account, queries the
+              GA4 reporting endpoint, and returns structured JSON that this
+              React dashboard consumes. Device breakdown, session flow, and
+              architecture sections use supplementary demonstration data.
             </>
           ) : (
             <>
-              Mock data shown above. Connect GA4 property <code>G-JXCE49FJ7J</code> via
-              the Data API to display real metrics.
+              Deterministic mock data generated client-side for demonstration.
+              In production, this dashboard connects to a Cloudflare Worker
+              proxy that authenticates with the GA4 Data API and returns
+              real visitor metrics, traffic sources, and ball engagement funnels.
             </>
           )}
         </p>
         <p>
-          Custom event tracking implemented in <code>src/game/ga4.js</code> — listens to the
-          EventBus and forwards 5 custom events with enriched parameters to Google Analytics 4.
+          Five custom GA4 events track the full user journey from ball
+          interaction through project discovery, with enriched parameters
+          for per-project attribution and accuracy tracking.
         </p>
       </div>
     </div>
