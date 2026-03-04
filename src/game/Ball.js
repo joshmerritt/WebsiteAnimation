@@ -82,9 +82,13 @@ export default class Ball {
 
   openDetail() {
     if (this.pageOpen) return null;
-    this.makes++;
+    this.opens++;
     this.pageOpen = true;
     return this.getDetailData();
+  }
+
+  scoreGoal() {
+    this.makes++;
   }
 
   closeDetail() { this.pageOpen = false; }
