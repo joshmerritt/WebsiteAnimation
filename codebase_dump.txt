@@ -1,5 +1,5 @@
 =============================
- CODEBASE DUMP - Wed Mar  4 09:56:51 PST 2026
+ CODEBASE DUMP - Wed Mar  4 10:11:10 PST 2026
 =============================
 
 
@@ -247,40 +247,6 @@ FILE: index.html
           <a href="/portfolio.html">View Accessible Portfolio →</a>
         </nav>
 
-        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
-          <img class="noscript-project-img" src="/assets/images/powerBIMetrics.jpg" alt="Microsoft Power BI dashboard showing KPI metrics and data visualizations" loading="lazy" />
-          <h2 itemprop="name">Microsoft Power BI</h2>
-          <p class="noscript-category">Business</p>
-          <dl class="noscript-meta">
-            <dt>Goal</dt>
-            <dd itemprop="description">Build a governed data warehouse with automated pipelines that lets business users self-serve answers without filing tickets.</dd>
-            <dt>Role</dt>
-            <dd>BI Developer and Data Analyst</dd>
-            <dt>Technology</dt>
-            <dd itemprop="keywords">Power BI, DAX, Power Query, REST APIs, Google BigQuery, Azure</dd>
-            <dt>Summary</dt>
-            <dd>Built the reporting layer that lets business teams answer their own questions instead of filing a ticket and waiting. Data flows in automatically from multiple sources, lands in a clean, structured model, and powers a set of linked reports users can drill into on their own.</dd>
-          </dl>
-          <a class="noscript-cta" href="https://www.upwork.com/fl/joshuapmerritt" itemprop="url">View Upwork Profile ↗</a>
-        </article>
-
-        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
-          <img class="noscript-project-img" src="/assets/images/googleDataStudioServiceTechs.jpg" alt="Google Data Studio streaming dashboard displayed on office TV" loading="lazy" />
-          <h2 itemprop="name">Google Data Studio Streaming Dashboard</h2>
-          <p class="noscript-category">Business</p>
-          <dl class="noscript-meta">
-            <dt>Goal</dt>
-            <dd itemprop="description">Give frontline employees real-time visibility into their performance and standing relative to team benchmarks.</dd>
-            <dt>Role</dt>
-            <dd>BI Developer</dd>
-            <dt>Technology</dt>
-            <dd itemprop="keywords">Google Data Studio, Data Modeling, ScreenCloud, Amazon Fire TV</dd>
-            <dt>Summary</dt>
-            <dd>A live KPI dashboard displayed on office TVs so the whole team can see how they're tracking against goals at a glance. Shows individual and team standings updated throughout the day.</dd>
-          </dl>
-          <a class="noscript-cta" href="https://www.upwork.com/fl/joshuapmerritt" itemprop="url">View Upwork Profile ↗</a>
-        </article>
-
         <article class="noscript-project" itemscope itemtype="https://schema.org/SoftwareApplication">
           <img class="noscript-project-img" src="/assets/images/thewineyoudrink.jpg" alt="The Wine You Drink app showing wine cellar management interface" loading="lazy" />
           <h2 itemprop="name">The Wine You Drink</h2>
@@ -365,6 +331,40 @@ FILE: index.html
           </dl>
           <a class="noscript-cta" href="https://github.com/joshmerritt/arduinoChickenCoopDoor" itemprop="url">View on GitHub ↗</a>
         </article>
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/powerBIMetrics.jpg" alt="Microsoft Power BI dashboard showing KPI metrics and data visualizations" loading="lazy" />
+          <h2 itemprop="name">Microsoft Power BI</h2>
+          <p class="noscript-category">Business</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Build a governed data warehouse with automated pipelines that lets business users self-serve answers without filing tickets.</dd>
+            <dt>Role</dt>
+            <dd>BI Developer and Data Analyst</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">Power BI, DAX, Power Query, REST APIs, Google BigQuery, Azure</dd>
+            <dt>Summary</dt>
+            <dd>Built the reporting layer that lets business teams answer their own questions instead of filing a ticket and waiting. Data flows in automatically from multiple sources, lands in a clean, structured model, and powers a set of linked reports users can drill into on their own.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://www.upwork.com/fl/joshuapmerritt" itemprop="url">View Upwork Profile ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/googleDataStudioServiceTechs.jpg" alt="Google Data Studio streaming dashboard displayed on office TV" loading="lazy" />
+          <h2 itemprop="name">Google Data Studio Streaming Dashboard</h2>
+          <p class="noscript-category">Business</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Give frontline employees real-time visibility into their performance and standing relative to team benchmarks.</dd>
+            <dt>Role</dt>
+            <dd>BI Developer</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">Google Data Studio, Data Modeling, ScreenCloud, Amazon Fire TV</dd>
+            <dt>Summary</dt>
+            <dd>A live KPI dashboard displayed on office TVs so the whole team can see how they're tracking against goals at a glance. Shows individual and team standings updated throughout the day.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://www.upwork.com/fl/joshuapmerritt" itemprop="url">View Upwork Profile ↗</a>
+        </article>
+
 
         <footer class="noscript-footer">
           <p>&copy; 2026 Josh Merritt &middot; Da Data Dad &middot; <a href="mailto:josh@DaDataDad.com" style="color: #5985b1; text-decoration: none;">josh@DaDataDad.com</a></p>
@@ -665,6 +665,28 @@ const projects = [
       'Builder with a bias for shipping. Just as comfortable wiring up a data pipeline as designing the frontend that displays it. Turns messy, complex data into clear answers for the people who need them \u2014 whether that\u2019s a VP checking quarterly numbers or a teammate debugging a report. Track record of balancing competing priorities while keeping projects on schedule and under budget.',
   },
   {
+    id: 'thisWebsite',
+    name: 'Portfolio Website',
+    link: 'https://github.com/joshmerritt/websiteAnimation',
+    category: 'Technology',
+    goal: 'Build a portfolio that doubles as a playable physics sandbox \u2014 because a list of links doesn\u2019t show how you think.',
+    role: 'Creator and Developer',
+    technology: 'React 18, Vite, p5.js (instance mode), Matter.js, ES Modules, GA4',
+    description:
+      'The site you\u2019re on right now. Each project is a ball you drag and launch into a goal \u2014 part portfolio, part physics playground. Works on phones and desktops, adapts its performance to the device, and quietly tracks every interaction so the analytics dashboard has real data to show.',
+  },
+  {
+    id: 'SiteAnalytics',
+    name: 'Site Analytics',
+    link: '/analytics-dashboard.html',
+    category: 'Technology',
+    goal: 'Prove the portfolio isn\u2019t just pretty \u2014 instrument every interaction and surface the data in a live dashboard.',
+    role: 'Creator and Developer',
+    technology: 'React, Cloudflare Workers, GA4 Data API, SVG, CSS Grid',
+    description:
+      'A live analytics dashboard for this very site. Every ball launch, score, and project open is tracked, piped through a custom backend, and displayed here in real time. Includes visitor trends, traffic sources, top pages, and a ball engagement funnel that shows how visitors move from launching a ball all the way to clicking a project link.',
+  },
+  {
     id: 'arduinoCoopDoor',
     name: 'Smart Chicken Coop',
     link: 'https://github.com/joshmerritt/arduinoChickenCoopDoor',
@@ -699,28 +721,7 @@ const projects = [
     description:
       'Built the reporting layer that lets business teams answer their own questions instead of filing a ticket and waiting. Data flows in automatically from multiple sources, lands in a clean, structured model, and powers a set of linked reports users can drill into on their own. Cut ad-hoc analyst requests significantly and gave leadership real-time visibility into KPIs.',
   },
-  {
-    id: 'thisWebsite',
-    name: 'Portfolio Website',
-    link: 'https://github.com/joshmerritt/websiteAnimation',
-    category: 'Technology',
-    goal: 'Build a portfolio that doubles as a playable physics sandbox \u2014 because a list of links doesn\u2019t show how you think.',
-    role: 'Creator and Developer',
-    technology: 'React 18, Vite, p5.js (instance mode), Matter.js, ES Modules, GA4',
-    description:
-      'The site you\u2019re on right now. Each project is a ball you drag and launch into a goal \u2014 part portfolio, part physics playground. Works on phones and desktops, adapts its performance to the device, and quietly tracks every interaction so the analytics dashboard has real data to show.',
-  },
-  {
-    id: 'SiteAnalytics',
-    name: 'Site Analytics',
-    link: '/analytics-dashboard.html',
-    category: 'Technology',
-    goal: 'Prove the portfolio isn\u2019t just pretty \u2014 instrument every interaction and surface the data in a live dashboard.',
-    role: 'Creator and Developer',
-    technology: 'React, Cloudflare Workers, GA4 Data API, SVG, CSS Grid',
-    description:
-      'A live analytics dashboard for this very site. Every ball launch, score, and project open is tracked, piped through a custom backend, and displayed here in real time. Includes visitor trends, traffic sources, top pages, and a ball engagement funnel that shows how visitors move from launching a ball all the way to clicking a project link.',
-  },
+
   {
     id: 'thewineyoudrink',
     name: 'The Wine You Drink',
