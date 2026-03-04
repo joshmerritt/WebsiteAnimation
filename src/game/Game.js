@@ -37,9 +37,10 @@ export default class Game {
     this.selectedCategory = 'All';
     this.showDemo         = true;
     this.totalShots       = 0;
-    this.totalMakes       = 0;
-    this.totalOpens       = 0;
+    this.totalMakes       = 0;    // goals only (collision score)
+    this.totalOpens       = 0;    // all detail views (goals + double-clicks)
     this.clickedToOpen    = false;
+    this.consecutiveMisses = 0;   // launches without a score — triggers hint at 3
 
     this.currentPage      = 0;
     this.ballsPerPage     = 999;
@@ -156,8 +157,10 @@ export default class Game {
     if (this._lastTappedBall &&
         now - this._lastTapTime < config.doubleTapWindow &&
         this._lastTappedBall.onBall(p.mouseX, p.mouseY)) {
-      this._openBallDetail(this._lastTappedBall);
+      this._openBallDetail(this._lastTappedBall, false); // false = not a goal
       this.clickedToOpen = true;
+      this.consecutiveMisses = 0;
+      bus.emit('miss:hint', false);
       this._lastTappedBall = null;
       return false;
     }
@@ -226,6 +229,10 @@ export default class Game {
       if (ball.clicked && (Math.abs(ball.xPower) > config.minLaunchPower || Math.abs(ball.yPower) > config.minLaunchPower)) {
         this._launchBall(ball);
         this.totalShots++;
+        this.consecutiveMisses++;
+        if (this.consecutiveMisses >= 3) {
+          bus.emit('miss:hint', true);
+        }
         this._emitStats();
         bus.emit('ball:launched', {
           name: ball.name,
@@ -397,8 +404,11 @@ export default class Game {
         const ballBody = bodyA.label === 'Ball' ? bodyA : bodyB.label === 'Ball' ? bodyB : null;
         if (ballBody?.ballRef) {
           const ball = ballBody.ballRef;
-          this._openBallDetail(ball);
+          ball.scoreGoal();                   // makes++ (goal only)
+          this._openBallDetail(ball, true);   // true = is a goal
           this.totalMakes++;
+          this.consecutiveMisses = 0;
+          bus.emit('miss:hint', false);
           this._emitStats();
           bus.emit('ball:scored', {
             name: ball.name,
@@ -414,19 +424,25 @@ export default class Game {
   // ── Private: actions ───────────────────────────────────────────────────
 
   _launchBall(ball) {
-    // ── FIX 5: Increase launch power for mobile ──
-    // Portrait: doubled (0.35 → 0.70), Landscape mobile: +20% (0.35 → 0.42)
-    let speedScale;
+    // ── Higher-order launch power ──
+    // Polynomial curve: small drags = gentle, big drags = disproportionately powerful.
+    // Solves the linear approach's inability to handle different desktop screen sizes.
+    const magnitude = Math.sqrt(ball.xPower ** 2 + ball.yPower ** 2);
+    if (magnitude < 0.5) return;
+
+    const exponent = 1.6;
+    let coeff;
     if (this.vp.portrait) {
-      speedScale = 0.70;
+      coeff = 0.07;
     } else if (this.vp.mobile) {
-      speedScale = 0.42;
+      coeff = 0.042;
     } else {
-      speedScale = 0.25;
+      coeff = 0.025;
     }
 
-    const vx = -ball.xPower * speedScale;
-    const vy = -ball.yPower * speedScale;
+    const scaledMag = Math.pow(magnitude, exponent) * coeff;
+    const vx = -(ball.xPower / magnitude) * scaledMag;
+    const vy = -(ball.yPower / magnitude) * scaledMag;
 
     const catIdx = this.categories.indexOf(ball.category);
 
@@ -449,10 +465,11 @@ export default class Game {
     ball.launched();
   }
 
-  _openBallDetail(ball) {
+  _openBallDetail(ball, isGoal = false) {
     const data = ball.openDetail();
     if (!data) return;
     this.totalOpens++;
+    data.isGoal = isGoal;       // pass to React for potential UI differentiation
     this.detailOpen = true;
     this._emitStats();
     bus.emit('detail:open', data);
@@ -484,8 +501,8 @@ export default class Game {
   _emitStats() {
     bus.emit('stats:update', {
       shots: this.totalShots,
-      makes: this.totalMakes,
-      opens: this.totalOpens,
+      makes: this.totalMakes,   // goals only
+      opens: this.totalOpens,   // goals + double-clicks
     });
   }
 
@@ -657,14 +674,14 @@ export default class Game {
     const factor = dist / this.vp.iconSize;
 
     if (this.vp.portrait) {
-      // Portrait (phone + tablet): 2× old power, then -10% fine-tune
-      return this.vp.power * factor * 5.69 * 0.9;
+      // Portrait: compensate for polynomial curve
+      return this.vp.power * factor * 5.69 * 1.1;
     } else if (this.vp.mobile) {
-      // Mobile landscape: 2× previous (was 25%, now 50%)
-      return this.vp.power * factor * 3.36 * 0.5;
+      // Mobile landscape
+      return this.vp.power * factor * 3.36 * 0.6;
     } else {
-      // Desktop landscape: 70% of old power
-      return this.vp.power * factor * 0.15;
+      // Desktop: bumped from 0.15 → 0.22 to compensate for polynomial
+      return this.vp.power * factor * 0.22;
     }
   }
 
@@ -798,23 +815,8 @@ export default class Game {
   }
 
   _drawHelpMessage() {
-    if (this.totalShots > 2 && this.totalShots < 10 && !this.clickedToOpen && !this.detailOpen) {
-      const p = this.p;
-      const { gridStartY, spacing, gridRows, iconSize, portrait, width, height } = this.vp;
-      const gridBottom = gridStartY + (gridRows - 1) * spacing + iconSize / 2;
-      const yPos = gridBottom + iconSize * 0.8;
-
-      // Don't draw if it would go off screen or overlap the HUD
-      if (yPos > height - iconSize * 0.8) return;
-
-      p.push();
-      p.textFont('Syne');
-      p.textSize(iconSize / 6);
-      p.fill(config.colors.main);
-      p.textAlign(p.CENTER);
-      p.text("Double click the image if you're tired of playing.", width / 2, yPos);
-      p.pop();
-    }
+    // Replaced by React-based miss:hint popup system
+    // (emitted via EventBus after 3 consecutive misses)
   }
 
   // ── FIX 3: Stats equidistant between last category and screen bottom ──

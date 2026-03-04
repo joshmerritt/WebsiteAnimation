@@ -28,7 +28,7 @@ export default class Menu {
       position.x, position.y, this.width, this.height,
       {
         isStatic: true,
-        restitution: 0.3,
+        restitution: config.menu.restitution,
         collisionFilter: {
           group:    index + 1,
           category: Math.pow(2, index),
