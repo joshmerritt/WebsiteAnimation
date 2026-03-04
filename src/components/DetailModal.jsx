@@ -14,6 +14,7 @@
 
 import { useCallback } from 'react';
 import config from '../game/config.js';
+import bus from '../game/EventBus.js';
 
 function ctaLabel(link) {
   if (!link) return null;
@@ -40,6 +41,18 @@ export default function DetailModal({ detail, onClose }) {
   const handleButtonClick = useCallback((e) => {
     e.stopPropagation();
   }, []);
+
+  /** CTA click handler — emit tracking event then allow default navigation */
+  const handleCtaClick = useCallback((e) => {
+    e.stopPropagation();
+    if (detail) {
+      bus.emit('cta:click', {
+        name: detail.name || 'unknown',
+        link: detail.link || '',
+        category: detail.category || '',
+      });
+    }
+  }, [detail]);
 
   if (!detail) return null;
 
@@ -111,7 +124,7 @@ export default function DetailModal({ detail, onClose }) {
               href={detail.link}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={handleButtonClick}
+              onClick={handleCtaClick}
               onPointerDown={handleButtonClick}
               onTouchStart={handleButtonClick}
             >

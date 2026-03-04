@@ -329,56 +329,70 @@ function friendlyPageTitle(path) {
 // ── Ball engagement events ──────────────────────────────────────────────
 
 async function fetchBallEvents(token, propId, days) {
-  // Get ball_launch and ball_score counts by project
-  const launchReport = await runReport(token, propId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
-    dimensions: [{ name: 'customEvent:project_name' }],
-    metrics: [{ name: 'eventCount' }],
-    dimensionFilter: {
-      filter: {
-        fieldName: 'eventName',
-        stringFilter: { matchType: 'EXACT', value: 'ball_launch' },
+  // Get ball_launch, ball_score, detail_open, and cta_click counts by project
+  const [launchReport, scoreReport, openReport, ctaReport] = await Promise.all([
+    runReport(token, propId, {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dimensions: [{ name: 'customEvent:project_name' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'ball_launch' },
+        },
       },
-    },
-    limit: 20,
-  });
-
-  const scoreReport = await runReport(token, propId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
-    dimensions: [{ name: 'customEvent:project_name' }],
-    metrics: [{ name: 'eventCount' }],
-    dimensionFilter: {
-      filter: {
-        fieldName: 'eventName',
-        stringFilter: { matchType: 'EXACT', value: 'ball_score' },
+      limit: 20,
+    }),
+    runReport(token, propId, {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dimensions: [{ name: 'customEvent:project_name' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'ball_score' },
+        },
       },
-    },
-    limit: 20,
-  });
-
-  const openReport = await runReport(token, propId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
-    dimensions: [{ name: 'customEvent:project_name' }],
-    metrics: [{ name: 'eventCount' }],
-    dimensionFilter: {
-      filter: {
-        fieldName: 'eventName',
-        stringFilter: { matchType: 'EXACT', value: 'detail_open' },
+      limit: 20,
+    }),
+    runReport(token, propId, {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dimensions: [{ name: 'customEvent:project_name' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'detail_open' },
+        },
       },
-    },
-    limit: 20,
-  });
+      limit: 20,
+    }),
+    runReport(token, propId, {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dimensions: [{ name: 'customEvent:project_name' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'cta_click' },
+        },
+      },
+      limit: 20,
+    }),
+  ]);
 
   // Index by project name
-  const launches = indexByDimension(launchReport);
-  const scores = indexByDimension(scoreReport);
-  const opens = indexByDimension(openReport);
+  const launches  = indexByDimension(launchReport);
+  const scores    = indexByDimension(scoreReport);
+  const opens     = indexByDimension(openReport);
+  const ctaClicks = indexByDimension(ctaReport);
 
   // Merge all known project names
   const allNames = new Set([
     ...Object.keys(launches),
     ...Object.keys(scores),
     ...Object.keys(opens),
+    ...Object.keys(ctaClicks),
   ]);
 
   const BALL_META = {
@@ -397,23 +411,25 @@ async function fetchBallEvents(token, propId, days) {
   let i = 0;
   for (const name of allNames) {
     const meta = BALL_META[name] || { id: name, color: palette[i % palette.length], category: 'Other' };
-    const launchCount = launches[name] || 0;
-    const scoreCount = scores[name] || 0;
-    const openCount = opens[name] || 0;
+    const launchCount   = launches[name] || 0;
+    const scoreCount    = scores[name] || 0;
+    const openCount     = opens[name] || 0;
+    const ctaClickCount = ctaClicks[name] || 0;
     result.push({
       ball: name,
       id: meta.id,
-      clicks: launchCount,      // ball_launch = user interacted
+      clicks: launchCount,      // V1 compat: clicks = launches
       launches: launchCount,
       scores: scoreCount,
       opens: openCount,
+      ctaClicks: ctaClickCount,
       color: meta.color,
       category: meta.category,
     });
     i++;
   }
 
-  return result.sort((a, b) => b.clicks - a.clicks);
+  return result.sort((a, b) => b.launches - a.launches);
 }
 
 function indexByDimension(report) {

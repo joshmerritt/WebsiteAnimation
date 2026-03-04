@@ -183,11 +183,11 @@ function SessionFlow() {
 
 function ArchitectureShowcase() {
   const pipeline = [
-    { label: 'User Action',  items: ['Drag ball', 'Release (launch)', 'Collision (score)', 'Double-tap (open)'], color: '#D4A843', icon: '👆' },
+    { label: 'User Action',  items: ['Drag ball', 'Release (launch)', 'Collision (score)', 'Double-tap (open)', 'CTA link click'], color: '#D4A843', icon: '👆' },
     { label: 'Game.js',      items: ['Physics engine', 'Collision detection', 'State management'],                color: '#5985B1', icon: '⚙️' },
-    { label: 'EventBus',     items: ['stats:update', 'detail:open', 'detail:close', 'load:complete'],            color: '#6B9F6B', icon: '📡' },
+    { label: 'EventBus',     items: ['stats:update', 'detail:open', 'detail:close', 'cta:click', 'load:complete'],            color: '#6B9F6B', icon: '📡' },
     { label: 'ga4.js',       items: ['Delta detection', 'Event mapping', 'Parameter enrichment'],                color: '#7B5EA7', icon: '🔗' },
-    { label: 'GA4',          items: ['ball_launch', 'ball_score', 'detail_open', 'portfolio_loaded'],            color: '#4285F4', icon: '📊' },
+    { label: 'GA4',          items: ['ball_launch', 'ball_score', 'detail_open', 'cta_click', 'portfolio_loaded'],            color: '#4285F4', icon: '📊' },
   ];
 
   return (
@@ -456,9 +456,9 @@ export default function AnalyticsDashboardV2() {
           )}
         </p>
         <p>
-          Five custom GA4 events track the full user journey from ball
-          interaction through project discovery, with enriched parameters
-          for per-project attribution and accuracy tracking.
+          Six custom GA4 events track the full user journey from ball
+          interaction through project discovery and CTA conversion, with
+          enriched parameters for per-project attribution and accuracy tracking.
         </p>
       </div>
     </div>

@@ -97,26 +97,29 @@ export const PAGE_DATA = [
 ];
 
 // ── Ball engagement funnel (all 8 project balls) ────────────────────────
+// clicks field retained for V1 compatibility (equals launches)
+// ctaClicks = CTA link clicks from the detail modal
 export const BALL_ENGAGEMENT = [
-  { ball: 'Josh Merritt',            id: 'aboutMe',                      clicks: 312, launches: 289, scores: 267, opens: 251, color: '#6B9F6B',  category: 'Me' },
-  { ball: 'Microsoft Power BI',      id: 'powerBIMetrics',               clicks: 234, launches: 218, scores: 189, opens: 178, color: '#D4A843',  category: 'Business' },
-  { ball: 'The Wine You Drink',      id: 'thewineyoudrink',              clicks: 198, launches: 182, scores: 156, opens: 149, color: '#8B1A32',  category: 'Apps' },
-  { ball: 'Black Sheep Dart League', id: 'dartleague',                   clicks: 178, launches: 165, scores: 141, opens: 132, color: '#7B5EA7',  category: 'Apps' },
-  { ball: 'Smart Chicken Coop',      id: 'arduinoCoopDoor',              clicks: 156, launches: 142, scores: 122, opens: 108, color: '#BF360C',  category: 'Technology' },
-  { ball: 'Site Analytics',          id: 'SiteAnalytics',                clicks: 145, launches: 131, scores: 112, opens: 98,  color: '#5985B1',  category: 'Technology' },
-  { ball: 'Google Data Studio',      id: 'googleDataStudioServiceTechs', clicks: 123, launches: 108, scores: 89,  opens: 78,  color: '#4285F4',  category: 'Business' },
-  { ball: 'Portfolio Website',       id: 'thisWebsite',                  clicks: 108, launches: 95,  scores: 84,  opens: 72,  color: '#5985B1',  category: 'Technology' },
+  { ball: 'Josh Merritt',            id: 'aboutMe',                      clicks: 312, launches: 289, scores: 267, opens: 251, ctaClicks: 198, color: '#6B9F6B',  category: 'Me' },
+  { ball: 'Microsoft Power BI',      id: 'powerBIMetrics',               clicks: 234, launches: 218, scores: 189, opens: 178, ctaClicks: 132, color: '#D4A843',  category: 'Business' },
+  { ball: 'The Wine You Drink',      id: 'thewineyoudrink',              clicks: 198, launches: 182, scores: 156, opens: 149, ctaClicks: 121, color: '#8B1A32',  category: 'Apps' },
+  { ball: 'Black Sheep Dart League', id: 'dartleague',                   clicks: 178, launches: 165, scores: 141, opens: 132, ctaClicks: 104, color: '#7B5EA7',  category: 'Apps' },
+  { ball: 'Smart Chicken Coop',      id: 'arduinoCoopDoor',              clicks: 156, launches: 142, scores: 122, opens: 108, ctaClicks: 79,  color: '#BF360C',  category: 'Technology' },
+  { ball: 'Site Analytics',          id: 'SiteAnalytics',                clicks: 145, launches: 131, scores: 112, opens: 98,  ctaClicks: 71,  color: '#5985B1',  category: 'Technology' },
+  { ball: 'Google Data Studio',      id: 'googleDataStudioServiceTechs', clicks: 123, launches: 108, scores: 89,  opens: 78,  ctaClicks: 52,  color: '#4285F4',  category: 'Business' },
+  { ball: 'Portfolio Website',       id: 'thisWebsite',                  clicks: 108, launches: 95,  scores: 84,  opens: 72,  ctaClicks: 48,  color: '#5985B1',  category: 'Technology' },
 ];
 
 // ── Aggregate funnel totals (derived from BALL_ENGAGEMENT) ──────────────
 export const FUNNEL_TOTALS = BALL_ENGAGEMENT.reduce(
   (acc, b) => ({
-    clicks:   acc.clicks + b.clicks,
-    launches: acc.launches + b.launches,
-    scores:   acc.scores + b.scores,
-    opens:    acc.opens + b.opens,
+    clicks:    acc.clicks + b.clicks,
+    launches:  acc.launches + b.launches,
+    scores:    acc.scores + b.scores,
+    opens:     acc.opens + b.opens,
+    ctaClicks: acc.ctaClicks + b.ctaClicks,
   }),
-  { clicks: 0, launches: 0, scores: 0, opens: 0 },
+  { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 },
 );
 
 // ── Device / viewport breakdown ─────────────────────────────────────────
@@ -146,6 +149,7 @@ export const ARCHITECTURE = {
     { name: 'ball_score',       params: ['shot_number', 'make_number', 'accuracy'] },
     { name: 'detail_open',      params: ['project_name', 'project_link'] },
     { name: 'detail_close',     params: [] },
+    { name: 'cta_click',        params: ['project_name', 'project_link', 'project_category'] },
     { name: 'portfolio_loaded', params: ['load_time_ms'] },
   ],
 };
