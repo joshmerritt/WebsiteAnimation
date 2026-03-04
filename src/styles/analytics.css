@@ -335,14 +335,51 @@ body { background: var(--a-bg); font-family: var(--font-body); color: var(--a-te
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BALL ENGAGEMENT — 7-column grid (added Launches)
+   BALL ENGAGEMENT — 8-column grid + bar metric toggle
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .ball-engagement { margin-bottom: 0; }
 
+/* ─── Bar Metric Toggle ───────────────────────────────────────────────── */
+.engagement-bar-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.bar-toggle-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--a-text-faint);
+  margin-right: 4px;
+}
+
+.bar-toggle-btn {
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--a-border);
+  background: transparent;
+  color: var(--a-text-muted);
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bar-toggle-btn:hover:not(.active) { color: var(--a-text-dim); border-color: var(--a-border-accent); }
+.bar-toggle-btn.active {
+  background: rgba(89, 133, 177, 0.12);
+  border-color: var(--a-blue);
+  color: var(--a-text);
+}
+
+/* ─── Ball Table Grid — 8 columns ─────────────────────────────────────── */
 .ball-row {
   display: grid;
-  grid-template-columns: 130px 1fr 50px 56px 50px 50px 48px;
+  grid-template-columns: 130px 1fr 50px 46px 42px 42px 42px 42px;
   align-items: center;
   gap: 6px;
   padding: 10px 0;
@@ -397,6 +434,10 @@ body { background: var(--a-bg); font-family: var(--font-body); color: var(--a-te
 .ball-conv { font-weight: 600; }
 .ball-conv.high { color: var(--a-green); }
 .ball-conv.mid  { color: var(--a-gold); }
+
+.ball-acc { font-weight: 600; }
+.ball-acc.high { color: var(--a-green); }
+.ball-acc.mid  { color: var(--a-blue); }
 
 
 /* ─── Category Breakdown Chips ──────────────────────────────────────────────── */
@@ -525,12 +566,14 @@ body { background: var(--a-bg); font-family: var(--font-body); color: var(--a-te
   .sources-layout { flex-direction: column; align-items: flex-start; }
 
   .ball-row {
-    grid-template-columns: 90px 1fr 38px 42px 38px 38px 38px;
+    grid-template-columns: 90px 1fr 34px 34px 34px 34px 34px 36px;
     gap: 3px;
     font-size: 11px;
   }
   .ball-name { font-size: 10px; gap: 5px; }
   .ball-stat { font-size: 10px; }
+
+  .engagement-bar-toggle { flex-wrap: wrap; }
 
   .kpi-row { flex-wrap: wrap; }
   .stat-card { min-width: calc(50% - 8px); }
@@ -542,12 +585,15 @@ body { background: var(--a-bg); font-family: var(--font-body); color: var(--a-te
   .stat-card { min-width: 100%; }
 
   .ball-row {
-    grid-template-columns: 80px 1fr 34px 38px 34px 34px 36px;
+    grid-template-columns: 80px 1fr 30px 30px 32px 28px 28px 34px;
     gap: 2px;
   }
   .ball-name { font-size: 9px; }
   .ball-stat { font-size: 9px; }
   .page-stats { gap: 10px; }
+
+  .bar-toggle-btn { font-size: 8px; padding: 2px 6px; }
+  .bar-toggle-label { font-size: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
