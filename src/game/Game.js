@@ -658,14 +658,18 @@ export default class Game {
    * Compute demo launch power using a higher-order formula that
    * accounts for both screen width and ball-to-goal distance.
    *
-   * Formula:  coeff × dist^1.5 / √width
+   * Core idea:  dist^1.5 compensates for gravity losses on longer
+   * trajectories (linear would under-shoot large screens).  Dividing
+   * by a power of width normalises across viewport sizes.
    *
-   * Why higher-order?  The physics engine applies gravity over time,
-   * so longer trajectories lose proportionally more energy to the
-   * downward pull.  A linear distance→power mapping under-shoots on
-   * large screens and over-shoots on small ones.  The 1.5 exponent on
-   * distance compensates for this, while dividing by √width normalises
-   * across viewport sizes so the same visual arc is produced everywhere.
+   * Mobile (portrait & landscape):  coeff × dist^1.5 / √width
+   *   - Portrait coeff 0.0062, landscape coeff 0.196
+   *
+   * Desktop:  2860 × dist^1.5 / width^1.75
+   *   - The steeper 1.75 exponent on width means narrower desktop
+   *     viewports get proportionally more power, producing a consistent
+   *     arc whether the browser is 1280px or 1920px wide.
+   *   - Verified: ≈3× at 1920, ≈4.3× at 1440, ≈5× at 1280.
    */
   _computeDemoPower(ball) {
     const dx = ball.x - this.vp.dotCenterX;
@@ -673,20 +677,16 @@ export default class Game {
     const dist = Math.sqrt(dx * dx + dy * dy);
     const { width, portrait, mobile } = this.vp;
 
-    // Higher-order base: dist^1.5 / √width
-    const base = Math.pow(dist, 1.5) / Math.sqrt(width);
+    const distPow = Math.pow(dist, 1.5);
 
-    // Per-device coefficients calibrated so the demo ball arcs into the goal
-    let coeff;
     if (portrait) {
-      coeff = 0.62;       // tall viewports — ball is far below goal
+      return 0.0062 * distPow / Math.sqrt(width);
     } else if (mobile) {
-      coeff = 0.098;      // landscape phones — compact layout
+      return 0.196 * distPow / Math.sqrt(width);
     } else {
-      coeff = 0.075;      // desktop — long horizontal distance
+      // Desktop: steeper width^1.75 so narrow and wide screens both hit the goal
+      return 2860 * distPow / Math.pow(width, 1.75);
     }
-
-    return coeff * base;
   }
 
   _drawTitle() {
