@@ -1,5 +1,5 @@
 =============================
- CODEBASE DUMP - Tue Mar  3 21:01:35 PST 2026
+ CODEBASE DUMP - Wed Mar  4 09:56:51 PST 2026
 =============================
 
 
@@ -38,7 +38,7 @@ FILE: index.html
     <meta name="twitter:description" content="Interactive physics-based portfolio. Drag, aim, and shoot to explore projects in data, apps, and technology." />
     <meta name="twitter:image" content="https://dadatadad.com/assets/images/og-preview.jpg" />
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data (JSON-LD) — Person + Portfolio -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -46,12 +46,29 @@ FILE: index.html
         "name": "Josh Merritt",
         "url": "https://dadatadad.com",
         "jobTitle": "Analyst, Creator, Engineer",
+        "description": "Builder with a bias for shipping. Just as comfortable wiring up a data pipeline as designing the frontend that displays it. Turns messy, complex data into clear answers for the people who need them.",
+        "email": "josh@DaDataDad.com",
         "sameAs": [
           "https://www.linkedin.com/in/josh-merritt",
           "https://github.com/joshmerritt",
           "https://www.upwork.com/fl/joshuapmerritt"
         ],
-        "knowsAbout": ["SQL", "Python", "React", "Power BI", "Data Analytics", "JavaScript", "Arduino"]
+        "knowsAbout": ["SQL", "Python", "React", "Power BI", "DAX", "Data Analytics", "JavaScript", "Arduino", "Google BigQuery", "Microsoft Fabric"]
+      }
+    </script>
+
+    <!-- Structured Data — WebSite (helps Google understand the site) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Da Data Dad",
+        "url": "https://dadatadad.com",
+        "description": "Interactive physics-based portfolio by Josh Merritt — data analytics, BI development, and full-stack engineering.",
+        "author": {
+          "@type": "Person",
+          "name": "Josh Merritt"
+        }
       }
     </script>
 
@@ -68,10 +85,292 @@ FILE: index.html
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <!-- Noscript styles for the static fallback -->
+    <noscript>
+      <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          background: #0a0e12;
+          color: #c7d6d5;
+          font-family: 'DM Sans', 'Helvetica Neue', sans-serif;
+          line-height: 1.6;
+          padding: 0;
+          overflow-x: hidden;
+        }
+        .noscript-portfolio {
+          max-width: 780px;
+          margin: 0 auto;
+          padding: 48px 24px 80px;
+        }
+        .noscript-header {
+          margin-bottom: 48px;
+          padding-bottom: 32px;
+          border-bottom: 1px solid rgba(89, 133, 177, 0.25);
+        }
+        .noscript-brand {
+          font-family: 'Syne', sans-serif;
+          font-size: 2rem;
+          font-weight: 800;
+          color: #ffffff;
+          margin-bottom: 4px;
+        }
+        .noscript-tagline {
+          font-family: 'Syne', sans-serif;
+          font-size: 1.1rem;
+          color: #5985b1;
+          font-weight: 600;
+          margin-bottom: 16px;
+        }
+        .noscript-bio {
+          color: rgba(199, 214, 213, 0.75);
+          font-size: 0.95rem;
+          max-width: 600px;
+          margin-bottom: 20px;
+        }
+        .noscript-links { display: flex; gap: 16px; flex-wrap: wrap; }
+        .noscript-links a {
+          color: #5985b1;
+          text-decoration: none;
+          font-size: 0.85rem;
+          font-weight: 500;
+          padding: 6px 14px;
+          border: 1px solid rgba(89, 133, 177, 0.3);
+          border-radius: 6px;
+          transition: border-color 0.2s;
+        }
+        .noscript-links a:hover { border-color: #5985b1; }
+        .noscript-nav {
+          margin-bottom: 32px;
+          padding: 12px 0;
+          font-size: 0.85rem;
+        }
+        .noscript-nav a {
+          color: #5985b1;
+          text-decoration: none;
+          font-weight: 500;
+        }
+        .noscript-project {
+          margin-bottom: 40px;
+          padding: 24px;
+          background: rgba(14, 20, 28, 0.6);
+          border: 1px solid rgba(89, 133, 177, 0.12);
+          border-radius: 12px;
+        }
+        .noscript-project-img {
+          width: 100%;
+          max-height: 280px;
+          object-fit: cover;
+          border-radius: 8px;
+          margin-bottom: 16px;
+        }
+        .noscript-project h2 {
+          font-family: 'Syne', sans-serif;
+          font-size: 1.3rem;
+          font-weight: 700;
+          color: #ffffff;
+          margin-bottom: 4px;
+        }
+        .noscript-category {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.7rem;
+          color: #5985b1;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 12px;
+        }
+        .noscript-meta { margin-bottom: 12px; }
+        .noscript-meta dt {
+          font-weight: 600;
+          font-size: 0.8rem;
+          color: rgba(199, 214, 213, 0.5);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-top: 10px;
+        }
+        .noscript-meta dd {
+          font-size: 0.9rem;
+          color: rgba(199, 214, 213, 0.85);
+          margin: 2px 0 0 0;
+        }
+        .noscript-cta {
+          display: inline-block;
+          color: #5985b1;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 0.85rem;
+          margin-top: 12px;
+          padding: 8px 18px;
+          border: 1px solid rgba(89, 133, 177, 0.35);
+          border-radius: 8px;
+        }
+        .noscript-cta:hover { border-color: #5985b1; background: rgba(89, 133, 177, 0.08); }
+        .noscript-footer {
+          margin-top: 64px;
+          padding-top: 24px;
+          border-top: 1px solid rgba(89, 133, 177, 0.15);
+          font-size: 0.8rem;
+          color: rgba(199, 214, 213, 0.35);
+          text-align: center;
+        }
+      </style>
+    </noscript>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!--
+      ═══════════════════════════════════════════════════════════════════════
+      NOSCRIPT FALLBACK — Static semantic HTML for crawlers & accessibility
+      This content is only shown when JavaScript is disabled or unavailable.
+      Search engines index this content to understand the portfolio.
+      ═══════════════════════════════════════════════════════════════════════
+    -->
+    <noscript>
+      <main class="noscript-portfolio" role="main">
+        <header class="noscript-header">
+          <h1 class="noscript-brand">Da Data Dad</h1>
+          <p class="noscript-tagline">Honest. Analytical. Data Dreamer.</p>
+          <p class="noscript-bio">
+            Builder with a bias for shipping. Just as comfortable wiring up a data pipeline as designing the frontend that displays it. Turns messy, complex data into clear answers for the people who need them — whether that's a VP checking quarterly numbers or a teammate debugging a report.
+          </p>
+          <nav class="noscript-links" aria-label="External profiles">
+            <a href="https://www.linkedin.com/in/josh-merritt">LinkedIn</a>
+            <a href="https://github.com/joshmerritt">GitHub</a>
+            <a href="https://www.upwork.com/fl/joshuapmerritt">Upwork</a>
+            <a href="mailto:josh@DaDataDad.com">Contact</a>
+          </nav>
+        </header>
+
+        <nav class="noscript-nav" aria-label="Site pages">
+          <a href="/portfolio.html">View Accessible Portfolio →</a>
+        </nav>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/powerBIMetrics.jpg" alt="Microsoft Power BI dashboard showing KPI metrics and data visualizations" loading="lazy" />
+          <h2 itemprop="name">Microsoft Power BI</h2>
+          <p class="noscript-category">Business</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Build a governed data warehouse with automated pipelines that lets business users self-serve answers without filing tickets.</dd>
+            <dt>Role</dt>
+            <dd>BI Developer and Data Analyst</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">Power BI, DAX, Power Query, REST APIs, Google BigQuery, Azure</dd>
+            <dt>Summary</dt>
+            <dd>Built the reporting layer that lets business teams answer their own questions instead of filing a ticket and waiting. Data flows in automatically from multiple sources, lands in a clean, structured model, and powers a set of linked reports users can drill into on their own.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://www.upwork.com/fl/joshuapmerritt" itemprop="url">View Upwork Profile ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/googleDataStudioServiceTechs.jpg" alt="Google Data Studio streaming dashboard displayed on office TV" loading="lazy" />
+          <h2 itemprop="name">Google Data Studio Streaming Dashboard</h2>
+          <p class="noscript-category">Business</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Give frontline employees real-time visibility into their performance and standing relative to team benchmarks.</dd>
+            <dt>Role</dt>
+            <dd>BI Developer</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">Google Data Studio, Data Modeling, ScreenCloud, Amazon Fire TV</dd>
+            <dt>Summary</dt>
+            <dd>A live KPI dashboard displayed on office TVs so the whole team can see how they're tracking against goals at a glance. Shows individual and team standings updated throughout the day.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://www.upwork.com/fl/joshuapmerritt" itemprop="url">View Upwork Profile ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/SoftwareApplication">
+          <img class="noscript-project-img" src="/assets/images/thewineyoudrink.jpg" alt="The Wine You Drink app showing wine cellar management interface" loading="lazy" />
+          <h2 itemprop="name">The Wine You Drink</h2>
+          <p class="noscript-category">Apps</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Replace spreadsheets and sticky notes with a purpose-built app for managing a wine collection — from cellar to glass.</dd>
+            <dt>Role</dt>
+            <dd>Product Owner and Creator</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">React 18, Firebase, Vite, PWA, Claude AI, CSS Custom Properties</dd>
+            <dt>Summary</dt>
+            <dd>A wine cellar app built for collectors who outgrew their spreadsheet. Snap a photo of any label to auto-fill the details with AI, and see at a glance which bottles are in their prime.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://thewineyoudrink.web.app" itemprop="url">Open App ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/SoftwareApplication">
+          <img class="noscript-project-img" src="/assets/images/dartleague.jpg" alt="Black Sheep Dart League app showing league management dashboard" loading="lazy" />
+          <h2 itemprop="name">Black Sheep Dart League</h2>
+          <p class="noscript-category">Apps</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Eliminate the spreadsheets, group texts, and paper scoresheets that were slowing down league night.</dd>
+            <dt>Role</dt>
+            <dd>Product Owner and Creator</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">React 19, Firebase, Tailwind CSS, Vite, Claude AI (scoresheet OCR)</dd>
+            <dt>Summary</dt>
+            <dd>A league management app used weekly by real players. Handles RSVPs, automatically pairs teams, and tracks stats. The scorekeeper snaps a photo and AI reads the scoresheet — what used to take 30+ minutes now takes seconds.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://theblacksheepdartleague.web.app" itemprop="url">Open App ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/thisWebsite.jpg" alt="Portfolio website showing physics-based ball launching interaction" loading="lazy" />
+          <h2 itemprop="name">Portfolio Website</h2>
+          <p class="noscript-category">Technology</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Build a portfolio that doubles as a playable physics sandbox — because a list of links doesn't show how you think.</dd>
+            <dt>Role</dt>
+            <dd>Creator and Developer</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">React 18, Vite, p5.js, Matter.js, ES Modules, GA4</dd>
+            <dt>Summary</dt>
+            <dd>Each project is a ball you drag and launch into a goal — part portfolio, part physics playground. Works on phones and desktops, adapts its performance to the device, and tracks every interaction for the analytics dashboard.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://github.com/joshmerritt/websiteAnimation" itemprop="url">View on GitHub ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/SiteAnalytics.jpg" alt="Site analytics dashboard showing visitor trends and ball engagement metrics" loading="lazy" />
+          <h2 itemprop="name">Site Analytics</h2>
+          <p class="noscript-category">Technology</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Prove the portfolio isn't just pretty — instrument every interaction and surface the data in a live dashboard.</dd>
+            <dt>Role</dt>
+            <dd>Creator and Developer</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">React, Cloudflare Workers, GA4 Data API, SVG, CSS Grid</dd>
+            <dt>Summary</dt>
+            <dd>A live analytics dashboard for this very site. Every ball launch, score, and project open is tracked, piped through a custom backend, and displayed in real time.</dd>
+          </dl>
+          <a class="noscript-cta" href="/analytics-dashboard.html" itemprop="url">View Dashboard ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/arduinoCoopDoor.jpg" alt="Smart chicken coop door with Arduino controller and motor assembly" loading="lazy" />
+          <h2 itemprop="name">Smart Chicken Coop</h2>
+          <p class="noscript-category">Technology</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Automate a chicken coop door that opens at sunrise and locks at sundown — no manual intervention required.</dd>
+            <dt>Role</dt>
+            <dd>Hardware Engineer and Builder</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">C++, Arduino, Motor Shield, Photoresistor, Programmable RGB LEDs, Custom Woodworking</dd>
+            <dt>Summary</dt>
+            <dd>An automated coop door that senses daylight and drives a repurposed car-window motor to open at sunrise and lock at sundown. Built on an Arduino with a light sensor, color-coded status LEDs, and a custom wooden housing.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://github.com/joshmerritt/arduinoChickenCoopDoor" itemprop="url">View on GitHub ↗</a>
+        </article>
+
+        <footer class="noscript-footer">
+          <p>&copy; 2026 Josh Merritt &middot; Da Data Dad &middot; <a href="mailto:josh@DaDataDad.com" style="color: #5985b1; text-decoration: none;">josh@DaDataDad.com</a></p>
+        </footer>
+      </main>
+    </noscript>
   </body>
 </html>
 
@@ -167,6 +466,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         analytics: resolve(__dirname, 'analytics-dashboard.html'),
         analyticsV2: resolve(__dirname, 'analytics-v2.html'),
+        portfolio: resolve(__dirname, 'portfolio.html'),
       },
     },
   },
@@ -179,7 +479,7 @@ FILE: package.json
 {
   "name": "dadatadad-portfolio",
   "private": true,
-  "version": "3.1.0",
+  "version": "3.1.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -358,11 +658,11 @@ const projects = [
     category: 'Me',
     heroMode: 'full',
     goal: 'To leave things better than I found them.',
-    role: 'Analyst, Creator, Engineer, Project Manager',
+    role: 'Data Engineer \u00B7 BI Developer \u00B7 Full-Stack Builder',
     technology:
-      'SQL, Python, Jupyter, JavaScript, React.js, Git, RDBMS, PowerBI, DAX, Excel, Google Data Studio',
+      'SQL, Python, JavaScript, React, Power BI, DAX, Google BigQuery, Git, Jupyter, Excel',
     description:
-      'I am a builder with integrity, who not only understands complex data sets, but also knows how to convey their relevance in an elegant, effective manner. As a born problem-solver with a passion for efficiency and a history of success in a host of diverse roles, I\u2019ve juggled competing stakeholder interests and communicated efficient solutions to executives, engineers, and customers alike to help them get more done and be smarter about it.',
+      'Builder with a bias for shipping. Just as comfortable wiring up a data pipeline as designing the frontend that displays it. Turns messy, complex data into clear answers for the people who need them \u2014 whether that\u2019s a VP checking quarterly numbers or a teammate debugging a report. Track record of balancing competing priorities while keeping projects on schedule and under budget.',
   },
   {
     id: 'arduinoCoopDoor',
@@ -370,80 +670,80 @@ const projects = [
     link: 'https://github.com/joshmerritt/arduinoChickenCoopDoor',
     category: 'Technology',
     heroMode: 'full',
-    goal: 'Build an automated door to allow the chickens to free range from sun-up to sun-down, while keeping them safely enclosed in their coop overnight.',
-    role: 'Creator and Engineer',
-    technology: 'C++, Arduino, Motors, Programmable RGB LEDs, Woodworking',
+    goal: 'Automate a chicken coop door that opens at sunrise and locks at sundown \u2014 no manual intervention required.',
+    role: 'Hardware Engineer and Builder',
+    technology: 'C++, Arduino, Motor Shield, Photoresistor, Programmable RGB LEDs, Custom Woodworking',
     description:
-      'Using an Arduino, a motor shield, and a car door window motor, I created a door that opens and closes automatically based upon a photoresistor\u2019s realtime readings.',
+      'An automated coop door that senses daylight and drives a repurposed car-window motor to open at sunrise and lock at sundown \u2014 no manual intervention, no missed bedtimes. Built on an Arduino with a light sensor, color-coded status LEDs, and a custom wooden housing. A true end-to-end hardware project: designed the circuit, wrote the firmware, and built the enclosure.',
   },
   {
     id: 'googleDataStudioServiceTechs',
     name: 'Google Data Studio Streaming Dashboard',
     link: 'https://www.upwork.com/fl/joshuapmerritt',
     category: 'Business',
-    goal: 'Educate and motivate employees about their contribution to the business and performance metrics relative to their colleagues.',
+    goal: 'Give frontline employees real-time visibility into their performance and standing relative to team benchmarks.',
     role: 'BI Developer',
-    technology: 'Google Data Studio, Data Modeling, Screencloud, Amazon Firestick',
+    technology: 'Google Data Studio, Data Modeling, ScreenCloud, Amazon Fire TV',
     description:
-      'I created a TV dashboard to help track key performance indicators and display it within a business. By providing goals and showcasing performance over the year, employees can understand their contribution to the company in real-time and track how their metrics compare to those of their colleagues.',
+      'A live KPI dashboard displayed on office TVs so the whole team can see how they\u2019re tracking against goals at a glance. Shows individual and team standings updated throughout the day, driving friendly competition without anyone needing to open a spreadsheet. Designed to be readable from across the room \u2014 big numbers, color-coded status, and automatic refresh.',
   },
   {
     id: 'powerBIMetrics',
-    name: 'Microsoft PowerBI',
+    name: 'Microsoft Power BI',
     link: 'https://www.upwork.com/fl/joshuapmerritt',
     category: 'Business',
-    goal: 'Create a data warehouse, with robust data pipelines and ETL processes, to enable self-service analytics.',
+    goal: 'Build a governed data warehouse with automated pipelines that lets business users self-serve answers without filing tickets.',
     role: 'BI Developer and Data Analyst',
     technology:
-      'Microsoft PowerBI, REST APIs, Microsoft PowerQuery, DAX, Google BigQuery, Microsoft Azure',
+      'Power BI, DAX, Power Query, REST APIs, Google BigQuery, Azure',
     description:
-      'I use PowerBI to create multidimensional star schema modeled data warehouses. Using interconnected visualizations to answer real-world business questions and track key performance indicators.',
+      'Built the reporting layer that lets business teams answer their own questions instead of filing a ticket and waiting. Data flows in automatically from multiple sources, lands in a clean, structured model, and powers a set of linked reports users can drill into on their own. Cut ad-hoc analyst requests significantly and gave leadership real-time visibility into KPIs.',
   },
   {
     id: 'thisWebsite',
     name: 'Portfolio Website',
     link: 'https://github.com/joshmerritt/websiteAnimation',
     category: 'Technology',
-    goal: 'Learn new skills and create a fun, interactive way to showcase my creativity and experience with business and technology.',
+    goal: 'Build a portfolio that doubles as a playable physics sandbox \u2014 because a list of links doesn\u2019t show how you think.',
     role: 'Creator and Developer',
-    technology: 'JavaScript, CSS3, HTML5, Git, p5.js, matter.js',
+    technology: 'React 18, Vite, p5.js (instance mode), Matter.js, ES Modules, GA4',
     description:
-      'I created this website to showcase some of my favorite recent projects while learning new technologies. It is coded to allow for a dynamic number of content tiles and is responsive to the size of the screen on which it is viewed.',
+      'The site you\u2019re on right now. Each project is a ball you drag and launch into a goal \u2014 part portfolio, part physics playground. Works on phones and desktops, adapts its performance to the device, and quietly tracks every interaction so the analytics dashboard has real data to show.',
   },
   {
     id: 'SiteAnalytics',
     name: 'Site Analytics',
     link: '/analytics-dashboard.html',
     category: 'Technology',
-    goal: 'Track and visualize website engagement metrics including visitor traffic, referral sources, and interactive ball engagement data.',
+    goal: 'Prove the portfolio isn\u2019t just pretty \u2014 instrument every interaction and surface the data in a live dashboard.',
     role: 'Creator and Developer',
-    technology: 'React, JavaScript, CSS3, SVG',
+    technology: 'React, Cloudflare Workers, GA4 Data API, SVG, CSS Grid',
     description:
-      'An interactive analytics dashboard built for DaDataDad.com that displays visitor traffic, traffic sources, top pages, and a unique ball engagement funnel tracking how users interact with the physics playground.',
+      'A live analytics dashboard for this very site. Every ball launch, score, and project open is tracked, piped through a custom backend, and displayed here in real time. Includes visitor trends, traffic sources, top pages, and a ball engagement funnel that shows how visitors move from launching a ball all the way to clicking a project link.',
   },
   {
     id: 'thewineyoudrink',
     name: 'The Wine You Drink',
     link: 'https://thewineyoudrink.web.app',
     category: 'Apps',
-    goal: 'To provide a visually appealing and intuitive way to manage your wine cellar.',
-    role: 'Creator and Product Owner \u2014 dreamed up the concept after years of collecting wine. Built with Claude.ai as development partner.',
+    goal: 'Replace spreadsheets and sticky notes with a purpose-built app for managing a wine collection \u2014 from cellar to glass.',
+    role: 'Product Owner and Creator \u2014 built this to solve my own problem after years of tracking bottles in spreadsheets. Developed with Claude AI as a coding partner.',
     technology:
-      'React 18, Firebase (Auth + Firestore), Vite, PWA, CSS custom properties, Claude AI (wine label recognition)',
+      'React 18, Firebase (Auth + Firestore), Vite, PWA, Claude AI (label recognition), CSS Custom Properties',
     description:
-      'A full-featured wine cellar management progressive web app. Features include multi-cellar management, a section builder with drag-and-drop reordering, AI-powered wine label photo recognition, drink window tracking with animated SVG rings, tasting notes timeline, consumption history, statistics dashboard, and full offline capability.',
+      'A wine cellar app built for collectors who outgrew their spreadsheet. Organize multiple cellars, snap a photo of any label to auto-fill the details with AI, and see at a glance which bottles are in their prime. Includes tasting notes, drinking history, and stats \u2014 and it works offline, so you can use it in the cellar where there\u2019s no signal.',
   },
   {
     id: 'dartleague',
     name: 'Black Sheep Dart League',
     link: 'https://theblacksheepdartleague.web.app',
     category: 'Apps',
-    goal: 'To make setting up weekly pairings and brackets quick and easy for a local dart league.',
-    role: 'Creator and Product Owner \u2014 identified the friction points in a highly manual, paper-based process. Built with Claude.ai as development partner.',
+    goal: 'Eliminate the spreadsheets, group texts, and paper scoresheets that were slowing down league night.',
+    role: 'Product Owner and Creator \u2014 got tired of the paper scoresheets and group-text chaos, so I built something better. Developed with Claude AI as a coding partner.',
     technology:
-      'React 19, Firebase (Auth + Firestore + Cloud Functions), Tailwind CSS, Vite, Claude AI (scoresheet scanning)',
+      'React 19, Firebase (Auth + Firestore + Cloud Functions), Tailwind CSS, Vite, Claude AI (scoresheet OCR)',
     description:
-      'A league management app that replaces a paper-based process. Tracks player stats and win percentages, manages weekly RSVPs, generates smart pairings based on matchup history and standings, and uses Claude AI to scan and parse physical scoresheets via phone camera.',
+      'A league management app used weekly by real players. Handles RSVPs, automatically pairs teams based on past matchups and current standings, and tracks everyone\u2019s stats. The scorekeeper just snaps a photo of the paper scoresheet and AI reads it in \u2014 what used to take 30+ minutes of manual entry now takes seconds.',
   },
 ];
 
@@ -878,29 +1178,22 @@ export default class Game {
   // ── Private: actions ───────────────────────────────────────────────────
 
   _launchBall(ball) {
-    // ── Higher-order launch power ──
-    // Polynomial curve (mag^1.15): matches old linear at typical drags,
-    // gives ~15% boost at large drags (big screens) and ~5% reduction
-    // at small drags (small screens). Coefficients calibrated to match
-    // the original speedScale values at their respective typical magnitudes.
+    // ── Linear launch power ──
+    // Drag twice as far → twice as much power. Simple and predictable.
     const magnitude = Math.sqrt(ball.xPower ** 2 + ball.yPower ** 2);
     if (magnitude < 0.01) return;
 
-    const exponent = 1.15;
-    let coeff;
+    let speedScale;
     if (this.vp.portrait) {
-      coeff = 0.50;      // was linear 0.70 — matched at mag ≈ 20
+      speedScale = 0.70;
     } else if (this.vp.mobile) {
-      coeff = 0.29;      // was linear 0.42 — matched at mag ≈ 25
+      speedScale = 0.42;
     } else {
-      coeff = 0.17;      // was linear 0.25 — matched at mag ≈ 30
+      speedScale = 0.25;
     }
 
-    const scaledMag = Math.pow(magnitude, exponent) * coeff;
-    const dirX = ball.xPower / magnitude;
-    const dirY = ball.yPower / magnitude;
-    const vx = -dirX * scaledMag;
-    const vy = -dirY * scaledMag;
+    const vx = -ball.xPower * speedScale;
+    const vy = -ball.yPower * speedScale;
 
     const catIdx = this.categories.indexOf(ball.category);
 
@@ -1117,28 +1410,37 @@ export default class Game {
   }
 
   /**
-   * Compute demo launch power based on the pixel distance between
-   * the ball and the goal dots. Uses vp.power as the physics-tuned
-   * base, modulated by (dist / iconSize) so the demo adapts to any
-   * screen size and layout.
+   * Compute demo launch power using a higher-order formula that
+   * accounts for both screen width and ball-to-goal distance.
    *
-   * Targets: desktop ≈ 70% of v1, mobile/portrait ≈ 200% of v1
+   * Core idea:  dist^1.5 compensates for gravity losses on longer
+   * trajectories (linear would under-shoot large screens).  Dividing
+   * by a power of width normalises across viewport sizes.
+   *
+   * Mobile (portrait & landscape):  coeff × dist^1.5 / √width
+   *   - Portrait coeff 0.129, landscape coeff 0.169
+   *
+   * Desktop:  12.59 × dist^1.5 / width^1.045
+   *   - The 1.045 exponent gives a gentle boost to narrower viewports
+   *     while leaving wide desktops untouched.
+   *   - +5% uniform bump vs prior round; narrow-to-wide ratio preserved.
+   *   - Narrower viewports still get a gentle relative boost via the exponent.
    */
   _computeDemoPower(ball) {
     const dx = ball.x - this.vp.dotCenterX;
     const dy = ball.y - this.vp.gridStartY;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const factor = dist / this.vp.iconSize;
+    const { width, portrait, mobile } = this.vp;
 
-    if (this.vp.portrait) {
-      // Portrait (phone + tablet): 2× old power, then -10% fine-tune
-      return this.vp.power * factor * 5.69 * 0.9;
-    } else if (this.vp.mobile) {
-      // Mobile landscape: 2× previous (was 25%, now 50%)
-      return this.vp.power * factor * 3.36 * 0.5;
+    const distPow = Math.pow(dist, 1.5);
+
+    if (portrait) {
+      return 0.129 * distPow / Math.sqrt(width);
+    } else if (mobile) {
+      return 0.169 * distPow / Math.sqrt(width);
     } else {
-      // Desktop landscape: 70% of old power
-      return this.vp.power * factor * 0.15;
+      // Desktop: width^1.045 — slight boost at narrow viewports
+      return 12.59 * distPow / Math.pow(width, 1.045);
     }
   }
 
@@ -1233,6 +1535,8 @@ export default class Game {
           + (this.vp.gridCols - 1) * this.vp.spacing
           + iconSize / 2;
         xPos = Math.max(rightmostBallEdge + titleSize, width * 0.92 - maxW);
+        // Clamp so the longest line doesn't get cut off at the right edge
+        xPos = Math.min(xPos, width - maxW - titleSize * 0.4);
       } else {
         xPos = width * 0.92 - maxW;
       }
@@ -1695,6 +1999,8 @@ export default class Game {
     document.documentElement.style.setProperty('--ball-bottom', `${ballBottomY}px`);
   }
 }
+
+
 
 
 ========================================
@@ -7534,12 +7840,20 @@ RewriteRule .* - [F,L]
       Header set Pragma "no-cache"
     </IfModule>
   </FilesMatch>
+
+  # XML (sitemap) — cache for 1 day
+  <FilesMatch "\.xml$">
+    ExpiresDefault "access plus 1 day"
+    <IfModule mod_headers.c>
+      Header set Cache-Control "public, max-age=86400"
+    </IfModule>
+  </FilesMatch>
 </IfModule>
 
 # ── 7. COMPRESSION ─────────────────────────────────────────────────────────
 <IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/plain text/css
-  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json application/xml
   AddOutputFilterByType DEFLATE image/svg+xml
   AddOutputFilterByType DEFLATE application/font-woff application/font-woff2
 </IfModule>
@@ -7547,8 +7861,13 @@ RewriteRule .* - [F,L]
 # ── 8. SPA FALLBACK ────────────────────────────────────────────────────────
 # If a requested file/directory doesn't exist, serve index.html
 # (needed if you ever add client-side routing)
+# Exclude known HTML pages so they serve directly
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/analytics-dashboard\.html
+RewriteCond %{REQUEST_URI} !^/analytics-v2\.html
+RewriteCond %{REQUEST_URI} !^/portfolio\.html
+RewriteCond %{REQUEST_URI} !^/sitemap\.xml
+RewriteCond %{REQUEST_URI} !^/robots\.txt
 RewriteRule ^(.*)$ /index.html [L]
 

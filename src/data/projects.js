@@ -20,6 +20,28 @@ const projects = [
       'Builder with a bias for shipping. Just as comfortable wiring up a data pipeline as designing the frontend that displays it. Turns messy, complex data into clear answers for the people who need them \u2014 whether that\u2019s a VP checking quarterly numbers or a teammate debugging a report. Track record of balancing competing priorities while keeping projects on schedule and under budget.',
   },
   {
+    id: 'thisWebsite',
+    name: 'Portfolio Website',
+    link: 'https://github.com/joshmerritt/websiteAnimation',
+    category: 'Technology',
+    goal: 'Build a portfolio that doubles as a playable physics sandbox \u2014 because a list of links doesn\u2019t show how you think.',
+    role: 'Creator and Developer',
+    technology: 'React 18, Vite, p5.js (instance mode), Matter.js, ES Modules, GA4',
+    description:
+      'The site you\u2019re on right now. Each project is a ball you drag and launch into a goal \u2014 part portfolio, part physics playground. Works on phones and desktops, adapts its performance to the device, and quietly tracks every interaction so the analytics dashboard has real data to show.',
+  },
+  {
+    id: 'SiteAnalytics',
+    name: 'Site Analytics',
+    link: '/analytics-dashboard.html',
+    category: 'Technology',
+    goal: 'Prove the portfolio isn\u2019t just pretty \u2014 instrument every interaction and surface the data in a live dashboard.',
+    role: 'Creator and Developer',
+    technology: 'React, Cloudflare Workers, GA4 Data API, SVG, CSS Grid',
+    description:
+      'A live analytics dashboard for this very site. Every ball launch, score, and project open is tracked, piped through a custom backend, and displayed here in real time. Includes visitor trends, traffic sources, top pages, and a ball engagement funnel that shows how visitors move from launching a ball all the way to clicking a project link.',
+  },
+  {
     id: 'arduinoCoopDoor',
     name: 'Smart Chicken Coop',
     link: 'https://github.com/joshmerritt/arduinoChickenCoopDoor',
@@ -54,28 +76,7 @@ const projects = [
     description:
       'Built the reporting layer that lets business teams answer their own questions instead of filing a ticket and waiting. Data flows in automatically from multiple sources, lands in a clean, structured model, and powers a set of linked reports users can drill into on their own. Cut ad-hoc analyst requests significantly and gave leadership real-time visibility into KPIs.',
   },
-  {
-    id: 'thisWebsite',
-    name: 'Portfolio Website',
-    link: 'https://github.com/joshmerritt/websiteAnimation',
-    category: 'Technology',
-    goal: 'Build a portfolio that doubles as a playable physics sandbox \u2014 because a list of links doesn\u2019t show how you think.',
-    role: 'Creator and Developer',
-    technology: 'React 18, Vite, p5.js (instance mode), Matter.js, ES Modules, GA4',
-    description:
-      'The site you\u2019re on right now. Each project is a ball you drag and launch into a goal \u2014 part portfolio, part physics playground. Works on phones and desktops, adapts its performance to the device, and quietly tracks every interaction so the analytics dashboard has real data to show.',
-  },
-  {
-    id: 'SiteAnalytics',
-    name: 'Site Analytics',
-    link: '/analytics-dashboard.html',
-    category: 'Technology',
-    goal: 'Prove the portfolio isn\u2019t just pretty \u2014 instrument every interaction and surface the data in a live dashboard.',
-    role: 'Creator and Developer',
-    technology: 'React, Cloudflare Workers, GA4 Data API, SVG, CSS Grid',
-    description:
-      'A live analytics dashboard for this very site. Every ball launch, score, and project open is tracked, piped through a custom backend, and displayed here in real time. Includes visitor trends, traffic sources, top pages, and a ball engagement funnel that shows how visitors move from launching a ball all the way to clicking a project link.',
-  },
+
   {
     id: 'thewineyoudrink',
     name: 'The Wine You Drink',

@@ -1,0 +1,12 @@
+# robots.txt — dadatadad.com
+# Josh Merritt's portfolio
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://dadatadad.com/sitemap.xml
+
+# Block access to build artifacts and internal paths
+Disallow: /assets/client-*
+Disallow: /assets/analytics-*

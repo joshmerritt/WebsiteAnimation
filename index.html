@@ -30,7 +30,7 @@
     <meta name="twitter:description" content="Interactive physics-based portfolio. Drag, aim, and shoot to explore projects in data, apps, and technology." />
     <meta name="twitter:image" content="https://dadatadad.com/assets/images/og-preview.jpg" />
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data (JSON-LD) — Person + Portfolio -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -38,12 +38,29 @@
         "name": "Josh Merritt",
         "url": "https://dadatadad.com",
         "jobTitle": "Analyst, Creator, Engineer",
+        "description": "Builder with a bias for shipping. Just as comfortable wiring up a data pipeline as designing the frontend that displays it. Turns messy, complex data into clear answers for the people who need them.",
+        "email": "josh@DaDataDad.com",
         "sameAs": [
           "https://www.linkedin.com/in/josh-merritt",
           "https://github.com/joshmerritt",
           "https://www.upwork.com/fl/joshuapmerritt"
         ],
-        "knowsAbout": ["SQL", "Python", "React", "Power BI", "Data Analytics", "JavaScript", "Arduino"]
+        "knowsAbout": ["SQL", "Python", "React", "Power BI", "DAX", "Data Analytics", "JavaScript", "Arduino", "Google BigQuery", "Microsoft Fabric"]
+      }
+    </script>
+
+    <!-- Structured Data — WebSite (helps Google understand the site) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Da Data Dad",
+        "url": "https://dadatadad.com",
+        "description": "Interactive physics-based portfolio by Josh Merritt — data analytics, BI development, and full-stack engineering.",
+        "author": {
+          "@type": "Person",
+          "name": "Josh Merritt"
+        }
       }
     </script>
 
@@ -60,9 +77,291 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <!-- Noscript styles for the static fallback -->
+    <noscript>
+      <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          background: #0a0e12;
+          color: #c7d6d5;
+          font-family: 'DM Sans', 'Helvetica Neue', sans-serif;
+          line-height: 1.6;
+          padding: 0;
+          overflow-x: hidden;
+        }
+        .noscript-portfolio {
+          max-width: 780px;
+          margin: 0 auto;
+          padding: 48px 24px 80px;
+        }
+        .noscript-header {
+          margin-bottom: 48px;
+          padding-bottom: 32px;
+          border-bottom: 1px solid rgba(89, 133, 177, 0.25);
+        }
+        .noscript-brand {
+          font-family: 'Syne', sans-serif;
+          font-size: 2rem;
+          font-weight: 800;
+          color: #ffffff;
+          margin-bottom: 4px;
+        }
+        .noscript-tagline {
+          font-family: 'Syne', sans-serif;
+          font-size: 1.1rem;
+          color: #5985b1;
+          font-weight: 600;
+          margin-bottom: 16px;
+        }
+        .noscript-bio {
+          color: rgba(199, 214, 213, 0.75);
+          font-size: 0.95rem;
+          max-width: 600px;
+          margin-bottom: 20px;
+        }
+        .noscript-links { display: flex; gap: 16px; flex-wrap: wrap; }
+        .noscript-links a {
+          color: #5985b1;
+          text-decoration: none;
+          font-size: 0.85rem;
+          font-weight: 500;
+          padding: 6px 14px;
+          border: 1px solid rgba(89, 133, 177, 0.3);
+          border-radius: 6px;
+          transition: border-color 0.2s;
+        }
+        .noscript-links a:hover { border-color: #5985b1; }
+        .noscript-nav {
+          margin-bottom: 32px;
+          padding: 12px 0;
+          font-size: 0.85rem;
+        }
+        .noscript-nav a {
+          color: #5985b1;
+          text-decoration: none;
+          font-weight: 500;
+        }
+        .noscript-project {
+          margin-bottom: 40px;
+          padding: 24px;
+          background: rgba(14, 20, 28, 0.6);
+          border: 1px solid rgba(89, 133, 177, 0.12);
+          border-radius: 12px;
+        }
+        .noscript-project-img {
+          width: 100%;
+          max-height: 280px;
+          object-fit: cover;
+          border-radius: 8px;
+          margin-bottom: 16px;
+        }
+        .noscript-project h2 {
+          font-family: 'Syne', sans-serif;
+          font-size: 1.3rem;
+          font-weight: 700;
+          color: #ffffff;
+          margin-bottom: 4px;
+        }
+        .noscript-category {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.7rem;
+          color: #5985b1;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 12px;
+        }
+        .noscript-meta { margin-bottom: 12px; }
+        .noscript-meta dt {
+          font-weight: 600;
+          font-size: 0.8rem;
+          color: rgba(199, 214, 213, 0.5);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-top: 10px;
+        }
+        .noscript-meta dd {
+          font-size: 0.9rem;
+          color: rgba(199, 214, 213, 0.85);
+          margin: 2px 0 0 0;
+        }
+        .noscript-cta {
+          display: inline-block;
+          color: #5985b1;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 0.85rem;
+          margin-top: 12px;
+          padding: 8px 18px;
+          border: 1px solid rgba(89, 133, 177, 0.35);
+          border-radius: 8px;
+        }
+        .noscript-cta:hover { border-color: #5985b1; background: rgba(89, 133, 177, 0.08); }
+        .noscript-footer {
+          margin-top: 64px;
+          padding-top: 24px;
+          border-top: 1px solid rgba(89, 133, 177, 0.15);
+          font-size: 0.8rem;
+          color: rgba(199, 214, 213, 0.35);
+          text-align: center;
+        }
+      </style>
+    </noscript>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!--
+      ═══════════════════════════════════════════════════════════════════════
+      NOSCRIPT FALLBACK — Static semantic HTML for crawlers & accessibility
+      This content is only shown when JavaScript is disabled or unavailable.
+      Search engines index this content to understand the portfolio.
+      ═══════════════════════════════════════════════════════════════════════
+    -->
+    <noscript>
+      <main class="noscript-portfolio" role="main">
+        <header class="noscript-header">
+          <h1 class="noscript-brand">Da Data Dad</h1>
+          <p class="noscript-tagline">Honest. Analytical. Data Dreamer.</p>
+          <p class="noscript-bio">
+            Builder with a bias for shipping. Just as comfortable wiring up a data pipeline as designing the frontend that displays it. Turns messy, complex data into clear answers for the people who need them — whether that's a VP checking quarterly numbers or a teammate debugging a report.
+          </p>
+          <nav class="noscript-links" aria-label="External profiles">
+            <a href="https://www.linkedin.com/in/josh-merritt">LinkedIn</a>
+            <a href="https://github.com/joshmerritt">GitHub</a>
+            <a href="https://www.upwork.com/fl/joshuapmerritt">Upwork</a>
+            <a href="mailto:josh@DaDataDad.com">Contact</a>
+          </nav>
+        </header>
+
+        <nav class="noscript-nav" aria-label="Site pages">
+          <a href="/portfolio.html">View Accessible Portfolio →</a>
+        </nav>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/SoftwareApplication">
+          <img class="noscript-project-img" src="/assets/images/thewineyoudrink.jpg" alt="The Wine You Drink app showing wine cellar management interface" loading="lazy" />
+          <h2 itemprop="name">The Wine You Drink</h2>
+          <p class="noscript-category">Apps</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Replace spreadsheets and sticky notes with a purpose-built app for managing a wine collection — from cellar to glass.</dd>
+            <dt>Role</dt>
+            <dd>Product Owner and Creator</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">React 18, Firebase, Vite, PWA, Claude AI, CSS Custom Properties</dd>
+            <dt>Summary</dt>
+            <dd>A wine cellar app built for collectors who outgrew their spreadsheet. Snap a photo of any label to auto-fill the details with AI, and see at a glance which bottles are in their prime.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://thewineyoudrink.web.app" itemprop="url">Open App ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/SoftwareApplication">
+          <img class="noscript-project-img" src="/assets/images/dartleague.jpg" alt="Black Sheep Dart League app showing league management dashboard" loading="lazy" />
+          <h2 itemprop="name">Black Sheep Dart League</h2>
+          <p class="noscript-category">Apps</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Eliminate the spreadsheets, group texts, and paper scoresheets that were slowing down league night.</dd>
+            <dt>Role</dt>
+            <dd>Product Owner and Creator</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">React 19, Firebase, Tailwind CSS, Vite, Claude AI (scoresheet OCR)</dd>
+            <dt>Summary</dt>
+            <dd>A league management app used weekly by real players. Handles RSVPs, automatically pairs teams, and tracks stats. The scorekeeper snaps a photo and AI reads the scoresheet — what used to take 30+ minutes now takes seconds.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://theblacksheepdartleague.web.app" itemprop="url">Open App ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/thisWebsite.jpg" alt="Portfolio website showing physics-based ball launching interaction" loading="lazy" />
+          <h2 itemprop="name">Portfolio Website</h2>
+          <p class="noscript-category">Technology</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Build a portfolio that doubles as a playable physics sandbox — because a list of links doesn't show how you think.</dd>
+            <dt>Role</dt>
+            <dd>Creator and Developer</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">React 18, Vite, p5.js, Matter.js, ES Modules, GA4</dd>
+            <dt>Summary</dt>
+            <dd>Each project is a ball you drag and launch into a goal — part portfolio, part physics playground. Works on phones and desktops, adapts its performance to the device, and tracks every interaction for the analytics dashboard.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://github.com/joshmerritt/websiteAnimation" itemprop="url">View on GitHub ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/SiteAnalytics.jpg" alt="Site analytics dashboard showing visitor trends and ball engagement metrics" loading="lazy" />
+          <h2 itemprop="name">Site Analytics</h2>
+          <p class="noscript-category">Technology</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Prove the portfolio isn't just pretty — instrument every interaction and surface the data in a live dashboard.</dd>
+            <dt>Role</dt>
+            <dd>Creator and Developer</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">React, Cloudflare Workers, GA4 Data API, SVG, CSS Grid</dd>
+            <dt>Summary</dt>
+            <dd>A live analytics dashboard for this very site. Every ball launch, score, and project open is tracked, piped through a custom backend, and displayed in real time.</dd>
+          </dl>
+          <a class="noscript-cta" href="/analytics-dashboard.html" itemprop="url">View Dashboard ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/arduinoCoopDoor.jpg" alt="Smart chicken coop door with Arduino controller and motor assembly" loading="lazy" />
+          <h2 itemprop="name">Smart Chicken Coop</h2>
+          <p class="noscript-category">Technology</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Automate a chicken coop door that opens at sunrise and locks at sundown — no manual intervention required.</dd>
+            <dt>Role</dt>
+            <dd>Hardware Engineer and Builder</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">C++, Arduino, Motor Shield, Photoresistor, Programmable RGB LEDs, Custom Woodworking</dd>
+            <dt>Summary</dt>
+            <dd>An automated coop door that senses daylight and drives a repurposed car-window motor to open at sunrise and lock at sundown. Built on an Arduino with a light sensor, color-coded status LEDs, and a custom wooden housing.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://github.com/joshmerritt/arduinoChickenCoopDoor" itemprop="url">View on GitHub ↗</a>
+        </article>
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/powerBIMetrics.jpg" alt="Microsoft Power BI dashboard showing KPI metrics and data visualizations" loading="lazy" />
+          <h2 itemprop="name">Microsoft Power BI</h2>
+          <p class="noscript-category">Business</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Build a governed data warehouse with automated pipelines that lets business users self-serve answers without filing tickets.</dd>
+            <dt>Role</dt>
+            <dd>BI Developer and Data Analyst</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">Power BI, DAX, Power Query, REST APIs, Google BigQuery, Azure</dd>
+            <dt>Summary</dt>
+            <dd>Built the reporting layer that lets business teams answer their own questions instead of filing a ticket and waiting. Data flows in automatically from multiple sources, lands in a clean, structured model, and powers a set of linked reports users can drill into on their own.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://www.upwork.com/fl/joshuapmerritt" itemprop="url">View Upwork Profile ↗</a>
+        </article>
+
+        <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
+          <img class="noscript-project-img" src="/assets/images/googleDataStudioServiceTechs.jpg" alt="Google Data Studio streaming dashboard displayed on office TV" loading="lazy" />
+          <h2 itemprop="name">Google Data Studio Streaming Dashboard</h2>
+          <p class="noscript-category">Business</p>
+          <dl class="noscript-meta">
+            <dt>Goal</dt>
+            <dd itemprop="description">Give frontline employees real-time visibility into their performance and standing relative to team benchmarks.</dd>
+            <dt>Role</dt>
+            <dd>BI Developer</dd>
+            <dt>Technology</dt>
+            <dd itemprop="keywords">Google Data Studio, Data Modeling, ScreenCloud, Amazon Fire TV</dd>
+            <dt>Summary</dt>
+            <dd>A live KPI dashboard displayed on office TVs so the whole team can see how they're tracking against goals at a glance. Shows individual and team standings updated throughout the day.</dd>
+          </dl>
+          <a class="noscript-cta" href="https://www.upwork.com/fl/joshuapmerritt" itemprop="url">View Upwork Profile ↗</a>
+        </article>
+
+
+        <footer class="noscript-footer">
+          <p>&copy; 2026 Josh Merritt &middot; Da Data Dad &middot; <a href="mailto:josh@DaDataDad.com" style="color: #5985b1; text-decoration: none;">josh@DaDataDad.com</a></p>
+        </footer>
+      </main>
+    </noscript>
   </body>
 </html>
