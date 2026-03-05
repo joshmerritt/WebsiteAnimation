@@ -199,13 +199,18 @@ function MultiLineChart({ data, metrics, width = 680, height = 220 }) {
   const svgRef = useRef(null);
   const padL = 44, padR = 12, padT = 16, padB = 28;
   const chartW = width - padL - padR, chartH = height - padT - padB;
-  const scales = useMemo(() => { const s = {}; metrics.forEach(m => { const v = data.map(d => d[m.key] || 0); s[m.key] = { max: Math.max(...v, 1) * 1.15, min: 0 }; }); return s; }, [data, metrics]);
+  // Single shared Y scale — all metrics on the same axis so values are visually comparable
+  const globalMax = useMemo(() => {
+    let mx = 1;
+    metrics.forEach(m => { data.forEach(d => { const v = d[m.key] || 0; if (v > mx) mx = v; }); });
+    return mx * 1.15;
+  }, [data, metrics]);
   const toX = (i) => padL + (i / (data.length - 1)) * chartW;
-  const toY = (val, key) => { const sc = scales[key]; const v = val || 0; return padT + chartH - ((v - sc.min) / (sc.max - sc.min || 1)) * chartH; };
-  const buildPath = (key) => data.map((d, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(d[key] || 0, key)}`).join(" ");
+  const toY = (val) => { const v = val || 0; return padT + chartH - (v / globalMax) * chartH; };
+  const buildPath = (key) => data.map((d, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(d[key] || 0)}`).join(" ");
   const buildArea = (key) => `${buildPath(key)} L${toX(data.length - 1)},${padT + chartH} L${toX(0)},${padT + chartH} Z`;
   const handleMove = (e) => { if (!svgRef.current) return; const rect = svgRef.current.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const x = (cx - rect.left) / rect.width * width - padL; setHoverIdx(Math.max(0, Math.min(data.length - 1, Math.round((x / chartW) * (data.length - 1))))); };
-  const pMax = scales.visitors?.max || 100;
+  const pMax = globalMax;
   const gridVals = Array.from({ length: 5 }, (_, i) => (pMax / 4) * i);
   const xStep = Math.ceil(data.length / 8);
   return (
@@ -216,7 +221,7 @@ function MultiLineChart({ data, metrics, width = 680, height = 220 }) {
       {[...metrics].reverse().map(m => <g key={m.key}><path d={buildArea(m.key)} fill={`url(#g3-${m.key})`} /><path d={buildPath(m.key)} fill="none" stroke={m.color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" /></g>)}
       {hoverIdx !== null && <g>
         <line x1={toX(hoverIdx)} y1={padT} x2={toX(hoverIdx)} y2={padT + chartH} stroke="rgba(255,255,255,0.2)" strokeDasharray="3,3" />
-        {metrics.map(m => <circle key={m.key} cx={toX(hoverIdx)} cy={toY(data[hoverIdx][m.key] || 0, m.key)} r="4" fill={m.color} stroke="#0a0a0f" strokeWidth="2" />)}
+        {metrics.map(m => <circle key={m.key} cx={toX(hoverIdx)} cy={toY(data[hoverIdx][m.key] || 0)} r="4" fill={m.color} stroke="#0a0a0f" strokeWidth="2" />)}
         <foreignObject x={Math.min(toX(hoverIdx) - 70, width - 155)} y={4} width="140" height="80">
           <div xmlns="http://www.w3.org/1999/xhtml" style={{ background: "rgba(0,0,0,0.88)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, padding: "6px 8px", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: "#fff", lineHeight: 1.6 }}>
             <div style={{ color: "rgba(255,255,255,0.5)", marginBottom: 2 }}>{data[hoverIdx].label}</div>
@@ -322,12 +327,15 @@ function DayOfWeekChart({ data }) {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const buckets = Array.from({ length: 7 }, () => ({ visitors: 0, shots: 0, cta: 0, count: 0 }));
   data.forEach(d => { const b = buckets[d.dayOfWeek]; b.visitors += (d.visitors || 0); b.shots += (d.shots || 0); b.cta += (d.ctaClicks || 0); b.count++; });
-  const avgs = buckets.map(b => ({ visitors: b.count ? Math.round(b.visitors / b.count) : 0, shots: b.count ? Math.round(b.shots / b.count) : 0, cta: b.count ? Math.round(b.cta / b.count) : 0 }));
-  const maxV = Math.max(...avgs.map(a => a.visitors));
-  const [metric, setMetric] = useState("visitors");
-  const metricOpts = [{ key: "visitors", label: "Visitors", color: "#D4A843" }, { key: "shots", label: "Shots", color: "#5985B1" }, { key: "cta", label: "CTAs", color: "#6B9F6B" }];
-  const activeColor = metricOpts.find(m => m.key === metric)?.color || "#D4A843";
-  const maxForMetric = Math.max(...avgs.map(a => a[metric]), 1);
+  const vals = buckets.map(b => ({
+    visitors: b.visitors, shots: b.shots, cta: b.cta,
+    shotsPerUser: b.visitors > 0 ? parseFloat((b.shots / b.visitors).toFixed(1)) : 0,
+  }));
+  const [metric, setMetric] = useState("shotsPerUser");
+  const metricOpts = [{ key: "shotsPerUser", label: "Shots/User", color: "#7B5EA7" }, { key: "visitors", label: "Visitors", color: "#D4A843" }, { key: "shots", label: "Shots", color: "#5985B1" }, { key: "cta", label: "CTAs", color: "#6B9F6B" }];
+  const activeColor = metricOpts.find(m => m.key === metric)?.color || "#7B5EA7";
+  const isFloat = metric === "shotsPerUser";
+  const maxForMetric = Math.max(...vals.map(a => a[metric]), 1);
 
   const w = 320, h = 140, padL = 32, padB = 20, padT = 18;
   const barW = (w - padL - 10) / 7 - 4;
@@ -351,12 +359,12 @@ function DayOfWeekChart({ data }) {
           const y = padT + chartH * (1 - pct);
           return <g key={i}>
             <line x1={padL} y1={y} x2={w - 5} y2={y} stroke="rgba(255,255,255,0.04)" />
-            {i > 0 && <text x={padL - 4} y={y + 3} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="'JetBrains Mono', monospace" textAnchor="end">{Math.round(maxForMetric * pct)}</text>}
+            {i > 0 && <text x={padL - 4} y={y + 3} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="'JetBrains Mono', monospace" textAnchor="end">{isFloat ? (maxForMetric * pct).toFixed(1) : Math.round(maxForMetric * pct)}</text>}
           </g>;
         })}
         {/* Bars */}
         {days.map((day, i) => {
-          const val = avgs[i][metric];
+          const val = vals[i][metric];
           const barH = maxForMetric > 0 ? (val / maxForMetric) * chartH : 0;
           const x = padL + 2 + i * (barW + 4);
           const y = padT + chartH - barH;
@@ -368,9 +376,8 @@ function DayOfWeekChart({ data }) {
               {/* Data label above bar */}
               <text x={x + barW / 2} y={y - 4} fill={activeColor} fontSize="9" fontWeight="600"
                 fontFamily="'JetBrains Mono', monospace" textAnchor="middle" opacity="0.9">
-                {val}
+                {isFloat ? val.toFixed(1) : val}
               </text>
-              {/* Day label */}
               <text x={x + barW / 2} y={h - 4} fill={isWeekend ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.4)"}
                 fontSize="8" fontFamily="'JetBrains Mono', monospace" textAnchor="middle">
                 {day}
@@ -504,7 +511,6 @@ function ConversionWaterfall() {
   }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
 
   const steps = [
-    { label: "Clicks", val: totals.clicks, color: "#D4A843" },
     { label: "Shots", val: totals.launches, color: "#5985B1" },
     { label: "Makes", val: totals.scores, color: "#5985B1" },
     { label: "Opens", val: totals.opens, color: "#6B9F6B" },
@@ -712,21 +718,27 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       <MultiLineChart data={timeSeriesData} metrics={metrics} />
     </div>
 
+    {/* Shot Chart */}
+    <div style={{ ...SS.panel, marginBottom: 20 }}>
+      <div style={SS.panelHeader}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ ...SS.panelTitle, marginBottom: 0 }}>Shot Chart</span>
+          <span style={SS.panelBadge}>first-contact heatmap</span>
+        </div>
+        {selectedBall && <button onClick={() => setSelectedBall(null)} style={{ ...SS.timeBtn, background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)", fontSize: 10, padding: "4px 10px", borderRadius: 6, cursor: "pointer" }}>{"\u2190"} Show All</button>}
+      </div>
+      <ShotChart selectedBall={selectedBall} />
+    </div>
+
     {/* Ball Engagement Funnel */}
     <div style={{ ...SS.panel, marginBottom: 20 }}>
       <div style={SS.panelHeader}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ ...SS.panelTitle, marginBottom: 0 }}>Ball Engagement Funnel</span>
-          <span style={SS.panelBadge}>{"\uD83C\uDFB1"} click → shot → make → open → CTA</span>
+          <span style={SS.panelBadge}>{"\uD83C\uDFB1"} shot → make → open → CTA</span>
         </div>
-        {selectedBall && <button onClick={() => setSelectedBall(null)} style={{ ...SS.timeBtn, background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)", fontSize: 10, padding: "4px 10px", borderRadius: 6, cursor: "pointer" }}>{"\u2190"} Show All</button>}
       </div>
-
-      {/* Shot chart heatmap */}
-      <ShotChart selectedBall={selectedBall} />
-
-      {/* Funnel visual */}
-      <div style={{ maxWidth: 480, margin: "16px auto 16px" }}><FunnelVisual data={funnelData} color={funnelColor} label={funnelLabel} /></div>
+      <div style={{ maxWidth: 480, margin: "0 auto 16px" }}><FunnelVisual data={funnelData} color={funnelColor} label={funnelLabel} /></div>
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 12 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 48px 48px 48px 56px", gap: 4, padding: "0 0 6px", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, letterSpacing: "0.8px", textTransform: "uppercase", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <span>Ball</span><span style={{ textAlign: "right" }}>Shots</span><span style={{ textAlign: "right" }}>Makes</span><span style={{ textAlign: "right" }}>Opens</span><span style={{ textAlign: "right" }}>CTAs</span><span style={{ textAlign: "right" }}>Cat</span>
@@ -745,18 +757,11 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       </div>
     </div>
 
-    {/* Session Flow + Device + Day-of-Week */}
+    {/* Device + Day-of-Week */}
     <div style={SS.twoCol} className="v3-two-col">
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={SS.panel}>
-          <span style={SS.panelTitle}>Session Flow</span>
-          {SESSION_FLOW.map((f, i) => <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < SESSION_FLOW.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}><div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}><span style={{ color: "rgba(255,255,255,0.7)" }}>{f.from}</span><span style={{ color: "rgba(255,255,255,0.25)", fontSize: 11 }}>{"\u2192"}</span><span style={{ color: "rgba(255,255,255,0.9)" }}>{f.to}</span></div><span style={{ fontSize: 14, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: f.color }}>{f.pct}%</span></div>)}
-        </div>
-        <div style={SS.panel}>
-          <div style={SS.panelHeader}>
-            <span style={{ ...SS.panelTitle, marginBottom: 0 }}>Day-of-Week Pattern</span>
-            <span style={SS.panelBadge}>avg per day</span>
-          </div>
+          <span style={SS.panelTitle}>Day-of-Week Pattern</span>
           <DayOfWeekChart data={timeSeriesData} />
         </div>
       </div>
@@ -816,7 +821,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
             ["Total Shots Fired", totals.launches.toLocaleString(), "#5985B1"],
             ["Goals Scored", totals.scores.toLocaleString(), "#6B9F6B"],
             ["CTA Click-Throughs", totals.ctaClicks.toLocaleString(), "#7B5EA7"],
-            ["Full Funnel Conv.", `${((totals.ctaClicks / totals.clicks) * 100).toFixed(1)}%`, "#D4A843"],
+            ["Full Funnel Conv.", `${((totals.launches > 0 ? totals.ctaClicks / totals.launches : 0) * 100).toFixed(1)}%`, "#D4A843"],
             ["Avg Balls / Session", avgBallsPerSession, "#5985B1"],
           ].map(([label, val, color]) => (
             <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
@@ -828,8 +833,8 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       </div>
     </div>
 
-    {/* Bottom: Sources + Pages */}
-    <div style={{ ...SS.twoCol, marginTop: 20 }} className="v3-two-col">
+    {/* Traffic Sources */}
+    <div style={{ marginTop: 20 }}>
       <div style={SS.panel}>
         <span style={SS.panelTitle}>Traffic Sources</span>
         <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
@@ -839,11 +844,13 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
           </div>
         </div>
       </div>
-      <div style={SS.panel}>
-        <span style={SS.panelTitle}>Top Pages</span>
-        {PAGE_DATA.map((pg, i) => <div key={pg.path} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", gap: 12, borderBottom: i < PAGE_DATA.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}><div><div style={{ fontSize: 12, color: "rgba(255,255,255,0.85)", fontWeight: 500 }}>{pg.title}</div><div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", fontFamily: "'JetBrains Mono', monospace" }}>{pg.path}</div></div><div style={{ display: "flex", gap: 14, alignItems: "center", fontSize: 11, fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}><span style={{ color: "#fff" }}>{pg.views.toLocaleString()}</span><span style={{ color: "rgba(255,255,255,0.4)" }}>{pg.avgTime}</span><span style={{ color: pg.trend >= 0 ? "#6B9F6B" : "#C05050" }}>{pg.trend >= 0 ? "\u2191" : "\u2193"} {Math.abs(pg.trend)}%</span></div></div>)}
-      </div>
     </div>
+    {/* Session Flow */}
+    <div style={{ ...SS.panel, marginTop: 20 }}>
+      <span style={SS.panelTitle}>Session Flow</span>
+      {SESSION_FLOW.map((f, i) => <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < SESSION_FLOW.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}><div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}><span style={{ color: "rgba(255,255,255,0.7)" }}>{f.from}</span><span style={{ color: "rgba(255,255,255,0.25)", fontSize: 11 }}>{"\u2192"}</span><span style={{ color: "rgba(255,255,255,0.9)" }}>{f.to}</span></div><span style={{ fontSize: 14, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: f.color }}>{f.pct}%</span></div>)}
+    </div>
+
     <div style={{ marginTop: 24, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
       <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", lineHeight: 1.7 }}>
         {isLive
@@ -1045,8 +1052,8 @@ export default function AnalyticsDashboardV3() {
       ballInteractions: d.ballInteractions || 0,
       // "shots" = ball_launch count per day (Worker calls it ballInteractions)
       shots: d.shots || d.ballInteractions || 0,
-      // ctaClicks per day — not in Worker yet, estimate from ball interactions
-      ctaClicks: d.ctaClicks || Math.round((d.ballInteractions || 0) * 0.15),
+      // ctaClicks per day — only show real data, 0 if not tracked yet
+      ctaClicks: d.ctaClicks || 0,
       dayOfWeek: d.dayOfWeek != null ? d.dayOfWeek : dateObj.getDay(),
       label: d.label || dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     };
