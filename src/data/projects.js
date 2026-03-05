@@ -33,7 +33,7 @@ const projects = [
   {
     id: 'SiteAnalytics',
     name: 'Site Analytics',
-    link: '/analytics-dashboard.html',
+    link: '/analytics-v3.html',
     category: 'Technology',
     goal: 'Prove the portfolio isn\u2019t just pretty \u2014 instrument every interaction and surface the data in a live dashboard.',
     role: 'Creator and Developer',

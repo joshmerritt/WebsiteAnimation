@@ -77,6 +77,7 @@ export default class Ball {
       description: this.project.description,
       imageSrc:    this.imageSrc,
       heroMode:    this.project.heroMode || 'banner',
+      category:    this.project.category,    
     };
   }
 

@@ -338,6 +338,7 @@ export default function AnalyticsDashboardV2() {
         <div className="dash-nav">
           <a className="dash-nav-link" href="/analytics-dashboard.html">V1</a>
           <a className="dash-nav-link active" href="/analytics-v2.html">V2</a>
+          <a className="dash-nav-link" href="/analytics-v3.html">V3</a>
           <a className="dash-nav-link" href="/">Portfolio</a>
         </div>
       </header>

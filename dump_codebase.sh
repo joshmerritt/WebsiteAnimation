@@ -11,6 +11,7 @@ FILES=(
   "portfolio.html"
   "analytics-dashboard.html"
   "analytics-v2.html"
+  "analytics-v3.html"
   "vite.config.js"
   "package.json"
   ".env.production"
@@ -21,6 +22,7 @@ FILES=(
   "src/portfolio-main.jsx"
   "src/analytics-main.jsx"
   "src/analytics-v2-main.jsx"
+  "src/analytics-v3-main.jsx"
 
   # Data
   "src/data/projects.js"
@@ -65,6 +67,7 @@ FILES=(
   "src/analytics/BallEngagementV2.jsx"
   "src/analytics/AnalyticsDashboard.jsx"
   "src/analytics/AnalyticsDashboardV2.jsx"
+  "src/analytics/AnalyticsDashboardV3.jsx"
 
   # GA4 Worker
   "ga4-worker/ga4-worker.js"
