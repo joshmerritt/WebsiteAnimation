@@ -8,6 +8,7 @@ OUTPUT="codebase_dump.txt"
 FILES=(
   # Root config
   "index.html"
+  "portfolio.html"
   "analytics-dashboard.html"
   "analytics-v2.html"
   "vite.config.js"
@@ -17,11 +18,15 @@ FILES=(
   # Entry points
   "src/main.jsx"
   "src/App.jsx"
+  "src/portfolio-main.jsx"
   "src/analytics-main.jsx"
   "src/analytics-v2-main.jsx"
 
   # Data
   "src/data/projects.js"
+
+  # Accessible portfolio
+  "src/AccessiblePortfolio.jsx"
 
   # Game
   "src/game/Game.js"
@@ -44,6 +49,7 @@ FILES=(
 
   # Styles
   "src/styles/index.css"
+  "src/styles/portfolio.css"
   "src/styles/analytics.css"
   "src/styles/analytics-v2.css"
 
@@ -66,6 +72,8 @@ FILES=(
 
   # Public
   "public/.htaccess"
+  "public/robots.txt"
+  "public/sitemap.xml"
 )
 
 echo "=============================" >> "$OUTPUT"

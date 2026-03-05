@@ -1,5 +1,5 @@
 =============================
- CODEBASE DUMP - Wed Mar  4 10:11:10 PST 2026
+ CODEBASE DUMP - Thu Mar  5 14:20:12 PST 2026
 =============================
 
 
@@ -376,6 +376,88 @@ FILE: index.html
 
 
 ========================================
+FILE: portfolio.html
+========================================
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Portfolio — Josh Merritt | Da Data Dad</title>
+    <meta name="description" content="Josh Merritt's data analytics and engineering portfolio. Projects spanning Power BI, React, Firebase, Arduino, and more. Analyst, creator, and engineer." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Josh Merritt" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://dadatadad.com/portfolio.html" />
+    <link rel="shortcut icon" href="/assets/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/assets/images/favicon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://dadatadad.com/portfolio.html" />
+    <meta property="og:title" content="Portfolio — Josh Merritt | Da Data Dad" />
+    <meta property="og:description" content="Data analytics and engineering portfolio. Projects in Power BI, React, Firebase, Arduino, and more." />
+    <meta property="og:image" content="https://dadatadad.com/assets/images/og-preview.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Da Data Dad" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Portfolio — Josh Merritt | Da Data Dad" />
+    <meta name="twitter:description" content="Data analytics and engineering portfolio. Projects in Power BI, React, Firebase, Arduino, and more." />
+    <meta name="twitter:image" content="https://dadatadad.com/assets/images/og-preview.jpg" />
+
+    <!-- Structured Data (JSON-LD) — Portfolio page -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Josh Merritt — Portfolio",
+        "url": "https://dadatadad.com/portfolio.html",
+        "description": "Data analytics and engineering portfolio by Josh Merritt, featuring projects in Power BI, React, Firebase, Arduino, and more.",
+        "author": {
+          "@type": "Person",
+          "name": "Josh Merritt",
+          "url": "https://dadatadad.com",
+          "jobTitle": "Analyst, Creator, Engineer"
+        },
+        "mainEntity": {
+          "@type": "ItemList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Microsoft Power BI", "url": "https://www.upwork.com/fl/joshuapmerritt" },
+            { "@type": "ListItem", "position": 2, "name": "Google Data Studio Streaming Dashboard", "url": "https://www.upwork.com/fl/joshuapmerritt" },
+            { "@type": "ListItem", "position": 3, "name": "The Wine You Drink", "url": "https://thewineyoudrink.web.app" },
+            { "@type": "ListItem", "position": 4, "name": "Black Sheep Dart League", "url": "https://theblacksheepdartleague.web.app" },
+            { "@type": "ListItem", "position": 5, "name": "Portfolio Website", "url": "https://github.com/joshmerritt/websiteAnimation" },
+            { "@type": "ListItem", "position": 6, "name": "Site Analytics Dashboard", "url": "https://dadatadad.com/analytics-dashboard.html" },
+            { "@type": "ListItem", "position": 7, "name": "Smart Chicken Coop", "url": "https://github.com/joshmerritt/arduinoChickenCoopDoor" }
+          ]
+        }
+      }
+    </script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXCE49FJ7J"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-JXCE49FJ7J');
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/portfolio-main.jsx"></script>
+  </body>
+</html>
+
+
+========================================
 FILE: analytics-dashboard.html
 ========================================
 <!DOCTYPE html>
@@ -611,6 +693,21 @@ export default function App() {
 
 
 ========================================
+FILE: src/portfolio-main.jsx
+========================================
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import AccessiblePortfolio from './AccessiblePortfolio.jsx';
+import './styles/portfolio.css';
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <AccessiblePortfolio />
+  </StrictMode>,
+);
+
+
+========================================
 FILE: src/analytics-main.jsx
 ========================================
 import { StrictMode } from 'react';
@@ -749,6 +846,293 @@ const projects = [
 ];
 
 export default projects;
+
+
+========================================
+FILE: src/AccessiblePortfolio.jsx
+========================================
+/**
+ * AccessiblePortfolio.jsx — Traditional portfolio layout
+ *
+ * A fully accessible, SEO-friendly version of the portfolio that presents
+ * the same project data as the physics playground but in a traditional
+ * card-based layout. Semantic HTML, keyboard navigable, screen reader friendly.
+ *
+ * Shares the existing design language: dark theme, Syne/DM Sans/JetBrains Mono,
+ * steel blue accents, glass morphism.
+ */
+
+import { useState, useEffect, useRef } from 'react';
+import projects from './data/projects.js';
+
+/* ── Category color map (matches the physics game's ball colors) ───────── */
+const CATEGORY_COLORS = {
+  Me:         '#5985b1',
+  Business:   '#d4a843',
+  Technology: '#6b9f6b',
+  Apps:       '#c06060',
+};
+
+/* ── Helpers ───────────────────────────────────────────────────────────── */
+function ctaLabel(link) {
+  if (!link) return null;
+  if (link.includes('linkedin.com'))  return 'View LinkedIn';
+  if (link.includes('github.com'))    return 'View on GitHub';
+  if (link.includes('upwork.com'))    return 'View Upwork Profile';
+  if (link.includes('.html'))         return 'View Dashboard';
+  if (link.includes('.app'))          return 'Open App';
+  return 'View Project';
+}
+
+function ctaIcon(link) {
+  if (link?.includes('.html')) return '📊';
+  if (link?.includes('github.com'))   return '⌨';
+  if (link?.includes('linkedin.com')) return '💼';
+  if (link?.includes('.app'))         return '🚀';
+  return '↗';
+}
+
+/* ── Scroll-reveal hook ────────────────────────────────────────────────── */
+function useReveal() {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return [ref, visible];
+}
+
+/* ── Project Card ──────────────────────────────────────────────────────── */
+function ProjectCard({ project, index }) {
+  const [ref, visible] = useReveal();
+  const categoryColor = CATEGORY_COLORS[project.category] || '#5985b1';
+  const hasLink = project.link && project.link !== 'null' && project.link.trim() !== '';
+
+  // Skip aboutMe from the project grid (it's in the hero)
+  if (project.id === 'aboutMe') return null;
+
+  const rows = [
+    { label: 'Goal',       value: project.goal },
+    { label: 'My Role',    value: project.role },
+    { label: 'Technology', value: project.technology },
+    { label: 'Summary',    value: project.description },
+  ].filter((r) => r.value);
+
+  return (
+    <article
+      ref={ref}
+      className={`port-card ${visible ? 'port-card--visible' : ''}`}
+      style={{ animationDelay: `${index * 80}ms` }}
+      itemScope
+      itemType="https://schema.org/CreativeWork"
+    >
+      <div className="port-card-image">
+        <img
+          src={`/assets/images/${project.id}.jpg`}
+          alt={`${project.name} — ${project.category} project by Josh Merritt`}
+          loading="lazy"
+          itemProp="image"
+        />
+        <span className="port-card-badge" style={{ background: categoryColor }}>
+          {project.category}
+        </span>
+      </div>
+
+      <div className="port-card-body">
+        <h2 className="port-card-title" itemProp="name">{project.name}</h2>
+
+        <dl className="port-card-meta">
+          {rows.map(({ label, value }) => (
+            <div className="port-card-row" key={label}>
+              <dt>{label}</dt>
+              <dd itemProp={label === 'Goal' ? 'description' : undefined}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {hasLink && (
+          <a
+            className="port-card-cta"
+            href={project.link}
+            target={project.link.startsWith('/') ? '_self' : '_blank'}
+            rel={project.link.startsWith('/') ? undefined : 'noopener noreferrer'}
+            itemProp="url"
+          >
+            <span className="port-card-cta-icon">{ctaIcon(project.link)}</span>
+            {ctaLabel(project.link)}
+            {!project.link.startsWith('/') && <span aria-hidden="true"> ↗</span>}
+          </a>
+        )}
+      </div>
+    </article>
+  );
+}
+
+/* ── Skills Section ────────────────────────────────────────────────────── */
+const SKILLS = [
+  { name: 'SQL',            level: 95 },
+  { name: 'Power BI / DAX', level: 92 },
+  { name: 'Python',         level: 85 },
+  { name: 'React / JS',     level: 88 },
+  { name: 'Google BigQuery', level: 80 },
+  { name: 'Data Modeling',  level: 90 },
+  { name: 'Firebase',       level: 78 },
+  { name: 'Git',            level: 85 },
+];
+
+function SkillBar({ skill, visible, delay }) {
+  return (
+    <div className="port-skill" style={{ animationDelay: `${delay}ms` }}>
+      <div className="port-skill-header">
+        <span className="port-skill-name">{skill.name}</span>
+        <span className="port-skill-pct">{skill.level}%</span>
+      </div>
+      <div className="port-skill-track">
+        <div
+          className={`port-skill-fill ${visible ? 'port-skill-fill--active' : ''}`}
+          style={{ width: visible ? `${skill.level}%` : '0%', transitionDelay: `${delay}ms` }}
+          role="progressbar"
+          aria-valuenow={skill.level}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`${skill.name}: ${skill.level}%`}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ── Main Component ────────────────────────────────────────────────────── */
+export default function AccessiblePortfolio() {
+  const [filter, setFilter] = useState('All');
+  const [skillsRef, skillsVisible] = useReveal();
+
+  const categories = ['All', ...new Set(projects.filter(p => p.id !== 'aboutMe').map((p) => p.category))];
+  const aboutMe = projects.find((p) => p.id === 'aboutMe');
+  const filteredProjects = projects
+    .filter((p) => p.id !== 'aboutMe')
+    .filter((p) => filter === 'All' || p.category === filter);
+
+  return (
+    <div className="port-root">
+      {/* Ambient background effects */}
+      <div className="port-glow port-glow--tl" aria-hidden="true" />
+      <div className="port-glow port-glow--br" aria-hidden="true" />
+
+      {/* ── Skip link for keyboard users ── */}
+      <a href="#projects" className="port-skip">Skip to projects</a>
+
+      {/* ── Header / Hero ── */}
+      <header className="port-hero" role="banner">
+        <nav className="port-topnav" aria-label="Site navigation">
+          <a href="/" className="port-topnav-brand">Da Data Dad</a>
+          <div className="port-topnav-links">
+            <a href="/" className="port-topnav-link" title="Interactive physics portfolio">
+              <span className="port-topnav-link-icon" aria-hidden="true">🎮</span>
+              Interactive Version
+            </a>
+            <a href="/analytics-dashboard.html" className="port-topnav-link">
+              <span className="port-topnav-link-icon" aria-hidden="true">📊</span>
+              Analytics
+            </a>
+          </div>
+        </nav>
+
+        <div className="port-hero-content">
+          <div className="port-hero-text">
+            <p className="port-hero-eyebrow">Analyst · Creator · Engineer</p>
+            <h1 className="port-hero-name">{aboutMe?.name || 'Josh Merritt'}</h1>
+            <p className="port-hero-tagline">Honest. Analytical. Data Dreamer.</p>
+            <p className="port-hero-bio">
+              {aboutMe?.description || 'Builder with a bias for shipping.'}
+            </p>
+
+            <div className="port-hero-actions">
+              <a href="mailto:josh@DaDataDad.com" className="port-btn port-btn--primary">
+                Contact Me
+              </a>
+              <a href="https://www.linkedin.com/in/josh-merritt" className="port-btn port-btn--ghost" target="_blank" rel="noopener noreferrer">
+                LinkedIn ↗
+              </a>
+              <a href="https://github.com/joshmerritt" className="port-btn port-btn--ghost" target="_blank" rel="noopener noreferrer">
+                GitHub ↗
+              </a>
+            </div>
+          </div>
+
+          <div className="port-hero-image">
+            <img
+              src="/assets/images/aboutMe.jpg"
+              alt="Josh Merritt"
+              className="port-hero-photo"
+            />
+          </div>
+        </div>
+      </header>
+
+      {/* ── Skills ── */}
+      <section className="port-section port-skills-section" ref={skillsRef} aria-labelledby="skills-heading">
+        <h2 id="skills-heading" className="port-section-title">Core Skills</h2>
+        <div className="port-skills-grid">
+          {SKILLS.map((skill, i) => (
+            <SkillBar key={skill.name} skill={skill} visible={skillsVisible} delay={i * 60} />
+          ))}
+        </div>
+      </section>
+
+      {/* ── Projects ── */}
+      <section className="port-section" id="projects" aria-labelledby="projects-heading">
+        <h2 id="projects-heading" className="port-section-title">Projects</h2>
+
+        {/* Category filter */}
+        <div className="port-filters" role="tablist" aria-label="Filter projects by category">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={`port-filter-btn ${filter === cat ? 'port-filter-btn--active' : ''}`}
+              onClick={() => setFilter(cat)}
+              role="tab"
+              aria-selected={filter === cat}
+              style={filter === cat && cat !== 'All' ? { borderColor: CATEGORY_COLORS[cat] || '#5985b1', color: CATEGORY_COLORS[cat] || '#5985b1' } : undefined}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Project grid */}
+        <div className="port-grid" role="tabpanel">
+          {filteredProjects.map((project, i) => (
+            <ProjectCard key={project.id} project={project} index={i} />
+          ))}
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="port-footer" role="contentinfo">
+        <div className="port-footer-inner">
+          <p className="port-footer-brand">Da Data Dad</p>
+          <p className="port-footer-copy">&copy; {new Date().getFullYear()} Josh Merritt</p>
+          <nav className="port-footer-links" aria-label="Footer links">
+            <a href="mailto:josh@DaDataDad.com">josh@DaDataDad.com</a>
+            <a href="https://www.linkedin.com/in/josh-merritt" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a href="https://github.com/joshmerritt" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.upwork.com/fl/joshuapmerritt" target="_blank" rel="noopener noreferrer">Upwork</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  );
+}
 
 
 ========================================
@@ -2746,6 +3130,7 @@ FILE: src/game/ga4.js
  *   ball_score      — ball collides with matching goal → detail opens
  *   detail_open     — project detail modal displayed
  *   detail_close    — modal dismissed
+ *   cta_click       — user clicks the CTA link in the detail modal
  *   portfolio_loaded — all images loaded, canvas ready
  */
 
@@ -2820,6 +3205,17 @@ export function initGA4Tracking() {
   unsubs.push(
     bus.on('detail:close', () => {
       track('detail_close');
+    }),
+  );
+
+  // CTA clicked from detail modal
+  unsubs.push(
+    bus.on('cta:click', ({ name, link, category }) => {
+      track('cta_click', {
+        project_name: name || 'unknown',
+        project_link: link || '',
+        project_category: category || '',
+      });
     }),
   );
 
@@ -4037,6 +4433,615 @@ a { color: var(--main); text-decoration: none; }
   .stats-overlay {
     margin-bottom: env(safe-area-inset-bottom, 0);
   }
+}
+
+
+========================================
+FILE: src/styles/portfolio.css
+========================================
+/* ═══════════════════════════════════════════════════════════════════════════
+   portfolio.css — Accessible Portfolio Page
+   Shares the main site's design language: dark theme, steel blue accents,
+   glass morphism, Syne + DM Sans + JetBrains Mono
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ─── Design Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  /* Palette — matches index.css */
+  --p-bg:            #0a0e12;
+  --p-bg-elevated:   rgba(14, 20, 28, 0.92);
+  --p-main:          #c7d6d5;
+  --p-main-dim:      rgba(199, 214, 213, 0.55);
+  --p-main-faint:    rgba(199, 214, 213, 0.25);
+  --p-secondary:     #5985b1;
+  --p-accent:        #5985b1;
+  --p-accent-glow:   rgba(89, 133, 177, 0.45);
+  --p-accent-subtle: rgba(89, 133, 177, 0.12);
+  --p-accent-border: rgba(89, 133, 177, 0.25);
+
+  /* Glass */
+  --p-glass-bg:      rgba(10, 16, 22, 0.75);
+  --p-glass-border:  rgba(89, 133, 177, 0.12);
+  --p-glass-shine:   rgba(199, 214, 213, 0.04);
+
+  /* Shadows */
+  --p-shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.30);
+  --p-shadow-md:     0 8px 32px rgba(0, 0, 0, 0.40);
+  --p-shadow-lg:     0 24px 64px rgba(0, 0, 0, 0.55);
+
+  /* Radii */
+  --p-radius:        12px;
+  --p-radius-sm:     8px;
+
+  /* Typography */
+  --font-display:    'Syne', 'Helvetica Neue', sans-serif;
+  --font-body:       'DM Sans', 'Helvetica Neue', sans-serif;
+  --font-mono:       'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Transitions */
+  --ease-out:        cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
+/* ─── Reset ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--p-bg);
+  font-family: var(--font-body);
+  color: var(--p-main);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+img { display: block; max-width: 100%; }
+a { color: var(--p-secondary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+
+/* ─── Animations ────────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideRight {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ─── Root & Background ─────────────────────────────────────────────────────── */
+.port-root {
+  min-height: 100vh;
+  position: relative;
+}
+
+.port-glow {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.06;
+  filter: blur(120px);
+  z-index: 0;
+}
+.port-glow--tl { top: -200px; left: -200px; background: var(--p-secondary); }
+.port-glow--br { bottom: -200px; right: -200px; background: #6b9f6b; }
+
+
+/* ─── Skip Link ─────────────────────────────────────────────────────────────── */
+.port-skip {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--p-secondary);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: var(--p-radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+  z-index: 1000;
+  transition: top 0.2s;
+}
+.port-skip:focus {
+  top: 16px;
+  text-decoration: none;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TOP NAV
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.port-topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--p-glass-border);
+}
+
+.port-topnav-brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.port-topnav-brand:hover { text-decoration: none; color: var(--p-secondary); }
+
+.port-topnav-links {
+  display: flex;
+  gap: 8px;
+}
+
+.port-topnav-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--p-main-dim);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.port-topnav-link:hover {
+  color: var(--p-secondary);
+  border-color: var(--p-accent-border);
+  text-decoration: none;
+  background: var(--p-accent-subtle);
+}
+.port-topnav-link-icon { font-size: 0.85rem; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.port-hero {
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.port-hero-content {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 48px;
+  align-items: center;
+}
+
+.port-hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--p-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+  animation: fadeUp 0.6s var(--ease-out) both;
+}
+
+.port-hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+  animation: fadeUp 0.6s var(--ease-out) 0.05s both;
+}
+
+.port-hero-tagline {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-weight: 600;
+  color: var(--p-secondary);
+  margin-bottom: 20px;
+  animation: fadeUp 0.6s var(--ease-out) 0.1s both;
+}
+
+.port-hero-bio {
+  font-size: 0.95rem;
+  color: rgba(199, 214, 213, 0.72);
+  max-width: 540px;
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s var(--ease-out) 0.15s both;
+}
+
+.port-hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.6s var(--ease-out) 0.2s both;
+}
+
+.port-hero-image {
+  animation: fadeIn 0.8s var(--ease-out) 0.3s both;
+}
+
+.port-hero-photo {
+  width: 220px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: var(--p-radius);
+  border: 2px solid var(--p-glass-border);
+  box-shadow: var(--p-shadow-md);
+}
+
+
+/* ─── Buttons ───────────────────────────────────────────────────────────────── */
+.port-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: var(--p-radius-sm);
+  border: 1px solid transparent;
+  transition: all 0.2s var(--ease-out);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.port-btn:hover { text-decoration: none; transform: translateY(-1px); }
+
+.port-btn--primary {
+  background: var(--p-secondary);
+  color: #fff;
+  border-color: var(--p-secondary);
+}
+.port-btn--primary:hover { background: #6b9fc5; box-shadow: 0 4px 16px rgba(89, 133, 177, 0.3); }
+
+.port-btn--ghost {
+  background: transparent;
+  color: var(--p-main-dim);
+  border-color: var(--p-accent-border);
+}
+.port-btn--ghost:hover { color: var(--p-secondary); border-color: var(--p-secondary); background: var(--p-accent-subtle); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SECTIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.port-section {
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.port-section-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 28px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--p-accent-border);
+  display: inline-block;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SKILLS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.port-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.port-skill { padding: 4px 0; }
+
+.port-skill-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.port-skill-name {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--p-main);
+}
+
+.port-skill-pct {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--p-main-dim);
+}
+
+.port-skill-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.port-skill-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--p-secondary), #6b9fc5);
+  transform-origin: left;
+  transition: width 0.8s var(--ease-out);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FILTERS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.port-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.port-filter-btn {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--p-glass-border);
+  background: transparent;
+  color: var(--p-main-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.port-filter-btn:hover {
+  color: var(--p-main);
+  border-color: var(--p-accent-border);
+  background: var(--p-accent-subtle);
+}
+
+.port-filter-btn--active {
+  color: var(--p-secondary);
+  border-color: var(--p-accent-border);
+  background: var(--p-accent-subtle);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PROJECT CARDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.port-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 24px;
+}
+
+.port-card {
+  background: var(--p-glass-bg);
+  border: 1px solid var(--p-glass-border);
+  border-radius: var(--p-radius);
+  overflow: hidden;
+  box-shadow: var(--p-shadow-sm);
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), border-color 0.3s;
+
+  /* Reveal animation */
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.port-card--visible {
+  animation: fadeUp 0.5s var(--ease-out) forwards;
+}
+
+.port-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--p-shadow-md);
+  border-color: var(--p-accent-border);
+}
+
+.port-card-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.port-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.port-card:hover .port-card-image img {
+  transform: scale(1.04);
+}
+
+.port-card-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.port-card-body {
+  padding: 20px 22px 24px;
+}
+
+.port-card-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 14px;
+}
+
+.port-card-meta {
+  margin-bottom: 16px;
+}
+
+.port-card-row {
+  margin-bottom: 10px;
+}
+
+.port-card-row dt {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--p-main-faint);
+  margin-bottom: 1px;
+}
+
+.port-card-row dd {
+  font-size: 0.88rem;
+  color: rgba(199, 214, 213, 0.78);
+  line-height: 1.5;
+}
+
+.port-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--p-secondary);
+  padding: 8px 18px;
+  border: 1px solid var(--p-accent-border);
+  border-radius: var(--p-radius-sm);
+  transition: all 0.2s;
+}
+
+.port-card-cta:hover {
+  border-color: var(--p-secondary);
+  background: var(--p-accent-subtle);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.port-card-cta-icon {
+  font-size: 0.9rem;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.port-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: 32px;
+  border-top: 1px solid var(--p-glass-border);
+  padding: 32px 24px;
+}
+
+.port-footer-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.port-footer-brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.port-footer-copy {
+  font-size: 0.75rem;
+  color: var(--p-main-faint);
+}
+
+.port-footer-links {
+  display: flex;
+  gap: 16px;
+}
+
+.port-footer-links a {
+  font-size: 0.8rem;
+  color: var(--p-main-dim);
+  transition: color 0.2s;
+}
+.port-footer-links a:hover {
+  color: var(--p-secondary);
+  text-decoration: none;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .port-hero-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .port-hero-image { order: -1; margin: 0 auto; }
+  .port-hero-photo { width: 160px; height: 160px; }
+  .port-hero-bio { max-width: 100%; }
+  .port-hero-actions { justify-content: center; }
+
+  .port-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .port-topnav { flex-direction: column; gap: 10px; }
+  .port-topnav-links { gap: 4px; }
+
+  .port-footer-inner { flex-direction: column; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .port-hero-name { font-size: 1.8rem; }
+  .port-hero-actions { flex-direction: column; align-items: center; }
+  .port-btn { width: 100%; justify-content: center; }
+  .port-card-image { height: 160px; }
 }
 
 
@@ -7871,4 +8876,53 @@ RewriteCond %{REQUEST_URI} !^/portfolio\.html
 RewriteCond %{REQUEST_URI} !^/sitemap\.xml
 RewriteCond %{REQUEST_URI} !^/robots\.txt
 RewriteRule ^(.*)$ /index.html [L]
+
+
+========================================
+FILE: public/robots.txt
+========================================
+# robots.txt — dadatadad.com
+# Josh Merritt's portfolio
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://dadatadad.com/sitemap.xml
+
+# Block access to build artifacts and internal paths
+Disallow: /assets/client-*
+Disallow: /assets/analytics-*
+
+
+========================================
+FILE: public/sitemap.xml
+========================================
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://dadatadad.com/</loc>
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://dadatadad.com/portfolio.html</loc>
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://dadatadad.com/analytics-dashboard.html</loc>
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dadatadad.com/analytics-v2.html</loc>
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+</urlset>
 
