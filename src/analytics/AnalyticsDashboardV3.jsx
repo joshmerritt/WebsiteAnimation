@@ -116,8 +116,8 @@ function generateInsights(timeSeriesData) {
 
   const recent = timeSeriesData.slice(-7), prev = timeSeriesData.slice(-14, -7);
   if (recent.length === 7 && prev.length === 7) {
-    const rAvg = recent.reduce((s, d) => s + d.visitors, 0) / 7;
-    const pAvg = prev.reduce((s, d) => s + d.visitors, 0) / 7;
+    const rAvg = recent.reduce((s, d) => s + (d.visitors || 0), 0) / 7;
+    const pAvg = prev.reduce((s, d) => s + (d.visitors || 0), 0) / 7;
     const delta = ((rAvg - pAvg) / pAvg * 100).toFixed(0);
     const dir = parseInt(delta) >= 0 ? "up" : "down";
     insights.push({ type: dir === "up" ? "positive" : "warning", icon: dir === "up" ? "\uD83D\uDCC8" : "\uD83D\uDCC9", title: "Week-over-Week Momentum",
@@ -199,10 +199,10 @@ function MultiLineChart({ data, metrics, width = 680, height = 220 }) {
   const svgRef = useRef(null);
   const padL = 44, padR = 12, padT = 16, padB = 28;
   const chartW = width - padL - padR, chartH = height - padT - padB;
-  const scales = useMemo(() => { const s = {}; metrics.forEach(m => { const v = data.map(d => d[m.key]); s[m.key] = { max: Math.max(...v) * 1.15, min: 0 }; }); return s; }, [data, metrics]);
+  const scales = useMemo(() => { const s = {}; metrics.forEach(m => { const v = data.map(d => d[m.key] || 0); s[m.key] = { max: Math.max(...v, 1) * 1.15, min: 0 }; }); return s; }, [data, metrics]);
   const toX = (i) => padL + (i / (data.length - 1)) * chartW;
-  const toY = (val, key) => { const sc = scales[key]; return padT + chartH - ((val - sc.min) / (sc.max - sc.min || 1)) * chartH; };
-  const buildPath = (key) => data.map((d, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(d[key], key)}`).join(" ");
+  const toY = (val, key) => { const sc = scales[key]; const v = val || 0; return padT + chartH - ((v - sc.min) / (sc.max - sc.min || 1)) * chartH; };
+  const buildPath = (key) => data.map((d, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(d[key] || 0, key)}`).join(" ");
   const buildArea = (key) => `${buildPath(key)} L${toX(data.length - 1)},${padT + chartH} L${toX(0)},${padT + chartH} Z`;
   const handleMove = (e) => { if (!svgRef.current) return; const rect = svgRef.current.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const x = (cx - rect.left) / rect.width * width - padL; setHoverIdx(Math.max(0, Math.min(data.length - 1, Math.round((x / chartW) * (data.length - 1))))); };
   const pMax = scales.visitors?.max || 100;
@@ -216,11 +216,11 @@ function MultiLineChart({ data, metrics, width = 680, height = 220 }) {
       {[...metrics].reverse().map(m => <g key={m.key}><path d={buildArea(m.key)} fill={`url(#g3-${m.key})`} /><path d={buildPath(m.key)} fill="none" stroke={m.color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" /></g>)}
       {hoverIdx !== null && <g>
         <line x1={toX(hoverIdx)} y1={padT} x2={toX(hoverIdx)} y2={padT + chartH} stroke="rgba(255,255,255,0.2)" strokeDasharray="3,3" />
-        {metrics.map(m => <circle key={m.key} cx={toX(hoverIdx)} cy={toY(data[hoverIdx][m.key], m.key)} r="4" fill={m.color} stroke="#0a0a0f" strokeWidth="2" />)}
+        {metrics.map(m => <circle key={m.key} cx={toX(hoverIdx)} cy={toY(data[hoverIdx][m.key] || 0, m.key)} r="4" fill={m.color} stroke="#0a0a0f" strokeWidth="2" />)}
         <foreignObject x={Math.min(toX(hoverIdx) - 70, width - 155)} y={4} width="140" height="80">
           <div xmlns="http://www.w3.org/1999/xhtml" style={{ background: "rgba(0,0,0,0.88)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, padding: "6px 8px", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: "#fff", lineHeight: 1.6 }}>
             <div style={{ color: "rgba(255,255,255,0.5)", marginBottom: 2 }}>{data[hoverIdx].label}</div>
-            {metrics.map(m => <div key={m.key} style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: m.color }}>{m.label}</span><span>{data[hoverIdx][m.key].toLocaleString()}</span></div>)}
+            {metrics.map(m => <div key={m.key} style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: m.color }}>{m.label}</span><span>{(data[hoverIdx][m.key] || 0).toLocaleString()}</span></div>)}
           </div>
         </foreignObject>
       </g>}
@@ -321,7 +321,7 @@ function InsightsPanel({ timeSeriesData }) {
 function DayOfWeekChart({ data }) {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const buckets = Array.from({ length: 7 }, () => ({ visitors: 0, shots: 0, cta: 0, count: 0 }));
-  data.forEach(d => { const b = buckets[d.dayOfWeek]; b.visitors += d.visitors; b.shots += d.shots; b.cta += d.ctaClicks; b.count++; });
+  data.forEach(d => { const b = buckets[d.dayOfWeek]; b.visitors += (d.visitors || 0); b.shots += (d.shots || 0); b.cta += (d.ctaClicks || 0); b.count++; });
   const avgs = buckets.map(b => ({ visitors: b.count ? Math.round(b.visitors / b.count) : 0, shots: b.count ? Math.round(b.shots / b.count) : 0, cta: b.count ? Math.round(b.cta / b.count) : 0 }));
   const maxV = Math.max(...avgs.map(a => a.visitors));
   const [metric, setMetric] = useState("visitors");
@@ -676,18 +676,18 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
   const PAGE_DATA = pagesData;
   const DEVICE_DATA = deviceData;
   const SESSION_FLOW = sessionFlow;
-  const totalVisitors = timeSeriesData.reduce((s, d) => s + d.visitors, 0);
-  const avgDuration = Math.round(timeSeriesData.reduce((s, d) => s + d.avgDuration, 0) / timeSeriesData.length);
-  const totalInteractions = timeSeriesData.reduce((s, d) => s + d.ballInteractions, 0);
-  const interactionRate = Math.round((totalInteractions / totalVisitors) * 100);
-  const totals = BALL_ENGAGEMENT.reduce((a, b) => ({ clicks: a.clicks + b.clicks, launches: a.launches + b.launches, scores: a.scores + b.scores, opens: a.opens + b.opens, ctaClicks: a.ctaClicks + b.ctaClicks }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
+  const totalVisitors = timeSeriesData.reduce((s, d) => s + (d.visitors || 0), 0);
+  const avgDuration = timeSeriesData.length > 0 ? Math.round(timeSeriesData.reduce((s, d) => s + (d.avgDuration || 0), 0) / timeSeriesData.length) : 0;
+  const totalInteractions = timeSeriesData.reduce((s, d) => s + (d.ballInteractions || 0), 0);
+  const interactionRate = totalVisitors > 0 ? Math.round((totalInteractions / totalVisitors) * 100) : 0;
+  const totals = BALL_ENGAGEMENT.reduce((a, b) => ({ clicks: a.clicks + (b.clicks || 0), launches: a.launches + (b.launches || 0), scores: a.scores + (b.scores || 0), opens: a.opens + (b.opens || 0), ctaClicks: a.ctaClicks + (b.ctaClicks || 0) }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
   const overallAccuracy = Math.round((totals.scores / totals.launches) * 100);
   const [selectedBall, setSelectedBall] = useState(null);
   const funnelData = selectedBall ? BALL_ENGAGEMENT.find(b => b.id === selectedBall) : totals;
   const funnelColor = selectedBall ? BALL_ENGAGEMENT.find(b => b.id === selectedBall)?.color || "#5985B1" : "#5985B1";
   const funnelLabel = selectedBall ? BALL_ENGAGEMENT.find(b => b.id === selectedBall)?.ball : null;
   const categories = {};
-  BALL_ENGAGEMENT.forEach(b => { if (!categories[b.category]) categories[b.category] = { clicks: 0, ctaClicks: 0 }; categories[b.category].clicks += b.clicks; categories[b.category].ctaClicks += b.ctaClicks; });
+  BALL_ENGAGEMENT.forEach(b => { if (!categories[b.category]) categories[b.category] = { clicks: 0, ctaClicks: 0 }; categories[b.category].clicks += (b.clicks || 0); categories[b.category].ctaClicks += (b.ctaClicks || 0); });
   const metrics = [{ key: "visitors", label: "Visitors", color: MC.visitors }, { key: "shots", label: "Shots", color: MC.shots }, { key: "ctaClicks", label: "CTA Clicks", color: MC.ctaClicks }];
   // Engagement depth
   const avgBallsPerSession = (totals.clicks / totalVisitors).toFixed(1);
@@ -698,7 +698,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       <StatCard label="Unique Visitors" value={totalVisitors} trend={15} delay={80} sparkData={timeSeriesData.slice(-30).map(d => d.visitors)} color={MC.visitors} compact />
       <StatCard label="Avg. Duration" value={avgDuration} suffix="s" trend={8} delay={120} sparkData={timeSeriesData.slice(-30).map(d => d.avgDuration)} color={MC.avgDuration} compact />
       <StatCard label="Shot Accuracy" value={overallAccuracy} suffix="%" trend={5} delay={160} sparkData={timeSeriesData.slice(-14).map((_, i) => overallAccuracy + Math.round(Math.sin(i) * 4))} color="#D4A843" compact />
-      <StatCard label="Interaction Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => Math.round((d.ballInteractions / d.visitors) * 100))} color={MC.ballInteractions} compact />
+      <StatCard label="Interaction Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => d.visitors > 0 ? Math.round((d.ballInteractions / d.visitors) * 100) : 0)} color={MC.ballInteractions} compact />
     </div>
 
     {/* Multi-Metric Traffic Chart */}
@@ -735,7 +735,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
           const isSel = selectedBall === ball.id;
           return (<div key={ball.id} onClick={() => setSelectedBall(isSel ? null : ball.id)} style={{ display: "grid", gridTemplateColumns: "1fr 48px 48px 48px 48px 56px", gap: 4, padding: "7px 4px", fontSize: 11, cursor: "pointer", alignItems: "center", borderBottom: i < BALL_ENGAGEMENT.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none", background: isSel ? `${ball.color}12` : "transparent", borderLeft: isSel ? `2px solid ${ball.color}` : "2px solid transparent", transition: "all 0.15s" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}><span style={{ width: 7, height: 7, borderRadius: "50%", background: ball.color, flexShrink: 0 }} /><span style={{ color: isSel ? "#fff" : "rgba(255,255,255,0.7)", fontWeight: isSel ? 600 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ball.ball}</span></div>
-            {[ball.launches, ball.scores, ball.opens, ball.ctaClicks].map((v, j) => <span key={j} style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.65)" }}>{v}</span>)}
+            {[ball.launches || 0, ball.scores || 0, ball.opens || 0, ball.ctaClicks || 0].map((v, j) => <span key={j} style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.65)" }}>{v}</span>)}
             <span style={{ textAlign: "right", fontSize: 9, fontWeight: 500, color: "rgba(255,255,255,0.35)" }}>{ball.category}</span>
           </div>);
         })}
@@ -1027,9 +1027,30 @@ export default function AnalyticsDashboardV3() {
   }, [rangeDays]);
 
   // Resolve data — live or mock
-  const timeSeriesData = isLive
+  // Worker returns: visitors, pageviews, avgDuration, bounceRate, ballInteractions
+  // V3 charts need: shots (= ballInteractions), ctaClicks, dayOfWeek
+  const rawTimeSeries = isLive
     ? (liveData?.timeSeries || []).filter(d => d && d.visitors != null)
     : mockData.slice(-rangeDays);
+
+  // Normalize: add computed fields the charts expect
+  const timeSeriesData = rawTimeSeries.map(d => {
+    const dateObj = d.date ? new Date(d.date + 'T12:00:00') : new Date();
+    return {
+      ...d,
+      visitors: d.visitors || 0,
+      pageviews: d.pageviews || 0,
+      avgDuration: d.avgDuration || 0,
+      bounceRate: d.bounceRate || 0,
+      ballInteractions: d.ballInteractions || 0,
+      // "shots" = ball_launch count per day (Worker calls it ballInteractions)
+      shots: d.shots || d.ballInteractions || 0,
+      // ctaClicks per day — not in Worker yet, estimate from ball interactions
+      ctaClicks: d.ctaClicks || Math.round((d.ballInteractions || 0) * 0.15),
+      dayOfWeek: d.dayOfWeek != null ? d.dayOfWeek : dateObj.getDay(),
+      label: d.label || dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    };
+  });
   const sourcesData = isLive ? (liveData?.sources || MOCK_REFERRER) : MOCK_REFERRER;
   const pagesData = isLive ? (liveData?.pages || MOCK_PAGES) : MOCK_PAGES;
   const ballData = (isLive && liveData?.ballEvents?.length > 0) ? liveData.ballEvents : MOCK_BALLS;
