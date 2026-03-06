@@ -17,6 +17,7 @@ import {
   ARCHITECTURE,
   METRIC_COLORS,
 } from './data.js';
+import ShotChart from './ShotChart.jsx';
 
 // ═══ SUPPLEMENTARY DATA (not from GA4) ══════════════════════════════════
 // Device icons for V3 display (MOCK_DEVICES has different shape)
@@ -564,155 +565,6 @@ function ConversionWaterfall() {
   );
 }
 
-// ═══ SHOT CHART HEATMAP ═════════════════════════════════════════════════
-function ShotChart({ selectedBall }) {
-  const width = 680, height = 340;
-
-  // Ball positions (simulating the 3-col grid on right side)
-  const ballPositions = BALL_ENGAGEMENT.map((ball, i) => ({
-    ...ball,
-    cx: 440 + (i % 3) * 80,
-    cy: 65 + Math.floor(i / 3) * 90,
-  }));
-
-  // Goal zones (left side, matching category layout)
-  const cats = ["Me", "Technology", "Business", "Apps"];
-  const goalX = 60;
-  const goalZones = cats.map((cat, i) => ({ cat, x: goalX, y: 55 + i * 72, w: 55, h: 55 }));
-
-  // Use live session impact data if available, otherwise seeded demo dots
-  const [liveImpactCount, setLiveImpactCount] = useState(0);
-
-  // Read impacts from localStorage (persisted by ga4.js, shared across tabs)
-  const getSessionImpacts = () => {
-    try {
-      const stored = localStorage.getItem('__dadatadad_impacts');
-      if (!stored) return [];
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (e) { console.warn('Failed to parse session impacts', e.message); return []; }
-  };
-
-  // Poll for live impact data (checks localStorage for cross-tab data)
-  useEffect(() => {
-    const check = () => {
-      const impacts = getSessionImpacts();
-      setLiveImpactCount((prev) => impacts.length !== prev ? impacts.length : prev);
-    };
-    check();
-    const interval = setInterval(check, 2000);
-    return () => clearInterval(interval);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const isLiveShots = liveImpactCount > 0;
-
-  const shots = useMemo(() => {
-    // Prefer live data from localStorage
-    const liveImpacts = getSessionImpacts();
-    if (liveImpacts.length > 0) {
-      return liveImpacts.map(imp => {
-        const fx = Math.max(20, Math.min(width - 20, imp.x * width));
-        const fy = Math.max(15, Math.min(height - 15, imp.y * height));
-        const ball = BALL_ENGAGEMENT.find(b => b.id === imp.ballId);
-        return { x: fx, y: fy, scored: imp.isGoal, ballId: imp.ballId, color: ball?.color || '#5985B1' };
-      });
-    }
-
-    // Fallback: seeded demo data
-    const r = seededRandom(777);
-    const dots = [];
-    ballPositions.forEach(ball => {
-      const goalZone = goalZones.find(g => g.cat === ball.category);
-      if (!goalZone) return;
-      const numShots = Math.round((ball.launches || 0) * 0.35);
-      for (let s = 0; s < numShots; s++) {
-        const scored = r() < ((ball.scores || 0) / (ball.launches || 1));
-        const t = 0.3 + r() * 0.55;
-        const baseX = ball.cx + (goalZone.x + goalZone.w / 2 - ball.cx) * t;
-        const baseY = ball.cy + (goalZone.y + goalZone.h / 2 - ball.cy) * t;
-        const spread = scored ? 12 + r() * 18 : 25 + r() * 45;
-        const angle = r() * Math.PI * 2;
-        const dx = Math.cos(angle) * spread * (r() * 0.7 + 0.3);
-        const dy = Math.sin(angle) * spread * (r() * 0.7 + 0.3);
-        const fx = Math.max(20, Math.min(width - 20, baseX + dx));
-        const fy = Math.max(15, Math.min(height - 15, baseY + dy));
-        dots.push({ x: fx, y: fy, scored, ballId: ball.id, color: ball.color });
-      }
-    });
-    return dots;
-  }, [liveImpactCount]);
-
-  const filteredShots = selectedBall ? shots.filter(s => s.ballId === selectedBall) : shots;
-
-  const visibleScored = filteredShots.filter(s => s.scored).length;
-  const visibleTotal = filteredShots.length;
-  const visiblePct = visibleTotal > 0 ? ((visibleScored / visibleTotal) * 100).toFixed(0) : 0;
-
-  return (
-    <div>
-      <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" style={{ display: "block" }}>
-        <defs>
-          <radialGradient id="glow-green" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#6B9F6B" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#6B9F6B" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <rect x="0" y="0" width={width} height={height} rx="10" fill="rgba(255,255,255,0.015)" />
-        <line x1="220" y1="10" x2="220" y2={height - 10} stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4,4" />
-
-        {goalZones.map(g => (
-          <g key={g.cat}>
-            <rect x={g.x - 8} y={g.y - 5} width={g.w + 16} height={g.h + 10} rx="6" fill="rgba(107,159,107,0.06)" stroke="rgba(107,159,107,0.15)" strokeWidth="1" />
-            <text x={g.x + g.w / 2} y={g.y + g.h + 18} fill="rgba(255,255,255,0.3)" fontSize="9" fontFamily="'JetBrains Mono', monospace" textAnchor="middle">{g.cat}</text>
-          </g>
-        ))}
-
-        {filteredShots.map((dot, i) => (
-          <circle key={i} cx={dot.x} cy={dot.y} r={dot.scored ? 2.5 : 2}
-            fill={dot.scored ? "#6B9F6B" : "#C05050"}
-            opacity={dot.scored ? 0.7 : 0.35} />
-        ))}
-
-        {goalZones.map(g => {
-          const near = filteredShots.filter(s => {
-            const dx = s.x - (g.x + g.w / 2), dy = s.y - (g.y + g.h / 2);
-            return Math.sqrt(dx * dx + dy * dy) < 50 && s.scored;
-          });
-          return near.length >= 3 ? <circle key={`gl-${g.cat}`} cx={g.x + g.w / 2} cy={g.y + g.h / 2} r={35} fill="url(#glow-green)" /> : null;
-        })}
-
-        {ballPositions.map(ball => {
-          const isActive = !selectedBall || selectedBall === ball.id;
-          const shotScale = ball.launches / Math.max(...BALL_ENGAGEMENT.map(b => b.launches));
-          const r = 12 + shotScale * 14;
-          return (
-            <g key={ball.id} opacity={isActive ? 1 : 0.2}>
-              <circle cx={ball.cx} cy={ball.cy} r={r} fill={`${ball.color}25`} stroke={`${ball.color}66`} strokeWidth="1.5" />
-              <circle cx={ball.cx} cy={ball.cy} r={3} fill={ball.color} />
-              <text x={ball.cx} y={ball.cy + r + 12} fill={isActive ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.15)"} fontSize="8" fontFamily="'JetBrains Mono', monospace" textAnchor="middle">{ball.ball.split(" ")[0]}</text>
-            </g>
-          );
-        })}
-
-        <text x={goalX + 20} y={20} fill="rgba(255,255,255,0.2)" fontSize="9" fontFamily="'JetBrains Mono', monospace" textAnchor="middle" letterSpacing="2">GOALS</text>
-        <text x={520} y={20} fill="rgba(255,255,255,0.2)" fontSize="9" fontFamily="'JetBrains Mono', monospace" textAnchor="middle" letterSpacing="2">BALLS</text>
-      </svg>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8, flexWrap: "wrap", gap: 8 }}>
-        <div style={{ display: "flex", gap: 14 }}>
-          {[["\u25CF Score", "#6B9F6B"], ["\u25CF Miss", "#C05050"], ["\u25CB Ball (sized by volume)", "rgba(255,255,255,0.4)"]].map(([l, c]) => (
-            <span key={l} style={{ fontSize: 9, color: c, fontFamily: "'JetBrains Mono', monospace" }}>{l}</span>
-          ))}
-        </div>
-        <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
-          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>
-            {isLiveShots ? `Live session: ${visibleTotal} shots` : `${visibleTotal} shots (demo)`}
-          </span>
-          <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: parseInt(visiblePct) > 75 ? "#6B9F6B" : "#D4A843" }}>{visiblePct}% accuracy</span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ═══ ANALYTICS TAB ══════════════════════════════════════════════════════
 function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesData, deviceData, sessionFlow, isLive }) {
@@ -784,15 +636,8 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
     </div>
 
     {/* Shot Chart */}
-    <div style={{ ...SS.panel, marginBottom: 20 }}>
-      <div style={SS.panelHeader}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ ...SS.panelTitle, marginBottom: 0 }}>Shot Chart</span>
-          <span style={SS.panelBadge}>first-contact heatmap</span>
-        </div>
-        {selectedBall && <button onClick={() => setSelectedBall(null)} style={{ ...SS.timeBtn, background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)", fontSize: 10, padding: "4px 10px", borderRadius: 6, cursor: "pointer" }}>{"\u2190"} Show All</button>}
-      </div>
-      <ShotChart selectedBall={selectedBall} />
+    <div style={{ marginBottom: 20 }}>
+      <ShotChart liveData={BALL_ENGAGEMENT} />
     </div>
 
     {/* Ball Engagement Funnel */}

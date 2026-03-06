@@ -1,0 +1,133 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ShotChart.css — Physics playground shot visualization (v3)
+   Three-zone court: Contact dots | Accuracy rings | Launch frequency balls
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.shot-chart-wrap {
+  background: var(--a-bg-surface, rgba(255, 255, 255, 0.025));
+  border: 1px solid var(--a-border, rgba(255, 255, 255, 0.06));
+  border-radius: var(--radius-md, 14px);
+  padding: 14px 16px 10px;
+  animation: fadeSlideIn 0.6s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+/* ─── Header ── */
+.shot-chart-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+.shot-chart-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--a-bg-elevated, rgba(255, 255, 255, 0.04));
+  border-radius: 5px;
+  padding: 2px;
+  border: 1px solid var(--a-border, rgba(255, 255, 255, 0.06));
+}
+
+.sct-btn {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--a-text-muted, rgba(255, 255, 255, 0.35));
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.sct-btn:hover:not(.sct-btn--active) { color: var(--a-text-dim, rgba(255, 255, 255, 0.6)); }
+.sct-btn--active { background: rgba(255, 255, 255, 0.1); color: var(--a-text, #fff); }
+
+/* ─── SVG ── */
+.shot-chart-svg { display: block; width: 100%; height: auto; border-radius: 8px; overflow: visible; }
+
+/* ─── Zone titles ── */
+.shot-zone-title {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 10px;
+  font-weight: 700;
+  fill: rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.08em;
+}
+.shot-zone-title--lg { font-size: 12px; fill: rgba(255, 255, 255, 0.22); font-weight: 800; }
+
+/* ─── Dots ── */
+.shot-dot { animation: shotDotPop 0.3s ease-out both; }
+@keyframes shotDotPop { from { opacity: 0; r: 0; } }
+
+/* ─── Balls ── */
+.shot-ball {
+  animation: shotBallGrow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transition: opacity 0.2s, stroke-width 0.15s;
+}
+@keyframes shotBallGrow { from { r: 2; opacity: 0; } }
+
+.shot-ball-name {
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 9px;
+  fill: var(--a-text-muted, rgba(255, 255, 255, 0.35));
+  font-weight: 500;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+/* ─── Category labels ── */
+.shot-cat-label {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  fill: var(--a-text-dim, rgba(255, 255, 255, 0.6));
+  letter-spacing: 0.04em;
+  transition: opacity 0.2s, font-weight 0.15s;
+}
+
+/* ─── Accuracy rings ── */
+.shot-acc-ring {
+  animation: shotAccGrow 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes shotAccGrow { from { stroke-dasharray: 0 200; opacity: 0; } }
+
+.shot-acc-pct {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 8px;
+  font-weight: 700;
+}
+.shot-acc-name {
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 8px;
+  font-weight: 500;
+  fill: rgba(255, 255, 255, 0.28);
+}
+
+/* ─── Tooltip ── */
+.shot-tooltip { pointer-events: none; animation: shotTipIn 0.15s ease-out both; }
+@keyframes shotTipIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ─── Legend ── */
+.shot-legend-text {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 9.5px;
+  fill: rgba(255, 255, 255, 0.25);
+  font-weight: 500;
+}
+
+/* ─── Stat strip ── */
+.shot-stat-strip { display: flex; align-items: center; gap: 14px; padding: 8px 4px 2px; margin-top: 4px; }
+.shot-stat { display: flex; align-items: baseline; gap: 5px; }
+.shot-stat-val { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 13px; font-weight: 700; color: var(--a-text, #fff); letter-spacing: -0.02em; }
+.shot-stat-accent { color: var(--a-gold, #D4A843); }
+.shot-stat-lbl { font-family: var(--font-body, 'DM Sans', sans-serif); font-size: 9px; color: var(--a-text-muted, rgba(255, 255, 255, 0.35)); text-transform: uppercase; letter-spacing: 0.06em; }
+.shot-stat-div { width: 1px; height: 16px; background: rgba(255, 255, 255, 0.08); flex-shrink: 0; }
+
+/* ─── Responsive ── */
+@media screen and (max-width: 680px) {
+  .shot-stat-strip { flex-wrap: wrap; gap: 8px 14px; }
+  .shot-chart-wrap { padding: 10px 12px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shot-dot, .shot-ball, .shot-acc-ring, .shot-tooltip { animation: none !important; }
+}
