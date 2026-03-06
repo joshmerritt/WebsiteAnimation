@@ -160,14 +160,36 @@ export default class Ball {
     octx.arc(cssSize / 2, cssSize / 2, cssSize / 2, 0, Math.PI * 2);
     octx.clip();
 
-    // Draw from full-res source with square crop
-    const srcCanvas = this.fullImage.canvas || this.fullImage.drawingContext?.canvas;
-    if (srcCanvas) {
-      octx.drawImage(
-        srcCanvas,
-        this._cropX, this._cropY, this._cropSize, this._cropSize,
-        0, 0, cssSize, cssSize,
-      );
+    // Draw from full-res source with square crop.
+    // Firefox can differ in which p5 image backing element is exposed,
+    // so we check all common sources and gracefully fall back.
+    const srcEl =
+      this.fullImage?.canvas ||
+      this.fullImage?.drawingContext?.canvas ||
+      this.fullImage?.elt ||
+      this.fullImage;
+
+    if (srcEl) {
+      try {
+        octx.drawImage(
+          srcEl,
+          this._cropX, this._cropY, this._cropSize, this._cropSize,
+          0, 0, cssSize, cssSize,
+        );
+        return;
+      } catch (_) {
+        // Fallback below
+      }
+    }
+
+    // Last-resort fallback: draw already-cropped p5 image backing canvas.
+    const fallbackEl =
+      this.ballImage?.canvas ||
+      this.ballImage?.drawingContext?.canvas ||
+      this.ballImage?.elt ||
+      this.ballImage;
+    if (fallbackEl) {
+      octx.drawImage(fallbackEl, 0, 0, cssSize, cssSize);
     }
   }
 
