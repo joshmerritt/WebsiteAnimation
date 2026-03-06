@@ -52,6 +52,10 @@ export default class Ball {
     if (typeof Image !== 'undefined') {
       this.nativeImage = new Image();
       this.nativeImage.decoding = 'async';
+      this.nativeImage.onload = () => {
+        // Force a fresh render once the native image is available.
+        this._circleCanvas = null;
+      };
       this.nativeImage.src = this.imageSrc;
     }
 
@@ -129,7 +133,9 @@ export default class Ball {
     // Draw pre-rendered circular image at CSS pixel size
     // The offscreen canvas is dpr× larger, so specifying explicit
     // destination width/height ensures it maps to sharp physical pixels.
-    ctx.drawImage(this._circleCanvas, -this.r, -this.r, diameter, diameter);
+    if (this._circleCanvas) {
+      ctx.drawImage(this._circleCanvas, -this.r, -this.r, diameter, diameter);
+    }
 
     // Border ring
     p.noFill();
@@ -151,12 +157,11 @@ export default class Ball {
   _renderCircleImage(diameter, dpr) {
     const cssSize = Math.round(diameter);
     const physSize = Math.round(diameter * dpr);
-    this._circleSize = diameter;
-    this._circleDpr = dpr;
-    this._circleCanvas = document.createElement('canvas');
-    this._circleCanvas.width = physSize;
-    this._circleCanvas.height = physSize;
-    const octx = this._circleCanvas.getContext('2d');
+    const circleCanvas = document.createElement('canvas');
+    circleCanvas.width = physSize;
+    circleCanvas.height = physSize;
+    const octx = circleCanvas.getContext('2d');
+    let didDraw = false;
 
     // Scale so we draw in CSS-pixel coordinates, but at physical resolution
     octx.scale(dpr, dpr);
@@ -175,7 +180,7 @@ export default class Ball {
         this._cropX, this._cropY, this._cropSize, this._cropSize,
         0, 0, cssSize, cssSize,
       );
-      return;
+      didDraw = true;
     }
 
     // Fallback to p5 image internals while native image is still loading.
@@ -184,14 +189,14 @@ export default class Ball {
       this.fullImage?.drawingContext?.canvas ||
       this.fullImage?.elt;
 
-    if (srcEl) {
+    if (!didDraw && srcEl) {
       try {
         octx.drawImage(
           srcEl,
           this._cropX, this._cropY, this._cropSize, this._cropSize,
           0, 0, cssSize, cssSize,
         );
-        return;
+        didDraw = true;
       } catch (_) {
         // Continue to final fallback.
       }
@@ -202,9 +207,15 @@ export default class Ball {
       this.ballImage?.canvas ||
       this.ballImage?.drawingContext?.canvas ||
       this.ballImage?.elt;
-    if (fallbackEl) {
+    if (!didDraw && fallbackEl) {
       octx.drawImage(fallbackEl, 0, 0, cssSize, cssSize);
+      didDraw = true;
     }
+
+    // Avoid caching blank circles when no source is drawable yet.
+    this._circleSize = diameter;
+    this._circleDpr = dpr;
+    this._circleCanvas = didDraw ? circleCanvas : null;
   }
 
   hover(iconSize, showHint) {
