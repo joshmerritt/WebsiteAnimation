@@ -583,15 +583,15 @@ function ShotChart({ selectedBall }) {
   // Use live session impact data if available, otherwise seeded demo dots
   const [liveImpactCount, setLiveImpactCount] = useState(0);
 
-  // Read impacts from sessionStorage (persisted by ga4.js on the main site)
+  // Read impacts from localStorage (persisted by ga4.js, shared across tabs)
   const getSessionImpacts = () => {
     try {
-      const stored = sessionStorage.getItem('__dadatadad_impacts');
+      const stored = localStorage.getItem('__dadatadad_impacts');
       return stored ? JSON.parse(stored) : [];
     } catch (_) { return []; }
   };
 
-  // Poll for live impact data (checks sessionStorage for cross-page data)
+  // Poll for live impact data (checks localStorage for cross-tab data)
   useEffect(() => {
     const check = () => {
       const impacts = getSessionImpacts();
@@ -605,7 +605,7 @@ function ShotChart({ selectedBall }) {
   const isLiveShots = liveImpactCount > 0;
 
   const shots = useMemo(() => {
-    // Prefer live session data from sessionStorage
+    // Prefer live data from localStorage
     const liveImpacts = getSessionImpacts();
     if (liveImpacts.length > 0) {
       return liveImpacts.map(imp => {
@@ -743,6 +743,32 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       <StatCard label="Shot Accuracy" value={overallAccuracy} suffix="%" trend={5} delay={160} sparkData={timeSeriesData.slice(-14).map((_, i) => overallAccuracy + Math.round(Math.sin(i) * 4))} color="#D4A843" compact />
       <StatCard label="Interaction Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => d.visitors > 0 ? Math.round((d.ballInteractions / d.visitors) * 100) : 0)} color={MC.ballInteractions} compact />
     </div>
+
+    {/* Bridge Stats — live activity since GA4's last sync */}
+    {(() => {
+      try {
+        const bridge = JSON.parse(localStorage.getItem('__dadatadad_bridge') || 'null');
+        if (!bridge || (bridge.shots === 0 && bridge.makes === 0)) return null;
+        const ago = Math.round((Date.now() - bridge.lastUpdated) / 60000);
+        const agoText = ago < 1 ? 'just now' : ago < 60 ? `${ago}m ago` : `${Math.round(ago / 60)}h ago`;
+        return (
+          <div style={{ marginBottom: 16, padding: "10px 14px", borderRadius: 10, background: "rgba(89,133,177,0.06)", border: "1px solid rgba(89,133,177,0.12)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, fontSize: 11 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#5985B1", display: "inline-block", boxShadow: "0 0 6px rgba(89,133,177,0.5)" }} />
+              <span style={{ color: "rgba(255,255,255,0.5)" }}>Recent activity:</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#5985B1" }}>{bridge.shots} shots</span>
+              <span style={{ color: "rgba(255,255,255,0.2)" }}>{" \u00B7 "}</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#6B9F6B" }}>{bridge.makes} makes</span>
+              <span style={{ color: "rgba(255,255,255,0.2)" }}>{" \u00B7 "}</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#D4A843" }}>{bridge.opens} opens</span>
+              <span style={{ color: "rgba(255,255,255,0.2)" }}>{" \u00B7 "}</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#7B5EA7" }}>{bridge.ctaClicks} CTAs</span>
+            </div>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.25)", fontSize: 10 }}>updated {agoText}</span>
+          </div>
+        );
+      } catch (_) { return null; }
+    })()}
 
     {/* Multi-Metric Traffic Chart */}
     <div style={{ ...SS.panel, marginBottom: 20, padding: "18px 20px 12px" }}>
@@ -1134,7 +1160,7 @@ export default function AnalyticsDashboardV3() {
             </div>
             <span style={SS.versionBadge}>V3</span>
           </div>
-          <p style={SS.subtitle}>DaDataDad.com &middot; Last {rangeDays} days</p>
+          <p style={SS.subtitle}>DaDataDad.com · Last {rangeDays} days</p>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <div style={SS.tabGroup}>{TABS.map(t => <button key={t.key} onClick={() => setActiveTab(t.key)} style={{ ...SS.tabBtn, background: activeTab === t.key ? "rgba(255,255,255,0.1)" : "transparent", color: activeTab === t.key ? "#fff" : "rgba(255,255,255,0.4)", borderColor: activeTab === t.key ? "rgba(255,255,255,0.15)" : "transparent" }}>{t.label}</button>)}</div>
@@ -1185,5 +1211,7 @@ const SS = {
   twoCol: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 },
   navLink: { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.35)", textDecoration: "none", padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(255,255,255,0.06)", transition: "all 0.15s" },
 };
+
+
 
 

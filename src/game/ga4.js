@@ -4,42 +4,46 @@
  * Listens to EventBus events and forwards them as GA4 custom events.
  * Gracefully no-ops if gtag isn't loaded (dev, ad-blockers, etc.).
  *
- * Custom events tracked:
- *   ball_launch     — user releases a ball with enough power
- *   ball_score      — ball collides with matching goal → detail opens
- *   detail_open     — project detail modal displayed
- *   detail_close    — modal dismissed
- *   cta_click       — user clicks the CTA link in the detail modal
- *   ball_impact     — first collision after launch (wall/net/goal/menu/ball)
- *   portfolio_loaded — all images loaded, canvas ready
+ * Also maintains a localStorage-based "bridge" store that:
+ *   1. Persists impact data across tabs (for the shot chart heatmap)
+ *   2. Tracks session stats (shots, makes, opens, cta clicks) with timestamps
+ *   3. Auto-expires data older than 24 hours
+ *
+ * The analytics dashboard reads this bridge data to fill the gap
+ * between GA4's ~48hr processing lag and the current moment.
  */
 
 import bus from './EventBus.js';
 
-const STORAGE_KEY = '__dadatadad_impacts';
+const IMPACT_KEY  = '__dadatadad_impacts';
+const BRIDGE_KEY  = '__dadatadad_bridge';
+const MAX_AGE_MS  = 24 * 60 * 60 * 1000; // 24 hours
 
-/**
- * Session-level impact data store.
- * Persists to sessionStorage so data survives page navigation
- * (e.g. main site → analytics dashboard within the same tab).
- * Accessible via window.__impactData and window.__impactStore.
- */
+// ═══════════════════════════════════════════════════════════════════════════
+//  Impact Store — per-shot first-contact data for the shot chart
+// ═══════════════════════════════════════════════════════════════════════════
+
 const impactStore = {
   _data: [],
 
   _hydrate() {
     try {
-      const stored = sessionStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(IMPACT_KEY);
       if (stored) {
-        this._data = JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        // Filter out impacts older than MAX_AGE
+        const cutoff = Date.now() - MAX_AGE_MS;
+        this._data = parsed.filter(r => r.timestamp > cutoff);
         if (typeof window !== 'undefined') window.__impactData = this._data;
+        // Re-persist if we pruned anything
+        if (this._data.length !== parsed.length) this._persist();
       }
     } catch (_) {}
   },
 
   _persist() {
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(this._data));
+      localStorage.setItem(IMPACT_KEY, JSON.stringify(this._data));
     } catch (_) {}
   },
 
@@ -67,13 +71,64 @@ const impactStore = {
   },
 };
 
-// Hydrate from sessionStorage on load (picks up data from the main page)
+// ═══════════════════════════════════════════════════════════════════════════
+//  Bridge Stats — aggregated event counts to supplement GA4 lag
+// ═══════════════════════════════════════════════════════════════════════════
+
+const bridgeStats = {
+  _data: null,
+
+  _hydrate() {
+    try {
+      const stored = localStorage.getItem(BRIDGE_KEY);
+      if (stored) {
+        this._data = JSON.parse(stored);
+        // Expire if older than MAX_AGE
+        if (this._data.startedAt && Date.now() - this._data.startedAt > MAX_AGE_MS) {
+          this._data = null;
+          localStorage.removeItem(BRIDGE_KEY);
+        }
+      }
+    } catch (_) {}
+    if (!this._data) {
+      this._data = { startedAt: Date.now(), shots: 0, makes: 0, opens: 0, ctaClicks: 0, visitors: 1, lastUpdated: Date.now() };
+      this._persist();
+    }
+  },
+
+  _persist() {
+    try {
+      this._data.lastUpdated = Date.now();
+      localStorage.setItem(BRIDGE_KEY, JSON.stringify(this._data));
+    } catch (_) {}
+  },
+
+  addShot()     { this._data.shots++;     this._persist(); },
+  addMake()     { this._data.makes++;     this._persist(); },
+  addOpen()     { this._data.opens++;     this._persist(); },
+  addCtaClick() { this._data.ctaClicks++; this._persist(); },
+
+  get() { return this._data ? { ...this._data } : null; },
+
+  clear() {
+    this._data = { startedAt: Date.now(), shots: 0, makes: 0, opens: 0, ctaClicks: 0, visitors: 1, lastUpdated: Date.now() };
+    this._persist();
+  },
+};
+
+// Hydrate both stores on load
 impactStore._hydrate();
+bridgeStats._hydrate();
 
 if (typeof window !== 'undefined') {
   window.__impactStore = impactStore;
   window.__impactData = impactStore._data;
+  window.__bridgeStats = bridgeStats;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  GA4 Tracking
+// ═══════════════════════════════════════════════════════════════════════════
 
 function gtag(...args) {
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
@@ -81,16 +136,13 @@ function gtag(...args) {
   }
 }
 
-/** Send a GA4 custom event. */
 function track(eventName, params = {}) {
   gtag('event', eventName, params);
 }
 
-/** Wire up all EventBus → GA4 listeners. Returns an unsubscribe function. */
 export function initGA4Tracking() {
   const unsubs = [];
 
-  // Track aggregate stats for accuracy calculation
   let currentShots = 0;
   let currentMakes = 0;
   unsubs.push(
@@ -100,7 +152,7 @@ export function initGA4Tracking() {
     }),
   );
 
-  // Per-ball launch tracking (includes project_name for GA4 breakdown)
+  // Per-ball launch
   unsubs.push(
     bus.on('ball:launched', ({ name, category, ballLaunches, ballMakes }) => {
       track('ball_launch', {
@@ -112,10 +164,11 @@ export function initGA4Tracking() {
         total_makes: currentMakes,
         accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
       });
+      bridgeStats.addShot();
     }),
   );
 
-  // Per-ball score tracking
+  // Per-ball score
   unsubs.push(
     bus.on('ball:scored', ({ name, category, ballLaunches, ballMakes }) => {
       track('ball_score', {
@@ -127,6 +180,7 @@ export function initGA4Tracking() {
         total_makes: currentMakes,
         accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
       });
+      bridgeStats.addMake();
     }),
   );
 
@@ -137,6 +191,7 @@ export function initGA4Tracking() {
         project_name: data.name || 'unknown',
         project_link: data.link || '',
       });
+      bridgeStats.addOpen();
     }),
   );
 
@@ -147,7 +202,7 @@ export function initGA4Tracking() {
     }),
   );
 
-  // CTA clicked from detail modal
+  // CTA clicked
   unsubs.push(
     bus.on('cta:click', ({ name, link, category }) => {
       track('cta_click', {
@@ -155,10 +210,11 @@ export function initGA4Tracking() {
         project_link: link || '',
         project_category: category || '',
       });
+      bridgeStats.addCtaClick();
     }),
   );
 
-  // Loading complete (measures load performance)
+  // Loading complete
   unsubs.push(
     bus.on('load:complete', () => {
       track('portfolio_loaded', {
@@ -167,15 +223,16 @@ export function initGA4Tracking() {
     }),
   );
 
-  // Game reset — clear impact data for fresh session
+  // Game reset
   unsubs.push(
     bus.on('game:reset', () => {
       track('game_reset');
       impactStore.clear();
+      bridgeStats.clear();
     }),
   );
 
-  // ── First-impact tracking ──
+  // First-impact tracking
   unsubs.push(
     bus.on('impact:first', (data) => {
       impactStore.add(data);
@@ -194,4 +251,4 @@ export function initGA4Tracking() {
   return () => unsubs.forEach((fn) => fn());
 }
 
-export { impactStore };
+export { impactStore, bridgeStats };

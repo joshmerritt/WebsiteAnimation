@@ -1,5 +1,5 @@
 =============================
- CODEBASE DUMP - Thu Mar  5 15:55:01 PST 2026
+ CODEBASE DUMP - Thu Mar  5 16:45:53 PST 2026
 =============================
 
 
@@ -3256,29 +3256,58 @@ FILE: src/game/ga4.js
  * Listens to EventBus events and forwards them as GA4 custom events.
  * Gracefully no-ops if gtag isn't loaded (dev, ad-blockers, etc.).
  *
- * Custom events tracked:
- *   ball_launch     — user releases a ball with enough power
- *   ball_score      — ball collides with matching goal → detail opens
- *   detail_open     — project detail modal displayed
- *   detail_close    — modal dismissed
- *   cta_click       — user clicks the CTA link in the detail modal
- *   portfolio_loaded — all images loaded, canvas ready
+ * Also maintains a localStorage-based "bridge" store that:
+ *   1. Persists impact data across tabs (for the shot chart heatmap)
+ *   2. Tracks session stats (shots, makes, opens, cta clicks) with timestamps
+ *   3. Auto-expires data older than 24 hours
+ *
+ * The analytics dashboard reads this bridge data to fill the gap
+ * between GA4's ~48hr processing lag and the current moment.
  */
 
 import bus from './EventBus.js';
 
-/**
- * Session-level impact data store.
- * Accessible via window.__impactData and window.__impactStore
- */
+const IMPACT_KEY  = '__dadatadad_impacts';
+const BRIDGE_KEY  = '__dadatadad_bridge';
+const MAX_AGE_MS  = 24 * 60 * 60 * 1000; // 24 hours
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Impact Store — per-shot first-contact data for the shot chart
+// ═══════════════════════════════════════════════════════════════════════════
+
 const impactStore = {
   _data: [],
+
+  _hydrate() {
+    try {
+      const stored = localStorage.getItem(IMPACT_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Filter out impacts older than MAX_AGE
+        const cutoff = Date.now() - MAX_AGE_MS;
+        this._data = parsed.filter(r => r.timestamp > cutoff);
+        if (typeof window !== 'undefined') window.__impactData = this._data;
+        // Re-persist if we pruned anything
+        if (this._data.length !== parsed.length) this._persist();
+      }
+    } catch (_) {}
+  },
+
+  _persist() {
+    try {
+      localStorage.setItem(IMPACT_KEY, JSON.stringify(this._data));
+    } catch (_) {}
+  },
+
   add(record) {
     this._data.push(record);
     if (typeof window !== 'undefined') window.__impactData = this._data;
+    this._persist();
   },
+
   getAll() { return [...this._data]; },
   getByBall(ballId) { return this._data.filter(r => r.ballId === ballId); },
+
   getSummary() {
     const total = this._data.length;
     const goals = this._data.filter(r => r.isGoal).length;
@@ -3286,16 +3315,72 @@ const impactStore = {
     this._data.forEach(r => { byType[r.hitType] = (byType[r.hitType] || 0) + 1; });
     return { total, goals, accuracy: total > 0 ? Math.round((goals / total) * 100) : 0, byType };
   },
+
   clear() {
     this._data = [];
     if (typeof window !== 'undefined') window.__impactData = this._data;
+    this._persist();
   },
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Bridge Stats — aggregated event counts to supplement GA4 lag
+// ═══════════════════════════════════════════════════════════════════════════
+
+const bridgeStats = {
+  _data: null,
+
+  _hydrate() {
+    try {
+      const stored = localStorage.getItem(BRIDGE_KEY);
+      if (stored) {
+        this._data = JSON.parse(stored);
+        // Expire if older than MAX_AGE
+        if (this._data.startedAt && Date.now() - this._data.startedAt > MAX_AGE_MS) {
+          this._data = null;
+          localStorage.removeItem(BRIDGE_KEY);
+        }
+      }
+    } catch (_) {}
+    if (!this._data) {
+      this._data = { startedAt: Date.now(), shots: 0, makes: 0, opens: 0, ctaClicks: 0, visitors: 1, lastUpdated: Date.now() };
+      this._persist();
+    }
+  },
+
+  _persist() {
+    try {
+      this._data.lastUpdated = Date.now();
+      localStorage.setItem(BRIDGE_KEY, JSON.stringify(this._data));
+    } catch (_) {}
+  },
+
+  addShot()     { this._data.shots++;     this._persist(); },
+  addMake()     { this._data.makes++;     this._persist(); },
+  addOpen()     { this._data.opens++;     this._persist(); },
+  addCtaClick() { this._data.ctaClicks++; this._persist(); },
+
+  get() { return this._data ? { ...this._data } : null; },
+
+  clear() {
+    this._data = { startedAt: Date.now(), shots: 0, makes: 0, opens: 0, ctaClicks: 0, visitors: 1, lastUpdated: Date.now() };
+    this._persist();
+  },
+};
+
+// Hydrate both stores on load
+impactStore._hydrate();
+bridgeStats._hydrate();
 
 if (typeof window !== 'undefined') {
   window.__impactStore = impactStore;
   window.__impactData = impactStore._data;
+  window.__bridgeStats = bridgeStats;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  GA4 Tracking
+// ═══════════════════════════════════════════════════════════════════════════
 
 function gtag(...args) {
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
@@ -3303,16 +3388,13 @@ function gtag(...args) {
   }
 }
 
-/** Send a GA4 custom event. */
 function track(eventName, params = {}) {
   gtag('event', eventName, params);
 }
 
-/** Wire up all EventBus → GA4 listeners. Returns an unsubscribe function. */
 export function initGA4Tracking() {
   const unsubs = [];
 
-  // Track aggregate stats for accuracy calculation
   let currentShots = 0;
   let currentMakes = 0;
   unsubs.push(
@@ -3322,7 +3404,7 @@ export function initGA4Tracking() {
     }),
   );
 
-  // Per-ball launch tracking (includes project_name for GA4 breakdown)
+  // Per-ball launch
   unsubs.push(
     bus.on('ball:launched', ({ name, category, ballLaunches, ballMakes }) => {
       track('ball_launch', {
@@ -3334,10 +3416,11 @@ export function initGA4Tracking() {
         total_makes: currentMakes,
         accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
       });
+      bridgeStats.addShot();
     }),
   );
 
-  // Per-ball score tracking
+  // Per-ball score
   unsubs.push(
     bus.on('ball:scored', ({ name, category, ballLaunches, ballMakes }) => {
       track('ball_score', {
@@ -3349,6 +3432,7 @@ export function initGA4Tracking() {
         total_makes: currentMakes,
         accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
       });
+      bridgeStats.addMake();
     }),
   );
 
@@ -3359,6 +3443,7 @@ export function initGA4Tracking() {
         project_name: data.name || 'unknown',
         project_link: data.link || '',
       });
+      bridgeStats.addOpen();
     }),
   );
 
@@ -3369,7 +3454,7 @@ export function initGA4Tracking() {
     }),
   );
 
-  // CTA clicked from detail modal
+  // CTA clicked
   unsubs.push(
     bus.on('cta:click', ({ name, link, category }) => {
       track('cta_click', {
@@ -3377,10 +3462,11 @@ export function initGA4Tracking() {
         project_link: link || '',
         project_category: category || '',
       });
+      bridgeStats.addCtaClick();
     }),
   );
 
-  // Loading complete (measures load performance)
+  // Loading complete
   unsubs.push(
     bus.on('load:complete', () => {
       track('portfolio_loaded', {
@@ -3389,7 +3475,16 @@ export function initGA4Tracking() {
     }),
   );
 
-  // ── First-impact tracking ──
+  // Game reset
+  unsubs.push(
+    bus.on('game:reset', () => {
+      track('game_reset');
+      impactStore.clear();
+      bridgeStats.clear();
+    }),
+  );
+
+  // First-impact tracking
   unsubs.push(
     bus.on('impact:first', (data) => {
       impactStore.add(data);
@@ -3404,11 +3499,11 @@ export function initGA4Tracking() {
       });
     }),
   );
-  
+
   return () => unsubs.forEach((fn) => fn());
 }
 
-export { impactStore };
+export { impactStore, bridgeStats };
 
 
 ========================================
@@ -9004,16 +9099,51 @@ function ShotChart({ selectedBall }) {
   const goalX = 60;
   const goalZones = cats.map((cat, i) => ({ cat, x: goalX, y: 55 + i * 72, w: 55, h: 55 }));
 
-  // Generate shot dots — each ball fires shots toward its category goal
+  // Use live session impact data if available, otherwise seeded demo dots
+  const [liveImpactCount, setLiveImpactCount] = useState(0);
+
+  // Read impacts from localStorage (persisted by ga4.js, shared across tabs)
+  const getSessionImpacts = () => {
+    try {
+      const stored = localStorage.getItem('__dadatadad_impacts');
+      return stored ? JSON.parse(stored) : [];
+    } catch (_) { return []; }
+  };
+
+  // Poll for live impact data (checks localStorage for cross-tab data)
+  useEffect(() => {
+    const check = () => {
+      const impacts = getSessionImpacts();
+      if (impacts.length !== liveImpactCount) setLiveImpactCount(impacts.length);
+    };
+    check();
+    const interval = setInterval(check, 2000);
+    return () => clearInterval(interval);
+  }, [liveImpactCount]);
+
+  const isLiveShots = liveImpactCount > 0;
+
   const shots = useMemo(() => {
+    // Prefer live data from localStorage
+    const liveImpacts = getSessionImpacts();
+    if (liveImpacts.length > 0) {
+      return liveImpacts.map(imp => {
+        const fx = Math.max(20, Math.min(width - 20, imp.x * width));
+        const fy = Math.max(15, Math.min(height - 15, imp.y * height));
+        const ball = BALL_ENGAGEMENT.find(b => b.id === imp.ballId);
+        return { x: fx, y: fy, scored: imp.isGoal, ballId: imp.ballId, color: ball?.color || '#5985B1' };
+      });
+    }
+
+    // Fallback: seeded demo data
     const r = seededRandom(777);
     const dots = [];
     ballPositions.forEach(ball => {
       const goalZone = goalZones.find(g => g.cat === ball.category);
       if (!goalZone) return;
-      const numShots = Math.round(ball.launches * 0.35);
+      const numShots = Math.round((ball.launches || 0) * 0.35);
       for (let s = 0; s < numShots; s++) {
-        const scored = r() < (ball.scores / ball.launches);
+        const scored = r() < ((ball.scores || 0) / (ball.launches || 1));
         const t = 0.3 + r() * 0.55;
         const baseX = ball.cx + (goalZone.x + goalZone.w / 2 - ball.cx) * t;
         const baseY = ball.cy + (goalZone.y + goalZone.h / 2 - ball.cy) * t;
@@ -9027,7 +9157,7 @@ function ShotChart({ selectedBall }) {
       }
     });
     return dots;
-  }, []);
+  }, [liveImpactCount]);
 
   const filteredShots = selectedBall ? shots.filter(s => s.ballId === selectedBall) : shots;
 
@@ -9091,7 +9221,9 @@ function ShotChart({ selectedBall }) {
           ))}
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
-          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{visibleTotal} shots sampled</span>
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>
+            {isLiveShots ? `Live session: ${visibleTotal} shots` : `${visibleTotal} shots (demo)`}
+          </span>
           <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: parseInt(visiblePct) > 75 ? "#6B9F6B" : "#D4A843" }}>{visiblePct}% accuracy</span>
         </div>
       </div>
@@ -9130,6 +9262,32 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       <StatCard label="Shot Accuracy" value={overallAccuracy} suffix="%" trend={5} delay={160} sparkData={timeSeriesData.slice(-14).map((_, i) => overallAccuracy + Math.round(Math.sin(i) * 4))} color="#D4A843" compact />
       <StatCard label="Interaction Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => d.visitors > 0 ? Math.round((d.ballInteractions / d.visitors) * 100) : 0)} color={MC.ballInteractions} compact />
     </div>
+
+    {/* Bridge Stats — live activity since GA4's last sync */}
+    {(() => {
+      try {
+        const bridge = JSON.parse(localStorage.getItem('__dadatadad_bridge') || 'null');
+        if (!bridge || (bridge.shots === 0 && bridge.makes === 0)) return null;
+        const ago = Math.round((Date.now() - bridge.lastUpdated) / 60000);
+        const agoText = ago < 1 ? 'just now' : ago < 60 ? `${ago}m ago` : `${Math.round(ago / 60)}h ago`;
+        return (
+          <div style={{ marginBottom: 16, padding: "10px 14px", borderRadius: 10, background: "rgba(89,133,177,0.06)", border: "1px solid rgba(89,133,177,0.12)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, fontSize: 11 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#5985B1", display: "inline-block", boxShadow: "0 0 6px rgba(89,133,177,0.5)" }} />
+              <span style={{ color: "rgba(255,255,255,0.5)" }}>Recent activity:</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#5985B1" }}>{bridge.shots} shots</span>
+              <span style={{ color: "rgba(255,255,255,0.2)" }}>{" \u00B7 "}</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#6B9F6B" }}>{bridge.makes} makes</span>
+              <span style={{ color: "rgba(255,255,255,0.2)" }}>{" \u00B7 "}</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#D4A843" }}>{bridge.opens} opens</span>
+              <span style={{ color: "rgba(255,255,255,0.2)" }}>{" \u00B7 "}</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#7B5EA7" }}>{bridge.ctaClicks} CTAs</span>
+            </div>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.25)", fontSize: 10 }}>updated {agoText}</span>
+          </div>
+        );
+      } catch (_) { return null; }
+    })()}
 
     {/* Multi-Metric Traffic Chart */}
     <div style={{ ...SS.panel, marginBottom: 20, padding: "18px 20px 12px" }}>
@@ -9521,7 +9679,7 @@ export default function AnalyticsDashboardV3() {
             </div>
             <span style={SS.versionBadge}>V3</span>
           </div>
-          <p style={SS.subtitle}>DaDataDad.com &middot; Last {rangeDays} days</p>
+          <p style={SS.subtitle}>DaDataDad.com · Last {rangeDays} days</p>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <div style={SS.tabGroup}>{TABS.map(t => <button key={t.key} onClick={() => setActiveTab(t.key)} style={{ ...SS.tabBtn, background: activeTab === t.key ? "rgba(255,255,255,0.1)" : "transparent", color: activeTab === t.key ? "#fff" : "rgba(255,255,255,0.4)", borderColor: activeTab === t.key ? "rgba(255,255,255,0.15)" : "transparent" }}>{t.label}</button>)}</div>
@@ -9572,6 +9730,10 @@ const SS = {
   twoCol: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 },
   navLink: { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.35)", textDecoration: "none", padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(255,255,255,0.06)", transition: "all 0.15s" },
 };
+
+
+
+
 
 
 ========================================
