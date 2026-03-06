@@ -16,18 +16,42 @@
 
 import bus from './EventBus.js';
 
+const STORAGE_KEY = '__dadatadad_impacts';
+
 /**
  * Session-level impact data store.
- * Accessible via window.__impactData and window.__impactStore
+ * Persists to sessionStorage so data survives page navigation
+ * (e.g. main site → analytics dashboard within the same tab).
+ * Accessible via window.__impactData and window.__impactStore.
  */
 const impactStore = {
   _data: [],
+
+  _hydrate() {
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        this._data = JSON.parse(stored);
+        if (typeof window !== 'undefined') window.__impactData = this._data;
+      }
+    } catch (_) {}
+  },
+
+  _persist() {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(this._data));
+    } catch (_) {}
+  },
+
   add(record) {
     this._data.push(record);
     if (typeof window !== 'undefined') window.__impactData = this._data;
+    this._persist();
   },
+
   getAll() { return [...this._data]; },
   getByBall(ballId) { return this._data.filter(r => r.ballId === ballId); },
+
   getSummary() {
     const total = this._data.length;
     const goals = this._data.filter(r => r.isGoal).length;
@@ -35,11 +59,16 @@ const impactStore = {
     this._data.forEach(r => { byType[r.hitType] = (byType[r.hitType] || 0) + 1; });
     return { total, goals, accuracy: total > 0 ? Math.round((goals / total) * 100) : 0, byType };
   },
+
   clear() {
     this._data = [];
     if (typeof window !== 'undefined') window.__impactData = this._data;
+    this._persist();
   },
 };
+
+// Hydrate from sessionStorage on load (picks up data from the main page)
+impactStore._hydrate();
 
 if (typeof window !== 'undefined') {
   window.__impactStore = impactStore;

@@ -583,11 +583,19 @@ function ShotChart({ selectedBall }) {
   // Use live session impact data if available, otherwise seeded demo dots
   const [liveImpactCount, setLiveImpactCount] = useState(0);
 
-  // Poll for live impact data (grows when user plays on the main site)
+  // Read impacts from sessionStorage (persisted by ga4.js on the main site)
+  const getSessionImpacts = () => {
+    try {
+      const stored = sessionStorage.getItem('__dadatadad_impacts');
+      return stored ? JSON.parse(stored) : [];
+    } catch (_) { return []; }
+  };
+
+  // Poll for live impact data (checks sessionStorage for cross-page data)
   useEffect(() => {
     const check = () => {
-      const len = (typeof window !== 'undefined' && window.__impactData?.length) || 0;
-      if (len !== liveImpactCount) setLiveImpactCount(len);
+      const impacts = getSessionImpacts();
+      if (impacts.length !== liveImpactCount) setLiveImpactCount(impacts.length);
     };
     check();
     const interval = setInterval(check, 2000);
@@ -597,9 +605,10 @@ function ShotChart({ selectedBall }) {
   const isLiveShots = liveImpactCount > 0;
 
   const shots = useMemo(() => {
-    // Prefer live session data from window.__impactData
-    if (typeof window !== 'undefined' && window.__impactData?.length > 0) {
-      return window.__impactData.map(imp => {
+    // Prefer live session data from sessionStorage
+    const liveImpacts = getSessionImpacts();
+    if (liveImpacts.length > 0) {
+      return liveImpacts.map(imp => {
         const fx = Math.max(20, Math.min(width - 20, imp.x * width));
         const fy = Math.max(15, Math.min(height - 15, imp.y * height));
         const ball = BALL_ENGAGEMENT.find(b => b.id === imp.ballId);
