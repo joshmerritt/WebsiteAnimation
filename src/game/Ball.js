@@ -62,6 +62,9 @@ export default class Ball {
     // Stats
     this.makes = 0;
     this.opens = 0;
+
+    // First-impact tracking — reset on each launch by Game._launchBall()
+    this._firstImpactRecorded = false;
   }
 
   get category() { return this.project.category; }
@@ -268,13 +271,14 @@ export default class Ball {
     this.inOriginalPosition = false;
   }
 
-  reset() {
+reset() {
     Matter.Body.setVelocity(this.body, { x: 0, y: 0 });
     Matter.Body.setPosition(this.body, this.originalPos);
     Matter.Body.setStatic(this.body, true);
     Matter.Body.setAngle(this.body, 0);
     Matter.Composite.remove(this.world, this.body);
     this.inOriginalPosition = true;
+    this._firstImpactRecorded = false;
   }
 
   _sensitivity() {

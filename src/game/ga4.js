@@ -10,10 +10,41 @@
  *   detail_open     — project detail modal displayed
  *   detail_close    — modal dismissed
  *   cta_click       — user clicks the CTA link in the detail modal
+ *   ball_impact     — first collision after launch (wall/net/goal/menu/ball)
  *   portfolio_loaded — all images loaded, canvas ready
  */
 
 import bus from './EventBus.js';
+
+/**
+ * Session-level impact data store.
+ * Accessible via window.__impactData and window.__impactStore
+ */
+const impactStore = {
+  _data: [],
+  add(record) {
+    this._data.push(record);
+    if (typeof window !== 'undefined') window.__impactData = this._data;
+  },
+  getAll() { return [...this._data]; },
+  getByBall(ballId) { return this._data.filter(r => r.ballId === ballId); },
+  getSummary() {
+    const total = this._data.length;
+    const goals = this._data.filter(r => r.isGoal).length;
+    const byType = {};
+    this._data.forEach(r => { byType[r.hitType] = (byType[r.hitType] || 0) + 1; });
+    return { total, goals, accuracy: total > 0 ? Math.round((goals / total) * 100) : 0, byType };
+  },
+  clear() {
+    this._data = [];
+    if (typeof window !== 'undefined') window.__impactData = this._data;
+  },
+};
+
+if (typeof window !== 'undefined') {
+  window.__impactStore = impactStore;
+  window.__impactData = impactStore._data;
+}
 
 function gtag(...args) {
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
@@ -107,5 +138,31 @@ export function initGA4Tracking() {
     }),
   );
 
+  // Game reset — clear impact data for fresh session
+  unsubs.push(
+    bus.on('game:reset', () => {
+      track('game_reset');
+      impactStore.clear();
+    }),
+  );
+
+  // ── First-impact tracking ──
+  unsubs.push(
+    bus.on('impact:first', (data) => {
+      impactStore.add(data);
+      track('ball_impact', {
+        ball_name:     data.ballName,
+        ball_category: data.ballCategory,
+        hit_type:      data.hitType,
+        is_goal:       data.isGoal ? 'true' : 'false',
+        impact_x:      data.x,
+        impact_y:      data.y,
+        shot_number:   data.shotNumber,
+      });
+    }),
+  );
+
   return () => unsubs.forEach((fn) => fn());
 }
+
+export { impactStore };

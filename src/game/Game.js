@@ -62,6 +62,10 @@ export default class Game {
 
     this._collisionHandler = (event) => this._handleCollisions(event);
     Matter.Events.on(this.engine, 'collisionActive', this._collisionHandler);
+
+    // First-impact tracking — fires once on initial contact
+    this._impactHandler = (event) => this._handleFirstImpacts(event);
+    Matter.Events.on(this.engine, 'collisionStart', this._impactHandler);
   }
 
   // ── p5 lifecycle ───────────────────────────────────────────────────────
@@ -259,6 +263,7 @@ export default class Game {
   destroy() {
     this._unsubs.forEach((fn) => fn());
     Matter.Events.off(this.engine, 'collisionActive', this._collisionHandler);
+    Matter.Events.off(this.engine, 'collisionStart', this._impactHandler);
     Matter.Engine.clear(this.engine);
   }
 
@@ -420,6 +425,67 @@ export default class Game {
     });
   }
 
+  /**
+   * First-impact tracking — fires once when a launched ball first contacts
+   * any body (wall, net, goal, menu, or another ball). Records the normalized
+   * impact position and emits 'impact:first' on EventBus.
+   */
+  _handleFirstImpacts(event) {
+    event.pairs.forEach(({ bodyA, bodyB }) => {
+      let ballBody = null;
+      let otherBody = null;
+
+      if (bodyA.label === 'Ball' && bodyA.ballRef && !bodyA.ballRef._firstImpactRecorded && bodyA.ballRef.launchCount > 0) {
+        ballBody = bodyA;
+        otherBody = bodyB;
+      } else if (bodyB.label === 'Ball' && bodyB.ballRef && !bodyB.ballRef._firstImpactRecorded && bodyB.ballRef.launchCount > 0) {
+        ballBody = bodyB;
+        otherBody = bodyA;
+      }
+
+      if (!ballBody) return;
+
+      const ball = ballBody.ballRef;
+      ball._firstImpactRecorded = true;
+
+      const hitType = this._classifyBody(otherBody);
+      const isGoal = hitType === 'goal' &&
+        otherBody.category && ballBody.category &&
+        otherBody.category === ballBody.category;
+
+      const pos = ballBody.position;
+      const nx = this.vp.width  ? pos.x / this.vp.width  : 0;
+      const ny = this.vp.height ? pos.y / this.vp.height : 0;
+
+      bus.emit('impact:first', {
+        ballId:       ball.project.id,
+        ballName:     ball.project.name,
+        ballCategory: ball.category,
+        hitType,
+        hitLabel:     otherBody.label || '',
+        isGoal,
+        x:            Math.round(nx * 1000) / 1000,
+        y:            Math.round(ny * 1000) / 1000,
+        px:           Math.round(pos.x),
+        py:           Math.round(pos.y),
+        vpWidth:      this.vp.width,
+        vpHeight:     this.vp.height,
+        shotNumber:   this.totalShots,
+        timestamp:    Date.now(),
+      });
+    });
+  }
+
+  _classifyBody(body) {
+    const label = body.label || '';
+    if (label === 'leftWall' || label === 'rightWall')  return 'wall';
+    if (label === 'Net')                                 return 'net';
+    if (label.startsWith('Goal'))                        return 'goal';
+    if (label.startsWith('Menu_'))                       return 'menu';
+    if (label === 'Ball')                                return 'ball';
+    return 'unknown';
+  }
+
   // ── Private: actions ───────────────────────────────────────────────────
 
   _launchBall(ball) {
@@ -458,6 +524,7 @@ export default class Game {
 
     Matter.Body.setStatic(ball.body, false);
     Matter.Body.setVelocity(ball.body, { x: vx, y: vy });
+    ball._firstImpactRecorded = false;
     ball.launched();
   }
 

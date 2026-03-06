@@ -580,16 +580,42 @@ function ShotChart({ selectedBall }) {
   const goalX = 60;
   const goalZones = cats.map((cat, i) => ({ cat, x: goalX, y: 55 + i * 72, w: 55, h: 55 }));
 
-  // Generate shot dots — each ball fires shots toward its category goal
+  // Use live session impact data if available, otherwise seeded demo dots
+  const [liveImpactCount, setLiveImpactCount] = useState(0);
+
+  // Poll for live impact data (grows when user plays on the main site)
+  useEffect(() => {
+    const check = () => {
+      const len = (typeof window !== 'undefined' && window.__impactData?.length) || 0;
+      if (len !== liveImpactCount) setLiveImpactCount(len);
+    };
+    check();
+    const interval = setInterval(check, 2000);
+    return () => clearInterval(interval);
+  }, [liveImpactCount]);
+
+  const isLiveShots = liveImpactCount > 0;
+
   const shots = useMemo(() => {
+    // Prefer live session data from window.__impactData
+    if (typeof window !== 'undefined' && window.__impactData?.length > 0) {
+      return window.__impactData.map(imp => {
+        const fx = Math.max(20, Math.min(width - 20, imp.x * width));
+        const fy = Math.max(15, Math.min(height - 15, imp.y * height));
+        const ball = BALL_ENGAGEMENT.find(b => b.id === imp.ballId);
+        return { x: fx, y: fy, scored: imp.isGoal, ballId: imp.ballId, color: ball?.color || '#5985B1' };
+      });
+    }
+
+    // Fallback: seeded demo data
     const r = seededRandom(777);
     const dots = [];
     ballPositions.forEach(ball => {
       const goalZone = goalZones.find(g => g.cat === ball.category);
       if (!goalZone) return;
-      const numShots = Math.round(ball.launches * 0.35);
+      const numShots = Math.round((ball.launches || 0) * 0.35);
       for (let s = 0; s < numShots; s++) {
-        const scored = r() < (ball.scores / ball.launches);
+        const scored = r() < ((ball.scores || 0) / (ball.launches || 1));
         const t = 0.3 + r() * 0.55;
         const baseX = ball.cx + (goalZone.x + goalZone.w / 2 - ball.cx) * t;
         const baseY = ball.cy + (goalZone.y + goalZone.h / 2 - ball.cy) * t;
@@ -603,7 +629,7 @@ function ShotChart({ selectedBall }) {
       }
     });
     return dots;
-  }, []);
+  }, [liveImpactCount]);
 
   const filteredShots = selectedBall ? shots.filter(s => s.ballId === selectedBall) : shots;
 
@@ -667,7 +693,9 @@ function ShotChart({ selectedBall }) {
           ))}
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
-          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{visibleTotal} shots sampled</span>
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>
+            {isLiveShots ? `Live session: ${visibleTotal} shots` : `${visibleTotal} shots (demo)`}
+          </span>
           <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: parseInt(visiblePct) > 75 ? "#6B9F6B" : "#D4A843" }}>{visiblePct}% accuracy</span>
         </div>
       </div>
@@ -1148,3 +1176,5 @@ const SS = {
   twoCol: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 },
   navLink: { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.35)", textDecoration: "none", padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(255,255,255,0.06)", transition: "all 0.15s" },
 };
+
+

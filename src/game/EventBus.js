@@ -38,4 +38,11 @@ export default bus;
  *   'stats:update'   { shots, makes, opens }  — Game → React: live stats
  *   'load:progress'  number (0–1)   — Game → React: image loading progress
  *   'load:complete'  —               Game → React: all assets loaded, setup done
+ *   'ball:launched'  { name, category, ballLaunches, ballMakes }  — Game → GA4
+ *   'ball:scored'    { name, category, ballLaunches, ballMakes }  — Game → GA4
+ *   'cta:click'      { name, link, category } — React → GA4
+ *   'miss:hint'      boolean         — Game → React: show/hide miss hint
+ *   'impact:first'   { ballId, ballName, ballCategory, hitType, hitLabel,
+ *                       isGoal, x, y, px, py, vpWidth, vpHeight,
+ *                       shotNumber, timestamp }  — Game → GA4/Dashboard
  */
