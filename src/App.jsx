@@ -8,13 +8,33 @@
  *   4. GA4 event tracking (wired to EventBus)
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { Component, useState, useEffect, useCallback } from 'react';
 import GameCanvas from './components/GameCanvas.jsx';
 import DetailModal from './components/DetailModal.jsx';
 import HUD from './components/HUD.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import bus from './game/EventBus.js';
 import { initGA4Tracking } from './game/ga4.js';
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error, info) { console.error('App error:', error, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ color: '#c7d6d5', textAlign: 'center', padding: '4rem 1rem', fontFamily: 'DM Sans, sans-serif' }}>
+          <h1 style={{ marginBottom: '0.5rem' }}>Something went wrong</h1>
+          <p>Try refreshing the page.</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export default function App() {
   const [detail, setDetail] = useState(null);
@@ -58,7 +78,7 @@ export default function App() {
   }, [detail, handleClose]);
 
   return (
-    <>
+    <ErrorBoundary>
       <LoadingScreen />
       <GameCanvas />
       <div className="ui-overlay">
@@ -75,6 +95,6 @@ export default function App() {
           </>
         )}
       </div>
-    </>
+    </ErrorBoundary>
   );
 }

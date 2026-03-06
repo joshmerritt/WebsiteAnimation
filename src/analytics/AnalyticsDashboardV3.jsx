@@ -587,20 +587,22 @@ function ShotChart({ selectedBall }) {
   const getSessionImpacts = () => {
     try {
       const stored = localStorage.getItem('__dadatadad_impacts');
-      return stored ? JSON.parse(stored) : [];
-    } catch (_) { return []; }
+      if (!stored) return [];
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) { console.warn('Failed to parse session impacts', e.message); return []; }
   };
 
   // Poll for live impact data (checks localStorage for cross-tab data)
   useEffect(() => {
     const check = () => {
       const impacts = getSessionImpacts();
-      if (impacts.length !== liveImpactCount) setLiveImpactCount(impacts.length);
+      setLiveImpactCount((prev) => impacts.length !== prev ? impacts.length : prev);
     };
     check();
     const interval = setInterval(check, 2000);
     return () => clearInterval(interval);
-  }, [liveImpactCount]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isLiveShots = liveImpactCount > 0;
 
