@@ -47,6 +47,18 @@ export default class Ball {
     this.ballImage = img.get(this._cropX, this._cropY, minDim, minDim);
     this.imageSrc = `assets/images/${project.id}.jpg`;
 
+    // Browser-stable image source for canvas drawImage (not tied to p5 internals)
+    this.nativeImage = null;
+    if (typeof Image !== 'undefined') {
+      this.nativeImage = new Image();
+      this.nativeImage.decoding = 'async';
+      this.nativeImage.onload = () => {
+        // Force a fresh render once the native image is available.
+        this._circleCanvas = null;
+      };
+      this.nativeImage.src = this.imageSrc;
+    }
+
     // Position / interaction state
     this.originalPos = { x, y };
     this.x = x;
@@ -121,7 +133,9 @@ export default class Ball {
     // Draw pre-rendered circular image at CSS pixel size
     // The offscreen canvas is dpr× larger, so specifying explicit
     // destination width/height ensures it maps to sharp physical pixels.
-    ctx.drawImage(this._circleCanvas, -this.r, -this.r, diameter, diameter);
+    if (this._circleCanvas) {
+      ctx.drawImage(this._circleCanvas, -this.r, -this.r, diameter, diameter);
+    }
 
     // Border ring
     p.noFill();
@@ -143,12 +157,11 @@ export default class Ball {
   _renderCircleImage(diameter, dpr) {
     const cssSize = Math.round(diameter);
     const physSize = Math.round(diameter * dpr);
-    this._circleSize = diameter;
-    this._circleDpr = dpr;
-    this._circleCanvas = document.createElement('canvas');
-    this._circleCanvas.width = physSize;
-    this._circleCanvas.height = physSize;
-    const octx = this._circleCanvas.getContext('2d');
+    const circleCanvas = document.createElement('canvas');
+    circleCanvas.width = physSize;
+    circleCanvas.height = physSize;
+    const octx = circleCanvas.getContext('2d');
+    let didDraw = false;
 
     // Scale so we draw in CSS-pixel coordinates, but at physical resolution
     octx.scale(dpr, dpr);
@@ -160,15 +173,49 @@ export default class Ball {
     octx.arc(cssSize / 2, cssSize / 2, cssSize / 2, 0, Math.PI * 2);
     octx.clip();
 
-    // Draw from full-res source with square crop
-    const srcCanvas = this.fullImage.canvas || this.fullImage.drawingContext?.canvas;
-    if (srcCanvas) {
+    // Prefer native HTMLImageElement: most stable across Firefox/Chromium/Safari.
+    if (this.nativeImage?.complete && this.nativeImage.naturalWidth > 0) {
       octx.drawImage(
-        srcCanvas,
+        this.nativeImage,
         this._cropX, this._cropY, this._cropSize, this._cropSize,
         0, 0, cssSize, cssSize,
       );
+      didDraw = true;
     }
+
+    // Fallback to p5 image internals while native image is still loading.
+    const srcEl =
+      this.fullImage?.canvas ||
+      this.fullImage?.drawingContext?.canvas ||
+      this.fullImage?.elt;
+
+    if (!didDraw && srcEl) {
+      try {
+        octx.drawImage(
+          srcEl,
+          this._cropX, this._cropY, this._cropSize, this._cropSize,
+          0, 0, cssSize, cssSize,
+        );
+        didDraw = true;
+      } catch (_) {
+        // Continue to final fallback.
+      }
+    }
+
+    // Last-resort fallback: draw already-cropped p5 image canvas.
+    const fallbackEl =
+      this.ballImage?.canvas ||
+      this.ballImage?.drawingContext?.canvas ||
+      this.ballImage?.elt;
+    if (!didDraw && fallbackEl) {
+      octx.drawImage(fallbackEl, 0, 0, cssSize, cssSize);
+      didDraw = true;
+    }
+
+    // Avoid caching blank circles when no source is drawable yet.
+    this._circleSize = diameter;
+    this._circleDpr = dpr;
+    this._circleCanvas = didDraw ? circleCanvas : null;
   }
 
   hover(iconSize, showHint) {
