@@ -47,6 +47,14 @@ export default class Ball {
     this.ballImage = img.get(this._cropX, this._cropY, minDim, minDim);
     this.imageSrc = `assets/images/${project.id}.jpg`;
 
+    // Browser-stable image source for canvas drawImage (not tied to p5 internals)
+    this.nativeImage = null;
+    if (typeof Image !== 'undefined') {
+      this.nativeImage = new Image();
+      this.nativeImage.decoding = 'async';
+      this.nativeImage.src = this.imageSrc;
+    }
+
     // Position / interaction state
     this.originalPos = { x, y };
     this.x = x;
@@ -160,14 +168,42 @@ export default class Ball {
     octx.arc(cssSize / 2, cssSize / 2, cssSize / 2, 0, Math.PI * 2);
     octx.clip();
 
-    // Draw from full-res source with square crop
-    const srcCanvas = this.fullImage.canvas || this.fullImage.drawingContext?.canvas;
-    if (srcCanvas) {
+    // Prefer native HTMLImageElement: most stable across Firefox/Chromium/Safari.
+    if (this.nativeImage?.complete && this.nativeImage.naturalWidth > 0) {
       octx.drawImage(
-        srcCanvas,
+        this.nativeImage,
         this._cropX, this._cropY, this._cropSize, this._cropSize,
         0, 0, cssSize, cssSize,
       );
+      return;
+    }
+
+    // Fallback to p5 image internals while native image is still loading.
+    const srcEl =
+      this.fullImage?.canvas ||
+      this.fullImage?.drawingContext?.canvas ||
+      this.fullImage?.elt;
+
+    if (srcEl) {
+      try {
+        octx.drawImage(
+          srcEl,
+          this._cropX, this._cropY, this._cropSize, this._cropSize,
+          0, 0, cssSize, cssSize,
+        );
+        return;
+      } catch (_) {
+        // Continue to final fallback.
+      }
+    }
+
+    // Last-resort fallback: draw already-cropped p5 image canvas.
+    const fallbackEl =
+      this.ballImage?.canvas ||
+      this.ballImage?.drawingContext?.canvas ||
+      this.ballImage?.elt;
+    if (fallbackEl) {
+      octx.drawImage(fallbackEl, 0, 0, cssSize, cssSize);
     }
   }
 
