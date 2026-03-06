@@ -17,7 +17,12 @@ import config from '../game/config.js';
 import bus from '../game/EventBus.js';
 
 function isSafeUrl(url) {
-  try { return ['http:', 'https:', 'mailto:'].includes(new URL(url).protocol); }
+  try {
+    const parsed = new URL(url, window.location.origin);
+    if (parsed.protocol === 'mailto:') return true;
+    if (!['http:', 'https:'].includes(parsed.protocol)) return false;
+    return parsed.origin === window.location.origin || /^https?:\/\//.test(url);
+  }
   catch { return false; }
 }
 
