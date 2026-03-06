@@ -16,6 +16,11 @@ import { useCallback } from 'react';
 import config from '../game/config.js';
 import bus from '../game/EventBus.js';
 
+function isSafeUrl(url) {
+  try { return ['http:', 'https:', 'mailto:'].includes(new URL(url).protocol); }
+  catch { return false; }
+}
+
 function ctaLabel(link) {
   if (!link) return null;
   if (link.includes('linkedin.com'))  return 'View LinkedIn ↗';
@@ -56,7 +61,7 @@ export default function DetailModal({ detail, onClose }) {
 
   if (!detail) return null;
 
-  const hasLink = detail.link && detail.link !== 'null' && detail.link.trim() !== '';
+  const hasLink = detail.link && detail.link !== 'null' && detail.link.trim() !== '' && isSafeUrl(detail.link);
 
   const rows = [
     { label: 'Goal',       value: detail.goal },
@@ -71,6 +76,9 @@ export default function DetailModal({ detail, onClose }) {
   return (
     <div
       className="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
       onClick={handleBackdrop}
       onPointerDown={blockCanvas}
       onTouchStart={blockCanvas}
@@ -99,13 +107,13 @@ export default function DetailModal({ detail, onClose }) {
 
         {detail.imageSrc && (
           <div className={heroClass}>
-            <img src={detail.imageSrc} alt={detail.name} />
+            <img src={detail.imageSrc} alt={detail.name} loading="lazy" decoding="async" />
             <div className="modal-hero-gradient" />
           </div>
         )}
 
         <div className="modal-content">
-          <h2 className="modal-title modal-title--centered">{detail.name}</h2>
+          <h2 id="modal-title" className="modal-title modal-title--centered">{detail.name}</h2>
 
           <table className="modal-table">
             <tbody>

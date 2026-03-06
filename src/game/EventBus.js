@@ -17,7 +17,9 @@ class EventBus {
   }
 
   emit(event, data) {
-    this._listeners.get(event)?.forEach((fn) => fn(data));
+    this._listeners.get(event)?.forEach((fn) => {
+      try { fn(data); } catch (e) { console.error(`EventBus [${event}]:`, e); }
+    });
   }
 
   off(event, fn) {

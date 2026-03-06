@@ -3,18 +3,22 @@
  *
  * Listens to EventBus for load:progress and load:complete events.
  * Fades out smoothly when loading finishes.
+ *
+ * Uses module-level state to capture events that fire before React mounts,
+ * then hands off to React state once the component mounts and cleans up
+ * the early listeners to avoid leaks.
  */
 
 import { useState, useEffect } from 'react';
 import bus from '../game/EventBus.js';
 
-// Shared module-level ref so progress survives even if events fire before mount
+// Capture early events before React mounts — unsubscribed once the component takes over
 let _latestProgress = 0;
 let _isComplete = false;
-
-// Pre-register listeners immediately (before React mount) to catch early events
-bus.on('load:progress', (pct) => { _latestProgress = pct; });
-bus.on('load:complete', () => { _isComplete = true; });
+const _earlyUnsubs = [
+  bus.on('load:progress', (pct) => { _latestProgress = pct; }),
+  bus.on('load:complete', () => { _isComplete = true; }),
+];
 
 export default function LoadingScreen() {
   const [progress, setProgress] = useState(() => _latestProgress);
@@ -22,6 +26,10 @@ export default function LoadingScreen() {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
+    // Clean up early listeners now that React owns the state
+    _earlyUnsubs.forEach((fn) => fn());
+    _earlyUnsubs.length = 0;
+
     // Sync any progress that fired before mount
     if (_latestProgress > 0) setProgress(_latestProgress);
     if (_isComplete) {

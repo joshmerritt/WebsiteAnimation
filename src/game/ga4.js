@@ -18,6 +18,7 @@ import bus from './EventBus.js';
 const IMPACT_KEY  = '__dadatadad_impacts';
 const BRIDGE_KEY  = '__dadatadad_bridge';
 const MAX_AGE_MS  = 24 * 60 * 60 * 1000; // 24 hours
+const MAX_IMPACTS = 500; // Cap impact records to prevent localStorage bloat
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Impact Store — per-shot first-contact data for the shot chart
@@ -31,25 +32,27 @@ const impactStore = {
       const stored = localStorage.getItem(IMPACT_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Filter out impacts older than MAX_AGE
+        if (!Array.isArray(parsed)) { this._data = []; this._persist(); return; }
         const cutoff = Date.now() - MAX_AGE_MS;
-        this._data = parsed.filter(r => r.timestamp > cutoff);
-        if (typeof window !== 'undefined') window.__impactData = this._data;
+        this._data = parsed.filter(r => r && typeof r.timestamp === 'number' && r.timestamp > cutoff);
         // Re-persist if we pruned anything
         if (this._data.length !== parsed.length) this._persist();
       }
-    } catch (_) {}
+    } catch (e) { console.warn('ga4: failed to hydrate impact store', e.message); }
   },
 
   _persist() {
     try {
       localStorage.setItem(IMPACT_KEY, JSON.stringify(this._data));
-    } catch (_) {}
+    } catch (e) { console.warn('ga4: failed to persist impacts', e.message); }
   },
 
   add(record) {
     this._data.push(record);
-    if (typeof window !== 'undefined') window.__impactData = this._data;
+    // Cap stored records to prevent localStorage bloat
+    if (this._data.length > MAX_IMPACTS) {
+      this._data = this._data.slice(-MAX_IMPACTS);
+    }
     this._persist();
   },
 
@@ -66,7 +69,6 @@ const impactStore = {
 
   clear() {
     this._data = [];
-    if (typeof window !== 'undefined') window.__impactData = this._data;
     this._persist();
   },
 };
@@ -82,14 +84,18 @@ const bridgeStats = {
     try {
       const stored = localStorage.getItem(BRIDGE_KEY);
       if (stored) {
-        this._data = JSON.parse(stored);
-        // Expire if older than MAX_AGE
-        if (this._data.startedAt && Date.now() - this._data.startedAt > MAX_AGE_MS) {
-          this._data = null;
-          localStorage.removeItem(BRIDGE_KEY);
+        const parsed = JSON.parse(stored);
+        // Validate shape before accepting
+        if (parsed && typeof parsed === 'object' && typeof parsed.startedAt === 'number') {
+          this._data = parsed;
+          // Expire if older than MAX_AGE
+          if (Date.now() - this._data.startedAt > MAX_AGE_MS) {
+            this._data = null;
+            localStorage.removeItem(BRIDGE_KEY);
+          }
         }
       }
-    } catch (_) {}
+    } catch (e) { console.warn('ga4: failed to hydrate bridge stats', e.message); }
     if (!this._data) {
       this._data = { startedAt: Date.now(), shots: 0, makes: 0, opens: 0, ctaClicks: 0, visitors: 1, lastUpdated: Date.now() };
       this._persist();
@@ -100,7 +106,7 @@ const bridgeStats = {
     try {
       this._data.lastUpdated = Date.now();
       localStorage.setItem(BRIDGE_KEY, JSON.stringify(this._data));
-    } catch (_) {}
+    } catch (e) { console.warn('ga4: failed to persist bridge stats', e.message); }
   },
 
   addShot()     { this._data.shots++;     this._persist(); },
@@ -120,7 +126,8 @@ const bridgeStats = {
 impactStore._hydrate();
 bridgeStats._hydrate();
 
-if (typeof window !== 'undefined') {
+// Expose stores on window in dev only (for debugging via console)
+if (import.meta.env.DEV && typeof window !== 'undefined') {
   window.__impactStore = impactStore;
   window.__impactData = impactStore._data;
   window.__bridgeStats = bridgeStats;

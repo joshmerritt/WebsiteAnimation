@@ -46,5 +46,5 @@ export default function GameCanvas() {
     };
   }, []);
 
-  return <div ref={containerRef} className="game-canvas" />;
+  return <div ref={containerRef} className="game-canvas" role="application" aria-label="Interactive portfolio game" />;
 }
