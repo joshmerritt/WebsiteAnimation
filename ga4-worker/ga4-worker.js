@@ -37,6 +37,7 @@ export default {
         sources,
         pages,
         ballEvents,
+        _ctaDebug: ballEvents._debug || null,
         fetchedAt: new Date().toISOString(),
         days,
       });
@@ -397,7 +398,7 @@ async function fetchBallEvents(token, propId, days) {
 
   const BALL_META = {
     'Josh Merritt':       { id: 'aboutMe',                      color: '#6B9F6B',  category: 'Me' },
-    'Microsoft PowerBI':  { id: 'powerBIMetrics',               color: '#D4A843',  category: 'Business' },
+    'Microsoft Power BI': { id: 'powerBIMetrics',               color: '#D4A843',  category: 'Business' },
     'The Wine You Drink': { id: 'thewineyoudrink',              color: '#8B1A32',  category: 'Apps' },
     'Black Sheep Dart League': { id: 'dartleague',              color: '#7B5EA7',  category: 'Apps' },
     'Smart Chicken Coop': { id: 'arduinoCoopDoor',              color: '#BF360C',  category: 'Technology' },
@@ -429,7 +430,14 @@ async function fetchBallEvents(token, propId, days) {
     i++;
   }
 
-  return result.sort((a, b) => b.launches - a.launches);
+  // Attach diagnostic info for debugging CTA click data
+  const sorted = result.sort((a, b) => b.launches - a.launches);
+  sorted._debug = {
+    ctaReportRowCount: (ctaReport.rows || []).length,
+    ctaReportRaw: ctaReport.rows || [],
+    ctaClicksMap: ctaClicks,
+  };
+  return sorted;
 }
 
 function indexByDimension(report) {
