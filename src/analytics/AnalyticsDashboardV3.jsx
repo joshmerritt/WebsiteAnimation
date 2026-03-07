@@ -58,39 +58,46 @@ const PIPELINE_STEPS = [
 ];
 
 // ═══ INSIGHTS ENGINE ════════════════════════════════════════════════════
-function generateInsights(timeSeriesData) {
+function generateInsights(timeSeriesData, ballDataArg) {
+  const BE = ballDataArg || BALL_ENGAGEMENT;
   const insights = [];
-  const totals = BALL_ENGAGEMENT.reduce((a, b) => ({
-    clicks: a.clicks + b.clicks, launches: a.launches + b.launches,
-    scores: a.scores + b.scores, opens: a.opens + b.opens, ctaClicks: a.ctaClicks + b.ctaClicks,
+  const totals = BE.reduce((a, b) => ({
+    clicks: a.clicks + (b.clicks || b.launches || 0), launches: a.launches + (b.launches || 0),
+    scores: a.scores + (b.scores || 0), opens: a.opens + (b.opens || 0), ctaClicks: a.ctaClicks + (b.ctaClicks || 0),
   }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
 
-  const byClicks = [...BALL_ENGAGEMENT].sort((a, b) => b.clicks - a.clicks);
-  const byConv = [...BALL_ENGAGEMENT].sort((a, b) => (b.ctaClicks / b.clicks) - (a.ctaClicks / a.clicks));
-  const byDropoff = [...BALL_ENGAGEMENT].sort((a, b) => (1 - a.opens / a.scores) - (1 - b.opens / b.scores)).reverse();
+  const byClicks = [...BE].sort((a, b) => (b.clicks || b.launches || 0) - (a.clicks || a.launches || 0));
+  const byConv = [...BE].sort((a, b) => {
+    const aClicks = a.clicks || a.launches || 1;
+    const bClicks = b.clicks || b.launches || 1;
+    return (b.ctaClicks / bClicks) - (a.ctaClicks / aClicks);
+  });
+  const byDropoff = [...BE].sort((a, b) => (1 - (a.opens || 0) / (a.scores || 1)) - (1 - (b.opens || 0) / (b.scores || 1))).reverse();
 
   const topVol = byClicks[0], topConv = byConv[0];
-  const topVolConv = ((topVol.ctaClicks / topVol.clicks) * 100).toFixed(0);
-  const topConvConv = ((topConv.ctaClicks / topConv.clicks) * 100).toFixed(0);
+  const topVolClicks = topVol.clicks || topVol.launches || 1;
+  const topConvClicks = topConv.clicks || topConv.launches || 1;
+  const topVolConv = ((topVol.ctaClicks / topVolClicks) * 100).toFixed(0);
+  const topConvConv = ((topConv.ctaClicks / topConvClicks) * 100).toFixed(0);
   if (topVol.id !== topConv.id) {
-    const lost = Math.round(topVol.clicks * (topConv.ctaClicks / topConv.clicks)) - topVol.ctaClicks;
+    const lost = Math.round(topVolClicks * (topConv.ctaClicks / topConvClicks)) - topVol.ctaClicks;
     insights.push({ type: "opportunity", icon: "\uD83C\uDFAF", title: "Conversion Efficiency Gap",
-      body: `"${topVol.ball}" gets the most traffic (${topVol.clicks} clicks) but converts to CTA at ${topVolConv}%, while "${topConv.ball}" converts at ${topConvConv}%. If the top-volume ball matched that rate, it would generate ~${lost} additional CTA click-throughs.`,
+      body: `"${topVol.ball}" gets the most traffic (${topVolClicks} interactions) but converts to CTA at ${topVolConv}%, while "${topConv.ball}" converts at ${topConvConv}%. If the top-volume ball matched that rate, it would generate ~${lost} additional CTA click-throughs.`,
       recommendation: `Investigate what makes "${topConv.ball}" convert better — is the CTA more prominent in its detail modal? Apply those patterns to "${topVol.ball}".`,
       metric: `+${lost} CTAs`, metricColor: "#6B9F6B", severity: "high" });
   }
 
   const worstLeaker = byDropoff[0];
-  const leakPct = ((1 - worstLeaker.opens / worstLeaker.scores) * 100).toFixed(0);
+  const leakPct = ((1 - (worstLeaker.opens || 0) / (worstLeaker.scores || 1)) * 100).toFixed(0);
   insights.push({ type: "warning", icon: "\uD83D\uDEA8", title: "Score-to-Open Leakage",
     body: `"${worstLeaker.ball}" loses ${leakPct}% of users between scoring and viewing the detail page (${worstLeaker.scores - worstLeaker.opens} lost opens). Users score but don't see the project content.`,
     recommendation: "Add a brief visual celebration on score that naturally transitions into the detail modal, or add a pulsing 'View Project' prompt after a successful score.",
     metric: `${leakPct}% drop`, metricColor: "#C05050", severity: "high" });
 
   const cats = {};
-  BALL_ENGAGEMENT.forEach(b => {
+  BE.forEach(b => {
     if (!cats[b.category]) cats[b.category] = { clicks: 0, ctaClicks: 0, balls: 0 };
-    cats[b.category].clicks += b.clicks; cats[b.category].ctaClicks += b.ctaClicks; cats[b.category].balls += 1;
+    cats[b.category].clicks += (b.clicks || b.launches || 0); cats[b.category].ctaClicks += (b.ctaClicks || 0); cats[b.category].balls += 1;
   });
   const catArr = Object.entries(cats).map(([n, d]) => ({ name: n, ...d, conv: d.ctaClicks / d.clicks * 100 })).sort((a, b) => b.conv - a.conv);
   const bestCat = catArr[0], worstCat = catArr[catArr.length - 1];
@@ -235,46 +242,8 @@ function MultiLineChart({ data, metrics, width = 680, height = 220 }) {
   );
 }
 
-function FunnelVisual({ data, color, label }) {
-  const steps = [
-    { key: "launches", name: "Shots", val: data.launches },
-    { key: "scores", name: "Makes", val: data.scores },
-    { key: "opens", name: "Opens", val: data.opens },
-    { key: "ctaClicks", name: "CTA Clicks", val: data.ctaClicks },
-  ];
-  const maxVal = steps[0].val;
-  return (
-    <div>
-      {label && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: color, display: "inline-block" }} /><span style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>{label}</span></div>}
-      <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-        {steps.map((step, i) => {
-          const w = maxVal > 0 ? (step.val / maxVal) * 100 : 0;
-          const rate = i > 0 ? ((step.val / steps[i - 1].val) * 100).toFixed(0) : null;
-          return (<div key={step.key}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
-              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", textTransform: "uppercase", letterSpacing: "0.8px", fontWeight: 600 }}>{step.name}</span>
-              <div style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
-                {rate && <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: parseFloat(rate) > 85 ? "#6B9F6B" : parseFloat(rate) > 70 ? "#D4A843" : "#C05050" }}>{rate}%</span>}
-                <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: "#fff", minWidth: 36, textAlign: "right" }}>{step.val.toLocaleString()}</span>
-              </div>
-            </div>
-            <div style={{ height: 18, background: "rgba(255,255,255,0.03)", borderRadius: 4, overflow: "hidden", position: "relative" }}>
-              <div style={{ position: "absolute", top: 0, left: 0, height: "100%", width: `${w}%`, background: `linear-gradient(90deg, ${color}cc, ${color}55)`, borderRadius: 4, transition: "width 0.5s cubic-bezier(0.22,1,0.36,1)" }} />
-            </div>
-            {i < steps.length - 1 && <div style={{ textAlign: "center", padding: "1px 0", fontSize: 8, color: "rgba(255,255,255,0.12)" }}>{"\u25BC"}</div>}
-          </div>);
-        })}
-      </div>
-      <div style={{ marginTop: 10, padding: "7px 12px", borderRadius: 6, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.8px" }}>Shot-to-CTA</span>
-        <span style={{ fontSize: 16, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color }}>{maxVal > 0 ? ((data.ctaClicks / data.launches) * 100).toFixed(1) : 0}%</span>
-      </div>
-    </div>
-  );
-}
-
-function InsightsPanel({ timeSeriesData }) {
-  const insights = useMemo(() => generateInsights(timeSeriesData), [timeSeriesData]);
+function InsightsPanel({ timeSeriesData, ballData }) {
+  const insights = useMemo(() => generateInsights(timeSeriesData, ballData), [timeSeriesData, ballData]);
   const [expanded, setExpanded] = useState(null);
   const sevOrder = { high: 0, medium: 1, low: 2 };
   const sorted = [...insights].sort((a, b) => sevOrder[a.severity] - sevOrder[b.severity]);
@@ -327,14 +296,14 @@ function InsightsPanel({ timeSeriesData }) {
 // ═══ DAY-OF-WEEK BAR CHART ══════════════════════════════════════════════
 function DayOfWeekChart({ data }) {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const buckets = Array.from({ length: 7 }, () => ({ visitors: 0, shots: 0, cta: 0, count: 0 }));
-  data.forEach(d => { const b = buckets[d.dayOfWeek]; b.visitors += (d.visitors || 0); b.shots += (d.shots || 0); b.cta += (d.ctaClicks || 0); b.count++; });
+  const buckets = Array.from({ length: 7 }, () => ({ visitors: 0, shots: 0, pageviews: 0, count: 0 }));
+  data.forEach(d => { const b = buckets[d.dayOfWeek]; b.visitors += (d.visitors || 0); b.shots += (d.shots || 0); b.pageviews += (d.pageviews || 0); b.count++; });
   const vals = buckets.map(b => ({
-    visitors: b.visitors, shots: b.shots, cta: b.cta,
+    visitors: b.visitors, shots: b.shots, pageviews: b.pageviews,
     shotsPerUser: b.visitors > 0 ? parseFloat((b.shots / b.visitors).toFixed(1)) : 0,
   }));
   const [metric, setMetric] = useState("shotsPerUser");
-  const metricOpts = [{ key: "shotsPerUser", label: "Shots/User", color: "#7B5EA7" }, { key: "visitors", label: "Visitors", color: "#D4A843" }, { key: "shots", label: "Shots", color: "#5985B1" }, { key: "cta", label: "CTAs", color: "#6B9F6B" }];
+  const metricOpts = [{ key: "shotsPerUser", label: "Shots/User", color: "#7B5EA7" }, { key: "visitors", label: "Visitors", color: "#D4A843" }, { key: "shots", label: "Shots", color: "#5985B1" }, { key: "pageviews", label: "Pageviews", color: "#6B9F6B" }];
   const activeColor = metricOpts.find(m => m.key === metric)?.color || "#7B5EA7";
   const isFloat = metric === "shotsPerUser";
   const maxForMetric = Math.max(...vals.map(a => a[metric]), 1);
@@ -392,43 +361,6 @@ function DayOfWeekChart({ data }) {
   );
 }
 
-// ═══ ACCURACY BY BALL — HORIZONTAL BAR CHART ════════════════════════════
-function AccuracyByBallChart() {
-  const sorted = [...BALL_ENGAGEMENT].sort((a, b) => (b.scores / b.launches) - (a.scores / a.launches));
-  const overallAcc = sorted.reduce((s, b) => s + b.scores, 0) / sorted.reduce((s, b) => s + b.launches, 0) * 100;
-
-  return (
-    <div>
-      {sorted.map((ball, i) => {
-        const acc = (ball.scores / ball.launches * 100);
-        const isAbove = acc >= overallAcc;
-        return (
-          <div key={ball.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderBottom: i < sorted.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
-            <div style={{ width: 70, display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: ball.color, display: "inline-block" }} />
-              <span style={{ fontSize: 9, color: "rgba(255,255,255,0.55)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ball.ball.split(" ")[0]}</span>
-            </div>
-            <div style={{ flex: 1, position: "relative", height: 14, background: "rgba(255,255,255,0.03)", borderRadius: 3, overflow: "hidden" }}>
-              <div style={{
-                position: "absolute", top: 0, left: 0, height: "100%",
-                width: `${acc}%`, background: `linear-gradient(90deg, ${ball.color}aa, ${ball.color}55)`,
-                borderRadius: 3, transition: "width 0.4s ease",
-              }} />
-              {/* Overall average line */}
-              <div style={{ position: "absolute", top: -1, left: `${overallAcc}%`, width: 1, height: 16, background: "rgba(255,255,255,0.3)" }} />
-            </div>
-            <span style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: isAbove ? "#6B9F6B" : "#D4A843", width: 38, textAlign: "right" }}>
-              {acc.toFixed(0)}%
-            </span>
-          </div>
-        );
-      })}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 8, gap: 12 }}>
-        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "'JetBrains Mono', monospace" }}>│ = avg {overallAcc.toFixed(0)}%</span>
-      </div>
-    </div>
-  );
-}
 
 // ═══ ENGAGEMENT RADAR — SPIDER CHART ════════════════════════════════════
 function EngagementRadar() {
@@ -505,64 +437,67 @@ function EngagementRadar() {
   );
 }
 
-// ═══ CONVERSION WATERFALL ════════════════════════════════════════════════
-function ConversionWaterfall() {
-  const totals = BALL_ENGAGEMENT.reduce((a, b) => ({
-    clicks: a.clicks + b.clicks, launches: a.launches + b.launches,
-    scores: a.scores + b.scores, opens: a.opens + b.opens, ctaClicks: a.ctaClicks + b.ctaClicks,
-  }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
+// ═══ CONVERSION FUNNEL (SVG trapezoid) ═══════════════════════════════════
+function ConversionFunnel({ ballData }) {
+  const src = ballData || BALL_ENGAGEMENT;
+  const totals = src.reduce((a, b) => ({
+    launches: a.launches + (b.launches || 0), scores: a.scores + (b.scores || 0),
+    opens: a.opens + (b.opens || 0), ctaClicks: a.ctaClicks + (b.ctaClicks || 0),
+  }), { launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
 
   const steps = [
     { label: "Shots", val: totals.launches, color: "#5985B1" },
-    { label: "Makes", val: totals.scores, color: "#5985B1" },
-    { label: "Opens", val: totals.opens, color: "#6B9F6B" },
-    { label: "CTAs", val: totals.ctaClicks, color: "#6B9F6B" },
+    { label: "Makes", val: totals.scores, color: "#6B9F6B" },
+    { label: "Opens", val: totals.opens, color: "#D4A843" },
+    { label: "CTAs", val: totals.ctaClicks, color: "#7B5EA7" },
   ];
-  const maxVal = steps[0].val;
-  const w = 320, h = 160, padL = 48, padR = 10, padT = 20, padB = 24;
-  const chartW = w - padL - padR;
-  const chartH = h - padT - padB;
-  const barW = chartW / steps.length - 8;
+  const maxVal = Math.max(steps[0].val, 1);
+  const w = 340, h = 220, padX = 20, padT = 10;
+  const rowH = (h - padT - 16) / steps.length;
+  const centerX = w / 2;
+  const maxHalfW = (w - padX * 2) / 2;
 
   return (
-    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" style={{ display: "block" }}>
-      {/* Grid */}
-      {[0, 0.5, 1].map((pct, i) => {
-        const y = padT + chartH * (1 - pct);
-        return <g key={i}>
-          <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="rgba(255,255,255,0.04)" />
-          <text x={padL - 4} y={y + 3} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="'JetBrains Mono', monospace" textAnchor="end">{Math.round(maxVal * pct)}</text>
-        </g>;
-      })}
-      {steps.map((step, i) => {
-        const barH = maxVal > 0 ? (step.val / maxVal) * chartH : 0;
-        const x = padL + 4 + i * (barW + 8);
-        const y = padT + chartH - barH;
-        const dropPct = i > 0 ? (((steps[i - 1].val - step.val) / steps[i - 1].val) * 100).toFixed(0) : null;
-        return (
-          <g key={step.label}>
-            {/* Connector line from previous bar's top to this bar's top */}
-            {i > 0 && (
-              <line
-                x1={padL + 4 + (i - 1) * (barW + 8) + barW}
-                y1={padT + chartH - (steps[i - 1].val / maxVal) * chartH}
-                x2={x}
-                y2={y}
-                stroke="rgba(255,255,255,0.1)" strokeWidth="1" strokeDasharray="3,2"
-              />
-            )}
-            {/* Bar */}
-            <rect x={x} y={y} width={barW} height={barH} rx={3} fill={step.color} opacity="0.7" />
-            {/* Value label */}
-            <text x={x + barW / 2} y={y - 5} fill="#fff" fontSize="10" fontWeight="600" fontFamily="'JetBrains Mono', monospace" textAnchor="middle">{step.val.toLocaleString()}</text>
-            {/* Drop percentage */}
-            {dropPct && <text x={x + barW / 2} y={y - 16} fill="#C05050" fontSize="8" fontFamily="'JetBrains Mono', monospace" textAnchor="middle" opacity="0.7">-{dropPct}%</text>}
-            {/* Label */}
-            <text x={x + barW / 2} y={h - 6} fill="rgba(255,255,255,0.4)" fontSize="8" fontFamily="'JetBrains Mono', monospace" textAnchor="middle">{step.label}</text>
-          </g>
-        );
-      })}
-    </svg>
+    <div>
+      <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" style={{ display: "block" }}>
+        {steps.map((step, i) => {
+          const pct = maxVal > 0 ? step.val / maxVal : 0;
+          const nextPct = i < steps.length - 1 ? (steps[i + 1].val / maxVal) : pct * 0.7;
+          const topHalf = Math.max(maxHalfW * pct, 20);
+          const botHalf = Math.max(maxHalfW * nextPct, 16);
+          const y = padT + i * rowH;
+          const passRate = i > 0 ? ((step.val / steps[i - 1].val) * 100) : 100;
+          const passColor = passRate > 85 ? "#6B9F6B" : passRate > 70 ? "#D4A843" : "#C05050";
+
+          // Trapezoid points
+          const pts = `${centerX - topHalf},${y} ${centerX + topHalf},${y} ${centerX + botHalf},${y + rowH - 4} ${centerX - botHalf},${y + rowH - 4}`;
+
+          return (
+            <g key={step.label}>
+              <polygon points={pts} fill={`${step.color}30`} stroke={`${step.color}55`} strokeWidth="1" />
+              {/* Label left */}
+              <text x={centerX - topHalf - 6} y={y + rowH / 2 + 1} textAnchor="end" fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{step.label}</text>
+              {/* Value center */}
+              <text x={centerX} y={y + rowH / 2 + 1} textAnchor="middle" fill="#fff" fontSize="14" fontFamily="'JetBrains Mono', monospace" fontWeight="700">{step.val.toLocaleString()}</text>
+              {/* Pass-through rate right */}
+              {i > 0 && (
+                <text x={centerX + topHalf + 6} y={y + rowH / 2 + 1} textAnchor="start" fill={passColor} fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{passRate.toFixed(0)}%</text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+      <div style={{ display: "flex", justifyContent: "center", gap: 20, marginTop: 4 }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 2 }}>Shot-to-CTA</div>
+          <div style={{ fontSize: 18, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: "#7B5EA7" }}>{maxVal > 0 ? ((totals.ctaClicks / totals.launches) * 100).toFixed(1) : 0}%</div>
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 2 }}>Open-to-CTA</div>
+          <div style={{ fontSize: 18, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: "#D4A843" }}>{totals.opens > 0 ? ((totals.ctaClicks / totals.opens) * 100).toFixed(1) : 0}%</div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -580,7 +515,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
   const interactionRate = totalVisitors > 0 ? Math.round((totalInteractions / totalVisitors) * 100) : 0;
   const totals = BALL_ENGAGEMENT.reduce((a, b) => ({ clicks: a.clicks + (b.clicks || 0), launches: a.launches + (b.launches || 0), scores: a.scores + (b.scores || 0), opens: a.opens + (b.opens || 0), ctaClicks: a.ctaClicks + (b.ctaClicks || 0) }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
   const overallAccuracy = totals.launches > 0 ? Math.round((totals.scores / totals.launches) * 100) : 0;
-  const metrics = [{ key: "visitors", label: "Visitors", color: MC.visitors }, { key: "shots", label: "Shots", color: MC.shots }, { key: "ctaClicks", label: "CTA Clicks", color: MC.ctaClicks }];
+  const metrics = [{ key: "visitors", label: "Visitors", color: MC.visitors }, { key: "shots", label: "Shots", color: MC.shots }, { key: "pageviews", label: "Pageviews", color: "#6B9F6B" }];
   // Engagement depth
   const avgBallsPerSession = (totals.clicks / totalVisitors).toFixed(1);
 
@@ -632,7 +567,25 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
 
     {/* Shot Chart */}
     <div style={{ marginBottom: 20 }}>
-      <ShotChart liveData={BALL_ENGAGEMENT} />
+      <ShotChart liveData={BALL_ENGAGEMENT} sessionData={(() => {
+        try {
+          const bridge = JSON.parse(localStorage.getItem('__dadatadad_bridge') || 'null');
+          const impacts = JSON.parse(localStorage.getItem('__dadatadad_impacts') || '[]');
+          if (!bridge) return undefined;
+          // Build a ballStats Map from impact data
+          const ballStats = new Map();
+          if (Array.isArray(impacts)) {
+            impacts.forEach(imp => {
+              if (!imp.ballId) return;
+              const existing = ballStats.get(imp.ballId) || { launches: 0, scores: 0 };
+              existing.launches++;
+              if (imp.isGoal) existing.scores++;
+              ballStats.set(imp.ballId, existing);
+            });
+          }
+          return { shots: bridge.shots || 0, makes: bridge.makes || 0, ballStats };
+        } catch (_) { return undefined; }
+      })()} />
     </div>
 
     {/* Ball Engagement Funnel — V1-style table */}
@@ -665,24 +618,15 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       </div>
     </div>
 
-    <InsightsPanel timeSeriesData={timeSeriesData} />
+    <InsightsPanel timeSeriesData={timeSeriesData} ballData={BALL_ENGAGEMENT} />
 
-    {/* Bonus Charts Row */}
-    <div style={{ ...SS.twoCol, marginTop: 20 }} className="v3-two-col">
-      <div style={SS.panel}>
-        <div style={SS.panelHeader}>
-          <span style={{ ...SS.panelTitle, marginBottom: 0 }}>Accuracy by Ball</span>
-          <span style={SS.panelBadge}>makes / shots</span>
-        </div>
-        <AccuracyByBallChart />
+    {/* Conversion Funnel — full width */}
+    <div style={{ ...SS.panel, marginTop: 20 }}>
+      <div style={SS.panelHeader}>
+        <span style={{ ...SS.panelTitle, marginBottom: 0 }}>Conversion Funnel</span>
+        <span style={SS.panelBadge}>full funnel drop-off</span>
       </div>
-      <div style={SS.panel}>
-        <div style={SS.panelHeader}>
-          <span style={{ ...SS.panelTitle, marginBottom: 0 }}>Conversion Waterfall</span>
-          <span style={SS.panelBadge}>full funnel drop-off</span>
-        </div>
-        <ConversionWaterfall />
-      </div>
+      <ConversionFunnel ballData={BALL_ENGAGEMENT} />
     </div>
 
     {/* Engagement Radar */}
