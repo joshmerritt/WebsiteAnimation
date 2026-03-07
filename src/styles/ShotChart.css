@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   ShotChart.css — Physics playground shot visualization (v3)
-   Three-zone court: Contact dots | Accuracy rings | Launch frequency balls
+   ShotChart.css — Physics playground shot visualization (v3 redesign)
+   Two-zone court: Contact dots (left) | Horizontal ball lineup (right)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .shot-chart-wrap {
@@ -12,12 +12,6 @@
 }
 
 /* ─── Header ── */
-.shot-chart-header {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 4px;
-}
-
 .shot-chart-toggle {
   display: flex;
   gap: 2px;
@@ -29,10 +23,10 @@
 
 .sct-btn {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.03em;
-  padding: 3px 10px;
+  padding: 4px 14px;
   border-radius: 4px;
   border: none;
   background: transparent;
@@ -46,15 +40,35 @@
 /* ─── SVG ── */
 .shot-chart-svg { display: block; width: 100%; height: auto; border-radius: 8px; overflow: visible; }
 
-/* ─── Zone titles ── */
+/* ─── Zone titles — much more visible ── */
 .shot-zone-title {
   font-family: var(--font-display, 'Syne', sans-serif);
   font-size: 10px;
   font-weight: 700;
-  fill: rgba(255, 255, 255, 0.15);
-  letter-spacing: 0.08em;
+  fill: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.1em;
 }
-.shot-zone-title--lg { font-size: 12px; fill: rgba(255, 255, 255, 0.22); font-weight: 800; }
+.shot-zone-title--lg {
+  font-size: 14px;
+  fill: rgba(255, 255, 255, 0.55);
+  font-weight: 800;
+}
+.shot-zone-title--sub {
+  font-size: 10px;
+  fill: rgba(255, 255, 255, 0.25);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+}
+
+/* ─── Goal label ── */
+.shot-goal-label {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 8px;
+  fill: rgba(89, 133, 177, 0.4);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
 
 /* ─── Dots ── */
 .shot-dot { animation: shotDotPop 0.3s ease-out both; }
@@ -69,18 +83,26 @@
 
 .shot-ball-name {
   font-family: var(--font-body, 'DM Sans', sans-serif);
-  font-size: 9px;
-  fill: var(--a-text-muted, rgba(255, 255, 255, 0.35));
-  font-weight: 500;
+  font-size: 11px;
+  fill: var(--a-text-dim, rgba(255, 255, 255, 0.6));
+  font-weight: 600;
   pointer-events: none;
   transition: opacity 0.2s;
+}
+
+.shot-ball-count {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  fill: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+  pointer-events: none;
 }
 
 /* ─── Category labels ── */
 .shot-cat-label {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 10px;
-  fill: var(--a-text-dim, rgba(255, 255, 255, 0.6));
+  font-size: 13px;
+  fill: var(--a-text-dim, rgba(255, 255, 255, 0.7));
   letter-spacing: 0.04em;
   transition: opacity 0.2s, font-weight 0.15s;
 }
@@ -91,42 +113,117 @@
 }
 @keyframes shotAccGrow { from { stroke-dasharray: 0 200; opacity: 0; } }
 
-.shot-acc-pct {
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 8px;
-  font-weight: 700;
-}
-.shot-acc-name {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
-  font-size: 8px;
-  font-weight: 500;
-  fill: rgba(255, 255, 255, 0.28);
-}
-
 /* ─── Tooltip ── */
 .shot-tooltip { pointer-events: none; animation: shotTipIn 0.15s ease-out both; }
 @keyframes shotTipIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* ─── Legend ── */
-.shot-legend-text {
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 9.5px;
-  fill: rgba(255, 255, 255, 0.25);
-  font-weight: 500;
+/* ═══ Legend — rich HTML section below SVG ══════════════════════════════ */
+.shot-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 12px 16px 8px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex-wrap: wrap;
 }
 
-/* ─── Stat strip ── */
-.shot-stat-strip { display: flex; align-items: center; gap: 14px; padding: 8px 4px 2px; margin-top: 4px; }
-.shot-stat { display: flex; align-items: baseline; gap: 5px; }
-.shot-stat-val { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 13px; font-weight: 700; color: var(--a-text, #fff); letter-spacing: -0.02em; }
+.shot-legend-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shot-legend-heading {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.shot-legend-items {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shot-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.shot-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.shot-legend-dot--score { background: #6B9F6B; opacity: 0.7; }
+.shot-legend-dot--miss { background: #C05050; opacity: 0.6; }
+
+.shot-legend-circle {
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  display: inline-block;
+  flex-shrink: 0;
+}
+.shot-legend-circle--sm { width: 10px; height: 10px; }
+.shot-legend-circle--lg { width: 20px; height: 20px; }
+
+.shot-legend-label {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+}
+.shot-legend-label--gold { color: #D4A843; font-weight: 600; }
+.shot-legend-label--green { color: #6B9F6B; font-weight: 600; }
+
+.shot-legend-ring-svg { display: block; flex-shrink: 0; }
+
+.shot-legend-sep {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+/* ═══ Stat strip — polished ══════════════════════════════════════════════ */
+.shot-stat-strip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 6px 4px;
+  margin-top: 4px;
+}
+.shot-stat { display: flex; align-items: baseline; gap: 6px; }
+.shot-stat-val {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--a-text, #fff);
+  letter-spacing: -0.02em;
+}
 .shot-stat-accent { color: var(--a-gold, #D4A843); }
-.shot-stat-lbl { font-family: var(--font-body, 'DM Sans', sans-serif); font-size: 9px; color: var(--a-text-muted, rgba(255, 255, 255, 0.35)); text-transform: uppercase; letter-spacing: 0.06em; }
-.shot-stat-div { width: 1px; height: 16px; background: rgba(255, 255, 255, 0.08); flex-shrink: 0; }
+.shot-stat-lbl {
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 10px;
+  color: var(--a-text-muted, rgba(255, 255, 255, 0.4));
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.shot-stat-div { width: 1px; height: 18px; background: rgba(255, 255, 255, 0.08); flex-shrink: 0; }
 
 /* ─── Responsive ── */
 @media screen and (max-width: 680px) {
   .shot-stat-strip { flex-wrap: wrap; gap: 8px 14px; }
   .shot-chart-wrap { padding: 10px 12px 8px; }
+  .shot-legend { gap: 12px; padding: 10px 8px 6px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .shot-dot, .shot-ball, .shot-acc-ring, .shot-tooltip { animation: none !important; }
