@@ -191,7 +191,7 @@ function StatCard({ label, value, suffix = "", prefix = "", trend, sparkData, co
 }
 
 function Sparkline({ data, width = 120, height = 32, color = "#D4A843", filled = false }) {
-  if (!data.length) return null;
+  if (!data || !data.length) return null;
   const max = Math.max(...data), min = Math.min(...data), range = max - min || 1;
   const pts = data.map((v, i) => `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * (height - 4) - 2}`).join(" ");
   const endY = height - ((data[data.length - 1] - min) / range) * (height - 4) - 2;
@@ -206,6 +206,7 @@ function DonutChart({ segments, size = 120, strokeWidth = 18 }) {
 function MultiLineChart({ data, metrics, width = 680, height = 220 }) {
   const [hoverIdx, setHoverIdx] = useState(null);
   const svgRef = useRef(null);
+  if (!data || data.length < 2) return <div style={{ height, display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.25)", fontSize: 12 }}>Loading chart data…</div>;
   const padL = 44, padR = 12, padT = 16, padB = 28;
   const chartW = width - padL - padR, chartH = height - padT - padB;
   // Single shared Y scale — all metrics on the same axis so values are visually comparable
@@ -297,7 +298,7 @@ function InsightsPanel({ timeSeriesData, ballData }) {
 function DayOfWeekChart({ data }) {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const buckets = Array.from({ length: 7 }, () => ({ visitors: 0, shots: 0, pageviews: 0, count: 0 }));
-  data.forEach(d => { const b = buckets[d.dayOfWeek]; b.visitors += (d.visitors || 0); b.shots += (d.shots || 0); b.pageviews += (d.pageviews || 0); b.count++; });
+  (data || []).forEach(d => { if (!d || d.dayOfWeek == null) return; const b = buckets[d.dayOfWeek]; b.visitors += (d.visitors || 0); b.shots += (d.shots || 0); b.pageviews += (d.pageviews || 0); b.count++; });
   const vals = buckets.map(b => ({
     visitors: b.visitors, shots: b.shots, pageviews: b.pageviews,
     shotsPerUser: b.visitors > 0 ? parseFloat((b.shots / b.visitors).toFixed(1)) : 0,
@@ -522,10 +523,10 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
   return (<div>
     {/* KPI Strip 2x2 */}
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20, position: "relative", zIndex: 1 }} className="v3-kpi-row">
-      <StatCard label="Unique Visitors" value={totalVisitors} trend={15} delay={80} sparkData={timeSeriesData.slice(-30).map(d => d.visitors)} color={MC.visitors} compact />
-      <StatCard label="Avg. Duration" value={avgDuration} suffix="s" trend={8} delay={120} sparkData={timeSeriesData.slice(-30).map(d => d.avgDuration)} color={MC.avgDuration} compact />
+      <StatCard label="Unique Visitors" value={totalVisitors} trend={15} delay={80} sparkData={timeSeriesData.slice(-30).map(d => (d && d.visitors) || 0)} color={MC.visitors} compact />
+      <StatCard label="Avg. Duration" value={avgDuration} suffix="s" trend={8} delay={120} sparkData={timeSeriesData.slice(-30).map(d => (d && d.avgDuration) || 0)} color={MC.avgDuration} compact />
       <StatCard label="Shot Accuracy" value={overallAccuracy} suffix="%" trend={5} delay={160} sparkData={timeSeriesData.slice(-14).map((_, i) => overallAccuracy + Math.round(Math.sin(i) * 4))} color="#D4A843" compact />
-      <StatCard label="Interaction Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => d.visitors > 0 ? Math.round((d.ballInteractions / d.visitors) * 100) : 0)} color={MC.ballInteractions} compact />
+      <StatCard label="Interaction Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => d && d.visitors > 0 ? Math.round((d.ballInteractions / d.visitors) * 100) : 0)} color={MC.ballInteractions} compact />
     </div>
 
     {/* Bridge Stats — live activity since GA4's last sync */}
@@ -865,8 +866,8 @@ export default function AnalyticsDashboardV3() {
     ? (liveData?.timeSeries || []).filter(d => d && d.visitors != null)
     : mockData.slice(-rangeDays);
 
-  // Normalize: add computed fields the charts expect
-  const timeSeriesData = rawTimeSeries.map(d => {
+  // Normalize: add computed fields the charts expect, filter out any null/undefined entries
+  const timeSeriesData = rawTimeSeries.filter(d => d != null).map(d => {
     const dateObj = d.date ? new Date(d.date + 'T12:00:00') : new Date();
     return {
       ...d,
