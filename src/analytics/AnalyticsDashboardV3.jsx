@@ -515,7 +515,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
   const interactionRate = totalVisitors > 0 ? Math.round((totalInteractions / totalVisitors) * 100) : 0;
   const totals = BALL_ENGAGEMENT.reduce((a, b) => ({ clicks: a.clicks + (b.clicks || 0), launches: a.launches + (b.launches || 0), scores: a.scores + (b.scores || 0), opens: a.opens + (b.opens || 0), ctaClicks: a.ctaClicks + (b.ctaClicks || 0) }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
   const overallAccuracy = totals.launches > 0 ? Math.round((totals.scores / totals.launches) * 100) : 0;
-  const metrics = [{ key: "visitors", label: "Visitors", color: MC.visitors }, { key: "shots", label: "Shots", color: MC.shots }, { key: "pageviews", label: "Pageviews", color: "#6B9F6B" }];
+  const metrics = [{ key: "visitors", label: "Visitors", color: MC.visitors }, { key: "shots", label: "Shots", color: MC.shots }, { key: "ctaClicks", label: "CTA Clicks", color: MC.ctaClicks }];
   // Engagement depth
   const avgBallsPerSession = (totals.clicks / totalVisitors).toFixed(1);
 
