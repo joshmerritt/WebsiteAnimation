@@ -18,6 +18,7 @@ import {
   METRIC_COLORS,
 } from './data.js';
 import ShotChart from './ShotChart.jsx';
+import BallEngagementV1 from './BallEngagement.jsx';
 
 // ═══ SUPPLEMENTARY DATA (not from GA4) ══════════════════════════════════
 // Device icons for V3 display (MOCK_DEVICES has different shape)
@@ -578,13 +579,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
   const totalInteractions = timeSeriesData.reduce((s, d) => s + (d.ballInteractions || 0), 0);
   const interactionRate = totalVisitors > 0 ? Math.round((totalInteractions / totalVisitors) * 100) : 0;
   const totals = BALL_ENGAGEMENT.reduce((a, b) => ({ clicks: a.clicks + (b.clicks || 0), launches: a.launches + (b.launches || 0), scores: a.scores + (b.scores || 0), opens: a.opens + (b.opens || 0), ctaClicks: a.ctaClicks + (b.ctaClicks || 0) }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
-  const overallAccuracy = Math.round((totals.scores / totals.launches) * 100);
-  const [selectedBall, setSelectedBall] = useState(null);
-  const funnelData = selectedBall ? BALL_ENGAGEMENT.find(b => b.id === selectedBall) : totals;
-  const funnelColor = selectedBall ? BALL_ENGAGEMENT.find(b => b.id === selectedBall)?.color || "#5985B1" : "#5985B1";
-  const funnelLabel = selectedBall ? BALL_ENGAGEMENT.find(b => b.id === selectedBall)?.ball : null;
-  const categories = {};
-  BALL_ENGAGEMENT.forEach(b => { if (!categories[b.category]) categories[b.category] = { clicks: 0, ctaClicks: 0 }; categories[b.category].clicks += (b.clicks || 0); categories[b.category].ctaClicks += (b.ctaClicks || 0); });
+  const overallAccuracy = totals.launches > 0 ? Math.round((totals.scores / totals.launches) * 100) : 0;
   const metrics = [{ key: "visitors", label: "Visitors", color: MC.visitors }, { key: "shots", label: "Shots", color: MC.shots }, { key: "ctaClicks", label: "CTA Clicks", color: MC.ctaClicks }];
   // Engagement depth
   const avgBallsPerSession = (totals.clicks / totalVisitors).toFixed(1);
@@ -640,32 +635,8 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       <ShotChart liveData={BALL_ENGAGEMENT} />
     </div>
 
-    {/* Ball Engagement Funnel */}
-    <div style={{ ...SS.panel, marginBottom: 20 }}>
-      <div style={SS.panelHeader}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ ...SS.panelTitle, marginBottom: 0 }}>Ball Engagement Funnel</span>
-          <span style={SS.panelBadge}>{"\uD83C\uDFB1"} shot → make → open → CTA</span>
-        </div>
-      </div>
-      <div style={{ maxWidth: 480, margin: "0 auto 16px" }}><FunnelVisual data={funnelData} color={funnelColor} label={funnelLabel} /></div>
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 12 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 48px 48px 48px 56px", gap: 4, padding: "0 0 6px", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, letterSpacing: "0.8px", textTransform: "uppercase", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <span>Ball</span><span style={{ textAlign: "right" }}>Shots</span><span style={{ textAlign: "right" }}>Makes</span><span style={{ textAlign: "right" }}>Opens</span><span style={{ textAlign: "right" }}>CTAs</span><span style={{ textAlign: "right" }}>Cat</span>
-        </div>
-        {BALL_ENGAGEMENT.map((ball, i) => {
-          const isSel = selectedBall === ball.id;
-          return (<div key={ball.id} onClick={() => setSelectedBall(isSel ? null : ball.id)} style={{ display: "grid", gridTemplateColumns: "1fr 48px 48px 48px 48px 56px", gap: 4, padding: "7px 4px", fontSize: 11, cursor: "pointer", alignItems: "center", borderBottom: i < BALL_ENGAGEMENT.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none", background: isSel ? `${ball.color}12` : "transparent", borderLeft: isSel ? `2px solid ${ball.color}` : "2px solid transparent", transition: "all 0.15s" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}><span style={{ width: 7, height: 7, borderRadius: "50%", background: ball.color, flexShrink: 0 }} /><span style={{ color: isSel ? "#fff" : "rgba(255,255,255,0.7)", fontWeight: isSel ? 600 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ball.ball}</span></div>
-            {[ball.launches || 0, ball.scores || 0, ball.opens || 0, ball.ctaClicks || 0].map((v, j) => <span key={j} style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.65)" }}>{v}</span>)}
-            <span style={{ textAlign: "right", fontSize: 9, fontWeight: 500, color: "rgba(255,255,255,0.35)" }}>{ball.category}</span>
-          </div>);
-        })}
-      </div>
-      <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-        {Object.entries(categories).map(([cat, d]) => <div key={cat} style={{ padding: "4px 10px", borderRadius: 6, fontSize: 11, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 6, alignItems: "center" }}><span style={{ color: "rgba(255,255,255,0.6)" }}>{cat}</span><span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#D4A843", fontWeight: 600 }}>{((d.ctaClicks / d.clicks) * 100).toFixed(0)}%</span></div>)}
-      </div>
-    </div>
+    {/* Ball Engagement Funnel — V1-style table */}
+    <BallEngagementV1 liveData={BALL_ENGAGEMENT} />
 
     {/* Device + Day-of-Week */}
     <div style={SS.twoCol} className="v3-two-col">
