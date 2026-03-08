@@ -12,7 +12,7 @@ const STEPS = [
   { key: 'ctaClicks', label: 'CTA Click', desc: 'Clicked project link' },
 ];
 
-const COLORS = ['#5985B1', '#D4A843', '#6B9F6B', '#7B5EA7'];
+const COLORS = ['#5985B1', '#D4A843', '#6B9F6B', '#D4A843'];
 
 export default function FunnelViz({ totals }) {
   const w = 520;
