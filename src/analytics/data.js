@@ -117,7 +117,7 @@ export const BALL_ENGAGEMENT = [
   { ball: 'Josh Merritt',            id: 'aboutMe',                      clicks: 312, launches: 289, scores: 267, opens: 251, ctaClicks: 198, color: '#6B9F6B',  category: 'Me' },
   { ball: 'Microsoft Power BI',      id: 'powerBIMetrics',               clicks: 234, launches: 218, scores: 189, opens: 178, ctaClicks: 132, color: '#D4A843',  category: 'Business' },
   { ball: 'The Wine You Drink',      id: 'thewineyoudrink',              clicks: 198, launches: 182, scores: 156, opens: 149, ctaClicks: 121, color: '#8B1A32',  category: 'Apps' },
-  { ball: 'Black Sheep Dart League', id: 'dartleague',                   clicks: 178, launches: 165, scores: 141, opens: 132, ctaClicks: 104, color: '#7B5EA7',  category: 'Apps' },
+  { ball: 'Black Sheep Dart League', id: 'dartleague',                   clicks: 178, launches: 165, scores: 141, opens: 132, ctaClicks: 104, color: '#5985B1',  category: 'Apps' },
   { ball: 'Smart Chicken Coop',      id: 'arduinoCoopDoor',              clicks: 156, launches: 142, scores: 122, opens: 108, ctaClicks: 79,  color: '#BF360C',  category: 'Technology' },
   { ball: 'Site Analytics',          id: 'SiteAnalytics',                clicks: 145, launches: 131, scores: 112, opens: 98,  ctaClicks: 71,  color: '#5985B1',  category: 'Technology' },
   { ball: 'Google Data Studio',      id: 'googleDataStudioServiceTechs', clicks: 123, launches: 108, scores: 89,  opens: 78,  ctaClicks: 52,  color: '#4285F4',  category: 'Business' },
@@ -151,7 +151,7 @@ export const SESSION_FLOW = [
   { from: 'Ball Interaction', to: 'Detail Page',      value: 48, color: '#D4A843' },
   { from: 'Ball Interaction', to: 'Multiple Balls',   value: 12, color: '#6B9F6B' },
   { from: 'Ball Interaction', to: 'Exit',             value: 3,  color: '#C05050' },
-  { from: 'Detail Page',     to: 'External Link',    value: 28, color: '#7B5EA7' },
+  { from: 'Detail Page',     to: 'External Link',    value: 28, color: '#D4A843' },
   { from: 'Detail Page',     to: 'Back to Play',     value: 15, color: '#5985B1' },
   { from: 'Detail Page',     to: 'Exit',             value: 5,  color: '#C05050' },
 ];
@@ -188,5 +188,5 @@ export const METRIC_COLORS = {
   pageviews:        '#5985B1',
   bounceRate:       '#C05050',
   avgDuration:      '#6B9F6B',
-  ballInteractions: '#7B5EA7',
+  ballInteractions: '#5985B1',
 };

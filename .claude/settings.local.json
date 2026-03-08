@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:/Users/Josh/WebsiteAnimation/.claude/worktrees/vigorous-aryabhata/assets/\"*.txt)",
+      "Bash(gh auth status)",
+      "Bash(npx vite build)",
+      "Bash(ls -lh \"C:\\\\Users\\\\Josh\\\\WebsiteAnimation\\\\.claude\\\\worktrees\\\\vigorous-aryabhata\"/analytics*.html)"
+    ]
+  }
+}

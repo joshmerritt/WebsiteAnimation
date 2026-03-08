@@ -39,14 +39,14 @@ function seededRandom(seed) {
   return () => { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
 }
 
-const MC = { visitors: "#D4A843", pageviews: "#5985B1", bounceRate: "#C05050", avgDuration: "#6B9F6B", ballInteractions: "#7B5EA7", shots: "#5985B1", ctaClicks: "#6B9F6B" };
+const MC = { visitors: "#D4A843", pageviews: "#5985B1", bounceRate: "#C05050", avgDuration: "#6B9F6B", ballInteractions: "#5985B1", shots: "#5985B1", ctaClicks: "#6B9F6B" };
 
 const CUSTOM_EVENTS = [
   { name: "ball_launch", params: ["shot_number", "total_makes", "accuracy"], color: "#D4A843" },
   { name: "ball_score", params: ["shot_number", "make_number", "accuracy"], color: "#6B9F6B" },
   { name: "detail_open", params: ["project_name", "project_link"], color: "#5985B1" },
   { name: "detail_close", params: [], color: "#5985B1" },
-  { name: "cta_click", params: ["project_name", "project_link", "project_category"], color: "#7B5EA7" },
+  { name: "cta_click", params: ["project_name", "project_link", "project_category"], color: "#D4A843" },
   { name: "portfolio_loaded", params: ["load_time_ms"], color: "#C05050" },
 ];
 
@@ -306,8 +306,8 @@ function DayOfWeekChart({ data }) {
     shotsPerUser: b.visitors > 0 ? parseFloat((b.shots / b.visitors).toFixed(1)) : 0,
   }));
   const [metric, setMetric] = useState("shotsPerUser");
-  const metricOpts = [{ key: "shotsPerUser", label: "Shots/User", color: "#7B5EA7" }, { key: "visitors", label: "Visitors", color: "#D4A843" }, { key: "shots", label: "Shots", color: "#5985B1" }, { key: "pageviews", label: "Pageviews", color: "#6B9F6B" }];
-  const activeColor = metricOpts.find(m => m.key === metric)?.color || "#7B5EA7";
+  const metricOpts = [{ key: "shotsPerUser", label: "Shots/User", color: "#D4A843" }, { key: "visitors", label: "Visitors", color: "#D4A843" }, { key: "shots", label: "Shots", color: "#5985B1" }, { key: "pageviews", label: "Pageviews", color: "#6B9F6B" }];
+  const activeColor = metricOpts.find(m => m.key === metric)?.color || "#D4A843";
   const isFloat = metric === "shotsPerUser";
   const maxForMetric = Math.max(...vals.map(a => a[metric]), 1);
 
@@ -385,7 +385,7 @@ function EngagementRadar() {
     return { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r };
   };
 
-  const deviceColors = ["#D4A843", "#5985B1", "#7B5EA7"];
+  const deviceColors = ["#D4A843", "#5985B1", "#6B9F6B"];
 
   return (
     <div>
@@ -452,7 +452,7 @@ function ConversionFunnel({ ballData }) {
     { label: "Shots", val: totals.launches, color: "#5985B1" },
     { label: "Makes", val: totals.scores, color: "#6B9F6B" },
     { label: "Opens", val: totals.opens, color: "#D4A843" },
-    { label: "CTAs", val: totals.ctaClicks, color: "#7B5EA7" },
+    { label: "CTAs", val: totals.ctaClicks, color: "#D4A843" },
   ];
   const maxVal = Math.max(steps[0].val, 1);
   const w = 340, h = 220, padX = 20, padT = 10;
@@ -493,7 +493,7 @@ function ConversionFunnel({ ballData }) {
       <div style={{ display: "flex", justifyContent: "center", gap: 20, marginTop: 4 }}>
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 2 }}>Shot-to-CTA</div>
-          <div style={{ fontSize: 18, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: "#7B5EA7" }}>{maxVal > 0 ? ((totals.ctaClicks / totals.launches) * 100).toFixed(1) : 0}%</div>
+          <div style={{ fontSize: 18, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: "#D4A843" }}>{maxVal > 0 ? ((totals.ctaClicks / totals.launches) * 100).toFixed(1) : 0}%</div>
         </div>
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 2 }}>Open-to-CTA</div>
@@ -515,7 +515,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
   const totalVisitors = timeSeriesData.reduce((s, d) => s + (d.visitors || 0), 0);
   const avgDuration = timeSeriesData.length > 0 ? Math.round(timeSeriesData.reduce((s, d) => s + (d.avgDuration || 0), 0) / timeSeriesData.length) : 0;
   const totalInteractions = timeSeriesData.reduce((s, d) => s + (d.ballInteractions || 0), 0);
-  const interactionRate = totalVisitors > 0 ? Math.round((totalInteractions / totalVisitors) * 100) : 0;
+  const interactionRate = totalVisitors > 0 ? Math.min(100, Math.round((totalInteractions / totalVisitors) * 100)) : 0;
   const totals = BALL_ENGAGEMENT.reduce((a, b) => ({ clicks: a.clicks + (b.clicks || 0), launches: a.launches + (b.launches || 0), scores: a.scores + (b.scores || 0), opens: a.opens + (b.opens || 0), ctaClicks: a.ctaClicks + (b.ctaClicks || 0) }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
   const overallAccuracy = totals.launches > 0 ? Math.round((totals.scores / totals.launches) * 100) : 0;
   const metrics = [{ key: "visitors", label: "Visitors", color: MC.visitors }, { key: "shots", label: "Shots", color: MC.shots }, { key: "ctaClicks", label: "CTA Clicks", color: MC.ctaClicks }];
@@ -525,10 +525,10 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
   return (<div>
     {/* KPI Strip 2x2 */}
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20, position: "relative", zIndex: 1 }} className="v3-kpi-row">
-      <StatCard label="Unique Visitors" value={totalVisitors} trend={15} delay={80} sparkData={timeSeriesData.slice(-30).map(d => (d && d.visitors) || 0)} color={MC.visitors} compact />
+      <StatCard label="Active Users" value={totalVisitors} trend={15} delay={80} sparkData={timeSeriesData.slice(-30).map(d => (d && d.visitors) || 0)} color={MC.visitors} compact subtitle="engaged visitors (10s+)" />
       <StatCard label="Avg. Duration" value={avgDuration} suffix="s" trend={8} delay={120} sparkData={timeSeriesData.slice(-30).map(d => (d && d.avgDuration) || 0)} color={MC.avgDuration} compact />
       <StatCard label="Shot Accuracy" value={overallAccuracy} suffix="%" trend={5} delay={160} sparkData={timeSeriesData.slice(-14).map((_, i) => overallAccuracy + Math.round(Math.sin(i) * 4))} color="#D4A843" compact />
-      <StatCard label="Interaction Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => d && d.visitors > 0 ? Math.round((d.ballInteractions / d.visitors) * 100) : 0)} color={MC.ballInteractions} compact subtitle="% of visitors who interact with balls" />
+      <StatCard label="Launch Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => d && d.visitors > 0 ? Math.min(100, Math.round((d.ballInteractions / d.visitors) * 100)) : 0)} color={MC.ballInteractions} compact subtitle="% of visitors who launch a ball" />
     </div>
 
     {/* Bridge Stats — live activity since GA4's last sync */}
@@ -549,7 +549,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
               <span style={{ color: "rgba(255,255,255,0.2)" }}>{" \u00B7 "}</span>
               <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#D4A843" }}>{bridge.opens} opens</span>
               <span style={{ color: "rgba(255,255,255,0.2)" }}>{" \u00B7 "}</span>
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#7B5EA7" }}>{bridge.ctaClicks} CTAs</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#D4A843" }}>{bridge.ctaClicks} CTAs</span>
             </div>
             <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.25)", fontSize: 10 }}>updated {agoText}</span>
           </div>
@@ -650,7 +650,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
           {[
             ["Total Shots Fired", totals.launches.toLocaleString(), "#5985B1"],
             ["Goals Scored", totals.scores.toLocaleString(), "#6B9F6B"],
-            ["CTA Click-Throughs", totals.ctaClicks.toLocaleString(), "#7B5EA7"],
+            ["CTA Click-Throughs", totals.ctaClicks.toLocaleString(), "#D4A843"],
             ["Full Funnel Conv.", `${((totals.launches > 0 ? totals.ctaClicks / totals.launches : 0) * 100).toFixed(1)}%`, "#D4A843"],
             ["Avg Balls / Session", avgBallsPerSession, "#5985B1"],
           ].map(([label, val, color]) => (
@@ -701,10 +701,40 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       </div>
     </div>
 
-    {/* Session Flow */}
+    {/* Session Flow — compact 3-column funnel */}
     <div style={{ ...SS.panel, marginTop: 20 }}>
-      <span style={SS.panelTitle}>Session Flow</span>
-      {SESSION_FLOW.map((f, i) => <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < SESSION_FLOW.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}><div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}><span style={{ color: "rgba(255,255,255,0.7)" }}>{f.from}</span><span style={{ color: "rgba(255,255,255,0.25)", fontSize: 11 }}>{"\u2192"}</span><span style={{ color: "rgba(255,255,255,0.9)" }}>{f.to}</span></div><span style={{ fontSize: 14, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: f.color }}>{f.pct}%</span></div>)}
+      <div style={SS.panelHeader}>
+        <span style={{ ...SS.panelTitle, marginBottom: 0 }}>Session Flow</span>
+        <span style={SS.panelBadge}>funnel stages</span>
+      </div>
+      {(() => {
+        // Group flow data by "from" stage into funnel columns
+        const stages = {};
+        SESSION_FLOW.forEach(f => {
+          if (!stages[f.from]) stages[f.from] = [];
+          stages[f.from].push(f);
+        });
+        const stageOrder = ['Landing', 'Ball Interaction', 'Detail Page'];
+        const stageColors = { Landing: '#5985B1', 'Ball Interaction': '#D4A843', 'Detail Page': '#6B9F6B' };
+        const maxRows = Math.max(...stageOrder.map(s => (stages[s] || []).length));
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            {stageOrder.map((stage, si) => (
+              <div key={stage} style={{ padding: "10px 10px 8px", borderRight: si < 2 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: stageColors[stage], textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, fontFamily: "'JetBrains Mono', monospace" }}>
+                  {stage}
+                </div>
+                {(stages[stage] || []).map((f, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0", borderBottom: i < (stages[stage] || []).length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.65)" }}>{f.to}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", color: f.color }}>{f.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
     </div>
 
     <div style={{ marginTop: 24, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
@@ -801,7 +831,7 @@ function DataArchitectureTab() {
           { state: "Idle", desc: "Static body in grid. Displays project image with canvas clipping.", color: "#5985B1", next: "Drag" },
           { state: "Aiming", desc: "User dragging — power accumulates from mouse delta / sensitivity. Arrow indicator shows trajectory.", color: "#D4A843", next: "Release" },
           { state: "Launched", desc: "Dynamic body with velocity. Collision filter set to category bitmask. Bounces off walls and nets.", color: "#6B9F6B", next: "Goal match?" },
-          { state: "Scored", desc: "Category match detected. Detail modal opens. Ball freezes. Stats emitted via EventBus.", color: "#7B5EA7", next: "Close modal" },
+          { state: "Scored", desc: "Category match detected. Detail modal opens. Ball freezes. Stats emitted via EventBus.", color: "#D4A843", next: "Close modal" },
           { state: "Reset", desc: "Velocity zeroed. Position restored. Body set back to static. Removed from physics world.", color: "#C05050", next: null },
         ].map((s, i) => (
           <div key={s.state} style={{ width: "100%", maxWidth: 440 }}>

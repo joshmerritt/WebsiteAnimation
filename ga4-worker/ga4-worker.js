@@ -259,7 +259,7 @@ async function fetchSources(token, propId, days) {
 
   const rows = report.rows || [];
   const total = rows.reduce((s, r) => s + parseInt(r.metricValues[0].value, 10), 0);
-  const palette = ['#D4A843', '#5985B1', '#6B9F6B', '#7B5EA7', '#C05050', '#14A800', '#4285F4', '#C9D1D9'];
+  const palette = ['#D4A843', '#5985B1', '#6B9F6B', '#5985B1', '#C05050', '#14A800', '#4285F4', '#C9D1D9'];
 
   return rows.map((row, i) => {
     const source = row.dimensionValues[0].value;
@@ -402,13 +402,13 @@ async function fetchBallEvents(token, propId, days) {
     'Josh Merritt':       { id: 'aboutMe',                      color: '#6B9F6B',  category: 'Me' },
     'Microsoft Power BI': { id: 'powerBIMetrics',               color: '#D4A843',  category: 'Business' },
     'The Wine You Drink': { id: 'thewineyoudrink',              color: '#8B1A32',  category: 'Apps' },
-    'Black Sheep Dart League': { id: 'dartleague',              color: '#7B5EA7',  category: 'Apps' },
+    'Black Sheep Dart League': { id: 'dartleague',              color: '#5985B1',  category: 'Apps' },
     'Smart Chicken Coop': { id: 'arduinoCoopDoor',              color: '#BF360C',  category: 'Technology' },
     'Site Analytics':     { id: 'SiteAnalytics',                color: '#5985B1',  category: 'Technology' },
     'Google Data Studio Streaming Dashboard': { id: 'googleDataStudioServiceTechs', color: '#4285F4', category: 'Business' },
     'Portfolio Website':  { id: 'thisWebsite',                  color: '#5985B1',  category: 'Technology' },
   };
-  const palette = ['#D4A843', '#5985B1', '#6B9F6B', '#7B5EA7', '#C05050', '#BF360C', '#4285F4', '#8B1A32'];
+  const palette = ['#D4A843', '#5985B1', '#6B9F6B', '#5985B1', '#C05050', '#BF360C', '#4285F4', '#8B1A32'];
 
   const result = [];
   let i = 0;

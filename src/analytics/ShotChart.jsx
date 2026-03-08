@@ -81,21 +81,42 @@ function generateDots(balls, seed = 7, impacts) {
 }
 
 // ── Horizontal ball layout sorted by launches (most→least, left→right) ──
-function layoutBalls(balls) {
+// Edge-to-edge spacing: gap is between ring edges, not between centers,
+// so balls never overlap regardless of size.
+function layoutBalls(balls, maxLaunches) {
   const sorted = [...balls].sort((a, b) => (b.launches || 0) - (a.launches || 0));
   const count = sorted.length;
   if (count === 0) return [];
 
-  // Horizontal band: x from 355 to 720, vertically centered at ~190
+  const BASE_R = 28, MIN_R = 8;
+  const RING_PAD = 5; // accuracy ring + breathing room beyond ball radius
   const startX = 355, endX = 720, centerY = 190;
   const totalWidth = endX - startX;
-  const step = count > 1 ? totalWidth / (count - 1) : 0;
 
-  return sorted.map((b, i) => ({
+  // Compute radius for each ball first
+  const withR = sorted.map(b => ({
     ...b,
-    cx: count === 1 ? (startX + endX) / 2 : startX + i * step,
-    cy: centerY,
+    r: Math.max(MIN_R, BASE_R * Math.sqrt((b.launches || 0) / maxLaunches)),
+    acc: b.launches > 0 ? b.scores / b.launches : 0,
   }));
+
+  if (count === 1) {
+    return withR.map(b => ({ ...b, cx: (startX + endX) / 2, cy: centerY }));
+  }
+
+  // Total width consumed by ball outer radii (ball + ring padding)
+  const totalDiameters = withR.reduce((s, b) => s + 2 * (b.r + RING_PAD), 0);
+  const gapSpace = totalWidth - totalDiameters;
+  const gap = Math.max(2, gapSpace / (count - 1));
+
+  // Position left-to-right, placing each ball so edges don't overlap
+  let cursor = startX;
+  return withR.map(b => {
+    const outerR = b.r + RING_PAD;
+    const cx = cursor + outerR;
+    cursor = cx + outerR + gap;
+    return { ...b, cx, cy: centerY };
+  });
 }
 
 const CATEGORY_ORDER = ['Technology', 'Business', 'Apps', 'Me'];
@@ -138,14 +159,10 @@ export default function ShotChart({ liveData, sessionData }) {
 
   const data = mode === 'session' ? sessionBalls : allTimeData;
   const maxLaunches = Math.max(...data.map(b => b.launches || 0), 1);
-  const BASE_R = 30, MIN_R = 9;
 
+  // layoutBalls computes radii + accuracy internally for edge-to-edge spacing
   const ballsWithPos = useMemo(() =>
-    layoutBalls(data).map(b => ({
-      ...b,
-      r: Math.max(MIN_R, BASE_R * Math.sqrt((b.launches || 0) / maxLaunches)),
-      acc: b.launches > 0 ? b.scores / b.launches : 0,
-    })),
+    layoutBalls(data, maxLaunches),
     [data, maxLaunches]);
 
   const dots = useMemo(() =>
@@ -301,7 +318,7 @@ export default function ShotChart({ liveData, sessionData }) {
               <line x1={tx + 10} y1={ty + 56} x2={tx + tw - 10} y2={ty + 56} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
               {/* CTA Conv row */}
               <text x={tx + 10} y={ty + 72} fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'JetBrains Mono', monospace">CTA Conv</text>
-              <text x={tx + 62} y={ty + 72} fill={conv !== '\u2014' && parseFloat(conv) > 70 ? '#7B5EA7' : '#D4A843'} fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{conv}{conv !== '\u2014' ? '%' : ''}</text>
+              <text x={tx + 62} y={ty + 72} fill={conv !== '\u2014' && parseFloat(conv) > 70 ? '#6B9F6B' : '#D4A843'} fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{conv}{conv !== '\u2014' ? '%' : ''}</text>
             </g>
           );
         })()}
