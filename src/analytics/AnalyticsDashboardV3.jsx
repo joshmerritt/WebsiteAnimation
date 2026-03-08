@@ -14,6 +14,7 @@ import {
   BALL_ENGAGEMENT as MOCK_BALLS,
   DEVICE_DATA as MOCK_DEVICES,
   SESSION_FLOW as MOCK_FLOW,
+  GEOGRAPHY_DATA as MOCK_GEO,
   ARCHITECTURE,
   METRIC_COLORS,
 } from './data.js';
@@ -174,11 +175,12 @@ function useAnimatedNumber(target, duration = 1000, delay = 0) {
 }
 
 // ═══ SUB-COMPONENTS ═════════════════════════════════════════════════════
-function StatCard({ label, value, suffix = "", prefix = "", trend, sparkData, color, delay = 0, compact }) {
+function StatCard({ label, value, suffix = "", prefix = "", trend, sparkData, color, delay = 0, compact, subtitle }) {
   const animVal = useAnimatedNumber(value, 1000, delay);
   return (
     <div style={{ ...SS.statCard, ...(compact ? { padding: "12px 14px" } : {}), animationDelay: `${delay}ms` }} className="fade-in-card">
       <div style={SS.statLabel}>{label}</div>
+      {subtitle && <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "'JetBrains Mono', monospace", marginTop: -2, marginBottom: 2 }}>{subtitle}</div>}
       <div style={SS.statRow}>
         <div style={SS.statValueGroup}>
           <span style={{ ...SS.statValue, ...(compact ? { fontSize: "clamp(1.1rem, 3vw, 1.4rem)" } : {}) }}>{prefix}{animVal.toLocaleString()}{suffix}</span>
@@ -504,7 +506,7 @@ function ConversionFunnel({ ballData }) {
 
 
 // ═══ ANALYTICS TAB ══════════════════════════════════════════════════════
-function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesData, deviceData, sessionFlow, isLive }) {
+function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesData, deviceData, sessionFlow, geoData, isLive }) {
   const BALL_ENGAGEMENT = ballData;
   const REFERRER_DATA = sourcesData;
   const PAGE_DATA = pagesData;
@@ -526,7 +528,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       <StatCard label="Unique Visitors" value={totalVisitors} trend={15} delay={80} sparkData={timeSeriesData.slice(-30).map(d => (d && d.visitors) || 0)} color={MC.visitors} compact />
       <StatCard label="Avg. Duration" value={avgDuration} suffix="s" trend={8} delay={120} sparkData={timeSeriesData.slice(-30).map(d => (d && d.avgDuration) || 0)} color={MC.avgDuration} compact />
       <StatCard label="Shot Accuracy" value={overallAccuracy} suffix="%" trend={5} delay={160} sparkData={timeSeriesData.slice(-14).map((_, i) => overallAccuracy + Math.round(Math.sin(i) * 4))} color="#D4A843" compact />
-      <StatCard label="Interaction Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => d && d.visitors > 0 ? Math.round((d.ballInteractions / d.visitors) * 100) : 0)} color={MC.ballInteractions} compact />
+      <StatCard label="Interaction Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => d && d.visitors > 0 ? Math.round((d.ballInteractions / d.visitors) * 100) : 0)} color={MC.ballInteractions} compact subtitle="% of visitors who interact with balls" />
     </div>
 
     {/* Bridge Stats — live activity since GA4's last sync */}
@@ -574,17 +576,19 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
           const impacts = JSON.parse(localStorage.getItem('__dadatadad_impacts') || '[]');
           if (!bridge) return undefined;
           // Build a ballStats Map from impact data
+          // Note: imp.isGoal is always false (Goal bodies lack .category in physics).
+          // Scoring actually happens on Menu bodies, so hitType==='menu' is the score indicator.
           const ballStats = new Map();
           if (Array.isArray(impacts)) {
             impacts.forEach(imp => {
               if (!imp.ballId) return;
               const existing = ballStats.get(imp.ballId) || { launches: 0, scores: 0 };
               existing.launches++;
-              if (imp.isGoal) existing.scores++;
+              if (imp.hitType === 'menu') existing.scores++;
               ballStats.set(imp.ballId, existing);
             });
           }
-          return { shots: bridge.shots || 0, makes: bridge.makes || 0, ballStats };
+          return { shots: bridge.shots || 0, makes: bridge.makes || 0, ballStats, impacts: Array.isArray(impacts) ? impacts : [] };
         } catch (_) { return undefined; }
       })()} />
     </div>
@@ -671,6 +675,32 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
         </div>
       </div>
     </div>
+    {/* Visitor Geography */}
+    <div style={{ ...SS.panel, marginTop: 20 }}>
+      <div style={SS.panelHeader}>
+        <span style={{ ...SS.panelTitle, marginBottom: 0 }}>Visitor Geography</span>
+        <span style={SS.panelBadge}>top locations</span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {(geoData || []).slice(0, 10).map((g, i) => {
+          const maxPct = (geoData || [])[0]?.pct || 1;
+          const barW = Math.max(4, (g.pct / maxPct) * 100);
+          return (
+            <div key={g.country} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", borderBottom: i < Math.min((geoData || []).length, 10) - 1 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", minWidth: 120, flex: "0 0 120px" }}>{g.country}</span>
+              <div style={{ flex: 1, height: 14, background: "rgba(255,255,255,0.03)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
+                <div style={{ width: `${barW}%`, height: "100%", background: `linear-gradient(90deg, #5985B1 0%, #D4A843 100%)`, borderRadius: 3, opacity: 0.7 }} />
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "baseline", minWidth: 80, justifyContent: "flex-end" }}>
+                <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: "#fff" }}>{g.users}</span>
+                <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: "#D4A843" }}>{g.pct}%</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+
     {/* Session Flow */}
     <div style={{ ...SS.panel, marginTop: 20 }}>
       <span style={SS.panelTitle}>Session Flow</span>
@@ -886,7 +916,10 @@ export default function AnalyticsDashboardV3() {
   });
   const sourcesData = isLive ? (liveData?.sources || MOCK_REFERRER) : MOCK_REFERRER;
   const pagesData = isLive ? (liveData?.pages || MOCK_PAGES) : MOCK_PAGES;
-  const ballData = (isLive && liveData?.ballEvents?.length > 0) ? liveData.ballEvents : MOCK_BALLS;
+  const geoData = isLive ? (liveData?.geography || MOCK_GEO) : MOCK_GEO;
+  // Filter out "(not set)" from ball data — noise from early data collection
+  const rawBallData = (isLive && liveData?.ballEvents?.length > 0) ? liveData.ballEvents : MOCK_BALLS;
+  const ballData = rawBallData.filter(b => b.ball !== '(not set)' && b.id !== '(not set)' && b.ball !== 'not set' && b.id !== 'not set' && b.ball && b.id);
 
   // Device data — adapt shape from data.js for V3 display
   const deviceData = MOCK_DEVICES.map(d => ({
@@ -940,7 +973,7 @@ export default function AnalyticsDashboardV3() {
       {activeTab === "analytics"
         ? <AnalyticsTab timeSeriesData={timeSeriesData} rangeDays={rangeDays}
             ballData={ballData} sourcesData={sourcesData} pagesData={pagesData}
-            deviceData={deviceData} sessionFlow={sessionFlow} isLive={isLive} />
+            deviceData={deviceData} sessionFlow={sessionFlow} geoData={geoData} isLive={isLive} />
         : <DataArchitectureTab />
       }
     </div>

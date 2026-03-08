@@ -40,22 +40,22 @@
 /* ─── SVG ── */
 .shot-chart-svg { display: block; width: 100%; height: auto; border-radius: 8px; overflow: visible; }
 
-/* ─── Zone titles — much more visible ── */
+/* ─── Zone titles — compact ── */
 .shot-zone-title {
   font-family: var(--font-display, 'Syne', sans-serif);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   fill: rgba(255, 255, 255, 0.3);
   letter-spacing: 0.1em;
 }
 .shot-zone-title--lg {
-  font-size: 14px;
-  fill: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+  fill: rgba(255, 255, 255, 0.45);
   font-weight: 800;
 }
 .shot-zone-title--sub {
-  font-size: 10px;
-  fill: rgba(255, 255, 255, 0.25);
+  font-size: 9px;
+  fill: rgba(255, 255, 255, 0.2);
   font-weight: 500;
   letter-spacing: 0.06em;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
@@ -64,8 +64,8 @@
 /* ─── Goal label ── */
 .shot-goal-label {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 8px;
-  fill: rgba(89, 133, 177, 0.4);
+  font-size: 7px;
+  fill: rgba(89, 133, 177, 0.35);
   font-weight: 700;
   letter-spacing: 0.1em;
 }
@@ -83,8 +83,8 @@
 
 .shot-ball-name {
   font-family: var(--font-body, 'DM Sans', sans-serif);
-  font-size: 11px;
-  fill: var(--a-text-dim, rgba(255, 255, 255, 0.6));
+  font-size: 9px;
+  fill: var(--a-text-dim, rgba(255, 255, 255, 0.55));
   font-weight: 600;
   pointer-events: none;
   transition: opacity 0.2s;
@@ -92,17 +92,17 @@
 
 .shot-ball-count {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 10px;
-  fill: rgba(255, 255, 255, 0.45);
+  font-size: 9px;
+  fill: rgba(255, 255, 255, 0.4);
   font-weight: 600;
   pointer-events: none;
 }
 
-/* ─── Category labels ── */
+/* ─── Category labels — compact ── */
 .shot-cat-label {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 13px;
-  fill: var(--a-text-dim, rgba(255, 255, 255, 0.7));
+  font-size: 10px;
+  fill: var(--a-text-dim, rgba(255, 255, 255, 0.55));
   letter-spacing: 0.04em;
   transition: opacity 0.2s, font-weight 0.15s;
 }
@@ -122,9 +122,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  padding: 12px 16px 8px;
-  margin-top: 6px;
+  gap: 16px;
+  padding: 10px 12px 6px;
+  margin-top: 4px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   flex-wrap: wrap;
 }
@@ -132,14 +132,14 @@
 .shot-legend-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .shot-legend-heading {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -147,18 +147,18 @@
 .shot-legend-items {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .shot-legend-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .shot-legend-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
@@ -172,12 +172,12 @@
   display: inline-block;
   flex-shrink: 0;
 }
-.shot-legend-circle--sm { width: 10px; height: 10px; }
-.shot-legend-circle--lg { width: 20px; height: 20px; }
+.shot-legend-circle--sm { width: 8px; height: 8px; }
+.shot-legend-circle--lg { width: 16px; height: 16px; }
 
 .shot-legend-label {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 10px;
+  font-size: 9px;
   color: rgba(255, 255, 255, 0.4);
   font-weight: 500;
 }
@@ -188,7 +188,7 @@
 
 .shot-legend-sep {
   width: 1px;
-  height: 24px;
+  height: 20px;
   background: rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
 }
@@ -197,14 +197,14 @@
 .shot-stat-strip {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 10px 6px 4px;
+  gap: 16px;
+  padding: 8px 6px 4px;
   margin-top: 4px;
 }
-.shot-stat { display: flex; align-items: baseline; gap: 6px; }
+.shot-stat { display: flex; align-items: baseline; gap: 5px; }
 .shot-stat-val {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--a-text, #fff);
   letter-spacing: -0.02em;
@@ -212,18 +212,18 @@
 .shot-stat-accent { color: var(--a-gold, #D4A843); }
 .shot-stat-lbl {
   font-family: var(--font-body, 'DM Sans', sans-serif);
-  font-size: 10px;
+  font-size: 9px;
   color: var(--a-text-muted, rgba(255, 255, 255, 0.4));
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-.shot-stat-div { width: 1px; height: 18px; background: rgba(255, 255, 255, 0.08); flex-shrink: 0; }
+.shot-stat-div { width: 1px; height: 16px; background: rgba(255, 255, 255, 0.08); flex-shrink: 0; }
 
 /* ─── Responsive ── */
 @media screen and (max-width: 680px) {
-  .shot-stat-strip { flex-wrap: wrap; gap: 8px 14px; }
+  .shot-stat-strip { flex-wrap: wrap; gap: 8px 12px; }
   .shot-chart-wrap { padding: 10px 12px 8px; }
-  .shot-legend { gap: 12px; padding: 10px 8px 6px; }
+  .shot-legend { gap: 10px; padding: 8px 6px 4px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .shot-dot, .shot-ball, .shot-acc-ring, .shot-tooltip { animation: none !important; }

@@ -60,7 +60,8 @@ function BallRow({ ball, maxBarVal, barMetric, index }) {
 export default function BallEngagement({ liveData }) {
   const [barMetric, setBarMetric] = useState('launches');
 
-  const data = (liveData && liveData.length > 0) ? liveData : BALL_ENGAGEMENT;
+  const raw = (liveData && liveData.length > 0) ? liveData : BALL_ENGAGEMENT;
+  const data = raw.filter(b => b.ball !== '(not set)' && b.id !== '(not set)' && b.ball !== 'not set' && b.ball && b.id);
 
   const maxBarVal = Math.max(...data.map((b) => b[barMetric] || 0));
   const sorted = [...data].sort((a, b) => (b.launches || 0) - (a.launches || 0));

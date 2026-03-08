@@ -8,7 +8,7 @@
  * Features:
  *   - Area-proportional ball sizing (r = base × √(launches/max))
  *   - Accuracy shown as outer ring arc on each ball
- *   - Score/miss dots scattered in the contact zone (left)
+ *   - Score/miss dots from real impact data when available, fallback to seeded scatter
  *   - Category highlight on label hover, ball hover tooltips
  *   - All-time / session toggle (centered top)
  *   - Rich HTML legend below the SVG
@@ -17,7 +17,7 @@
  *
  * Props:
  *   liveData    — array of ball objects from GA4 worker (optional)
- *   sessionData — { shots, makes, ballStats: Map<id, {launches,scores}> } (optional)
+ *   sessionData — { shots, makes, ballStats: Map<id, {launches,scores}>, impacts: [] } (optional)
  */
 
 import { useState, useMemo } from 'react';
@@ -31,23 +31,50 @@ function seededRand(seed) {
 
 // ── Filter out "(not set)" balls ──────────────────────────────────────
 function filterValid(balls) {
-  return balls.filter(b => b.ball !== '(not set)' && b.id !== '(not set)' && b.ball !== 'not set');
+  return balls.filter(b =>
+    b.ball !== '(not set)' && b.id !== '(not set)' &&
+    b.ball !== 'not set' && b.id !== 'not set' &&
+    b.ball && b.id
+  );
 }
 
-// ── Generate score/miss dots (left zone only) ─────────────────────────
-function generateDots(balls, seed = 7) {
+// ── Generate score/miss dots ──────────────────────────────────────────
+// Uses real impact data (from __dadatadad_impacts) when available,
+// falls back to seeded random scatter based on score/miss counts.
+function generateDots(balls, seed = 7, impacts) {
+  // If we have real impact data, use actual coordinates
+  if (impacts && impacts.length > 0) {
+    const dots = [];
+    impacts.forEach(imp => {
+      if (!imp.ballId || !imp.x || !imp.y) return;
+      // Map normalized coords (0-1) to SVG left zone (x: 20-320, y: 50-370)
+      const svgX = 20 + imp.x * 300;
+      const svgY = 50 + imp.y * 320;
+      const ball = balls.find(b => b.id === imp.ballId);
+      dots.push({
+        x: svgX, y: svgY,
+        type: imp.hitType === 'menu' ? 'score' : 'miss',
+        ballId: imp.ballId,
+        color: ball?.color || '#888',
+        category: ball?.category || imp.ballCategory || '',
+      });
+    });
+    return dots;
+  }
+
+  // Fallback: seeded random scatter
   const rand = seededRand(seed);
   const dots = [];
   balls.forEach((ball) => {
     const misses = Math.max(0, (ball.launches || 0) - (ball.scores || 0));
     const scores = ball.scores || 0;
-    // Score dots cluster near goal posts and category labels (x: 30–280, y: 55–350)
+    // Score dots cluster near the upper zone (x: 30–280, y: 55–250)
     for (let i = 0; i < Math.min(scores, 40); i++) {
-      dots.push({ x: 30 + rand() * 250, y: 55 + rand() * 295, type: 'score', ballId: ball.id, color: ball.color, category: ball.category });
+      dots.push({ x: 30 + rand() * 250, y: 55 + rand() * 200, type: 'score', ballId: ball.id, color: ball.color, category: ball.category });
     }
-    // Miss dots scatter wider but still in left zone (x: 40–310, y: 45–355)
+    // Miss dots scatter wider (x: 40–310, y: 45–300)
     for (let i = 0; i < Math.min(misses, 20); i++) {
-      dots.push({ x: 40 + rand() * 270, y: 45 + rand() * 310, type: 'miss', ballId: ball.id, color: ball.color, category: ball.category });
+      dots.push({ x: 40 + rand() * 270, y: 45 + rand() * 260, type: 'miss', ballId: ball.id, color: ball.color, category: ball.category });
     }
   });
   return dots;
@@ -59,8 +86,8 @@ function layoutBalls(balls) {
   const count = sorted.length;
   if (count === 0) return [];
 
-  // Horizontal band: x from 380 to 720, vertically centered at ~200
-  const startX = 400, endX = 720, centerY = 200;
+  // Horizontal band: x from 355 to 720, vertically centered at ~190
+  const startX = 355, endX = 720, centerY = 190;
   const totalWidth = endX - startX;
   const step = count > 1 ? totalWidth / (count - 1) : 0;
 
@@ -72,7 +99,8 @@ function layoutBalls(balls) {
 }
 
 const CATEGORY_ORDER = ['Technology', 'Business', 'Apps', 'Me'];
-const CATEGORY_Y = { Technology: 105, Business: 170, Apps: 235, Me: 300 };
+// Push categories to the bottom of the left zone to leave room for contact dots above
+const CATEGORY_Y = { Technology: 280, Business: 310, Apps: 340, Me: 370 };
 
 function shortName(name) {
   const map = {
@@ -81,12 +109,12 @@ function shortName(name) {
     'Google Data Studio Streaming Dashboard': 'Data Studio',
     'Google Data Studio': 'Data Studio',
     'The Wine You Drink': 'Wine App',
-    'Smart Chicken Coop': 'Chicken Coop',
+    'Smart Chicken Coop': 'Coop',
     'Portfolio Website': 'Portfolio',
     'Site Analytics': 'Analytics',
     'Josh Merritt': 'Josh',
   };
-  return map[name] || (name.length <= 14 ? name : name.slice(0, 12) + '\u2026');
+  return map[name] || (name.length <= 12 ? name : name.slice(0, 10) + '\u2026');
 }
 
 
@@ -110,7 +138,7 @@ export default function ShotChart({ liveData, sessionData }) {
 
   const data = mode === 'session' ? sessionBalls : allTimeData;
   const maxLaunches = Math.max(...data.map(b => b.launches || 0), 1);
-  const BASE_R = 34, MIN_R = 10;
+  const BASE_R = 30, MIN_R = 9;
 
   const ballsWithPos = useMemo(() =>
     layoutBalls(data).map(b => ({
@@ -120,7 +148,9 @@ export default function ShotChart({ liveData, sessionData }) {
     })),
     [data, maxLaunches]);
 
-  const dots = useMemo(() => generateDots(data, mode === 'session' ? 99 : 7), [data, mode]);
+  const dots = useMemo(() =>
+    generateDots(data, mode === 'session' ? 99 : 7, mode === 'session' ? sessionData?.impacts : null),
+    [data, mode, sessionData]);
 
   const totalShots = data.reduce((s, b) => s + (b.launches || 0), 0);
   const totalScores = data.reduce((s, b) => s + (b.scores || 0), 0);
@@ -134,8 +164,8 @@ export default function ShotChart({ liveData, sessionData }) {
 
   const W = 740, H = 410;
 
-  // Goal post positions
-  const goalDotY = 62;
+  // Goal post positions — pushed down to leave room for contact dots above
+  const goalDotY = 250;
   const goalDot1X = 42;
   const goalDot2X = 110;
 
@@ -159,25 +189,16 @@ export default function ShotChart({ liveData, sessionData }) {
 
         <rect width={W} height={H} rx="8" fill="rgba(8,12,18,0.6)" />
 
-        {/* Zone titles — much more visible */}
-        <text x={170} y={30} textAnchor="middle" className="shot-zone-title shot-zone-title--lg">FIRST POINT OF CONTACT</text>
-        <text x={170} y={44} textAnchor="middle" className="shot-zone-title shot-zone-title--sub">score &amp; miss heatmap</text>
-        <text x={555} y={30} textAnchor="middle" className="shot-zone-title shot-zone-title--lg">LAUNCH FREQUENCY</text>
-        <text x={555} y={44} textAnchor="middle" className="shot-zone-title shot-zone-title--sub">sorted by volume</text>
+        {/* Zone titles — compact */}
+        <text x={170} y={28} textAnchor="middle" className="shot-zone-title shot-zone-title--lg">FIRST POINT OF CONTACT</text>
+        <text x={170} y={40} textAnchor="middle" className="shot-zone-title shot-zone-title--sub">score &amp; miss heatmap</text>
+        <text x={530} y={28} textAnchor="middle" className="shot-zone-title shot-zone-title--lg">LAUNCH FREQUENCY</text>
+        <text x={530} y={40} textAnchor="middle" className="shot-zone-title shot-zone-title--sub">sorted by volume</text>
 
         {/* Zone divider */}
-        <line x1="350" y1="55" x2="350" y2={H - 30} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+        <line x1="340" y1="50" x2="340" y2={H - 20} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
 
-        {/* Goal posts — two dots like the portfolio */}
-        <circle cx={goalDot1X} cy={goalDotY} r="6" fill="none" stroke="rgba(89,133,177,0.5)" strokeWidth="1.5" />
-        <circle cx={goalDot2X} cy={goalDotY} r="6" fill="none" stroke="rgba(89,133,177,0.5)" strokeWidth="1.5" />
-        <text x={76} y={goalDotY + 4} textAnchor="middle" className="shot-goal-label">GOAL</text>
-
-        {/* Net lines from goal posts down */}
-        <line x1={goalDot1X} y1={goalDotY + 7} x2={goalDot1X} y2={H - 40} stroke="rgba(89,133,177,0.1)" strokeWidth="1" strokeDasharray="3,5" />
-        <line x1={goalDot2X} y1={goalDotY + 7} x2={goalDot2X} y2={H - 40} stroke="rgba(89,133,177,0.1)" strokeWidth="1" strokeDasharray="3,5" />
-
-        {/* Dots */}
+        {/* Dots — contact heatmap */}
         {dots.map((d, i) => (
           <circle key={i} cx={d.x} cy={d.y} r={d.type === 'score' ? 3.2 : 2.4}
             fill={d.type === 'score' ? '#6B9F6B' : '#C05050'}
@@ -185,15 +206,24 @@ export default function ShotChart({ liveData, sessionData }) {
             className="shot-dot" style={{ animationDelay: `${600 + i * 6}ms` }} />
         ))}
 
-        {/* Category labels — positioned between goal posts */}
+        {/* Goal posts — pushed down below the dot scatter zone */}
+        <circle cx={goalDot1X} cy={goalDotY} r="5" fill="none" stroke="rgba(89,133,177,0.4)" strokeWidth="1.5" />
+        <circle cx={goalDot2X} cy={goalDotY} r="5" fill="none" stroke="rgba(89,133,177,0.4)" strokeWidth="1.5" />
+        <text x={76} y={goalDotY + 4} textAnchor="middle" className="shot-goal-label">GOAL</text>
+
+        {/* Net lines from goal posts down */}
+        <line x1={goalDot1X} y1={goalDotY + 6} x2={goalDot1X} y2={H - 25} stroke="rgba(89,133,177,0.08)" strokeWidth="1" strokeDasharray="3,5" />
+        <line x1={goalDot2X} y1={goalDotY + 6} x2={goalDot2X} y2={H - 25} stroke="rgba(89,133,177,0.08)" strokeWidth="1" strokeDasharray="3,5" />
+
+        {/* Category labels — at bottom of left zone, compact */}
         {CATEGORY_ORDER.map(cat => {
           const y = CATEGORY_Y[cat], active = hoveredCat === cat, dim = anyHover && !active && hoveredCat;
           return (
             <g key={cat}>
-              <rect x="0" y={y - 20} width="150" height="40" fill="transparent" style={{ cursor: 'pointer' }}
+              <rect x="0" y={y - 12} width="150" height="26" fill="transparent" style={{ cursor: 'pointer' }}
                 onMouseEnter={() => setHoveredCat(cat)} onMouseLeave={() => setHoveredCat(null)} />
-              <text x={76} y={y + 5} textAnchor="middle" className="shot-cat-label"
-                opacity={dim ? 0.12 : active ? 1 : 0.6} fontWeight={active ? 700 : 600}>{cat}</text>
+              <text x={76} y={y + 4} textAnchor="middle" className="shot-cat-label"
+                opacity={dim ? 0.12 : active ? 1 : 0.55} fontWeight={active ? 700 : 500}>{cat}</text>
             </g>
           );
         })}
@@ -201,7 +231,7 @@ export default function ShotChart({ liveData, sessionData }) {
         {/* Balls with accuracy ring overlay — horizontal layout */}
         {ballsWithPos.map((ball, i) => {
           const lit = isLit(ball), isHov = hoveredBall === ball.id;
-          const ringR = ball.r + 5;
+          const ringR = ball.r + 4;
           const circ = 2 * Math.PI * ringR;
           const accPct = ball.acc;
           const accColor = accPct > 0.8 ? '#6B9F6B' : accPct > 0.6 ? '#D4A843' : '#C05050';
@@ -233,37 +263,45 @@ export default function ShotChart({ liveData, sessionData }) {
                 className="shot-ball" style={{ animationDelay: `${i * 70}ms` }} />
 
               {/* Launch count inside ball (if big enough) */}
-              {ball.r >= 18 && (
-                <text x={ball.cx} y={ball.cy + 4} textAnchor="middle" className="shot-ball-count"
+              {ball.r >= 16 && (
+                <text x={ball.cx} y={ball.cy + 3} textAnchor="middle" className="shot-ball-count"
                   opacity={anyHover && !lit ? 0.08 : 0.5}>{ball.launches}</text>
               )}
 
-              {/* Ball name below */}
-              <text x={ball.cx} y={ball.cy + ball.r + 20} textAnchor="middle" className="shot-ball-name"
-                opacity={anyHover && !lit ? 0.08 : 0.7}>{shortName(ball.ball)}</text>
+              {/* Ball name below — compact */}
+              <text x={ball.cx} y={ball.cy + ball.r + 14} textAnchor="middle" className="shot-ball-name"
+                opacity={anyHover && !lit ? 0.08 : 0.65}>{shortName(ball.ball)}</text>
             </g>
           );
         })}
 
-        {/* Tooltip */}
+        {/* Tooltip — redesigned: Scores → Launches = Acc%, CTA % */}
         {tooltipBall && (() => {
           const b = tooltipBall;
           const acc = b.launches > 0 ? ((b.scores / b.launches) * 100).toFixed(0) : '0';
           const conv = b.opens > 0 ? (((b.ctaClicks || 0) / b.opens) * 100).toFixed(0) : '\u2014';
-          const tw = 148, th = 76;
+          const tw = 160, th = 84;
           const tx = b.cx - b.r - tw - 10 > 0 ? b.cx - b.r - tw - 8 : b.cx + b.r + 8;
           const ty = Math.min(Math.max(b.cy - th / 2, 4), H - th - 4);
+          const accColor = parseFloat(acc) > 75 ? '#6B9F6B' : parseFloat(acc) > 50 ? '#D4A843' : '#C05050';
           return (
             <g className="shot-tooltip">
-              <rect x={tx} y={ty} width={tw} height={th} rx="6" fill="rgba(6,10,16,0.93)" stroke={`${b.color}55`} strokeWidth="1" />
-              <text x={tx + 10} y={ty + 18} fill="#fff" fontSize="12" fontWeight="600" fontFamily="'DM Sans', sans-serif">{b.ball}</text>
-              <text x={tx + 10} y={ty + 34} fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="'JetBrains Mono', monospace">Launches</text>
-              <text x={tx + 82} y={ty + 34} fill="rgba(255,255,255,0.8)" fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{b.launches}</text>
-              <text x={tx + 10} y={ty + 50} fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="'JetBrains Mono', monospace">Scores</text>
-              <text x={tx + 82} y={ty + 50} fill="rgba(255,255,255,0.8)" fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{b.scores}</text>
-              <text x={tx + 112} y={ty + 50} fill={parseFloat(acc) > 75 ? '#6B9F6B' : '#D4A843'} fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="700">{acc}%</text>
-              <text x={tx + 10} y={ty + 66} fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="'JetBrains Mono', monospace">CTA Conv</text>
-              <text x={tx + 82} y={ty + 66} fill={conv !== '\u2014' && parseFloat(conv) > 70 ? '#6B9F6B' : '#D4A843'} fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{conv}{conv !== '\u2014' ? '%' : ''}</text>
+              <rect x={tx} y={ty} width={tw} height={th} rx="6" fill="rgba(6,10,16,0.95)" stroke={`${b.color}55`} strokeWidth="1" />
+              {/* Ball name */}
+              <text x={tx + 10} y={ty + 16} fill="#fff" fontSize="11" fontWeight="600" fontFamily="'DM Sans', sans-serif">{b.ball}</text>
+              {/* Scores row */}
+              <text x={tx + 10} y={ty + 33} fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'JetBrains Mono', monospace">Scores</text>
+              <text x={tx + 62} y={ty + 33} fill="#6B9F6B" fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{b.scores}</text>
+              {/* Launches row with = accuracy */}
+              <text x={tx + 10} y={ty + 48} fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'JetBrains Mono', monospace">Launches</text>
+              <text x={tx + 62} y={ty + 48} fill="rgba(255,255,255,0.8)" fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{b.launches}</text>
+              <text x={tx + 96} y={ty + 48} fill="rgba(255,255,255,0.25)" fontSize="10" fontFamily="'JetBrains Mono', monospace">=</text>
+              <text x={tx + 108} y={ty + 48} fill={accColor} fontSize="11" fontFamily="'JetBrains Mono', monospace" fontWeight="700">{acc}%</text>
+              {/* Divider line */}
+              <line x1={tx + 10} y1={ty + 56} x2={tx + tw - 10} y2={ty + 56} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
+              {/* CTA Conv row */}
+              <text x={tx + 10} y={ty + 72} fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'JetBrains Mono', monospace">CTA Conv</text>
+              <text x={tx + 62} y={ty + 72} fill={conv !== '\u2014' && parseFloat(conv) > 70 ? '#7B5EA7' : '#D4A843'} fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{conv}{conv !== '\u2014' ? '%' : ''}</text>
             </g>
           );
         })()}
@@ -300,22 +338,20 @@ export default function ShotChart({ liveData, sessionData }) {
           <span className="shot-legend-heading">Accuracy Ring</span>
           <div className="shot-legend-items">
             <div className="shot-legend-item">
-              <svg width="22" height="22" viewBox="0 0 22 22" className="shot-legend-ring-svg">
-                <circle cx="11" cy="11" r="9" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
-                <circle cx="11" cy="11" r="9" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round"
-                  strokeDasharray={`${Math.PI * 18 * 0.5} ${Math.PI * 18 * 0.5}`}
-                  strokeDashoffset={Math.PI * 18 * 0.25} opacity="0.7" />
-                <text x="11" y="14" textAnchor="middle" fill="#D4A843" fontSize="7" fontWeight="700" fontFamily="'JetBrains Mono', monospace">50</text>
+              <svg width="20" height="20" viewBox="0 0 20 20" className="shot-legend-ring-svg">
+                <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
+                <circle cx="10" cy="10" r="8" fill="none" stroke="#D4A843" strokeWidth="2" strokeLinecap="round"
+                  strokeDasharray={`${Math.PI * 16 * 0.5} ${Math.PI * 16 * 0.5}`}
+                  strokeDashoffset={Math.PI * 16 * 0.25} opacity="0.7" />
               </svg>
               <span className="shot-legend-label shot-legend-label--gold">50%</span>
             </div>
             <div className="shot-legend-item">
-              <svg width="22" height="22" viewBox="0 0 22 22" className="shot-legend-ring-svg">
-                <circle cx="11" cy="11" r="9" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
-                <circle cx="11" cy="11" r="9" fill="none" stroke="#6B9F6B" strokeWidth="2" strokeLinecap="round"
-                  strokeDasharray={`${Math.PI * 18 * 0.9} ${Math.PI * 18 * 0.1}`}
-                  strokeDashoffset={Math.PI * 18 * 0.25} opacity="0.7" />
-                <text x="11" y="14" textAnchor="middle" fill="#6B9F6B" fontSize="7" fontWeight="700" fontFamily="'JetBrains Mono', monospace">90</text>
+              <svg width="20" height="20" viewBox="0 0 20 20" className="shot-legend-ring-svg">
+                <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
+                <circle cx="10" cy="10" r="8" fill="none" stroke="#6B9F6B" strokeWidth="2" strokeLinecap="round"
+                  strokeDasharray={`${Math.PI * 16 * 0.9} ${Math.PI * 16 * 0.1}`}
+                  strokeDashoffset={Math.PI * 16 * 0.25} opacity="0.7" />
               </svg>
               <span className="shot-legend-label shot-legend-label--green">90%</span>
             </div>

@@ -32,6 +32,7 @@ export async function fetchGA4Data(days = 90) {
       sources: data.sources || [],
       pages: data.pages || [],
       ballEvents: data.ballEvents || [],
+      geography: data.geography || [],
       isLive: true,
     };
   } catch (err) {
@@ -166,6 +167,20 @@ export const ARCHITECTURE = {
     { name: 'portfolio_loaded', params: ['load_time_ms'] },
   ],
 };
+
+// ── Visitor geography (mock / fallback) ──────────────────────────────
+export const GEOGRAPHY_DATA = [
+  { country: 'United States', users: 284, sessions: 412, pct: 62.1 },
+  { country: 'United Kingdom', users: 38, sessions: 52, pct: 8.3 },
+  { country: 'Canada', users: 29, sessions: 41, pct: 6.3 },
+  { country: 'Germany', users: 18, sessions: 24, pct: 3.9 },
+  { country: 'India', users: 16, sessions: 22, pct: 3.5 },
+  { country: 'Australia', users: 14, sessions: 19, pct: 3.1 },
+  { country: 'France', users: 11, sessions: 15, pct: 2.4 },
+  { country: 'Brazil', users: 9, sessions: 12, pct: 2.0 },
+  { country: 'Netherlands', users: 7, sessions: 10, pct: 1.5 },
+  { country: 'Japan', users: 6, sessions: 8, pct: 1.3 },
+];
 
 // ── Metric colors ───────────────────────────────────────────────────────
 export const METRIC_COLORS = {
