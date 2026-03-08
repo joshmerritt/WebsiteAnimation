@@ -82,12 +82,13 @@
 @keyframes shotBallGrow { from { r: 2; opacity: 0; } }
 
 .shot-ball-name {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
-  font-size: 9px;
-  fill: var(--a-text-dim, rgba(255, 255, 255, 0.55));
-  font-weight: 600;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 7px;
+  fill: var(--a-text-dim, rgba(255, 255, 255, 0.45));
+  font-weight: 500;
   pointer-events: none;
   transition: opacity 0.2s;
+  letter-spacing: 0.02em;
 }
 
 .shot-ball-count {

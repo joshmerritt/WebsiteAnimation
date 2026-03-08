@@ -715,8 +715,9 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
           stages[f.from].push(f);
         });
         const stageOrder = ['Landing', 'Ball Interaction', 'Detail Page'];
-        const stageColors = { Landing: '#5985B1', 'Ball Interaction': '#D4A843', 'Detail Page': '#6B9F6B' };
-        const maxRows = Math.max(...stageOrder.map(s => (stages[s] || []).length));
+        const stageColors = { 'Landing': '#5985B1', 'Ball Interaction': '#D4A843', 'Detail Page': '#6B9F6B' };
+        // Color items by their destination stage — links across columns share the same color
+        const itemColor = (to) => stageColors[to] || (to === 'External Link' ? '#D4A843' : to === 'Multiple Balls' ? '#D4A843' : to === 'Back to Play' ? '#5985B1' : '#C05050');
         return (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
             {stageOrder.map((stage, si) => (
@@ -724,12 +725,15 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
                 <div style={{ fontSize: 10, fontWeight: 700, color: stageColors[stage], textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, fontFamily: "'JetBrains Mono', monospace" }}>
                   {stage}
                 </div>
-                {(stages[stage] || []).map((f, i) => (
-                  <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0", borderBottom: i < (stages[stage] || []).length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.65)" }}>{f.to}</span>
-                    <span style={{ fontSize: 12, fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", color: f.color }}>{f.pct}%</span>
-                  </div>
-                ))}
+                {(stages[stage] || []).map((f, i) => {
+                  const c = itemColor(f.to);
+                  return (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0", borderBottom: i < (stages[stage] || []).length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                      <span style={{ fontSize: 11, color: c, opacity: 0.8 }}>{f.to}</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", color: c }}>{f.pct}%</span>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
