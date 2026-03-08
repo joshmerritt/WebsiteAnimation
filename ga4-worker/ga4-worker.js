@@ -25,11 +25,12 @@ export default {
       const propertyId = env.GA4_PROPERTY_ID;
 
       // Run all reports in parallel
-      const [timeSeries, sources, pages, ballEvents] = await Promise.all([
+      const [timeSeries, sources, pages, ballEvents, geography] = await Promise.all([
         fetchTimeSeries(accessToken, propertyId, days),
         fetchSources(accessToken, propertyId, days),
         fetchTopPages(accessToken, propertyId, days),
         fetchBallEvents(accessToken, propertyId, days),
+        fetchGeography(accessToken, propertyId, days),
       ]);
 
       const body = JSON.stringify({
@@ -37,6 +38,7 @@ export default {
         sources,
         pages,
         ballEvents,
+        geography,
         _ctaDebug: ballEvents._debug || null,
         fetchedAt: new Date().toISOString(),
         days,
@@ -438,6 +440,36 @@ async function fetchBallEvents(token, propId, days) {
     ctaClicksMap: ctaClicks,
   };
   return sorted;
+}
+
+// ── Visitor geography ─────────────────────────────────────────────────
+
+async function fetchGeography(token, propId, days) {
+  const report = await runReport(token, propId, {
+    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+    dimensions: [{ name: 'country' }],
+    metrics: [
+      { name: 'activeUsers' },
+      { name: 'sessions' },
+    ],
+    orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+    limit: 15,
+  });
+
+  const rows = report.rows || [];
+  const totalUsers = rows.reduce((s, r) => s + parseInt(r.metricValues[0].value, 10), 0);
+
+  return rows.map(row => {
+    const country = row.dimensionValues[0].value;
+    const users = parseInt(row.metricValues[0].value, 10);
+    const sessions = parseInt(row.metricValues[1].value, 10);
+    return {
+      country: country === '(not set)' ? 'Unknown' : country,
+      users,
+      sessions,
+      pct: totalUsers > 0 ? parseFloat(((users / totalUsers) * 100).toFixed(1)) : 0,
+    };
+  }).filter(g => g.country !== 'Unknown');
 }
 
 function indexByDimension(report) {
