@@ -84,7 +84,7 @@ function generateInsights(timeSeriesData, ballDataArg) {
     const lost = Math.round(topVolClicks * (topConv.ctaClicks / topConvClicks)) - topVol.ctaClicks;
     insights.push({ type: "opportunity", icon: "\uD83C\uDFAF", title: "Conversion Efficiency Gap",
       body: `"${topVol.ball}" gets the most traffic (${topVolClicks} interactions) but converts to CTA at ${topVolConv}%, while "${topConv.ball}" converts at ${topConvConv}%. If the top-volume ball matched that rate, it would generate ~${lost} additional CTA click-throughs.`,
-      recommendation: `Investigate what makes "${topConv.ball}" convert better — is the CTA more prominent in its detail modal? Apply those patterns to "${topVol.ball}".`,
+      recommendation: `Investigate what makes "${topConv.ball}" convert better. Is the CTA more prominent in its detail modal? Apply those patterns to "${topVol.ball}".`,
       metric: `+${lost} CTAs`, metricColor: "#6B9F6B", severity: "high" });
   }
 
@@ -104,7 +104,7 @@ function generateInsights(timeSeriesData, ballDataArg) {
   const bestCat = catArr[0], worstCat = catArr[catArr.length - 1];
   const catGap = (bestCat.conv - worstCat.conv).toFixed(0);
   insights.push({ type: "analysis", icon: "\uD83D\uDCCA", title: "Category Performance Disparity",
-    body: `"${bestCat.name}" converts at ${bestCat.conv.toFixed(0)}% vs "${worstCat.name}" at ${worstCat.conv.toFixed(0)}% — a ${catGap}pp gap.`,
+    body: `"${bestCat.name}" converts at ${bestCat.conv.toFixed(0)}% vs "${worstCat.name}" at ${worstCat.conv.toFixed(0)}%, a ${catGap}pp gap.`,
     recommendation: `A/B test moving "${worstCat.name}" balls to more central positions. If conversion stays flat, refresh project descriptions or images for that category.`,
     metric: `${catGap}pp gap`, metricColor: "#D4A843", severity: "medium" });
 
@@ -119,8 +119,8 @@ function generateInsights(timeSeriesData, ballDataArg) {
   const tab = DEVICE_DATA.find(d => d.device === "Tablet");
   if (tab) {
     insights.push({ type: "positive", icon: "\u2728", title: "High-Intent Tablet Cohort",
-      body: `Tablet users show ${tab.interactionRate}% interaction rate and ${tab.avgShots} shots/session — the highest of any device despite only ${tab.pct}% of traffic. Likely recruiter deep-dives or repeat visitors.`,
-      recommendation: "This is your highest-quality audience. Optimize the tablet layout specifically — the larger touch target + screen real estate combo is working. Track if these sessions correlate with CTA clicks.",
+      body: `Tablet users show ${tab.interactionRate}% interaction rate and ${tab.avgShots} shots/session, the highest of any device despite only ${tab.pct}% of traffic. These are likely recruiter deep-dives or repeat visitors.`,
+      recommendation: "This is your highest-quality audience. Optimize the tablet layout specifically. The larger touch target and screen real estate combo is working well. Track if these sessions correlate with CTA clicks.",
       metric: `${tab.avgShots} shots/sess`, metricColor: "#6B9F6B", severity: "low" });
   }
 
@@ -132,7 +132,7 @@ function generateInsights(timeSeriesData, ballDataArg) {
     const dir = parseInt(delta) >= 0 ? "up" : "down";
     insights.push({ type: dir === "up" ? "positive" : "warning", icon: dir === "up" ? "\uD83D\uDCC8" : "\uD83D\uDCC9", title: "Week-over-Week Momentum",
       body: `Traffic ${dir} ${Math.abs(delta)}% WoW (${rAvg.toFixed(0)} vs ${pAvg.toFixed(0)} daily avg).`,
-      recommendation: parseInt(delta) >= 0 ? "Engagement quality is holding as volume grows — continue current LinkedIn posting cadence." : "Check if a referral source dropped off. Review LinkedIn posting cadence and consider a content refresh.",
+      recommendation: parseInt(delta) >= 0 ? "Engagement quality is holding as volume grows. Continue current LinkedIn posting cadence." : "Check if a referral source dropped off. Review LinkedIn posting cadence and consider a content refresh.",
       metric: `${parseInt(delta) >= 0 ? "+" : ""}${delta}% WoW`, metricColor: dir === "up" ? "#6B9F6B" : "#C05050", severity: "medium" });
   }
 
@@ -744,7 +744,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
     <div style={{ marginTop: 24, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
       <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", lineHeight: 1.7 }}>
         {isLive
-          ? "Real-time analytics powered by a custom GA4 Data API pipeline \u2014 a Cloudflare Worker authenticates via service account, queries the GA4 reporting endpoint, and returns structured JSON that this React dashboard consumes. Device breakdown, session flow, and architecture sections use supplementary demonstration data."
+          ? "Real-time analytics powered by a custom GA4 Data API pipeline. A Cloudflare Worker authenticates via service account, queries the GA4 reporting endpoint, and returns structured JSON that this React dashboard consumes. Device breakdown, session flow, and architecture data are supplementary demonstrations."
           : "Deterministic mock data shown for demonstration. In production, this dashboard connects to a Cloudflare Worker proxy that authenticates with the GA4 Data API and returns real visitor metrics, traffic sources, and ball engagement funnels."
         }
       </p>
@@ -786,7 +786,7 @@ function DataArchitectureTab() {
       {/* Category collision system */}
       <div style={{ marginTop: 12, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, padding: "14px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}><span style={{ fontSize: 14 }}>{"\uD83D\uDCA5"}</span><span style={{ fontSize: 12, fontWeight: 600, color: "#fff" }}>Category Collision System</span></div>
-        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, marginBottom: 8 }}>Each ball is assigned a collision bitmask based on its category (Me, Technology, Business, Apps). Goals share the same bitmask. When a ball enters a goal zone, matter.js checks <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#5985B1" }}>bodyA.category === bodyB.category</span> — a match triggers the detail modal. Non-matching balls bounce off the net barriers.</p>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, marginBottom: 8 }}>Each ball is assigned a collision bitmask based on its category (Me, Technology, Business, Apps). Goals share the same bitmask. When a ball enters a goal zone, matter.js checks <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#5985B1" }}>bodyA.category === bodyB.category</span>. A match triggers the detail modal; non-matching balls bounce off the net barriers.</p>
         <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
           {["Me → 0x0001", "Technology → 0x0002", "Business → 0x0004", "Apps → 0x0008"].map(b => <span key={b} style={{ padding: "3px 8px", borderRadius: 4, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", background: "rgba(89,133,177,0.1)", color: "#5985B1", border: "1px solid rgba(89,133,177,0.15)" }}>{b}</span>)}
         </div>
@@ -833,10 +833,10 @@ function DataArchitectureTab() {
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
         {[
           { state: "Idle", desc: "Static body in grid. Displays project image with canvas clipping.", color: "#5985B1", next: "Drag" },
-          { state: "Aiming", desc: "User dragging — power accumulates from mouse delta / sensitivity. Arrow indicator shows trajectory.", color: "#D4A843", next: "Release" },
+          { state: "Aiming", desc: "User dragging. Power accumulates from mouse delta and sensitivity. Arrow indicator shows trajectory.", color: "#D4A843", next: "Release" },
           { state: "Launched", desc: "Dynamic body with velocity. Collision filter set to category bitmask. Bounces off walls and nets.", color: "#6B9F6B", next: "Goal match?" },
           { state: "Scored", desc: "Category match detected. Detail modal opens. Ball freezes. Stats emitted via EventBus.", color: "#D4A843", next: "Close modal" },
-          { state: "Reset", desc: "Velocity zeroed. Position restored. Body set back to static. Removed from physics world.", color: "#C05050", next: null },
+          { state: "Reset", desc: "Velocity zeroed. Position restored. Body set back to static. Removed from the physics world.", color: "#C05050", next: null },
         ].map((s, i) => (
           <div key={s.state} style={{ width: "100%", maxWidth: 440 }}>
             <div style={{ border: `1px solid ${s.color}44`, borderRadius: 8, padding: "10px 14px", background: `${s.color}08` }}>
@@ -855,7 +855,7 @@ function DataArchitectureTab() {
     {/* Responsive Viewport Adaptation */}
     <div style={{ ...SS.panel, marginTop: 20 }}>
       <div style={SS.panelHeader}><span style={{ ...SS.panelTitle, marginBottom: 0 }}>Responsive Viewport</span><span style={SS.panelBadge}>adaptive layout</span></div>
-      <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.7, marginBottom: 14 }}>The Game class recalculates all layout values on resize — icon size, grid positions, goal placement, power scaling, and font sizes are all derived from viewport dimensions. No CSS breakpoints — pure JavaScript layout engine.</p>
+      <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.7, marginBottom: 14 }}>The Game class recalculates all layout values on resize: icon size, grid positions, goal placement, power scaling, and font sizes are all derived from viewport dimensions. No CSS breakpoints, just a pure JavaScript layout engine.</p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }} className="v3-two-col">
         {[
           { mode: "Portrait", items: [["Icon size", "width / iconScale (6)"], ["Grid cols", "Auto-fit from available width"], ["Goals", "Top-center dots"], ["Power", "area / iconSize^2.7"]] },
@@ -884,7 +884,7 @@ function DataArchitectureTab() {
     <div style={{ ...SS.panel, marginTop: 20 }}>
       <span style={SS.panelTitle}>Implementation Details</span>
       <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.8 }}>
-        <p style={{ marginBottom: 12 }}>Real-time analytics powered by a custom GA4 Data API pipeline — a Cloudflare Worker authenticates via service account, queries the GA4 reporting endpoint, and returns structured JSON that this React dashboard consumes.</p>
+        <p style={{ marginBottom: 12 }}>Real-time analytics powered by a custom GA4 Data API pipeline. A Cloudflare Worker authenticates via service account, queries the GA4 reporting endpoint, and returns structured JSON that this React dashboard consumes.</p>
         <p>Six custom GA4 events track the full user journey from ball interaction through project discovery and CTA conversion, with enriched parameters for per-project attribution and accuracy tracking.</p>
       </div>
       <div style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 14 }}>

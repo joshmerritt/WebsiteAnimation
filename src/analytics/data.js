@@ -104,7 +104,7 @@ export const PAGE_DATA = [
   { path: '/detail/powerBI',    title: 'Microsoft Power BI',          views: 312,  avgTime: '2:42', trend: 22 },
   { path: '/detail/wine',       title: 'The Wine You Drink',          views: 267,  avgTime: '3:58', trend: 45 },
   { path: '/detail/dartleague', title: 'Black Sheep Dart League',     views: 198,  avgTime: '2:21', trend: 38 },
-  { path: '/detail/aboutMe',    title: 'Josh Merritt — About',        views: 185,  avgTime: '1:12', trend: 8 },
+  { path: '/detail/aboutMe',    title: 'Josh Merritt: About',         views: 185,  avgTime: '1:12', trend: 8 },
   { path: '/detail/arduino',    title: 'Smart Chicken Coop',          views: 142,  avgTime: '2:35', trend: 12 },
   { path: '/analytics',         title: 'Site Analytics Dashboard',    views: 98,   avgTime: '3:15', trend: 67 },
   { path: '/detail/gds',        title: 'Google Data Studio',          views: 87,   avgTime: '1:55', trend: -5 },
