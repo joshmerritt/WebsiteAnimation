@@ -75,6 +75,7 @@ export function generateTimeSeriesData(days = 90) {
 
     const visitors = Math.round(Math.max(5, raw));
     const avgPagesPerVisit = 1.8 + rand() * 1.4;
+    const ballInteractions = Math.round(visitors * (0.4 + rand() * 0.3));
 
     data.push({
       date: date.toISOString().split('T')[0],
@@ -83,7 +84,8 @@ export function generateTimeSeriesData(days = 90) {
       pageviews: Math.round(visitors * avgPagesPerVisit),
       avgDuration: Math.round(35 + rand() * 200),
       bounceRate: Math.round(25 + rand() * 40),
-      ballInteractions: Math.round(visitors * (0.4 + rand() * 0.3)),
+      ballInteractions,
+      ctaClicks: Math.round(ballInteractions * (0.08 + rand() * 0.07)),
     });
   }
   return data;

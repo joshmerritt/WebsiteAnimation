@@ -195,25 +195,44 @@ async function fetchTimeSeries(token, propId, days) {
     limit: days + 1,
   });
 
-  // Also fetch ball_launch event counts per day for interaction rate
-  const ballReport = await runReport(token, propId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
-    dimensions: [{ name: 'date' }],
-    metrics: [{ name: 'eventCount' }],
-    dimensionFilter: {
-      filter: {
-        fieldName: 'eventName',
-        stringFilter: { matchType: 'EXACT', value: 'ball_launch' },
+  // Also fetch ball_launch and cta_click event counts per day
+  const [ballReport, ctaReport] = await Promise.all([
+    runReport(token, propId, {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dimensions: [{ name: 'date' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'ball_launch' },
+        },
       },
-    },
-    orderBys: [{ dimension: { dimensionName: 'date' } }],
-    limit: days + 1,
-  });
+      orderBys: [{ dimension: { dimensionName: 'date' } }],
+      limit: days + 1,
+    }),
+    runReport(token, propId, {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dimensions: [{ name: 'date' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          stringFilter: { matchType: 'EXACT', value: 'cta_click' },
+        },
+      },
+      orderBys: [{ dimension: { dimensionName: 'date' } }],
+      limit: days + 1,
+    }),
+  ]);
 
-  // Index ball interactions by date
+  // Index event counts by date
   const ballByDate = {};
   (ballReport.rows || []).forEach((row) => {
     ballByDate[row.dimensionValues[0].value] = parseInt(row.metricValues[0].value, 10);
+  });
+  const ctaByDate = {};
+  (ctaReport.rows || []).forEach((row) => {
+    ctaByDate[row.dimensionValues[0].value] = parseInt(row.metricValues[0].value, 10);
   });
 
   return (report.rows || []).map((row) => {
@@ -231,6 +250,7 @@ async function fetchTimeSeries(token, propId, days) {
       avgDuration: Math.round(parseFloat(row.metricValues[2].value)),
       bounceRate: Math.round(parseFloat(row.metricValues[3].value) * 100),
       ballInteractions: ballByDate[dateStr] || 0,
+      ctaClicks: ctaByDate[dateStr] || 0,
     };
   });
 }
