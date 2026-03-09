@@ -35,7 +35,7 @@ const projects = [
     name: 'Site Analytics',
     link: '/analytics-v3.html',
     category: 'Technology',
-    goal: 'Prove the portfolio isn\u2019t just pretty \u2014 track the important engagements and tell the story in a live dashboard.',
+    goal: 'Prove the portfolio isn\u2019t just pretty \u2014 track the meaningful engagements and tell the story in a live dashboard.',
     role: 'Creator and Developer',
     technology: 'React, Cloudflare Workers, GA4 Data API, SVG, CSS Grid',
     description:
