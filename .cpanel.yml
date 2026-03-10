@@ -1,5 +1,6 @@
 ---
 deployment:
   tasks:
+    - /bin/rm -rf /home/dadacikk/public_html/assets
     - /bin/cp -R dist/. /home/dadacikk/public_html/
     - /bin/cp dist/.htaccess /home/dadacikk/public_html/.htaccess
