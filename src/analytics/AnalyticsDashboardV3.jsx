@@ -5,7 +5,7 @@
  * Fetches live data from the GA4 Cloudflare Worker.
  * Falls back to deterministic mock data if the fetch fails.
  */
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, Component } from "react";
 import {
   fetchGA4Data,
   generateTimeSeriesData,
@@ -61,6 +61,7 @@ const PIPELINE_STEPS = [
 // ═══ INSIGHTS ENGINE ════════════════════════════════════════════════════
 function generateInsights(timeSeriesData, ballDataArg) {
   const BE = ballDataArg || BALL_ENGAGEMENT;
+  if (!BE || BE.length === 0) return [];
   const insights = [];
   const totals = BE.reduce((a, b) => ({
     clicks: a.clicks + (b.clicks || b.launches || 0), launches: a.launches + (b.launches || 0),
@@ -520,7 +521,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
   const overallAccuracy = totals.launches > 0 ? Math.round((totals.scores / totals.launches) * 100) : 0;
   const metrics = [{ key: "visitors", label: "Visitors", color: MC.visitors }, { key: "shots", label: "Shots", color: MC.shots }, { key: "ctaClicks", label: "CTA Clicks", color: MC.ctaClicks }];
   // Engagement depth
-  const avgBallsPerSession = (totals.clicks / totalVisitors).toFixed(1);
+  const avgBallsPerSession = totalVisitors > 0 ? (totals.clicks / totalVisitors).toFixed(1) : "0.0";
 
   return (<div>
     {/* KPI Strip 2x2 */}
@@ -894,11 +895,38 @@ function DataArchitectureTab() {
   </div>);
 }
 
+// ═══ ERROR BOUNDARY ═════════════════════════════════════════════════════
+class DashboardErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidCatch(error, info) { console.error('Dashboard render error:', error, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ minHeight: "100vh", background: "#0a0a0f", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32, fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
+          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Dashboard hit a snag</h2>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginBottom: 20, textAlign: "center", maxWidth: 400 }}>
+            Something went wrong rendering the analytics data. This usually resolves on reload.
+          </p>
+          <button onClick={() => window.location.reload()} style={{ padding: "8px 20px", borderRadius: 8, border: "1px solid rgba(89,133,177,0.4)", background: "rgba(89,133,177,0.15)", color: "#5985B1", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+            Reload Dashboard
+          </button>
+          <pre style={{ marginTop: 16, fontSize: 10, color: "rgba(255,255,255,0.25)", maxWidth: 500, overflow: "auto" }}>
+            {this.state.error?.message}
+          </pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ═══ MAIN DASHBOARD ═════════════════════════════════════════════════════
 const TIME_RANGES = [{ key: "7d", label: "7D", days: 7 }, { key: "30d", label: "30D", days: 30 }, { key: "90d", label: "90D", days: 90 }];
 const TABS = [{ key: "analytics", label: "Analytics" }, { key: "architecture", label: "Data Architecture" }];
 
-export default function AnalyticsDashboardV3() {
+function AnalyticsDashboardV3Inner() {
   const [activeTab, setActiveTab] = useState("analytics");
   const [timeRange, setTimeRange] = useState("90d");
 
@@ -952,8 +980,10 @@ export default function AnalyticsDashboardV3() {
   const pagesData = isLive ? (liveData?.pages || MOCK_PAGES) : MOCK_PAGES;
   const geoData = isLive ? (liveData?.geography || MOCK_GEO) : MOCK_GEO;
   // Filter out "(not set)" from ball data — noise from early data collection
+  // Fall back to mock data if live ball events are empty after filtering
   const rawBallData = (isLive && liveData?.ballEvents?.length > 0) ? liveData.ballEvents : MOCK_BALLS;
-  const ballData = rawBallData.filter(b => b.ball !== '(not set)' && b.id !== '(not set)' && b.ball !== 'not set' && b.id !== 'not set' && b.ball && b.id);
+  const filteredBallData = rawBallData.filter(b => b.ball !== '(not set)' && b.id !== '(not set)' && b.ball !== 'not set' && b.id !== 'not set' && b.ball && b.id);
+  const ballData = filteredBallData.length > 0 ? filteredBallData : MOCK_BALLS;
 
   // Device data — adapt shape from data.js for V3 display
   const deviceData = MOCK_DEVICES.map(d => ({
@@ -1012,6 +1042,10 @@ export default function AnalyticsDashboardV3() {
       }
     </div>
   );
+}
+
+export default function AnalyticsDashboardV3() {
+  return <DashboardErrorBoundary><AnalyticsDashboardV3Inner /></DashboardErrorBoundary>;
 }
 
 // ═══ STYLES ═════════════════════════════════════════════════════════════
