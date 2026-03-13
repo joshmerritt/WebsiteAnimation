@@ -243,6 +243,7 @@ export default class Game {
           category: ball.category,
           ballLaunches: ball.launchCount,
           ballMakes: ball.makes,
+          shotNumber: this.totalShots,
         });
       }
 
@@ -419,6 +420,7 @@ export default class Game {
             category: ball.category,
             ballLaunches: ball.launchCount,
             ballMakes: ball.makes,
+            shotNumber: this.totalShots,
           });
         }
       }
@@ -1311,5 +1313,4 @@ export default class Game {
     document.documentElement.style.setProperty('--ball-bottom', `${ballBottomY}px`);
   }
 }
-
 

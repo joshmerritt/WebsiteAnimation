@@ -48,7 +48,25 @@ const impactStore = {
   },
 
   add(record) {
-    this._data.push(record);
+    if (!record || typeof record !== 'object') return;
+    const shotNumber = typeof record.shotNumber === 'number' ? record.shotNumber : null;
+
+    // Ensure one impact record per shot: later updates (e.g., score resolution)
+    // replace the initial first-contact snapshot for that same shot.
+    if (shotNumber != null) {
+      const idx = this._data.findIndex((r) => r && r.shotNumber === shotNumber);
+      if (idx >= 0) {
+        const prev = this._data[idx];
+        const merged = { ...prev, ...record };
+        // Preserve first-impact coordinates if a later update omits them.
+        ['x', 'y', 'px', 'py', 'vpWidth', 'vpHeight'].forEach((k) => {
+          if (record[k] == null && prev[k] != null) merged[k] = prev[k];
+        });
+        this._data[idx] = merged;
+      } else this._data.push(record);
+    } else {
+      this._data.push(record);
+    }
     // Cap stored records to prevent localStorage bloat
     if (this._data.length > MAX_IMPACTS) {
       this._data = this._data.slice(-MAX_IMPACTS);
@@ -147,6 +165,21 @@ function track(eventName, params = {}) {
   gtag('event', eventName, params);
 }
 
+function nameToBallId(name) {
+  const map = {
+    'Josh Merritt': 'aboutMe',
+    'Microsoft Power BI': 'powerBIMetrics',
+    'The Wine You Drink': 'thewineyoudrink',
+    'Black Sheep Dart League': 'dartleague',
+    'Smart Chicken Coop': 'arduinoCoopDoor',
+    'Site Analytics': 'SiteAnalytics',
+    'Google Data Studio Streaming Dashboard': 'googleDataStudioServiceTechs',
+    'Google Data Studio': 'googleDataStudioServiceTechs',
+    'Portfolio Website': 'thisWebsite',
+  };
+  return map[name] || name;
+}
+
 export function initGA4Tracking() {
   const unsubs = [];
 
@@ -161,7 +194,7 @@ export function initGA4Tracking() {
 
   // Per-ball launch
   unsubs.push(
-    bus.on('ball:launched', ({ name, category, ballLaunches, ballMakes }) => {
+    bus.on('ball:launched', ({ name, category, ballLaunches, ballMakes, shotNumber }) => {
       track('ball_launch', {
         project_name: name,
         project_category: category,
@@ -172,12 +205,33 @@ export function initGA4Tracking() {
         accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
       });
       bridgeStats.addShot();
+
+      // Seed a per-shot impact record that can be finalized later when
+      // the shot resolves (score popup / reset) and we know make vs miss.
+      if (typeof shotNumber === 'number') {
+        impactStore.add({
+          ballId:       nameToBallId(name),
+          ballName:     name,
+          ballCategory: category,
+          hitType:      'launch',
+          hitLabel:     'launch',
+          isGoal:       false,
+          x:            null,
+          y:            null,
+          px:           null,
+          py:           null,
+          vpWidth:      null,
+          vpHeight:     null,
+          shotNumber,
+          timestamp:    Date.now(),
+        });
+      }
     }),
   );
 
   // Per-ball score
   unsubs.push(
-    bus.on('ball:scored', ({ name, category, ballLaunches, ballMakes }) => {
+    bus.on('ball:scored', ({ name, category, ballLaunches, ballMakes, shotNumber }) => {
       track('ball_score', {
         project_name: name,
         project_category: category,
@@ -188,6 +242,26 @@ export function initGA4Tracking() {
         accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
       });
       bridgeStats.addMake();
+
+      // Finalize this shot as a make after score has been confirmed.
+      if (typeof shotNumber === 'number') {
+        impactStore.add({
+          ballId:       nameToBallId(name),
+          ballName:     name,
+          ballCategory: category,
+          hitType:      'menu',
+          hitLabel:     'Menu_final',
+          isGoal:       true,
+          x:            null,
+          y:            null,
+          px:           null,
+          py:           null,
+          vpWidth:      null,
+          vpHeight:     null,
+          shotNumber,
+          timestamp:    Date.now(),
+        });
+      }
     }),
   );
 
@@ -242,7 +316,9 @@ export function initGA4Tracking() {
   // First-impact tracking
   unsubs.push(
     bus.on('impact:first', (data) => {
-      impactStore.add(data);
+      // Keep coordinates from first contact, but don't trust first-contact
+      // goal classification until shot resolution updates it.
+      impactStore.add({ ...data, isGoal: false });
       track('ball_impact', {
         ball_name:     data.ballName,
         ball_category: data.ballCategory,

@@ -571,21 +571,20 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
 
     {/* Shot Chart */}
     <div style={{ marginBottom: 20 }}>
-      <ShotChart liveData={BALL_ENGAGEMENT} sessionData={(() => {
+      <ShotChart liveData={ballData} sessionData={(() => {
         try {
           const bridge = JSON.parse(localStorage.getItem('__dadatadad_bridge') || 'null');
           const impacts = JSON.parse(localStorage.getItem('__dadatadad_impacts') || '[]');
           if (!bridge) return undefined;
-          // Build a ballStats Map from impact data
-          // Note: imp.isGoal is always false (Goal bodies lack .category in physics).
-          // Scoring actually happens on Menu bodies, so hitType==='menu' is the score indicator.
+          // Build a ballStats Map from per-shot impact records.
+          // A shot is marked as score once it resolves via ball:scored.
           const ballStats = new Map();
           if (Array.isArray(impacts)) {
             impacts.forEach(imp => {
               if (!imp.ballId) return;
               const existing = ballStats.get(imp.ballId) || { launches: 0, scores: 0 };
               existing.launches++;
-              if (imp.hitType === 'menu') existing.scores++;
+              if (imp.isGoal || imp.hitType === 'menu') existing.scores++;
               ballStats.set(imp.ballId, existing);
             });
           }

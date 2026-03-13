@@ -46,14 +46,14 @@ function generateDots(balls, seed = 7, impacts) {
   if (impacts && impacts.length > 0) {
     const dots = [];
     impacts.forEach(imp => {
-      if (!imp.ballId || !imp.x || !imp.y) return;
+      if (!imp.ballId || imp.x == null || imp.y == null) return;
       // Map normalized coords (0-1) to SVG left zone (x: 20-320, y: 50-370)
       const svgX = 20 + imp.x * 300;
       const svgY = 50 + imp.y * 320;
       const ball = balls.find(b => b.id === imp.ballId);
       dots.push({
         x: svgX, y: svgY,
-        type: imp.hitType === 'menu' ? 'score' : 'miss',
+        type: imp.isGoal || imp.hitType === 'menu' ? 'score' : 'miss',
         ballId: imp.ballId,
         color: ball?.color || '#888',
         category: ball?.category || imp.ballCategory || '',
