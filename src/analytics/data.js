@@ -33,6 +33,7 @@ export async function fetchGA4Data(days = 90) {
       pages: data.pages || [],
       ballEvents: data.ballEvents || [],
       geography: data.geography || [],
+      impactDistribution: data.impactDistribution || [],
       isLive: true,
     };
   } catch (err) {

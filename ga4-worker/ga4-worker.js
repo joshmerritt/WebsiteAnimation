@@ -19,18 +19,20 @@ export default {
 
     try {
       const url = new URL(request.url);
-      const days = parseInt(url.searchParams.get('days') || '90', 10);
+      const daysParam = url.searchParams.get('days') || '90';
+      const days = daysParam === 'all' || daysParam === '0' ? 0 : parseInt(daysParam, 10);
 
       const accessToken = await getAccessToken(env);
       const propertyId = env.GA4_PROPERTY_ID;
 
       // Run all reports in parallel
-      const [timeSeries, sources, pages, ballEvents, geography] = await Promise.all([
+      const [timeSeries, sources, pages, ballEvents, geography, impactDistribution] = await Promise.all([
         fetchTimeSeries(accessToken, propertyId, days),
         fetchSources(accessToken, propertyId, days),
         fetchTopPages(accessToken, propertyId, days),
         fetchBallEvents(accessToken, propertyId, days),
         fetchGeography(accessToken, propertyId, days),
+        fetchImpactDistribution(accessToken, propertyId, days),
       ]);
 
       const body = JSON.stringify({
@@ -39,9 +41,10 @@ export default {
         pages,
         ballEvents,
         geography,
+        impactDistribution,
         _ctaDebug: ballEvents._debug || null,
         fetchedAt: new Date().toISOString(),
-        days,
+        days: days || 'all',
       });
 
       return new Response(body, {
@@ -159,6 +162,11 @@ async function signJWT(header, payload, privateKeyPem) {
 //  GA4 Data API Report Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
+// Resolve the start date: days=0 means "all time" (from GA4 property creation)
+function startDate(days) {
+  return days > 0 ? `${days}daysAgo` : '2020-01-01';
+}
+
 async function runReport(accessToken, propertyId, body) {
   const res = await fetch(
     `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`,
@@ -182,7 +190,7 @@ async function runReport(accessToken, propertyId, body) {
 
 async function fetchTimeSeries(token, propId, days) {
   const report = await runReport(token, propId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+    dateRanges: [{ startDate: startDate(days), endDate: 'today' }],
     dimensions: [{ name: 'date' }],
     metrics: [
       { name: 'activeUsers' },
@@ -192,13 +200,13 @@ async function fetchTimeSeries(token, propId, days) {
       { name: 'eventCount' },
     ],
     orderBys: [{ dimension: { dimensionName: 'date' } }],
-    limit: days + 1,
+    limit: days > 0 ? days + 1 : 10000,
   });
 
   // Also fetch ball_launch and cta_click event counts per day
   const [ballReport, ctaReport] = await Promise.all([
     runReport(token, propId, {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dateRanges: [{ startDate: startDate(days), endDate: 'today' }],
       dimensions: [{ name: 'date' }],
       metrics: [{ name: 'eventCount' }],
       dimensionFilter: {
@@ -208,10 +216,10 @@ async function fetchTimeSeries(token, propId, days) {
         },
       },
       orderBys: [{ dimension: { dimensionName: 'date' } }],
-      limit: days + 1,
+      limit: days > 0 ? days + 1 : 10000,
     }),
     runReport(token, propId, {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dateRanges: [{ startDate: startDate(days), endDate: 'today' }],
       dimensions: [{ name: 'date' }],
       metrics: [{ name: 'eventCount' }],
       dimensionFilter: {
@@ -221,7 +229,7 @@ async function fetchTimeSeries(token, propId, days) {
         },
       },
       orderBys: [{ dimension: { dimensionName: 'date' } }],
-      limit: days + 1,
+      limit: days > 0 ? days + 1 : 10000,
     }),
   ]);
 
@@ -270,7 +278,7 @@ const SOURCE_COLORS = {
 
 async function fetchSources(token, propId, days) {
   const report = await runReport(token, propId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+    dateRanges: [{ startDate: startDate(days), endDate: 'today' }],
     dimensions: [{ name: 'sessionSource' }],
     metrics: [{ name: 'sessions' }],
     orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
@@ -300,8 +308,8 @@ async function fetchTopPages(token, propId, days) {
   // Current period
   const report = await runReport(token, propId, {
     dateRanges: [
-      { startDate: `${days}daysAgo`, endDate: 'today' },
-      { startDate: `${days * 2}daysAgo`, endDate: `${days + 1}daysAgo` },
+      { startDate: startDate(days), endDate: 'today' },
+      { startDate: days > 0 ? `${days * 2}daysAgo` : '2020-01-01', endDate: days > 0 ? `${days + 1}daysAgo` : '2020-01-01' },
     ],
     dimensions: [{ name: 'pagePath' }],
     metrics: [
@@ -355,7 +363,7 @@ async function fetchBallEvents(token, propId, days) {
   // Get ball_launch, ball_score, detail_open, and cta_click counts by project
   const [launchReport, scoreReport, openReport, ctaReport] = await Promise.all([
     runReport(token, propId, {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dateRanges: [{ startDate: startDate(days), endDate: 'today' }],
       dimensions: [{ name: 'customEvent:project_name' }],
       metrics: [{ name: 'eventCount' }],
       dimensionFilter: {
@@ -367,7 +375,7 @@ async function fetchBallEvents(token, propId, days) {
       limit: 20,
     }),
     runReport(token, propId, {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dateRanges: [{ startDate: startDate(days), endDate: 'today' }],
       dimensions: [{ name: 'customEvent:project_name' }],
       metrics: [{ name: 'eventCount' }],
       dimensionFilter: {
@@ -379,7 +387,7 @@ async function fetchBallEvents(token, propId, days) {
       limit: 20,
     }),
     runReport(token, propId, {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dateRanges: [{ startDate: startDate(days), endDate: 'today' }],
       dimensions: [{ name: 'customEvent:project_name' }],
       metrics: [{ name: 'eventCount' }],
       dimensionFilter: {
@@ -391,7 +399,7 @@ async function fetchBallEvents(token, propId, days) {
       limit: 20,
     }),
     runReport(token, propId, {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dateRanges: [{ startDate: startDate(days), endDate: 'today' }],
       dimensions: [{ name: 'customEvent:project_name' }],
       metrics: [{ name: 'eventCount' }],
       dimensionFilter: {
@@ -418,22 +426,12 @@ async function fetchBallEvents(token, propId, days) {
     ...Object.keys(ctaClicks),
   ]);
 
-  const BALL_META = {
-    'Josh Merritt':       { id: 'aboutMe',                      color: '#6B9F6B',  category: 'Me' },
-    'Microsoft Power BI': { id: 'powerBIMetrics',               color: '#D4A843',  category: 'Business' },
-    'The Wine You Drink': { id: 'thewineyoudrink',              color: '#8B1A32',  category: 'Apps' },
-    'Black Sheep Dart League': { id: 'dartleague',              color: '#5985B1',  category: 'Apps' },
-    'Smart Chicken Coop': { id: 'arduinoCoopDoor',              color: '#BF360C',  category: 'Technology' },
-    'Site Analytics':     { id: 'SiteAnalytics',                color: '#5985B1',  category: 'Technology' },
-    'Google Data Studio Streaming Dashboard': { id: 'googleDataStudioServiceTechs', color: '#4285F4', category: 'Business' },
-    'Portfolio Website':  { id: 'thisWebsite',                  color: '#5985B1',  category: 'Technology' },
-  };
   const palette = ['#D4A843', '#5985B1', '#6B9F6B', '#5985B1', '#C05050', '#BF360C', '#4285F4', '#8B1A32'];
 
   const result = [];
   let i = 0;
   for (const name of allNames) {
-    const meta = BALL_META[name] || { id: name, color: palette[i % palette.length], category: 'Other' };
+    const meta = BALL_META_LOOKUP[name] || { id: name, color: palette[i % palette.length], category: 'Other' };
     const launchCount   = launches[name] || 0;
     const scoreCount    = scores[name] || 0;
     const openCount     = opens[name] || 0;
@@ -466,7 +464,7 @@ async function fetchBallEvents(token, propId, days) {
 
 async function fetchGeography(token, propId, days) {
   const report = await runReport(token, propId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+    dateRanges: [{ startDate: startDate(days), endDate: 'today' }],
     dimensions: [{ name: 'country' }],
     metrics: [
       { name: 'activeUsers' },
@@ -491,6 +489,59 @@ async function fetchGeography(token, propId, days) {
     };
   }).filter(g => g.country !== 'Unknown');
 }
+
+// ── Impact distribution — per-shot coordinate data from GA4 ───────────
+// impact_x/impact_y are registered as custom dimensions, so each unique
+// (project_name, impact_x, impact_y, is_goal) tuple is its own row.
+// Coordinates are rounded to 3 decimals on send, so most rows represent
+// individual shots (eventCount=1), with occasional collisions.
+
+async function fetchImpactDistribution(token, propId, days) {
+  const report = await runReport(token, propId, {
+    dateRanges: [{ startDate: startDate(days), endDate: 'today' }],
+    dimensions: [
+      { name: 'customEvent:project_name' },
+      { name: 'customEvent:is_goal' },
+      { name: 'customEvent:impact_x' },
+      { name: 'customEvent:impact_y' },
+    ],
+    metrics: [
+      { name: 'eventCount' },
+    ],
+    dimensionFilter: {
+      filter: {
+        fieldName: 'eventName',
+        stringFilter: { matchType: 'EXACT', value: 'ball_impact' },
+      },
+    },
+    orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
+    limit: 500,
+  });
+
+  return (report.rows || []).map(row => {
+    const meta = BALL_META_LOOKUP[row.dimensionValues[0].value];
+    return {
+      projectName: row.dimensionValues[0].value,
+      ballId:      meta?.id || row.dimensionValues[0].value,
+      isGoal:      row.dimensionValues[1].value === 'true',
+      x:           parseFloat(row.dimensionValues[2].value),
+      y:           parseFloat(row.dimensionValues[3].value),
+      count:       parseInt(row.metricValues[0].value, 10),
+    };
+  }).filter(r => !isNaN(r.x) && !isNaN(r.y));
+}
+
+// Shared ball metadata for both fetchBallEvents and fetchImpactDistribution
+const BALL_META_LOOKUP = {
+  'Josh Merritt':       { id: 'aboutMe',                      color: '#6B9F6B',  category: 'Me' },
+  'Microsoft Power BI': { id: 'powerBIMetrics',               color: '#D4A843',  category: 'Business' },
+  'The Wine You Drink': { id: 'thewineyoudrink',              color: '#8B1A32',  category: 'Apps' },
+  'Black Sheep Dart League': { id: 'dartleague',              color: '#5985B1',  category: 'Apps' },
+  'Smart Chicken Coop': { id: 'arduinoCoopDoor',              color: '#BF360C',  category: 'Technology' },
+  'Site Analytics':     { id: 'SiteAnalytics',                color: '#5985B1',  category: 'Technology' },
+  'Google Data Studio Streaming Dashboard': { id: 'googleDataStudioServiceTechs', color: '#4285F4', category: 'Business' },
+  'Portfolio Website':  { id: 'thisWebsite',                  color: '#5985B1',  category: 'Technology' },
+};
 
 function indexByDimension(report) {
   const map = {};
