@@ -5,7 +5,7 @@
  *   1. LoadingScreen (fades out when p5 finishes preloading)
  *   2. GameCanvas (p5.js physics + rendering)
  *   3. React overlay (modal + HUD + stats)
- *   4. GA4 event tracking (wired to EventBus)
+ *   4. Analytics: GA4 + PostHog event tracking (wired to EventBus)
  */
 
 import { Component, useState, useEffect, useCallback } from 'react';
@@ -15,6 +15,7 @@ import HUD from './components/HUD.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import bus from './game/EventBus.js';
 import { initGA4Tracking } from './game/ga4.js';
+import { initPostHogTracking } from './game/posthog.js';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -63,6 +64,12 @@ export default function App() {
   // Initialize GA4 tracking on mount
   useEffect(() => {
     const cleanup = initGA4Tracking();
+    return cleanup;
+  }, []);
+
+  // Initialize PostHog tracking on mount (no-ops if VITE_POSTHOG_KEY unset)
+  useEffect(() => {
+    const cleanup = initPostHogTracking();
     return cleanup;
   }, []);
 
