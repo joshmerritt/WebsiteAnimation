@@ -195,6 +195,7 @@ export function initGA4Tracking() {
   // Per-ball launch
   unsubs.push(
     bus.on('ball:launched', ({ name, category, ballLaunches, ballMakes, shotNumber }) => {
+      if (!name) return;
       track('ball_launch', {
         project_name: name,
         project_category: category,
@@ -232,6 +233,7 @@ export function initGA4Tracking() {
   // Per-ball score
   unsubs.push(
     bus.on('ball:scored', ({ name, category, ballLaunches, ballMakes, shotNumber }) => {
+      if (!name) return;
       track('ball_score', {
         project_name: name,
         project_category: category,
@@ -316,17 +318,18 @@ export function initGA4Tracking() {
   // First-impact tracking
   unsubs.push(
     bus.on('impact:first', (data) => {
+      if (!data.ballName) return;
       // Keep coordinates from first contact, but don't trust first-contact
       // goal classification until shot resolution updates it.
       impactStore.add({ ...data, isGoal: false });
       track('ball_impact', {
-        ball_name:     data.ballName,
-        ball_category: data.ballCategory,
-        hit_type:      data.hitType,
-        is_goal:       data.isGoal ? 'true' : 'false',
-        impact_x:      data.x,
-        impact_y:      data.y,
-        shot_number:   data.shotNumber,
+        project_name:    data.ballName,
+        project_category: data.ballCategory,
+        hit_type:        data.hitType,
+        is_goal:         data.isGoal ? 'true' : 'false',
+        impact_x:        data.x,
+        impact_y:        data.y,
+        shot_number:     data.shotNumber,
       });
     }),
   );

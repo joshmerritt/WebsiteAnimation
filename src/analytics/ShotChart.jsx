@@ -39,10 +39,9 @@ function filterValid(balls) {
 }
 
 // ── Generate score/miss dots ──────────────────────────────────────────
-// Uses real impact data (from __dadatadad_impacts) when available,
-// falls back to seeded random scatter based on score/miss counts.
-function generateDots(balls, seed = 7, impacts) {
-  // If we have real impact data, use actual coordinates
+// Priority: session impacts (real coords) > GA4 distribution (avg coords) > seeded scatter
+function generateDots(balls, seed = 7, impacts, impactDistribution) {
+  // Path 1: Real per-shot impact data from localStorage (session mode)
   if (impacts && impacts.length > 0) {
     const dots = [];
     impacts.forEach(imp => {
@@ -62,7 +61,38 @@ function generateDots(balls, seed = 7, impacts) {
     return dots;
   }
 
-  // Fallback: seeded random scatter
+  // Path 2: GA4 impact distribution (all-time mode with worker data)
+  // Each entry has real (x, y) coordinates from customEvent dimensions.
+  // Entries with count > 1 (coordinate collisions) emit multiple dots with jitter.
+  if (impactDistribution && impactDistribution.length > 0) {
+    const dots = [];
+    const rand = seededRand(seed);
+    impactDistribution.forEach(entry => {
+      const ball = balls.find(b => b.id === entry.ballId);
+      if (!ball) return;
+      if (entry.x == null || entry.y == null) return;
+      const type = entry.isGoal ? 'score' : 'miss';
+      const baseX = 20 + entry.x * 300;
+      const baseY = 50 + entry.y * 320;
+      const n = Math.min(entry.count || 1, 10);
+      for (let i = 0; i < n; i++) {
+        // First dot at exact position, extras get slight jitter for collisions
+        const jX = i === 0 ? 0 : (rand() - 0.5) * 12;
+        const jY = i === 0 ? 0 : (rand() - 0.5) * 12;
+        dots.push({
+          x: Math.max(20, Math.min(320, baseX + jX)),
+          y: Math.max(50, Math.min(370, baseY + jY)),
+          type,
+          ballId: ball.id,
+          color: ball.color,
+          category: ball.category,
+        });
+      }
+    });
+    return dots;
+  }
+
+  // Path 3: Fallback seeded random scatter from aggregate counts
   const rand = seededRand(seed);
   const dots = [];
   balls.forEach((ball) => {
@@ -139,7 +169,7 @@ function shortName(name) {
 }
 
 
-export default function ShotChart({ liveData, sessionData }) {
+export default function ShotChart({ liveData, sessionData, impactDistribution }) {
   const [mode, setMode] = useState('all');
   const [hoveredBall, setHoveredBall] = useState(null);
   const [hoveredCat, setHoveredCat] = useState(null);
@@ -166,8 +196,8 @@ export default function ShotChart({ liveData, sessionData }) {
     [data, maxLaunches]);
 
   const dots = useMemo(() =>
-    generateDots(data, mode === 'session' ? 99 : 7, mode === 'session' ? sessionData?.impacts : null),
-    [data, mode, sessionData]);
+    generateDots(data, mode === 'session' ? 99 : 7, mode === 'session' ? sessionData?.impacts : null, mode === 'all' ? impactDistribution : null),
+    [data, mode, sessionData, impactDistribution]);
 
   const totalShots = data.reduce((s, b) => s + (b.launches || 0), 0);
   const totalScores = data.reduce((s, b) => s + (b.scores || 0), 0);

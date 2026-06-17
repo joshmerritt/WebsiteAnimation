@@ -590,7 +590,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
           }
           return { shots: bridge.shots || 0, makes: bridge.makes || 0, ballStats, impacts: Array.isArray(impacts) ? impacts : [] };
         } catch (_) { return undefined; }
-      })()} />
+      })()} impactDistribution={isLive ? (liveData?.impactDistribution || []) : []} />
     </div>
 
     {/* Ball Engagement Funnel — V1-style table */}
@@ -922,7 +922,7 @@ class DashboardErrorBoundary extends Component {
 }
 
 // ═══ MAIN DASHBOARD ═════════════════════════════════════════════════════
-const TIME_RANGES = [{ key: "7d", label: "7D", days: 7 }, { key: "30d", label: "30D", days: 30 }, { key: "90d", label: "90D", days: 90 }];
+const TIME_RANGES = [{ key: "7d", label: "7D", days: 7 }, { key: "30d", label: "30D", days: 30 }, { key: "90d", label: "90D", days: 90 }, { key: "all", label: "All", days: 0 }];
 const TABS = [{ key: "analytics", label: "Analytics" }, { key: "architecture", label: "Data Architecture" }];
 
 function AnalyticsDashboardV3Inner() {
