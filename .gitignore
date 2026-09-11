@@ -1,3 +1,7 @@
 node_modules
 .DS_Store
 *.local
+
+# Build output — produced by CI (.github/workflows/deploy.yml) and deployed
+# over FTP; no longer committed to the repo.
+dist/
