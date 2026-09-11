@@ -1,0 +1,51 @@
+name: Build & Deploy to cPanel
+
+# Fixes the stalled deploy: every push to master now builds the site in CI
+# and uploads dist/ to public_html over FTPS. No dependence on cPanel's
+# GitHub auto-deploy (which had not fired since 2026-03-13).
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch: {}   # lets you trigger a deploy by hand from the Actions tab
+
+# Never let two deploys run at once; a newer push cancels an in-flight one.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `vite build` runs in production mode, so it reads the committed
+      # .env.production and bakes in VITE_POSTHOG_KEY + VITE_GA4_WORKER_URL.
+      - name: Build
+        run: npm run build
+
+      - name: Deploy dist/ to public_html via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps          # explicit FTPS over port 21
+          port: 21
+          local-dir: ./dist/      # trailing slash is required
+          # The deploy@dadatadad.com FTP account is jailed to public_html,
+          # so its login root already IS the web root — upload to ./
+          # (If you switch to the MAIN cPanel account, whose home is
+          #  /home/<user>, change this back to:  public_html/ )
+          server-dir: ./
