@@ -34,7 +34,7 @@ This section is the current truth; the sections below are the plan as written, k
 ### Two things still owed
 
 1. **cPanel → Zone Editor → CNAME** `e` → `95a06bb59f9f6f9353e8.cf-prod-us-proxy.proxyhog.com.`, no Cloudflare-style proxying. When the proxy reads `live`, set `VITE_POSTHOG_HOST=https://e.dadatadad.com`.
-2. **GitHub secret `POSTHOG_API_KEY`** — personal API key scoped to project 605146 with `error_tracking:write` + `annotation:write`.
+2. **GitHub secret `POSTHOG_API_KEY`** — personal API key scoped to project 605146 with **`error tracking: write`**, **`organization: read`** and **`annotation: write`**. `organization: read` is easy to miss and the upload 403s without it: the rollup plugin shells out to `posthog-cli`, whose docs require both that and error-tracking write. `annotation: write` is for the deploy-marker step.
 
 ### Deliberate deviations from the plan below
 
@@ -449,7 +449,7 @@ build: {
 }
 ```
 
-- Create a **personal API key** (PostHog → Settings → Personal API keys) scoped to project 605146 with **`error_tracking:write`** (and `annotation:write` for §5.3). Store it as the GitHub secret `POSTHOG_API_KEY`.
+- Create a **personal API key** at https://us.posthog.com/settings/user-api-keys, scoped to project 605146, with **`error tracking: write`** + **`organization: read`** (both required by `posthog-cli`, which the plugin spawns) and **`annotation: write`** (for §5.3). Store it as the GitHub secret `POSTHOG_API_KEY`. Do not paste the value into a chat or a committed file — `gh secret set POSTHOG_API_KEY` prompts for it.
 - In `.github/workflows/deploy.yml`, give the Build step:
 
 ```yaml

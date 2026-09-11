@@ -34,7 +34,9 @@ jobs:
       # .env.production and bakes in VITE_POSTHOG_KEY + VITE_GA4_WORKER_URL.
       #
       # POSTHOG_API_KEY (a personal API key scoped to project 605146 with
-      # error_tracking:write + annotation:write) turns on source-map generation
+      # 'error tracking: write' + 'organization: read' -- both required by
+      # posthog-cli, which the rollup plugin spawns -- plus 'annotation: write'
+      # for the annotation step below) turns on source-map generation
       # and upload to PostHog error tracking, so exception stacks are readable
       # instead of minified. The maps are deleted from dist/ after upload, so
       # nothing ships to public_html. Without the secret the plugin is skipped
