@@ -4,7 +4,14 @@
       "Bash(ls \"C:/Users/Josh/WebsiteAnimation/.claude/worktrees/vigorous-aryabhata/assets/\"*.txt)",
       "Bash(gh auth status)",
       "Bash(npx vite build)",
-      "Bash(ls -lh \"C:\\\\Users\\\\Josh\\\\WebsiteAnimation\\\\.claude\\\\worktrees\\\\vigorous-aryabhata\"/analytics*.html)"
+      "Bash(ls -lh \"C:\\\\Users\\\\Josh\\\\WebsiteAnimation\\\\.claude\\\\worktrees\\\\vigorous-aryabhata\"/analytics*.html)",
+      "PowerShell(npm install posthog-js)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "mcp__0285ea43-c45f-455b-9bf2-98ce147a9002__exec",
+      "Bash(git check-ignore *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(npm run *)"
     ]
   }
 }

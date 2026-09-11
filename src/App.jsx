@@ -15,7 +15,7 @@ import HUD from './components/HUD.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import bus from './game/EventBus.js';
 import { initGA4Tracking } from './game/ga4.js';
-import { initPostHogTracking } from './game/posthog.js';
+import { initPostHogTracking, captureException } from './game/posthog.js';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -23,7 +23,10 @@ class ErrorBoundary extends Component {
     this.state = { hasError: false };
   }
   static getDerivedStateFromError() { return { hasError: true }; }
-  componentDidCatch(error, info) { console.error('App error:', error, info); }
+  componentDidCatch(error, info) {
+    console.error('App error:', error, info);
+    captureException(error, { react_component_stack: info?.componentStack });
+  }
   render() {
     if (this.state.hasError) {
       return (

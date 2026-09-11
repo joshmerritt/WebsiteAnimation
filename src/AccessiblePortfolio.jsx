@@ -110,6 +110,7 @@ function ProjectCard({ project, index }) {
           <a
             className="port-card-cta"
             href={project.link}
+            data-attr="portfolio-project-link"
             target={project.link.startsWith('/') ? '_self' : '_blank'}
             rel={project.link.startsWith('/') ? undefined : 'noopener noreferrer'}
             itemProp="url"
@@ -204,13 +205,13 @@ export default function AccessiblePortfolio() {
             </p>
 
             <div className="port-hero-actions">
-              <a href="mailto:josh@DaDataDad.com" className="port-btn port-btn--primary">
+              <a href="mailto:josh@DaDataDad.com" className="port-btn port-btn--primary" data-attr="portfolio-link-email">
                 Contact Me
               </a>
-              <a href="https://www.linkedin.com/in/josh-merritt" className="port-btn port-btn--ghost" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.linkedin.com/in/josh-merritt" className="port-btn port-btn--ghost" target="_blank" rel="noopener noreferrer" data-attr="portfolio-link-linkedin">
                 LinkedIn ↗
               </a>
-              <a href="https://github.com/joshmerritt" className="port-btn port-btn--ghost" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/joshmerritt" className="port-btn port-btn--ghost" target="_blank" rel="noopener noreferrer" data-attr="portfolio-link-github">
                 GitHub ↗
               </a>
             </div>
@@ -270,10 +271,10 @@ export default function AccessiblePortfolio() {
           <p className="port-footer-brand">Da Data Dad</p>
           <p className="port-footer-copy">&copy; {new Date().getFullYear()} Josh Merritt</p>
           <nav className="port-footer-links" aria-label="Footer links">
-            <a href="mailto:josh@DaDataDad.com">josh@DaDataDad.com</a>
-            <a href="https://www.linkedin.com/in/josh-merritt" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a href="https://github.com/joshmerritt" target="_blank" rel="noopener noreferrer">GitHub</a>
-            <a href="https://www.upwork.com/fl/joshuapmerritt" target="_blank" rel="noopener noreferrer">Upwork</a>
+            <a href="mailto:josh@DaDataDad.com" data-attr="portfolio-link-email">josh@DaDataDad.com</a>
+            <a href="https://www.linkedin.com/in/josh-merritt" target="_blank" rel="noopener noreferrer" data-attr="portfolio-link-linkedin">LinkedIn</a>
+            <a href="https://github.com/joshmerritt" target="_blank" rel="noopener noreferrer" data-attr="portfolio-link-github">GitHub</a>
+            <a href="https://www.upwork.com/fl/joshuapmerritt" target="_blank" rel="noopener noreferrer" data-attr="portfolio-link-upwork">Upwork</a>
           </nav>
         </div>
       </footer>

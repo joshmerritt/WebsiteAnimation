@@ -37,6 +37,11 @@ export default bus;
  *   'detail:open'    { project }     — Game → React: open the detail modal
  *   'detail:close'   —                React → Game: modal was closed
  *   'game:reset'     —                React → Game: reset all balls
+ *                                     ⚠ NO EMITTER: there is no reset control
+ *                                     in the UI, so Game._onReset() and the
+ *                                     GA4/PostHog `game_reset` listeners are
+ *                                     wired but never fire. Add a reset button
+ *                                     that emits this and it all lights up.
  *   'stats:update'   { shots, makes, opens }  — Game → React: live stats
  *   'load:progress'  number (0–1)   — Game → React: image loading progress
  *   'load:complete'  —               Game → React: all assets loaded, setup done
@@ -47,4 +52,8 @@ export default bus;
  *   'impact:first'   { ballId, ballName, ballCategory, hitType, hitLabel,
  *                       isGoal, x, y, px, py, vpWidth, vpHeight,
  *                       shotNumber, timestamp }  — Game → GA4/Dashboard
+ *   'perf:sample'    { avg_fps, min_fps, active_frames, hardware_threads,
+ *                       device_memory_gb, canvas_px }  — Game → PostHog:
+ *                     emitted ONCE, ~30s after load:complete, averaged over
+ *                     active (non-idle) frames only
  */

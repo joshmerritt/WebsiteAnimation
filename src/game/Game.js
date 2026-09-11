@@ -48,6 +48,9 @@ export default class Game {
     this._loaded = false;
     this._loadProgress = 0;
 
+    // One-shot frame-rate sample for analytics (see draw())
+    this._perf = { samples: [], sent: false, start: 0 };
+
     this._lastTapTime = 0;
     this._lastTappedBall = null;
     this._lastReleaseTime = 0;
@@ -104,6 +107,29 @@ export default class Game {
     if (isIdle !== this._wasIdle) {
       p.frameRate(isIdle ? 15 : 60);
       this._wasIdle = isIdle;
+    }
+
+    // ── One-shot performance sample for analytics ──
+    // Averages the frame rate over the first 30s of active (non-idle) frames,
+    // so we can tell a slow *download* apart from a slow *runtime* per device.
+    if (this._loaded && !this._perf.sent) {
+      if (!this._perf.start) this._perf.start = performance.now();
+      if (!isIdle) this._perf.samples.push(p.frameRate());
+      if (performance.now() - this._perf.start > 30000) {
+        this._perf.sent = true;
+        const s = this._perf.samples;
+        if (s.length) {
+          bus.emit('perf:sample', {
+            avg_fps:          Math.round(s.reduce((a, b) => a + b, 0) / s.length),
+            min_fps:          Math.round(Math.min(...s)),
+            active_frames:    s.length,
+            hardware_threads: navigator.hardwareConcurrency || null,
+            device_memory_gb: navigator.deviceMemory || null,
+            canvas_px:        Math.round(p.width * p.pixelDensity()) + 'x' + Math.round(p.height * p.pixelDensity()),
+          });
+        }
+        this._perf.samples = [];   // release the sample array
+      }
     }
 
     p.background(config.colors.bg);

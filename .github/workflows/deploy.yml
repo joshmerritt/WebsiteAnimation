@@ -32,8 +32,19 @@ jobs:
 
       # `vite build` runs in production mode, so it reads the committed
       # .env.production and bakes in VITE_POSTHOG_KEY + VITE_GA4_WORKER_URL.
+      #
+      # POSTHOG_API_KEY (a personal API key scoped to project 605146 with
+      # error_tracking:write + annotation:write) turns on source-map generation
+      # and upload to PostHog error tracking, so exception stacks are readable
+      # instead of minified. The maps are deleted from dist/ after upload, so
+      # nothing ships to public_html. Without the secret the plugin is skipped
+      # and the build is unchanged.
       - name: Build
         run: npm run build
+        env:
+          POSTHOG_API_KEY:    ${{ secrets.POSTHOG_API_KEY }}
+          POSTHOG_PROJECT_ID: "605146"
+          POSTHOG_HOST:       https://us.posthog.com
 
       - name: Deploy dist/ to public_html via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -49,3 +60,26 @@ jobs:
           # (If you switch to the MAIN cPanel account, whose home is
           #  /home/<user>, change this back to:  public_html/ )
           server-dir: ./
+
+      # Drop a marker on every PostHog chart at the moment of each release, so
+      # a step change in load time or error count can be tied to the commit
+      # that caused it. Skipped (not failed) when the secret isn't configured.
+      - name: Annotate deploy in PostHog
+        if: success()
+        env:
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+        run: |
+          if [ -z "$POSTHOG_API_KEY" ]; then
+            echo "POSTHOG_API_KEY not set - skipping deploy annotation."
+            exit 0
+          fi
+          # jq builds the body so a commit subject containing quotes or
+          # backslashes can't produce invalid JSON.
+          BODY=$(jq -n \
+            --arg content "Deploy ${GITHUB_SHA:0:7}: $(git log -1 --pretty=%s | head -c 200)" \
+            --arg date_marker "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{content: $content, date_marker: $date_marker, scope: "project"}')
+          curl -sS -f -X POST "https://us.posthog.com/api/projects/605146/annotations/" \
+            -H "Authorization: Bearer $POSTHOG_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$BODY" > /dev/null && echo "Deploy annotation created in PostHog."

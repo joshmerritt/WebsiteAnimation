@@ -99,6 +99,7 @@ export default function DetailModal({ detail, onClose }) {
         {/* Sleek close icon — no button chrome */}
         <button
           className="modal-close"
+          data-attr="modal-close"
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           onPointerDown={handleButtonClick}
           onTouchStart={handleButtonClick}
@@ -134,6 +135,7 @@ export default function DetailModal({ detail, onClose }) {
           {hasLink && (
             <a
               className="modal-cta"
+              data-attr="modal-cta"
               href={detail.link}
               target="_blank"
               rel="noopener noreferrer"

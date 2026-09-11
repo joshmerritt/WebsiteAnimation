@@ -34,19 +34,23 @@ RewriteRule ^(.*)$ https://dadatadad.com/$1 [L,R=301]
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
 
   # Permissions Policy: disable browser features you don't use
-  # Your site uses canvas + touch — keep those enabled; lock down everything else
-  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+  # Your site uses canvas + touch — keep those enabled; lock down everything else.
+  # gyroscope/accelerometer are (self) because p5.js registers devicemotion +
+  # deviceorientation listeners on every load; blocking them logged two
+  # "Permissions policy violation" console errors into every page load, which
+  # then polluted the console tab of every PostHog session replay.
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(self), accelerometer=(self)"
 
   # Content-Security-Policy
   # Tuned for your stack: React/Vite (inline scripts from build), p5.js canvas,
   # Google Analytics, Google Fonts, and your own assets.
   Header always set Content-Security-Policy "\
     default-src 'self'; \
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://us-assets.i.posthog.com; \
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://us-assets.i.posthog.com https://e.dadatadad.com; \
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; \
     font-src 'self' https://fonts.gstatic.com; \
-    img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com https://us-assets.i.posthog.com; \
-    connect-src 'self' https://ga4-analytics-api.dadatadad-analytics.workers.dev https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com https://us.i.posthog.com https://us-assets.i.posthog.com; \
+    img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com https://us-assets.i.posthog.com https://e.dadatadad.com; \
+    connect-src 'self' https://ga4-analytics-api.dadatadad-analytics.workers.dev https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com https://us.i.posthog.com https://us-assets.i.posthog.com https://e.dadatadad.com; \
     worker-src 'self' blob:; \
     frame-ancestors 'self'; \
     base-uri 'self'; \
