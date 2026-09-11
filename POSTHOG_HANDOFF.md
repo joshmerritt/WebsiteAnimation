@@ -7,6 +7,50 @@
 
 ---
 
+## STATUS — executed 2026-09-11 (commit `9378ce8`)
+
+Phases 0–3 are **done**. §7 (site speed) was deliberately deferred until field data arrives.
+This section is the current truth; the sections below are the plan as written, kept for the reasoning.
+
+| Phase | State | Notes |
+|---|---|---|
+| **0 — project settings** | ✅ all 8 applied | Web vitals on, canvas capture on (fps 3, quality 0.4 — PostHog's current default), min duration 2000 ms, `recording_domains` + `app_urls` = `https://dadatadad.com`, `test_account_filters` = `$host exact dadatadad.com` (+ default-checked), timezone `America/Los_Angeles`. Verified in the live remote config. |
+| **1 — code** | ✅ shipped | posthog-js **1.430.2**, `defaults: '2026-08-30'`, `shouldTrack()` host gating, web vitals + network timing, explicit `capture_exceptions`, super properties, `captureException` from the React ErrorBoundary, `first_launch` / `miss_hint_shown` / `game_perf`, `data-attr` on the modal + portfolio links, `Permissions-Policy` gyroscope/accelerometer `(self)`. |
+| **2 — source maps + annotations** | ⚠️ code shipped, **needs the secret** | `@posthog/rollup-plugin` wired in `vite.config.js`; CI Build step and a new annotation step read `POSTHOG_API_KEY`. Both **skip cleanly** without it, so stacks stay minified until the secret is added. |
+| **2 — reverse proxy** | ⚠️ created, **needs DNS** | Managed proxy `e.dadatadad.com` exists, status `waiting`. CNAME target: `95a06bb59f9f6f9353e8.cf-prod-us-proxy.proxyhog.com.` CSP already allows the host, so flipping `VITE_POSTHOG_HOST` later is one line. |
+| **3 — analytics build-out** | ✅ built | Dashboard **"DaDataDad · Site health"** (id `2088517`, pinned) with 8 tiles; 3 alerts; 4 actions; 3 cohorts. |
+| **7 — site speed** | ⛔ not started | Deferred on purpose: `load_time_ms` p90 and `game_perf` now exist, so the next pass can be driven by field data instead of guesses. |
+
+### Verified on the live domain after deploy
+
+- Remote config the SDK receives: `$web_vitals_enabled_server_side: true`, `recordCanvas: true`, `canvasRecording: {enabled: true, fps: 3, quality: "0.4"}`, `minimumDurationMilliseconds: 2000`, console logs on, `maskAllInputs` on.
+- `web-vitals-with-attribution.js` now loads from `us-assets.i.posthog.com/static/1.430.2/` — it never loaded before. Console says `[Web Vitals] enabled, starting...`.
+- Console also says `History API monitoring enabled` (proves `defaults: '2026-08-30'` gave us `capture_pageview: 'history_change'`).
+- **No CSP errors and no accelerometer Permissions-Policy errors.** The two-errors-per-load noise is gone.
+- Ingestion confirmed from the new build: `portfolio_loaded` with `$lib_version = 1.430.2` from `$host = dadatadad.com`.
+- Host gating confirmed: a fresh `localhost:4173` load writes no `ph_*` storage and never initialises the SDK.
+- `$pageview`, `$pageleave`, `$web_vitals`, `ball_impact`, `ball_score`, `detail_open` all confirmed ingesting from `dadatadad.com` — but on SDK 1.379.0, from real visits earlier that afternoon. **They have not yet been observed on 1.430.2**, nor have the three new events, because an automated browser tab is always hidden (see §10) and posthog-js defers the initial `$pageview` and all paint-based vitals until the tab is visible. One ordinary visit closes that gap.
+
+### Two things still owed
+
+1. **cPanel → Zone Editor → CNAME** `e` → `95a06bb59f9f6f9353e8.cf-prod-us-proxy.proxyhog.com.`, no Cloudflare-style proxying. When the proxy reads `live`, set `VITE_POSTHOG_HOST=https://e.dadatadad.com`.
+2. **GitHub secret `POSTHOG_API_KEY`** — personal API key scoped to project 605146 with `error_tracking:write` + `annotation:write`.
+
+### Deliberate deviations from the plan below
+
+- **§3 item 8 (Web analytics conversion goal = `cta_click`)** was *not* set. The Web Analytics tab's conversion-goal picker is not exposed in the project-settings API — only *marketing* analytics goals are, which is a different product and would need ad-source mapping to mean anything. The `CTA clicked` action it needs already exists, so this is one click in the Web analytics tab.
+- **The funnel tile carries no breakdown.** §6 asked for `layout_mode` + `$device_type`; a 5-step funnel split three ways is unreadable at tile size, so the headline number is clean and the breakdown is one click away. The description on the insight says so.
+- **`game_perf.min_fps` uses the median, not p10.** PostHog's trend math offers `median`/`p75`/`p90`/`p95`/`p99`, not p10.
+- **The load-time alert runs off a separate insight** (`Loading-screen wait p90 (alert source)`), because PostHog alerts cannot evaluate an insight that has a breakdown.
+- **`game:reset` listeners were kept, not deleted.** §4.4 offered either. Nothing emits the event (there is no reset control in the UI), so it is flagged in the `EventBus.js` catalog and the instrumentation waits for a reset button rather than being removed.
+- **Web vitals CLS is not on the dashboard tile.** It is unitless and would share an axis with three millisecond metrics; it lives on the Web analytics → Web vitals tab.
+
+### One regression worth knowing about
+
+The SDK upgrade grew the PostHog chunk from **~65 KB to 102 KB gzipped** (314 KB raw) — 1.430 statically bundles more of what 1.379 lazy-loaded. It still loads in parallel with the main bundle and does not block render, but it is real weight on a site already flagged as slow. Worth revisiting if `load_time_ms` p90 disappoints once real data lands.
+
+---
+
 ## 0. TL;DR
 
 | Question | Answer |
