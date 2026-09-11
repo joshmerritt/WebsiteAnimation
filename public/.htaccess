@@ -42,11 +42,12 @@ RewriteRule ^(.*)$ https://dadatadad.com/$1 [L,R=301]
   # Google Analytics, Google Fonts, and your own assets.
   Header always set Content-Security-Policy "\
     default-src 'self'; \
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; \
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://us-assets.i.posthog.com; \
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; \
     font-src 'self' https://fonts.gstatic.com; \
-    img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com; \
-    connect-src 'self' https://ga4-analytics-api.dadatadad-analytics.workers.dev https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com; \
+    img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com https://us-assets.i.posthog.com; \
+    connect-src 'self' https://ga4-analytics-api.dadatadad-analytics.workers.dev https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com https://us.i.posthog.com https://us-assets.i.posthog.com; \
+    worker-src 'self' blob:; \
     frame-ancestors 'self'; \
     base-uri 'self'; \
     form-action 'self'; \
