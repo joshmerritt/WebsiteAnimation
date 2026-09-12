@@ -19,7 +19,37 @@ This section is the current truth; the sections below are the plan as written, k
 | **2 — source maps + annotations** | ✅ done & verified | `POSTHOG_API_KEY` added 2026-09-12 00:08 UTC. Run `34660902098` uploaded **10 symbol sets** (all `has_uploaded_file: true`, no failures) against release `dadatadad-portfolio@3.1.4`, and created annotation `438945` "Deploy 9424b07: …". No `.map` reaches public_html — `deleteAfterUpload` removes them before the FTP step. |
 | **2 — reverse proxy** | ✅ live | CNAME added 2026-09-12; proxy went `waiting → issuing → valid` at 00:15:50 UTC. Verified `/array/<token>/config.js`, `/static/1.430.2/posthog-recorder.js`, `/static/1.430.2/web-vitals-with-attribution.js` all 200 `application/javascript`, and `GET /e/` returns 400 exactly as `us.i.posthog.com` does (needs a POST body) while an unrouted path 404s. `VITE_POSTHOG_HOST` now points at it. |
 | **3 — analytics build-out** | ✅ built | Dashboard **"DaDataDad · Site health"** (id `2088517`, pinned) with 8 tiles; 3 alerts; 4 actions; 3 cohorts. |
-| **7 — site speed** | ⛔ not started | Deferred on purpose: `load_time_ms` p90 and `game_perf` now exist, so the next pass can be driven by field data instead of guesses. |
+| **7 — site speed** | ✅ items 1–5 shipped | Commit `e665c8d`. Images **1,309 KB → 292 KB (-78%)**; paint-blocking critical path **~354 KB → ~61 KB gzipped**; images preloaded; fonts non-blocking; favicon 84.5 → 18.7 KB. See the section below for what is and isn't proven. |
+
+### §7 site speed — what shipped, and what is actually proven
+
+Shipped in `e665c8d`:
+
+| Change | Measured on the live site |
+|---|---|
+| Ball images re-encoded to WebP, long edge capped at 900px | **1,308.7 KB → 291.7 KB (-78%)** |
+| p5 + matter-js + game split out of the entry chunk (`React.lazy` on `GameCanvas`) | `main` **1,187 KB → 11.7 KB** raw; paint-blocking path (html + main + react-dom + css) **~354 KB → ~61 KB gzipped** |
+| Eight ball images preloaded in `index.html`, in `Game.preload()` order | downloads now start during HTML parse, in parallel with the p5 chunk, instead of after it |
+| Google Fonts stylesheet made non-blocking (`media="print"` + promote on load) | a cross-origin round trip no longer blocks first paint |
+| `favicon.png` capped at 180px (what `apple-touch-icon` wants) | **84.5 KB → 18.7 KB**, fetched on every page of the site |
+| `/assets/` excluded from the SPA fallback | a missing asset now **404s** instead of returning 200 + `index.html` |
+
+`npm run images` (`scripts/optimize-images.mjs`, sharp) is the reproducible pipeline — run it after dropping in a new ball image and commit the `.webp`. It never upscales, and skips the unreferenced `TWYD Logo v1.0.0.png`.
+
+Sizing rationale: 900px covers the largest on-screen consumer — the detail modal hero, capped by CSS at `min(55vh, 450px)` — at 2x DPR. Balls render at `viewport/6` (~170–320 CSS px), so they have headroom.
+
+**Verified working:** the game renders with its images on a local production build and on the live domain, `portfolio.html` loads all 8 with none broken, **zero `.jpg` requests anywhere**, no console errors, and PostHog still routes entirely through `e.dadatadad.com`.
+
+**Not proven — be honest about this.** The byte reductions above are measured facts. The effect on `portfolio_loaded.load_time_ms` is **not yet demonstrable**: the only samples are hidden-tab probes from one fast connection, and the old-build readings alone scatter 551–1837 ms, which swamps any change. The new build's first warm reading was 1067 ms. Real numbers need actual traffic — the "Loading-screen wait (p50 / p90)" tile plus the deploy annotation at `e665c8d` will show it properly, and the win should be largest on mobile/4G, where a 1 MB image saving matters most and where these probes tell you nothing.
+
+### Two findings turned up while doing §7 — neither fixed
+
+1. **GA4 still sends from localhost.** The hostname gating added in Phase 1 covers PostHog only; `src/game/ga4.js` has no equivalent, so `vite preview` and local production builds still send `page_view` / `portfolio_loaded` to `G-JXCE49FJ7J` with `dl=http://localhost/`. That is the same data-pollution problem Phase 1 fixed for PostHog, still live for GA4. Fix = reuse the `shouldTrack()` pattern in `ga4.js`.
+2. **The `og:image` has never existed.** `index.html` and `portfolio.html` both point `og:image` and `twitter:image` at `https://dadatadad.com/assets/images/og-preview.jpg`, which **404s**. Every link preview on LinkedIn, Slack, iMessage and X has been falling back to no image. Needs a 1200x630 image at that path (the meta tags already declare those dimensions).
+
+**Not done from §7:** trimming unused font weights. `DM Sans` 300 and the italic 400 face are requested but nothing in `src/styles/*.css` uses `font-weight: 300` or `font-style: italic`, so two font files are downloaded for nothing — worth removing from the Google Fonts URL, but verify no inline JSX style relies on them first.
+
+---
 
 ### Verified on the live domain after deploy
 
