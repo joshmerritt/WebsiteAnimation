@@ -123,6 +123,24 @@ means *include only* that host). And alerts cannot evaluate an insight that has 
 
 ## Open items
 
+- **🔴 The intro demo counts as a real score — visible to every visitor.** `_runDemo()` auto-launches
+  `balls[0]` (About Me) via `_launchBall()` without `totalShots++`, and `_handleCollisions()` has no
+  demo check, so it does `totalMakes++`, emits `detail:open` and `ball:scored`. Result: a visitor who
+  makes their first shot sees **"1 shot · 2 makes · 200%"** on the scoreboard. Confirmed in code and in
+  real production sessions (`total_shots=0, total_makes=1` before any launch, on every page load).
+  Pre-existing since Feb/Mar 2026.
+- **🟠 …and corrupts analytics the same way.** Every page load logs a fake `ball_score` +
+  `detail_open` for "Josh Merritt": he is artificially #1 in "Top projects opened", the **Engaged
+  cohort includes every visitor** (it keys on `detail_open`), the funnel's Score step can exceed
+  Launch, and the `accuracy` event property can exceed 100%. GA4 history carries the same inflation.
+- **🟡 The miss hint fires a shot early.** `consecutiveMisses++` happens at *launch*, not on a miss,
+  and resets on score — so "try double-clicking" appears as the 3rd attempt *starts*, after only 2
+  real misses, and can appear on a shot that then goes in (seen in production). Inflates
+  `miss_hint_shown` and the Struggling cohort.
+- **Dependencies** (`npm audit`, 2026-09-12): 1 moderate in shipped code — `fflate@0.4.8` via
+  posthog-js (GHSA-px8p-9vwx-vf98, infinite loop in `unzipSync` on malformed ZIP64). Not reachable
+  here: posthog-js only *compresses*, never unzips untrusted input. 3 high + 2 others are build-only
+  (`browserslist`, `nanoid`, `postcss`) and never ship. All have fixes available.
 - **Deploy `analytics-worker/`.** The dashboards still read the old GA4 worker, which serves frozen
   historical data. `cd analytics-worker && npx wrangler secret put POSTHOG_API_KEY` (personal key,
   scope **`query:read`** — different from the CI key) `&& npx wrangler deploy`. Same worker name, so
