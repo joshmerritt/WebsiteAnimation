@@ -27,7 +27,7 @@ const projects = [
     category: 'Technology',
     goal: 'Build a portfolio that doubles as a playable physics sandbox \u2014 because a list of links doesn\u2019t show how you think.',
     role: 'Creator and Developer',
-    technology: 'React 18, Vite, p5.js (instance mode), Matter.js, ES Modules, GA4',
+    technology: 'React 18, Vite, p5.js (instance mode), Matter.js, ES Modules, PostHog',
     description:
       'The site you\u2019re on right now. Each project is a ball you drag and launch into a goal \u2014 part portfolio, part physics playground. Works on phones and desktops, adapts its performance to the device, and quietly tracks every interaction so the analytics dashboard has real data to show.',
   },
@@ -38,7 +38,7 @@ const projects = [
     category: 'Technology',
     goal: 'Prove the portfolio isn\u2019t just pretty \u2014 track the meaningful engagements and tell the story in a live dashboard.',
     role: 'Creator and Developer',
-    technology: 'React, Cloudflare Workers, GA4 Data API, SVG, CSS Grid',
+    technology: 'React, Cloudflare Workers, PostHog Query API (HogQL), SVG, CSS Grid',
     description:
       'A live analytics dashboard for this very site. Every ball launch, score, and project open is tracked, piped through a custom backend, and displayed here in real time. Includes visitor trends, traffic sources, top pages, and a ball engagement funnel that shows how visitors move from launching a ball all the way to clicking a project link.',
   },

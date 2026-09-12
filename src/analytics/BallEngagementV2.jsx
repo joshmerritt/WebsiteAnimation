@@ -1,7 +1,7 @@
 /**
  * BallEngagementV2.jsx — Ball interaction funnel visualization + table
  *
- * Accepts optional `liveData` prop from the GA4 worker.
+ * Accepts optional `liveData` prop from the analytics worker.
  * Falls back to mock BALL_ENGAGEMENT data when liveData is null.
  *
  * Features:

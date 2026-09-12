@@ -1,12 +1,13 @@
 /**
  * posthog.js — PostHog product analytics for DaDataDad.com
  *
- * Runs alongside GA4 (see ga4.js). Initializes posthog-js with autocapture,
- * automatic pageviews, session replay, web vitals and exception capture, then
- * subscribes to the same EventBus game events GA4 listens to and forwards them
+ * The site's only analytics tool since GA4 was removed. Initializes posthog-js
+ * with autocapture, pageviews, session replay, web vitals and exception capture,
+ * then subscribes to the EventBus game events and forwards them
  * as PostHog events.
  *
- * Event names + property keys mirror ga4.js so the two tools stay comparable.
+ * Per-visitor session state for the dashboard shot chart lives separately, in
+ * sessionBridge.js.
  *
  * ── Where data comes from ────────────────────────────────────────────────
  * Only the production hostname sends data. Local dev, `vite preview`, forks
@@ -126,7 +127,7 @@ export function captureException(error, props) {
 }
 
 /**
- * Initialize PostHog and wire it to the EventBus. Mirrors initGA4Tracking().
+ * Initialize PostHog and wire it to the EventBus. Mirrors initSessionBridge().
  * Returns a cleanup function that unsubscribes all listeners.
  */
 export function initPostHogTracking() {

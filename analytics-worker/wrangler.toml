@@ -1,0 +1,23 @@
+# Cloudflare Worker: PostHog-backed analytics API for the DaDataDad dashboard.
+#
+# Keeps the name of the worker it replaces so the deployed URL is unchanged and
+# the site needs no redeploy to pick it up:
+#   https://ga4-analytics-api.dadatadad-analytics.workers.dev
+# (The name is historical — it now reads PostHog, not GA4.)
+#
+# Deploy:
+#   cd analytics-worker
+#   npx wrangler secret put POSTHOG_API_KEY    # personal API key, scope: query:read
+#   npx wrangler deploy
+#
+# The personal API key MUST stay a secret — it can read all project data. It is
+# never sent to the browser; the browser only ever receives aggregated JSON.
+
+name = "ga4-analytics-api"
+main = "analytics-worker.js"
+compatibility_date = "2026-09-12"
+
+[vars]
+POSTHOG_PROJECT_ID = "605146"
+POSTHOG_HOST       = "https://us.posthog.com"
+ALLOWED_ORIGINS    = "https://dadatadad.com,https://www.dadatadad.com,http://localhost:4173,http://localhost:5173"

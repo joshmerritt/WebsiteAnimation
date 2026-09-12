@@ -1,26 +1,26 @@
 /**
  * data.js — Analytics data for DaDataDad.com
  *
- * Fetches live data from the Cloudflare Worker proxy (GA4 Data API).
+ * Fetches live data from the Cloudflare Worker proxy, which queries PostHog
  * Falls back to deterministic mock data if the fetch fails.
  *
  * In production, the worker URL should match your deployed endpoint.
  */
 
 // ── Worker endpoint ─────────────────────────────────────────────────────
-const GA4_WORKER_URL = import.meta.env.VITE_GA4_WORKER_URL || 'https://ga4-analytics-api.dadatadad-analytics.workers.dev';
+const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || import.meta.env.VITE_GA4_WORKER_URL || 'https://ga4-analytics-api.dadatadad-analytics.workers.dev';
 
 /**
- * Fetch live analytics data from the GA4 Cloudflare Worker.
+ * Fetch live analytics data from the worker (PostHog-backed).
  * Returns { timeSeries, sources, pages, ballEvents, isLive: true }
  * or null if the fetch fails.
  */
-export async function fetchGA4Data(days = 90) {
+export async function fetchAnalyticsData(days = 90) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
-    const res = await fetch(`${GA4_WORKER_URL}?days=${days}`, {
+    const res = await fetch(`${ANALYTICS_API_URL}?days=${days}`, {
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
@@ -37,7 +37,7 @@ export async function fetchGA4Data(days = 90) {
     };
   } catch (err) {
     clearTimeout(timeoutId);
-    console.warn('GA4 live fetch failed, using mock data:', err.message);
+    console.warn('analytics: live fetch failed, using mock data:', err.message);
     return null;
   }
 }

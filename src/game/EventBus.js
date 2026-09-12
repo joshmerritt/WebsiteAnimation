@@ -39,19 +39,19 @@ export default bus;
  *   'game:reset'     —                React → Game: reset all balls
  *                                     ⚠ NO EMITTER: there is no reset control
  *                                     in the UI, so Game._onReset() and the
- *                                     GA4/PostHog `game_reset` listeners are
+ *                                     PostHog `game_reset` listener is
  *                                     wired but never fire. Add a reset button
  *                                     that emits this and it all lights up.
  *   'stats:update'   { shots, makes, opens }  — Game → React: live stats
  *   'load:progress'  number (0–1)   — Game → React: image loading progress
  *   'load:complete'  —               Game → React: all assets loaded, setup done
- *   'ball:launched'  { name, category, ballLaunches, ballMakes }  — Game → GA4
- *   'ball:scored'    { name, category, ballLaunches, ballMakes }  — Game → GA4
- *   'cta:click'      { name, link, category } — React → GA4
+ *   'ball:launched'  { name, category, ballLaunches, ballMakes }  — Game → analytics
+ *   'ball:scored'    { name, category, ballLaunches, ballMakes }  — Game → analytics
+ *   'cta:click'      { name, link, category } — React → analytics
  *   'miss:hint'      boolean         — Game → React: show/hide miss hint
  *   'impact:first'   { ballId, ballName, ballCategory, hitType, hitLabel,
  *                       isGoal, x, y, px, py, vpWidth, vpHeight,
- *                       shotNumber, timestamp }  — Game → GA4/Dashboard
+ *                       shotNumber, timestamp }  — Game → analytics/dashboard
  *   'perf:sample'    { avg_fps, min_fps, active_frames, hardware_threads,
  *                       device_memory_gb, canvas_px }  — Game → PostHog:
  *                     emitted ONCE, ~30s after load:complete, averaged over

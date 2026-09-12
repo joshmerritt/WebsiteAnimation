@@ -16,7 +16,7 @@
  *   - Filters out "(not set)" events
  *
  * Props:
- *   liveData    — array of ball objects from GA4 worker (optional)
+ *   liveData    — array of ball objects from the analytics worker (optional)
  *   sessionData — { shots, makes, ballStats: Map<id, {launches,scores}>, impacts: [] } (optional)
  */
 

@@ -5,7 +5,7 @@
  *   1. LoadingScreen (fades out when p5 finishes preloading)
  *   2. GameCanvas (p5.js physics + rendering)
  *   3. React overlay (modal + HUD + stats)
- *   4. Analytics: GA4 + PostHog event tracking (wired to EventBus)
+ *   4. Analytics: PostHog event tracking + local session bridge (via EventBus)
  */
 
 import { Component, Suspense, lazy, useState, useEffect, useCallback } from 'react';
@@ -13,7 +13,7 @@ import DetailModal from './components/DetailModal.jsx';
 import HUD from './components/HUD.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import bus from './game/EventBus.js';
-import { initGA4Tracking } from './game/ga4.js';
+import { initSessionBridge } from './game/sessionBridge.js';
 import { initPostHogTracking, captureException } from './game/posthog.js';
 
 /**
@@ -75,9 +75,10 @@ export default function App() {
     return unsub;
   }, []);
 
-  // Initialize GA4 tracking on mount
+  // Keep the local per-session store (shot chart / "your session" stats) fed.
+  // Not analytics: this is the viewer's own data, in their own browser.
   useEffect(() => {
-    const cleanup = initGA4Tracking();
+    const cleanup = initSessionBridge();
     return cleanup;
   }, []);
 

@@ -64,10 +64,6 @@
       }
     </script>
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXCE49FJ7J"></script>
-    <script src="/gtag-init.js"></script>
-
     <!-- Fonts: Syne (display) + DM Sans (body) + JetBrains Mono (tech) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -86,15 +82,20 @@
          setup() fires load:complete and the loading screen hides, so kicking
          them off during HTML parse - rather than after the JS bundle has been
          fetched, parsed, and run - takes a full round trip off load_time_ms.
-         Listed in the order Game.preload() requests them. -->
-    <link rel="preload" as="image" type="image/webp" href="/assets/images/aboutMe.webp" />
-    <link rel="preload" as="image" type="image/webp" href="/assets/images/thisWebsite.webp" />
-    <link rel="preload" as="image" type="image/webp" href="/assets/images/SiteAnalytics.webp" />
-    <link rel="preload" as="image" type="image/webp" href="/assets/images/arduinoCoopDoor.webp" />
-    <link rel="preload" as="image" type="image/webp" href="/assets/images/googleDataStudioServiceTechs.webp" />
-    <link rel="preload" as="image" type="image/webp" href="/assets/images/powerBIMetrics.webp" />
-    <link rel="preload" as="image" type="image/webp" href="/assets/images/thewineyoudrink.webp" />
-    <link rel="preload" as="image" type="image/webp" href="/assets/images/dartleague.webp" />
+         Listed in the order Game.preload() requests them.
+
+         crossorigin is REQUIRED, not decorative: p5's loadImage fetches with
+         mode:'cors' (credentials mode same-origin), and a preload without
+         crossorigin uses credentials mode include. The mismatch makes the
+         browser discard the preload and download each image twice. -->
+    <link rel="preload" as="image" type="image/webp" crossorigin href="/assets/images/aboutMe.webp" />
+    <link rel="preload" as="image" type="image/webp" crossorigin href="/assets/images/thisWebsite.webp" />
+    <link rel="preload" as="image" type="image/webp" crossorigin href="/assets/images/SiteAnalytics.webp" />
+    <link rel="preload" as="image" type="image/webp" crossorigin href="/assets/images/arduinoCoopDoor.webp" />
+    <link rel="preload" as="image" type="image/webp" crossorigin href="/assets/images/googleDataStudioServiceTechs.webp" />
+    <link rel="preload" as="image" type="image/webp" crossorigin href="/assets/images/powerBIMetrics.webp" />
+    <link rel="preload" as="image" type="image/webp" crossorigin href="/assets/images/thewineyoudrink.webp" />
+    <link rel="preload" as="image" type="image/webp" crossorigin href="/assets/images/dartleague.webp" />
 
     <!-- Noscript styles for the static fallback -->
     <noscript>
@@ -301,7 +302,7 @@
             <dt>Role</dt>
             <dd>Creator and Developer</dd>
             <dt>Technology</dt>
-            <dd itemprop="keywords">React 18, Vite, p5.js, Matter.js, ES Modules, GA4</dd>
+            <dd itemprop="keywords">React 18, Vite, p5.js, Matter.js, ES Modules, PostHog</dd>
             <dt>Summary</dt>
             <dd>Each project is a ball you drag and launch into a goal — part portfolio, part physics playground. Works on phones and desktops, adapts its performance to the device, and tracks every interaction for the analytics dashboard.</dd>
           </dl>
@@ -318,7 +319,7 @@
             <dt>Role</dt>
             <dd>Creator and Developer</dd>
             <dt>Technology</dt>
-            <dd itemprop="keywords">React, Cloudflare Workers, GA4 Data API, SVG, CSS Grid</dd>
+            <dd itemprop="keywords">React, Cloudflare Workers, PostHog Query API (HogQL), SVG, CSS Grid</dd>
             <dt>Summary</dt>
             <dd>A live analytics dashboard for this very site. Every ball launch, score, and project open is tracked, piped through a custom backend, and displayed in real time.</dd>
           </dl>

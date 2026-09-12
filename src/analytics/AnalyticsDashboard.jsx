@@ -1,13 +1,13 @@
 /**
  * AnalyticsDashboard.jsx — Main dashboard layout (V1)
  *
- * Fetches live data from the GA4 Cloudflare Worker.
+ * Fetches live data from the analytics Worker (PostHog-backed).
  * Falls back to deterministic mock data if the fetch fails.
  */
 
 import { useState, useMemo, useEffect } from 'react';
 import {
-  fetchGA4Data,
+  fetchAnalyticsData,
   generateTimeSeriesData,
   REFERRER_DATA,
   PAGE_DATA,
@@ -43,7 +43,7 @@ export default function AnalyticsDashboard() {
     let cancelled = false;
     setLoading(true);
 
-    fetchGA4Data(rangeDays).then((result) => {
+    fetchAnalyticsData(rangeDays).then((result) => {
       if (cancelled) return;
       if (result) {
         setLiveData(result);
@@ -245,9 +245,9 @@ export default function AnalyticsDashboard() {
         <p>
           {isLive ? (
             <>
-              Real-time analytics powered by a custom GA4 Data API pipeline &mdash;
-              a Cloudflare Worker authenticates via service account, queries the
-              GA4 reporting endpoint, and returns structured JSON that this
+              Real-time analytics powered by a custom PostHog query pipeline &mdash;
+              a Cloudflare Worker authenticates with a PostHog personal API key, runs HogQL
+              queries against the PostHog query API, and returns JSON that this
               React dashboard consumes. Custom events track the full user
               journey from ball interaction through project discovery.
             </>
@@ -255,7 +255,7 @@ export default function AnalyticsDashboard() {
             <>
               Deterministic mock data generated client-side for demonstration.
               In production, this dashboard connects to a Cloudflare Worker
-              proxy that authenticates with the GA4 Data API and returns
+              proxy that authenticates with the PostHog query API and returns
               real visitor metrics, traffic sources, and ball engagement funnels.
             </>
           )}

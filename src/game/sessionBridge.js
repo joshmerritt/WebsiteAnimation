@@ -1,16 +1,21 @@
 /**
- * ga4.js — Google Analytics 4 event tracking for DaDataDad.com
+ * sessionBridge.js — Local, per-browser record of the current visitor's session
  *
- * Listens to EventBus events and forwards them as GA4 custom events.
- * Gracefully no-ops if gtag isn't loaded (dev, ad-blockers, etc.).
+ * Two localStorage-backed stores, both capped and auto-expiring after 24h:
+ *   __dadatadad_impacts — one record per shot (first-contact coordinates,
+ *                         later finalised as make/miss) for the shot chart
+ *   __dadatadad_bridge  — running counts: shots, makes, opens, cta clicks
  *
- * Also maintains a localStorage-based "bridge" store that:
- *   1. Persists impact data across tabs (for the shot chart heatmap)
- *   2. Tracks session stats (shots, makes, opens, cta clicks) with timestamps
- *   3. Auto-expires data older than 24 hours
+ * `AnalyticsDashboardV3` reads both keys directly to render the "your session"
+ * view of the shot chart, which no warehouse query can provide: these are the
+ * viewer's own interactions, available instantly and without a round trip.
  *
- * The analytics dashboard reads this bridge data to fill the gap
- * between GA4's ~48hr processing lag and the current moment.
+ * This used to live inside ga4.js, but it was never GA4-specific — it is
+ * local browser state that happens to be fed by the same EventBus events. It
+ * was extracted when GA4 was removed so the shot chart kept working.
+ *
+ * Everything here is best-effort: storage can be unavailable (private mode,
+ * embedded webviews) and every access is guarded.
  */
 
 import bus from './EventBus.js';
@@ -20,9 +25,6 @@ const BRIDGE_KEY  = '__dadatadad_bridge';
 const MAX_AGE_MS  = 24 * 60 * 60 * 1000; // 24 hours
 const MAX_IMPACTS = 500; // Cap impact records to prevent localStorage bloat
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  Impact Store — per-shot first-contact data for the shot chart
-// ═══════════════════════════════════════════════════════════════════════════
 
 const impactStore = {
   _data: [],
@@ -38,13 +40,13 @@ const impactStore = {
         // Re-persist if we pruned anything
         if (this._data.length !== parsed.length) this._persist();
       }
-    } catch (e) { console.warn('ga4: failed to hydrate impact store', e.message); }
+    } catch (e) { console.warn('sessionBridge: failed to hydrate impact store', e.message); }
   },
 
   _persist() {
     try {
       localStorage.setItem(IMPACT_KEY, JSON.stringify(this._data));
-    } catch (e) { console.warn('ga4: failed to persist impacts', e.message); }
+    } catch (e) { console.warn('sessionBridge: failed to persist impacts', e.message); }
   },
 
   add(record) {
@@ -92,7 +94,7 @@ const impactStore = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  Bridge Stats — aggregated event counts to supplement GA4 lag
+//  Bridge Stats — running counts for the current visitor session
 // ═══════════════════════════════════════════════════════════════════════════
 
 const bridgeStats = {
@@ -113,7 +115,7 @@ const bridgeStats = {
           }
         }
       }
-    } catch (e) { console.warn('ga4: failed to hydrate bridge stats', e.message); }
+    } catch (e) { console.warn('sessionBridge: failed to hydrate bridge stats', e.message); }
     if (!this._data) {
       this._data = { startedAt: Date.now(), shots: 0, makes: 0, opens: 0, ctaClicks: 0, visitors: 1, lastUpdated: Date.now() };
       this._persist();
@@ -124,7 +126,7 @@ const bridgeStats = {
     try {
       this._data.lastUpdated = Date.now();
       localStorage.setItem(BRIDGE_KEY, JSON.stringify(this._data));
-    } catch (e) { console.warn('ga4: failed to persist bridge stats', e.message); }
+    } catch (e) { console.warn('sessionBridge: failed to persist bridge stats', e.message); }
   },
 
   addShot()     { this._data.shots++;     this._persist(); },
@@ -151,20 +153,7 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
   window.__bridgeStats = bridgeStats;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  GA4 Tracking
-// ═══════════════════════════════════════════════════════════════════════════
-
-function gtag(...args) {
-  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-    window.gtag(...args);
-  }
-}
-
-function track(eventName, params = {}) {
-  gtag('event', eventName, params);
-}
-
+/** Map a ball's display name back to its project id (see src/data/projects.js). */
 function nameToBallId(name) {
   const map = {
     'Josh Merritt': 'aboutMe',
@@ -180,34 +169,18 @@ function nameToBallId(name) {
   return map[name] || name;
 }
 
-export function initGA4Tracking() {
+/**
+ * Subscribe the local stores to the EventBus.
+ * Returns a cleanup function that unsubscribes all listeners.
+ */
+export function initSessionBridge() {
   const unsubs = [];
 
-  let currentShots = 0;
-  let currentMakes = 0;
+  // Per-ball launch — count the shot and seed a record that is finalised
+  // later, when the shot resolves and we know make vs miss.
   unsubs.push(
-    bus.on('stats:update', ({ shots, makes }) => {
-      currentShots = shots;
-      currentMakes = makes;
-    }),
-  );
-
-  // Per-ball launch
-  unsubs.push(
-    bus.on('ball:launched', ({ name, category, ballLaunches, ballMakes, shotNumber }) => {
-      track('ball_launch', {
-        project_name: name,
-        project_category: category,
-        ball_launches: ballLaunches,
-        ball_makes: ballMakes,
-        total_shots: currentShots,
-        total_makes: currentMakes,
-        accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
-      });
+    bus.on('ball:launched', ({ name, category, shotNumber }) => {
       bridgeStats.addShot();
-
-      // Seed a per-shot impact record that can be finalized later when
-      // the shot resolves (score popup / reset) and we know make vs miss.
       if (typeof shotNumber === 'number') {
         impactStore.add({
           ballId:       nameToBallId(name),
@@ -216,12 +189,8 @@ export function initGA4Tracking() {
           hitType:      'launch',
           hitLabel:     'launch',
           isGoal:       false,
-          x:            null,
-          y:            null,
-          px:           null,
-          py:           null,
-          vpWidth:      null,
-          vpHeight:     null,
+          x: null, y: null, px: null, py: null,
+          vpWidth: null, vpHeight: null,
           shotNumber,
           timestamp:    Date.now(),
         });
@@ -229,21 +198,10 @@ export function initGA4Tracking() {
     }),
   );
 
-  // Per-ball score
+  // Per-ball score — finalise this shot as a make.
   unsubs.push(
-    bus.on('ball:scored', ({ name, category, ballLaunches, ballMakes, shotNumber }) => {
-      track('ball_score', {
-        project_name: name,
-        project_category: category,
-        ball_launches: ballLaunches,
-        ball_makes: ballMakes,
-        total_shots: currentShots,
-        total_makes: currentMakes,
-        accuracy: currentShots > 0 ? Math.round((currentMakes / currentShots) * 100) : 0,
-      });
+    bus.on('ball:scored', ({ name, category, shotNumber }) => {
       bridgeStats.addMake();
-
-      // Finalize this shot as a make after score has been confirmed.
       if (typeof shotNumber === 'number') {
         impactStore.add({
           ballId:       nameToBallId(name),
@@ -252,12 +210,8 @@ export function initGA4Tracking() {
           hitType:      'menu',
           hitLabel:     'Menu_final',
           isGoal:       true,
-          x:            null,
-          y:            null,
-          px:           null,
-          py:           null,
-          vpWidth:      null,
-          vpHeight:     null,
+          x: null, y: null, px: null, py: null,
+          vpWidth: null, vpHeight: null,
           shotNumber,
           timestamp:    Date.now(),
         });
@@ -265,70 +219,18 @@ export function initGA4Tracking() {
     }),
   );
 
-  // Detail modal opened
+  unsubs.push(bus.on('detail:open', () => bridgeStats.addOpen()));
+  unsubs.push(bus.on('cta:click',   () => bridgeStats.addCtaClick()));
+
+  // First contact — keep the coordinates, but don't trust first-contact goal
+  // classification until shot resolution updates it.
   unsubs.push(
-    bus.on('detail:open', (data) => {
-      track('detail_open', {
-        project_name: data.name || 'unknown',
-        project_link: data.link || '',
-      });
-      bridgeStats.addOpen();
-    }),
+    bus.on('impact:first', (data) => impactStore.add({ ...data, isGoal: false })),
   );
 
-  // Detail modal closed
+  // Reset clears the visitor's local session view.
   unsubs.push(
-    bus.on('detail:close', () => {
-      track('detail_close');
-    }),
-  );
-
-  // CTA clicked
-  unsubs.push(
-    bus.on('cta:click', ({ name, link, category }) => {
-      track('cta_click', {
-        project_name: name || 'unknown',
-        project_link: link || '',
-        project_category: category || '',
-      });
-      bridgeStats.addCtaClick();
-    }),
-  );
-
-  // Loading complete
-  unsubs.push(
-    bus.on('load:complete', () => {
-      track('portfolio_loaded', {
-        load_time_ms: Math.round(performance.now()),
-      });
-    }),
-  );
-
-  // Game reset
-  unsubs.push(
-    bus.on('game:reset', () => {
-      track('game_reset');
-      impactStore.clear();
-      bridgeStats.clear();
-    }),
-  );
-
-  // First-impact tracking
-  unsubs.push(
-    bus.on('impact:first', (data) => {
-      // Keep coordinates from first contact, but don't trust first-contact
-      // goal classification until shot resolution updates it.
-      impactStore.add({ ...data, isGoal: false });
-      track('ball_impact', {
-        ball_name:     data.ballName,
-        ball_category: data.ballCategory,
-        hit_type:      data.hitType,
-        is_goal:       data.isGoal ? 'true' : 'false',
-        impact_x:      data.x,
-        impact_y:      data.y,
-        shot_number:   data.shotNumber,
-      });
-    }),
+    bus.on('game:reset', () => { impactStore.clear(); bridgeStats.clear(); }),
   );
 
   return () => unsubs.forEach((fn) => fn());

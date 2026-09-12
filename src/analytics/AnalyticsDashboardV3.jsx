@@ -2,12 +2,12 @@
  * DaDataDad.com — Analytics Dashboard V3
  * Consolidated dashboard: Analytics + Data Architecture tabs
  *
- * Fetches live data from the GA4 Cloudflare Worker.
+ * Fetches live data from the analytics Worker (PostHog-backed).
  * Falls back to deterministic mock data if the fetch fails.
  */
 import { useState, useEffect, useMemo, useRef, Component } from "react";
 import {
-  fetchGA4Data,
+  fetchAnalyticsData,
   generateTimeSeriesData,
   REFERRER_DATA as MOCK_REFERRER,
   PAGE_DATA as MOCK_PAGES,
@@ -21,7 +21,7 @@ import {
 import ShotChart from './ShotChart.jsx';
 import BallEngagementV1 from './BallEngagement.jsx';
 
-// ═══ SUPPLEMENTARY DATA (not from GA4) ══════════════════════════════════
+// ═══ SUPPLEMENTARY DATA (not from PostHog) ══════════════════════════════════
 // Device icons for V3 display (MOCK_DEVICES has different shape)
 const DEVICE_ICONS = { Desktop: "\uD83D\uDDA5\uFE0F", Mobile: "\uD83D\uDCF1", Tablet: "\uD83D\uDCBB" };
 
@@ -54,8 +54,8 @@ const PIPELINE_STEPS = [
   { label: "User Action", icon: "\uD83D\uDC46", tags: ["Drag ball", "Release (launch)", "Collision (score)", "Double-tap (open)", "CTA link click"], color: "#D4A843", border: "#D4A843" },
   { label: "Game.js", icon: "\u2699\uFE0F", tags: ["Physics engine", "Collision detection", "State management"], color: "#5985B1", border: "#5985B1" },
   { label: "EventBus", icon: "\uD83D\uDCE1", tags: ["stats:update", "detail:open", "detail:close", "cta:click", "load:complete"], color: "#6B9F6B", border: "#6B9F6B" },
-  { label: "ga4.js", icon: "\uD83D\uDD17", tags: ["Delta detection", "Event mapping", "Parameter enrichment"], color: "#6B9F6B", border: "#6B9F6B" },
-  { label: "GA4", icon: "\uD83D\uDCCA", tags: ["ball_launch", "ball_score", "detail_open", "cta_click", "portfolio_loaded"], color: "#5985B1", border: "#5985B1" },
+  { label: "posthog.js", icon: "\uD83D\uDD17", tags: ["Event mapping", "Super properties", "Session replay"], color: "#6B9F6B", border: "#6B9F6B" },
+  { label: "PostHog", icon: "\uD83D\uDCCA", tags: ["ball_launch", "ball_score", "detail_open", "cta_click", "portfolio_loaded"], color: "#5985B1", border: "#5985B1" },
 ];
 
 // ═══ INSIGHTS ENGINE ════════════════════════════════════════════════════
@@ -532,7 +532,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
       <StatCard label="Launch Rate" value={interactionRate} suffix="%" trend={12} delay={200} sparkData={timeSeriesData.slice(-30).map(d => d && d.visitors > 0 ? Math.min(100, Math.round((d.ballInteractions / d.visitors) * 100)) : 0)} color={MC.ballInteractions} compact subtitle="% of visitors who launch a ball" />
     </div>
 
-    {/* Bridge Stats — live activity since GA4's last sync */}
+    {/* Bridge Stats — live activity from this browser session */}
     {(() => {
       try {
         const bridge = JSON.parse(localStorage.getItem('__dadatadad_bridge') || 'null');
@@ -744,8 +744,8 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
     <div style={{ marginTop: 24, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
       <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", lineHeight: 1.7 }}>
         {isLive
-          ? "Real-time analytics powered by a custom GA4 Data API pipeline. A Cloudflare Worker authenticates via service account, queries the GA4 reporting endpoint, and returns structured JSON that this React dashboard consumes. Device breakdown, session flow, and architecture data are supplementary demonstrations."
-          : "Deterministic mock data shown for demonstration. In production, this dashboard connects to a Cloudflare Worker proxy that authenticates with the GA4 Data API and returns real visitor metrics, traffic sources, and ball engagement funnels."
+          ? "Real-time analytics powered by a custom PostHog query pipeline. A Cloudflare Worker authenticates with a PostHog personal API key, runs HogQL queries against the PostHog query API, and returns structured JSON that this React dashboard consumes. Device breakdown, session flow, and architecture data are supplementary demonstrations."
+          : "Deterministic mock data shown for demonstration. In production, this dashboard connects to a Cloudflare Worker proxy that authenticates with the PostHog query API and returns real visitor metrics, traffic sources, and ball engagement funnels."
         }
       </p>
     </div>
@@ -757,7 +757,7 @@ function DataArchitectureTab() {
   return (<div>
     {/* Pipeline */}
     <div style={SS.panel}>
-      <div style={SS.panelHeader}><span style={{ ...SS.panelTitle, marginBottom: 0 }}>Tracking Architecture</span><span style={SS.panelBadge}>EventBus → GA4 pipeline</span></div>
+      <div style={SS.panelHeader}><span style={{ ...SS.panelTitle, marginBottom: 0 }}>Tracking Architecture</span><span style={SS.panelBadge}>EventBus → PostHog pipeline</span></div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
         {PIPELINE_STEPS.map((step, i) => <div key={step.label} style={{ width: "100%", maxWidth: 440 }}>
           <div style={{ border: `1px solid ${step.border}55`, borderRadius: 10, padding: "14px 16px", background: `${step.border}08` }}>
@@ -884,11 +884,11 @@ function DataArchitectureTab() {
     <div style={{ ...SS.panel, marginTop: 20 }}>
       <span style={SS.panelTitle}>Implementation Details</span>
       <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.8 }}>
-        <p style={{ marginBottom: 12 }}>Real-time analytics powered by a custom GA4 Data API pipeline. A Cloudflare Worker authenticates via service account, queries the GA4 reporting endpoint, and returns structured JSON that this React dashboard consumes.</p>
-        <p>Six custom GA4 events track the full user journey from ball interaction through project discovery and CTA conversion, with enriched parameters for per-project attribution and accuracy tracking.</p>
+        <p style={{ marginBottom: 12 }}>Real-time analytics powered by a custom PostHog query pipeline. A Cloudflare Worker authenticates with a PostHog personal API key, runs HogQL queries against the PostHog query API, and returns structured JSON that this React dashboard consumes.</p>
+        <p>Six custom PostHog events track the full user journey from ball interaction through project discovery and CTA conversion, with enriched parameters for per-project attribution and accuracy tracking.</p>
       </div>
       <div style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 14 }}>
-        {[["Event Bridge", "src/game/ga4.js"], ["Communication", "EventBus pub/sub"], ["Delta Detection", "Prevents double-counting via lastShots / lastMakes"], ["Dashboard", "React + custom SVG charts"], ["Hosting", "Namecheap cPanel + Cloudflare Worker"], ["Stack", "Vite + React 18 + p5.js + matter.js"]].map(([k, v], i) => <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: i < 5 ? "1px solid rgba(255,255,255,0.03)" : "none" }}><span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{k}</span><span style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.7)" }}>{v}</span></div>)}
+        {[["Event Bridge", "src/game/posthog.js"], ["Communication", "EventBus pub/sub"], ["Session Store", "sessionBridge.js (local shot chart data)"], ["Dashboard", "React + custom SVG charts"], ["Hosting", "Namecheap cPanel + Cloudflare Worker"], ["Stack", "Vite + React 18 + p5.js + matter.js"]].map(([k, v], i) => <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: i < 5 ? "1px solid rgba(255,255,255,0.03)" : "none" }}><span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{k}</span><span style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.7)" }}>{v}</span></div>)}
       </div>
     </div>
   </div>);
@@ -941,7 +941,7 @@ function AnalyticsDashboardV3Inner() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchGA4Data(rangeDays).then((result) => {
+    fetchAnalyticsData(rangeDays).then((result) => {
       if (cancelled) return;
       if (result) { setLiveData(result); setIsLive(true); }
       else { setIsLive(false); }

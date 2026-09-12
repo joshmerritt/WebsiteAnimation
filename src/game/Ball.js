@@ -51,6 +51,10 @@ export default class Ball {
     this.nativeImage = null;
     if (typeof Image !== 'undefined') {
       this.nativeImage = new Image();
+      // Match p5 loadImage's fetch(mode:'cors') and the <link rel=preload>
+      // in index.html. If these three disagree on credentials mode the
+      // browser treats them as different requests and re-downloads.
+      this.nativeImage.crossOrigin = 'anonymous';
       this.nativeImage.decoding = 'async';
       this.nativeImage.onload = () => {
         // Force a fresh render once the native image is available.
