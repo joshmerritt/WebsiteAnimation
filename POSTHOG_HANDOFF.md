@@ -19,7 +19,45 @@ This section is the current truth; the sections below are the plan as written, k
 | **2 — source maps + annotations** | ✅ done & verified | `POSTHOG_API_KEY` added 2026-09-12 00:08 UTC. Run `34660902098` uploaded **10 symbol sets** (all `has_uploaded_file: true`, no failures) against release `dadatadad-portfolio@3.1.4`, and created annotation `438945` "Deploy 9424b07: …". No `.map` reaches public_html — `deleteAfterUpload` removes them before the FTP step. |
 | **2 — reverse proxy** | ✅ live | CNAME added 2026-09-12; proxy went `waiting → issuing → valid` at 00:15:50 UTC. Verified `/array/<token>/config.js`, `/static/1.430.2/posthog-recorder.js`, `/static/1.430.2/web-vitals-with-attribution.js` all 200 `application/javascript`, and `GET /e/` returns 400 exactly as `us.i.posthog.com` does (needs a POST body) while an unrouted path 404s. `VITE_POSTHOG_HOST` now points at it. |
 | **3 — analytics build-out** | ✅ built | Dashboard **"DaDataDad · Site health"** (id `2088517`, pinned) with 8 tiles; 3 alerts; 4 actions; 3 cohorts. |
+| **GA4 removal** | ✅ shipped, worker needs deploying | Commit `271ed04`. GA4 gone entirely; dashboard ported to PostHog HogQL. See the section below. |
 | **7 — site speed** | ✅ items 1–5 shipped | Commit `e665c8d`. Images **1,309 KB → 292 KB (-78%)**; paint-blocking critical path **~354 KB → ~61 KB gzipped**; images preloaded; fonts non-blocking; favicon 84.5 → 18.7 KB. See the section below for what is and isn't proven. |
+
+### GA4 removed — PostHog is now the only analytics (commit `271ed04`)
+
+GA4 cost **175 KB gzipped on every page load** — larger than the whole critical path (61 KB) and larger than PostHog (100 KB) — while duplicating data PostHog already captures.
+
+The complication: GA4 was not only analytics here. The **SiteAnalytics ball is a portfolio project** whose dashboard read GA4 through a Cloudflare Worker, and two project descriptions named GA4 in their tech stack. So this was a port, not a deletion.
+
+| Piece | What happened |
+|---|---|
+| `analytics-worker/` | Replaces `ga4-worker/`. Same JSON contract and the same deployed worker name (so the URL is unchanged), but it runs **HogQL against the PostHog query API**. All five queries were validated against real project data *before* being written in, and the shaping functions were run against those real rows to confirm the output matches what the dashboards expect. |
+| `src/game/sessionBridge.js` | **New, extracted from `ga4.js`.** The two localStorage stores (`__dadatadad_impacts`, `__dadatadad_bridge`) were never GA4-specific — they hold the viewer's own session and are read directly by `AnalyticsDashboardV3` for the shot chart's "your session" view. They would have been destroyed along with `ga4.js`. |
+| Removed | `src/game/ga4.js`, `public/gtag-init.js`, `ga4-worker/`, the GA4 snippet from **all five** HTML entries (it was inlined in four of them, not just `index.html`), and every Google Analytics host from the CSP. |
+| Copy | The `SiteAnalytics` and `thisWebsite` descriptions, the dashboards' architecture panels and prose, and the noscript SEO keywords now say PostHog. |
+
+**Verified live:** zero requests to `googletagmanager` / `google-analytics`, `window.gtag` and `window.dataLayer` undefined, PostHog still routing entirely through `e.dadatadad.com`, the game loads, the session bridge initialises, `/analytics-v3.html` renders and calls the worker with no console errors.
+
+**One thing left, and it is yours:** deploy the worker.
+
+```bash
+cd analytics-worker
+npx wrangler secret put POSTHOG_API_KEY   # personal API key, scope: query:read
+npx wrangler deploy
+```
+
+Nothing is broken while you wait. The old GA4 worker is still deployed and still serves its historical data, so the dashboard keeps rendering real numbers — they just stop gaining new ones, because nothing writes to GA4 any more. Deploying swaps the data source over with no site redeploy (the worker name and URL are unchanged).
+
+### A bug this turned up in the §7 work
+
+**The ball-image preloads shipped in `e665c8d` were doing nothing.** p5's `loadImage` fetches with `mode: 'cors'` (credentials mode *same-origin*), while a `<link rel=preload>` without `crossorigin` uses credentials mode *include*. The browser treated them as different requests and discarded every preload — the console said so on each load. Fixed by adding `crossorigin` to the eight preloads and aligning `Ball.nativeImage`, so all three consumers agree. Verified: the "preload … is not used" warnings are gone in a clean tab.
+
+Worth remembering as a general rule: **a preload that does not match its consumer's credentials mode is silently wasted**, and the only signal is a console warning that is easy to miss among page noise.
+
+### Also noticed
+
+`src/dashboard-v3.jsx` (~1,000 lines) is **never imported** — `analytics-v3.html` loads `src/analytics-v3-main.jsx`, which uses `src/analytics/AnalyticsDashboardV3.jsx`. It is a stale duplicate that still describes the GA4 pipeline. It never ships (nothing imports it, so it is not bundled), which is why its copy was left alone. Worth deleting when convenient.
+
+---
 
 ### §7 site speed — what shipped, and what is actually proven
 
