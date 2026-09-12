@@ -29,9 +29,15 @@ const QUALITY  = 80;
 // favicon.png is referenced as-is by every HTML entry; handled separately below.
 const ICON_MAX = 180;   // apple-touch-icon wants 180x180
 
-// Nothing references this file — leaving it untouched rather than quietly
-// converting and deleting an orphan. Delete it by hand if it really is dead.
-const SKIP = new Set(['TWYD Logo v1.0.0.png']);
+// Files this script must not touch:
+//   TWYD Logo v1.0.0.png — unreferenced orphan; leaving it rather than quietly
+//     converting and deleting it. Delete by hand if it really is dead.
+//   og-preview.jpg — the social card, built by scripts/make-og-image.mjs. It
+//     MUST stay a .jpg at exactly this path because that is the URL the
+//     og:image/twitter:image meta tags advertise, and scrapers do not follow
+//     an extension change. Converting it here would silently break every link
+//     preview again.
+const SKIP = new Set(['TWYD Logo v1.0.0.png', 'og-preview.jpg']);
 
 const dry = process.argv.includes('--dry');
 const kb  = (n) => (n / 1024).toFixed(1).padStart(7) + ' KB';

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "images": "node scripts/optimize-images.mjs"
+    "images": "node scripts/optimize-images.mjs",
+    "og": "node scripts/make-og-image.mjs"
   },
   "dependencies": {
     "matter-js": "^0.20.0",
