@@ -71,7 +71,30 @@
     <!-- Fonts: Syne (display) + DM Sans (body) + JetBrains Mono (tech) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <!-- Google Fonts, loaded without blocking the first paint.
+         The stylesheet is requested at low priority as print media, then
+         promoted to all media once it arrives, so the loading screen paints
+         immediately in the fallback stack instead of waiting on a
+         cross-origin round trip. The URL already carries display=swap, so a
+         font swap was always expected. <noscript> keeps it working for
+         crawlers and JS-off visitors. -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" /></noscript>
+
+    <!-- Preload the ball images. All eight must finish downloading before p5's
+         setup() fires load:complete and the loading screen hides, so kicking
+         them off during HTML parse - rather than after the JS bundle has been
+         fetched, parsed, and run - takes a full round trip off load_time_ms.
+         Listed in the order Game.preload() requests them. -->
+    <link rel="preload" as="image" type="image/webp" href="/assets/images/aboutMe.webp" />
+    <link rel="preload" as="image" type="image/webp" href="/assets/images/thisWebsite.webp" />
+    <link rel="preload" as="image" type="image/webp" href="/assets/images/SiteAnalytics.webp" />
+    <link rel="preload" as="image" type="image/webp" href="/assets/images/arduinoCoopDoor.webp" />
+    <link rel="preload" as="image" type="image/webp" href="/assets/images/googleDataStudioServiceTechs.webp" />
+    <link rel="preload" as="image" type="image/webp" href="/assets/images/powerBIMetrics.webp" />
+    <link rel="preload" as="image" type="image/webp" href="/assets/images/thewineyoudrink.webp" />
+    <link rel="preload" as="image" type="image/webp" href="/assets/images/dartleague.webp" />
 
     <!-- Noscript styles for the static fallback -->
     <noscript>
@@ -235,7 +258,7 @@
         </nav>
 
         <article class="noscript-project" itemscope itemtype="https://schema.org/SoftwareApplication">
-          <img class="noscript-project-img" src="/assets/images/thewineyoudrink.jpg" alt="The Wine You Drink app showing wine cellar management interface" loading="lazy" />
+          <img class="noscript-project-img" src="/assets/images/thewineyoudrink.webp" alt="The Wine You Drink app showing wine cellar management interface" loading="lazy" />
           <h2 itemprop="name">The Wine You Drink</h2>
           <p class="noscript-category">Apps</p>
           <dl class="noscript-meta">
@@ -252,7 +275,7 @@
         </article>
 
         <article class="noscript-project" itemscope itemtype="https://schema.org/SoftwareApplication">
-          <img class="noscript-project-img" src="/assets/images/dartleague.jpg" alt="Black Sheep Dart League app showing league management dashboard" loading="lazy" />
+          <img class="noscript-project-img" src="/assets/images/dartleague.webp" alt="Black Sheep Dart League app showing league management dashboard" loading="lazy" />
           <h2 itemprop="name">Black Sheep Dart League</h2>
           <p class="noscript-category">Apps</p>
           <dl class="noscript-meta">
@@ -269,7 +292,7 @@
         </article>
 
         <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
-          <img class="noscript-project-img" src="/assets/images/thisWebsite.jpg" alt="Portfolio website showing physics-based ball launching interaction" loading="lazy" />
+          <img class="noscript-project-img" src="/assets/images/thisWebsite.webp" alt="Portfolio website showing physics-based ball launching interaction" loading="lazy" />
           <h2 itemprop="name">Portfolio Website</h2>
           <p class="noscript-category">Technology</p>
           <dl class="noscript-meta">
@@ -286,7 +309,7 @@
         </article>
 
         <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
-          <img class="noscript-project-img" src="/assets/images/SiteAnalytics.jpg" alt="Site analytics dashboard showing visitor trends and ball engagement metrics" loading="lazy" />
+          <img class="noscript-project-img" src="/assets/images/SiteAnalytics.webp" alt="Site analytics dashboard showing visitor trends and ball engagement metrics" loading="lazy" />
           <h2 itemprop="name">Site Analytics</h2>
           <p class="noscript-category">Technology</p>
           <dl class="noscript-meta">
@@ -303,7 +326,7 @@
         </article>
 
         <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
-          <img class="noscript-project-img" src="/assets/images/arduinoCoopDoor.jpg" alt="Smart chicken coop door with Arduino controller and motor assembly" loading="lazy" />
+          <img class="noscript-project-img" src="/assets/images/arduinoCoopDoor.webp" alt="Smart chicken coop door with Arduino controller and motor assembly" loading="lazy" />
           <h2 itemprop="name">Smart Chicken Coop</h2>
           <p class="noscript-category">Technology</p>
           <dl class="noscript-meta">
@@ -319,7 +342,7 @@
           <a class="noscript-cta" href="https://github.com/joshmerritt/arduinoChickenCoopDoor" itemprop="url">View on GitHub ↗</a>
         </article>
         <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
-          <img class="noscript-project-img" src="/assets/images/powerBIMetrics.jpg" alt="Microsoft Power BI dashboard showing KPI metrics and data visualizations" loading="lazy" />
+          <img class="noscript-project-img" src="/assets/images/powerBIMetrics.webp" alt="Microsoft Power BI dashboard showing KPI metrics and data visualizations" loading="lazy" />
           <h2 itemprop="name">Microsoft Power BI</h2>
           <p class="noscript-category">Business</p>
           <dl class="noscript-meta">
@@ -336,7 +359,7 @@
         </article>
 
         <article class="noscript-project" itemscope itemtype="https://schema.org/CreativeWork">
-          <img class="noscript-project-img" src="/assets/images/googleDataStudioServiceTechs.jpg" alt="Google Data Studio streaming dashboard displayed on office TV" loading="lazy" />
+          <img class="noscript-project-img" src="/assets/images/googleDataStudioServiceTechs.webp" alt="Google Data Studio streaming dashboard displayed on office TV" loading="lazy" />
           <h2 itemprop="name">Google Data Studio Streaming Dashboard</h2>
           <p class="noscript-category">Business</p>
           <dl class="noscript-meta">

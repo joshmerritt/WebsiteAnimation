@@ -177,4 +177,10 @@ RewriteCond %{REQUEST_URI} !^/analytics-v2\.html
 RewriteCond %{REQUEST_URI} !^/portfolio\.html
 RewriteCond %{REQUEST_URI} !^/sitemap\.xml
 RewriteCond %{REQUEST_URI} !^/robots\.txt
+# Never rewrite asset requests. Without this, a missing /assets/** file returns
+# 200 + index.html, which means a typo'd image or a stale hashed bundle looks
+# like a successful HTML response instead of a 404 -- p5's loadImage then fails
+# on "image" data that is really a web page, and crawlers see soft-404s. Let
+# assets 404 honestly.
+RewriteCond %{REQUEST_URI} !^/assets/
 RewriteRule ^(.*)$ /index.html [L]

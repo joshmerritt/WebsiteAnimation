@@ -84,7 +84,7 @@ function ProjectCard({ project, index }) {
     >
       <div className="port-card-image">
         <img
-          src={`/assets/images/${project.id}.jpg`}
+          src={`/assets/images/${project.id}.webp`}
           alt={`${project.name} — ${project.category} project by Josh Merritt`}
           loading="lazy"
           itemProp="image"
@@ -219,7 +219,7 @@ export default function AccessiblePortfolio() {
 
           <div className="port-hero-image">
             <img
-              src="/assets/images/aboutMe.jpg"
+              src="/assets/images/aboutMe.webp"
               alt="Josh Merritt"
               className="port-hero-photo"
             />

@@ -45,7 +45,7 @@ export default class Ball {
 
     // Fallback p5 cropped image (used by _captureWebsite override)
     this.ballImage = img.get(this._cropX, this._cropY, minDim, minDim);
-    this.imageSrc = `assets/images/${project.id}.jpg`;
+    this.imageSrc = `assets/images/${project.id}.webp`;
 
     // Browser-stable image source for canvas drawImage (not tied to p5 internals)
     this.nativeImage = null;

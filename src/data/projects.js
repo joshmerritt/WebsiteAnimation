@@ -2,7 +2,8 @@
  * projects.js — Portfolio project data
  *
  * Replaces the old .txt file loading. Each project's image should be
- * placed at public/assets/images/{id}.jpg
+ * placed at public/assets/images/{id}.webp (run `npm run images` after
+ * dropping in a .jpg/.png — see scripts/optimize-images.mjs)
  */
 
 const projects = [

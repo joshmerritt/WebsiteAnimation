@@ -8,14 +8,25 @@
  *   4. Analytics: GA4 + PostHog event tracking (wired to EventBus)
  */
 
-import { Component, useState, useEffect, useCallback } from 'react';
-import GameCanvas from './components/GameCanvas.jsx';
+import { Component, Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import DetailModal from './components/DetailModal.jsx';
 import HUD from './components/HUD.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import bus from './game/EventBus.js';
 import { initGA4Tracking } from './game/ga4.js';
 import { initPostHogTracking, captureException } from './game/posthog.js';
+
+/**
+ * GameCanvas pulls in p5 + matter-js — by far the heaviest thing on the page.
+ * Loading it as a separate chunk lets React paint LoadingScreen from a small
+ * first bundle, so the progress bar appears while p5 is still downloading
+ * instead of after it. It also frees the browser to fetch the preloaded ball
+ * images in parallel with that download rather than after it.
+ *
+ * No Suspense fallback is needed: LoadingScreen already covers the viewport
+ * and stays up until the game emits load:complete.
+ */
+const GameCanvas = lazy(() => import('./components/GameCanvas.jsx'));
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -90,7 +101,9 @@ export default function App() {
   return (
     <ErrorBoundary>
       <LoadingScreen />
-      <GameCanvas />
+      <Suspense fallback={null}>
+        <GameCanvas />
+      </Suspense>
       <div className="ui-overlay">
         <DetailModal detail={detail} onClose={handleClose} />
         {!detail && (

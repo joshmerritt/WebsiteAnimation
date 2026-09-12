@@ -78,7 +78,7 @@ export default class Game {
     const total = projects.length;
     let loaded = 0;
     for (const proj of projects) {
-      this.images.push(p.loadImage(`assets/images/${proj.id}.jpg`, () => {
+      this.images.push(p.loadImage(`assets/images/${proj.id}.webp`, () => {
         loaded++;
         this._loadProgress = loaded / total;
         bus.emit('load:progress', this._loadProgress);
