@@ -86,6 +86,23 @@ PostHog project **Website**, id `605146`, org DaDataDad. Ingestion is first-part
   **keys**, not for window globals.
 - Debug on the live site: `https://dadatadad.com/?__posthog_debug=true`.
 
+### Josh's PostHog orgs — verified 2026-09-12
+
+Each app has its own organization with exactly one project, and each project receives **only its own
+app's traffic** (checked by `$host` over 180 days; the only strays are a handful of old localhost dev
+hits). There is no cross-contamination between apps.
+
+| Organization | Slug | Project | Project id | Sends data |
+|---|---|---|---|---|
+| DaDataDad | `dadatadad-flpp` | Website | 605146 | `dadatadad.com` |
+| The Wine You Drink | `dadatadad` ⚠ | TWYD - v1 | 457220 | `thewineyoudrink.web.app` |
+| Black Sheep Darts | `black-sheep-darts` | Default project | 458340 | `theblacksheepdartleague.web.app` |
+
+⚠ **The Wine You Drink's org slug is `dadatadad`** — the real DaDataDad org is `dadatadad-flpp`. Slugs
+don't change on rename, so a URL like `us.posthog.com/organization/dadatadad` opens the *Wine* org.
+This, plus the MCP bug below, has already produced one confident and completely false report that this
+site was "sending events into the wine project".
+
 ### If you have the PostHog MCP
 
 ⚠ **It starts in the wrong organization** — the first write 404s, and a query will silently return
@@ -95,6 +112,11 @@ PostHog project **Website**, id `605146`, org DaDataDad. Ingestion is first-part
 call switch-organization {"orgId": "01a09230-59d0-0000-6f85-ee3d742250f5"}
 call switch-project      {"projectId": 605146}
 ```
+
+⚠ **`switch-organization` prints a stale project name next to the new org** — e.g. *"project Website
+within organization The Wine You Drink"*, a pairing that does not exist. Only `switch-project`
+re-resolves both. Never infer org/project membership from that line; use `projects-get`, which lists
+the projects that actually belong to the current org.
 
 Also: `test_account_filters` is a **keep** predicate, not a drop predicate (`$host = dadatadad.com`
 means *include only* that host). And alerts cannot evaluate an insight that has a breakdown.
