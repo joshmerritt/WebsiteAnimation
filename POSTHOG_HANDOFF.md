@@ -16,8 +16,8 @@ This section is the current truth; the sections below are the plan as written, k
 |---|---|---|
 | **0 — project settings** | ✅ all 8 applied | Web vitals on, canvas capture on (fps 3, quality 0.4 — PostHog's current default), min duration 2000 ms, `recording_domains` + `app_urls` = `https://dadatadad.com`, `test_account_filters` = `$host exact dadatadad.com` (+ default-checked), timezone `America/Los_Angeles`. Verified in the live remote config. |
 | **1 — code** | ✅ shipped | posthog-js **1.430.2**, `defaults: '2026-08-30'`, `shouldTrack()` host gating, web vitals + network timing, explicit `capture_exceptions`, super properties, `captureException` from the React ErrorBoundary, `first_launch` / `miss_hint_shown` / `game_perf`, `data-attr` on the modal + portfolio links, `Permissions-Policy` gyroscope/accelerometer `(self)`. |
-| **2 — source maps + annotations** | ⚠️ code shipped, **needs the secret** | `@posthog/rollup-plugin` wired in `vite.config.js`; CI Build step and a new annotation step read `POSTHOG_API_KEY`. Both **skip cleanly** without it, so stacks stay minified until the secret is added. |
-| **2 — reverse proxy** | ⚠️ created, **needs DNS** | Managed proxy `e.dadatadad.com` exists, status `waiting`. CNAME target: `95a06bb59f9f6f9353e8.cf-prod-us-proxy.proxyhog.com.` CSP already allows the host, so flipping `VITE_POSTHOG_HOST` later is one line. |
+| **2 — source maps + annotations** | ✅ done & verified | `POSTHOG_API_KEY` added 2026-09-12 00:08 UTC. Run `34660902098` uploaded **10 symbol sets** (all `has_uploaded_file: true`, no failures) against release `dadatadad-portfolio@3.1.4`, and created annotation `438945` "Deploy 9424b07: …". No `.map` reaches public_html — `deleteAfterUpload` removes them before the FTP step. |
+| **2 — reverse proxy** | ✅ live | CNAME added 2026-09-12; proxy went `waiting → issuing → valid` at 00:15:50 UTC. Verified `/array/<token>/config.js`, `/static/1.430.2/posthog-recorder.js`, `/static/1.430.2/web-vitals-with-attribution.js` all 200 `application/javascript`, and `GET /e/` returns 400 exactly as `us.i.posthog.com` does (needs a POST body) while an unrouted path 404s. `VITE_POSTHOG_HOST` now points at it. |
 | **3 — analytics build-out** | ✅ built | Dashboard **"DaDataDad · Site health"** (id `2088517`, pinned) with 8 tiles; 3 alerts; 4 actions; 3 cohorts. |
 | **7 — site speed** | ⛔ not started | Deferred on purpose: `load_time_ms` p90 and `game_perf` now exist, so the next pass can be driven by field data instead of guesses. |
 
@@ -31,10 +31,16 @@ This section is the current truth; the sections below are the plan as written, k
 - Host gating confirmed: a fresh `localhost:4173` load writes no `ph_*` storage and never initialises the SDK.
 - `$pageview`, `$pageleave`, `$web_vitals`, `ball_impact`, `ball_score`, `detail_open` all confirmed ingesting from `dadatadad.com` — but on SDK 1.379.0, from real visits earlier that afternoon. **They have not yet been observed on 1.430.2**, nor have the three new events, because an automated browser tab is always hidden (see §10) and posthog-js defers the initial `$pageview` and all paint-based vitals until the tab is visible. One ordinary visit closes that gap.
 
-### Two things still owed
+### Both prerequisites are done
 
-1. **cPanel → Zone Editor → CNAME** `e` → `95a06bb59f9f6f9353e8.cf-prod-us-proxy.proxyhog.com.`, no Cloudflare-style proxying. When the proxy reads `live`, set `VITE_POSTHOG_HOST=https://e.dadatadad.com`.
-2. **GitHub secret `POSTHOG_API_KEY`** — personal API key scoped to project 605146 with **`error tracking: write`**, **`organization: read`** and **`annotation: write`**. `organization: read` is easy to miss and the upload 403s without it: the rollup plugin shells out to `posthog-cli`, whose docs require both that and error-tracking write. `annotation: write` is for the deploy-marker step.
+The CNAME and the `POSTHOG_API_KEY` secret were both added on 2026-09-12 and are verified above. For reference, the key needs **`error tracking: write`**, **`organization: read`** and **`annotation: write`** — `organization: read` is easy to miss and the upload 403s without it, because the rollup plugin shells out to `posthog-cli`.
+
+**Remaining tidy-ups:**
+
+- Drop `https://us.i.posthog.com` and `https://us-assets.i.posthog.com` from the CSP in `public/.htaccess` once you're satisfied the proxy is stable. They're kept for now as a documented rollback path (`VITE_POSTHOG_HOST` back to `us.i.posthog.com` with no CSP edit).
+- One ordinary visit to the site to produce a `$pageview`, a `$web_vitals` set, and the first canvas-visible replay on 1.430.2 (see the note above).
+- Web analytics → conversion goal → `cta_click` (one click; the `CTA clicked` action already exists).
+- **Pre-existing, unrelated:** the SPA fallback in `public/.htaccess` returns **200 + `index.html` for every missing path**, including `/assets/*.js` and `/package.json`. Nothing is leaked — those are the index page, not the real files — but it means a missing asset looks like a successful HTML response instead of a 404, which masks broken deploys and creates soft-404s for crawlers. Excluding `/assets/` from the fallback would fix it.
 
 ### Deliberate deviations from the plan below
 
