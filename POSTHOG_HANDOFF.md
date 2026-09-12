@@ -7,6 +7,12 @@
 
 ---
 
+> **How to read this file.** Everything from here down to section 0 is the record of what was
+> actually done and verified. **Sections 0–11 below that are the original pre-work audit**
+> and describe a state that no longer exists — they are kept for their reasoning and exact
+> instructions, not as a description of the site today. For current orientation start with
+> `CLAUDE.md`; for the running log see `CHANGELOG.md`.
+
 ## STATUS — executed 2026-09-11 (commit `9378ce8`)
 
 Phases 0–3 are **done**. §7 (site speed) was deliberately deferred until field data arrives.

@@ -2,7 +2,69 @@
 
 All notable changes to this project are documented here. This log covers Claude-assisted development sessions. Version numbers in `package.json` may have been bumped independently between sessions.
 
-Current version: **2.9.2** (as of 2026-03-04)
+Current version: **3.2.0** (as of 2026-09-12)
+
+---
+
+## 3.2.0 — 2026-09-11/12 — Analytics rebuilt on PostHog, GA4 removed, site speed
+
+Six months of deploys had silently not shipped (see the deploy note below). This session
+worked through `POSTHOG_HANDOFF.md` end to end, then removed GA4 entirely.
+
+### Added — PostHog, properly configured
+- Upgraded `posthog-js` 1.379 → 1.430.2 with `defaults: '2026-08-30'`
+- Web vitals (LCP/CLS/FCP/INP), network timing, explicit exception capture
+- Canvas session replay — the p5 `<canvas>` IS the UI, so before this every recording was a blank screen
+- Super properties on every event: `app_version`, `input_type`, `layout_mode`, `device_pixel_ratio`, `prefers_reduced_motion`
+- New events: `first_launch`, `miss_hint_shown`, `game_perf` (avg/min FPS over the first 30s of active frames)
+- React ErrorBoundary now reports via `captureException` with the component stack
+- Source maps generated and uploaded to PostHog error tracking from CI, then deleted from `dist/` so no source ships
+- Deploy annotations from CI, so chart changes line up with releases
+- First-party ingestion via a managed reverse proxy at `e.dadatadad.com` (ad blockers block `*.posthog.com`)
+- In PostHog: dashboard "DaDataDad · Site health" (id 2088517), 3 alerts, 4 actions, 3 cohorts
+
+### Fixed — local builds were polluting production analytics
+- `shouldTrack()` in `posthog.js` gates on hostname; `vite preview` and local prod builds are now silent
+  (override with `localStorage.setItem('ph_force','1')`). Everything ingested before 2026-09-11 16:28 PT is test data.
+
+### Removed — GA4, entirely
+- GA4 cost **175 KB gzipped per page load**, more than the entire critical path, duplicating what PostHog captures
+- Deleted `src/game/ga4.js`, `public/gtag-init.js`, `ga4-worker/`, the GA4 snippet from **all five** HTML entries,
+  and every Google Analytics host from the CSP
+- **`analytics-worker/` replaces `ga4-worker/`** — same JSON contract and deployed worker name, but runs HogQL
+  against the PostHog query API. ⚠ Still needs deploying (see "Open items")
+- **`src/game/sessionBridge.js` is new, extracted from `ga4.js`** — the localStorage stores
+  `__dadatadad_impacts` / `__dadatadad_bridge` were never GA4-specific. `AnalyticsDashboardV3` reads those
+  **keys** directly for the shot chart's "your session" view; they would have died with `ga4.js`
+
+### Changed — site speed (handoff §7)
+- Ball images **1,309 KB → 292 KB (-78%)** as WebP capped at 900px long edge, via `npm run images`
+  (`scripts/optimize-images.mjs`, sharp). `aboutMe.jpg` was a 337px PNG misnamed `.jpg` costing 199 KB → now 12 KB
+- `GameCanvas` is `React.lazy`, so p5 + matter left the entry chunk: `main` **1,187 KB → 11.7 KB**;
+  paint-blocking path **~354 KB → ~61 KB gzipped**
+- Ball images preloaded in `index.html`; Google Fonts made non-blocking; `favicon.png` 84.5 → 18.7 KB
+- ⚠ The byte cuts are measured. The `load_time_ms` improvement is **not yet proven** — the only samples are
+  hidden-tab probes on one fast connection, whose old-build readings already scatter 551–1837 ms
+
+### Fixed — `og:image` had never existed
+- `index.html` and `portfolio.html` advertised `/assets/images/og-preview.jpg`, which 404'd. Every LinkedIn,
+  Slack, iMessage and X preview fell back to no image. Built by `npm run og` from the real logo
+
+### Fixed — bugs found while working
+- **Image preloads were silently discarded.** p5's `loadImage` fetches with `mode:'cors'` (credentials mode
+  *same-origin*); a `<link rel=preload>` without `crossorigin` uses *include*. Mismatched, so nothing reused them.
+  Fixed by adding `crossorigin` and aligning `Ball.nativeImage`
+- **`.htaccess` SPA fallback returned 200 + `index.html` for every missing path**, so a missing asset looked like
+  a successful HTML response instead of a 404. `/assets/` is now excluded
+- **`Permissions-Policy` blocked p5's devicemotion listeners**, logging two console errors into every page load
+  and every session replay. `gyroscope`/`accelerometer` are now `(self)`
+
+**Files changed:** `src/game/posthog.js`, `src/game/sessionBridge.js` (new), `src/game/ga4.js` (deleted),
+`src/game/Game.js`, `src/game/Ball.js`, `src/game/EventBus.js`, `src/App.jsx`, `src/analytics/data.js`,
+`src/analytics/AnalyticsDashboard*.jsx`, `src/data/projects.js`, `src/AccessiblePortfolio.jsx`,
+`src/components/DetailModal.jsx`, `index.html`, `portfolio.html`, `analytics-*.html`, `public/.htaccess`,
+`public/gtag-init.js` (deleted), `vite.config.js`, `.env.production`, `.github/workflows/deploy.yml`,
+`analytics-worker/` (new), `ga4-worker/` (deleted), `scripts/` (new), `CLAUDE.md` (new)
 
 ---
 

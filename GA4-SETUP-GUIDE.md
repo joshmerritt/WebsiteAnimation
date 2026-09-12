@@ -1,3 +1,13 @@
+> ## ⚠️ HISTORICAL — GA4 was removed from this site on 2026-09-12
+>
+> Nothing described below is wired up any more. `src/game/ga4.js`, `public/gtag-init.js`
+> and `ga4-worker/` are deleted, and every Google Analytics host is out of the CSP.
+> PostHog is the only analytics tool — see `CLAUDE.md`, and `CHANGELOG.md` under 3.2.0.
+>
+> Kept only as a record of how the GA4 pipeline and its Cloudflare Worker were built.
+
+---
+
 # Google Analytics 4 Setup Guide — DaDataDad.com
 
 Complete setup for tracking the physics-based portfolio, including custom events for ball interactions, detail page opens, and the engagement funnel unique to your site.
