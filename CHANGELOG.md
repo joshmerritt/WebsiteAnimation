@@ -2,7 +2,44 @@
 
 All notable changes to this project are documented here. This log covers Claude-assisted development sessions. Version numbers in `package.json` may have been bumped independently between sessions.
 
-Current version: **3.2.0** (as of 2026-09-12)
+Current version: **3.2.1** (as of 2026-09-13)
+
+---
+
+## 3.2.1 — 2026-09-13 — Game data fixes and jank
+
+Found by reading a real production session event by event, and by the `game_perf` event added in 3.2.0.
+
+### Fixed — the intro demo counted as the visitor's shot
+- `_runDemo()` auto-launches the About Me ball, and `_handleCollisions()` never checked for it. Every page
+  load did `totalMakes++` and emitted `detail:open` + `ball:scored` + `impact:first`
+- **Visible to every visitor:** someone who made their first shot saw **"1 shot · 2 makes · 200%"**
+- **In analytics:** a fake score and project open for "Josh Merritt" on every visit — first place in
+  Top projects opened, and every visitor (bounces included) in the Engaged cohort
+- The demo now tags its shot. It still plays and still opens the panel exactly as before, but counts nowhere.
+  Pre-existing since Feb/Mar 2026. **Data before this release is inflated**
+
+### Fixed — the miss hint fired a shot early
+- It counted a miss at launch, so "try double-clicking" appeared as the 3rd attempt started — after 2 real
+  misses — and could show on a shot that went in. A miss is now counted when a shot actually fails
+
+### Fixed — latent double count
+- One collision event can carry several pairs for the same ball, and each counted a make. Only a panel
+  that actually opens counts now
+
+### Fixed — jank on desktop
+- p5 defaults pixel density to `Math.ceil(devicePixelRatio)`, rendering a common 1.09–1.25 desktop at 2×.
+  A real session measured a **4694×2360 canvas (11M pixels) on a 1.09 display: 16 fps average, 6 fps minimum**.
+  Density is now `min(devicePixelRatio, 2)` — ~3.4× fewer pixels in that case, ~2.25× on a 3× phone
+- **Session replay canvas capture turned off.** It read back the whole canvas on the main thread; that session
+  logged a **194 ms stall** and 1.66 MB of snapshot data in about a minute. Replays still record DOM, clicks,
+  console and network
+- ⚠ FPS could not be measured locally — `requestAnimationFrame` never fires in the hidden in-app browser.
+  Verified instead by a Node test driving the real `Game`/`Ball` methods: 30 checks pass, 13 of which fail
+  against the pre-fix code. Confirm with real play via `game_perf`
+
+**Files changed:** `src/game/Game.js`, `src/game/Ball.js`, `src/game/posthog.js`, `src/game/sessionBridge.js`,
+`src/game/EventBus.js`, `CLAUDE.md`, `package.json`. PostHog setting: `session_replay_config.record_canvas = false`
 
 ---
 

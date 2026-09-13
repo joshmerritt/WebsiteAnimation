@@ -44,6 +44,21 @@ Two traps, both of which have burned real time here:
   *same-origin*). A `<link rel=preload>` without `crossorigin` uses *include*, and the browser
   silently discards the mismatch — the only signal is a console **warning**, not an error. The image
   preloads in `index.html` and `Ball.nativeImage` are deliberately aligned; keep them that way.
+- **The intro demo is not the visitor's shot.** `_runDemo()` tags its auto-launch with
+  `ball._demoShot`. It still plays and still opens the About Me panel, but adds nothing to
+  `launchCount`, makes, opens or `impact:first`, and its `detail:open` carries `demo: true`, which
+  every analytics listener must skip. Any **new** listener that counts `detail:open` must skip it too.
+- **One collision event can hold several pairs for the same ball.** Count a make only when
+  `_openBallDetail()` returns true (the panel actually opened), or one make counts several times.
+- **A miss is counted when a shot fails**, not at launch: the ball leaves the screen (there is no
+  floor, so every miss ends that way — see `_onBallExit`) or is relaunched before scoring.
+- **Canvas pixel density is capped at `min(devicePixelRatio, 2)`.** p5 defaults to
+  `Math.ceil(devicePixelRatio)`, which rendered a 1.09 desktop at 2× — an 11M-pixel canvas measured
+  at 16 fps. Don't remove `_targetPixelDensity()`.
+- **Session replay canvas capture is OFF on purpose** (turned off 2026-09-13). Snapshotting a
+  full-screen, continuously animating canvas reads it back on the main thread; it caused a measured
+  194 ms stall. Replays still record DOM, clicks, console and network; where shots land is captured
+  by the shot chart's `ball_impact` coordinates instead. Re-enabling it trades smoothness for replays.
 - **matter-js**: use `Matter.Composite`, not the deprecated `Matter.World`. Collisions come from
   `event.pairs`.
 - **p5 image masking**: use canvas clipping (`drawingContext.save/clip/restore`), not `img.mask()`,
@@ -123,20 +138,13 @@ means *include only* that host). And alerts cannot evaluate an insight that has 
 
 ## Open items
 
-- **🔴 The intro demo counts as a real score — visible to every visitor.** `_runDemo()` auto-launches
-  `balls[0]` (About Me) via `_launchBall()` without `totalShots++`, and `_handleCollisions()` has no
-  demo check, so it does `totalMakes++`, emits `detail:open` and `ball:scored`. Result: a visitor who
-  makes their first shot sees **"1 shot · 2 makes · 200%"** on the scoreboard. Confirmed in code and in
-  real production sessions (`total_shots=0, total_makes=1` before any launch, on every page load).
-  Pre-existing since Feb/Mar 2026.
-- **🟠 …and corrupts analytics the same way.** Every page load logs a fake `ball_score` +
-  `detail_open` for "Josh Merritt": he is artificially #1 in "Top projects opened", the **Engaged
-  cohort includes every visitor** (it keys on `detail_open`), the funnel's Score step can exceed
-  Launch, and the `accuracy` event property can exceed 100%. GA4 history carries the same inflation.
-- **🟡 The miss hint fires a shot early.** `consecutiveMisses++` happens at *launch*, not on a miss,
-  and resets on score — so "try double-clicking" appears as the 3rd attempt *starts*, after only 2
-  real misses, and can appear on a shot that then goes in (seen in production). Inflates
-  `miss_hint_shown` and the Struggling cohort.
+- **Data before 2026-09-13 is inflated by the intro demo.** Until commit `52dc3b8`, every page load
+  logged a fake `ball_score` + `detail_open` for "Josh Merritt" (fixed — see Gotchas). Treat older
+  "Top projects opened" rankings and the Engaged cohort as unreliable; GA4 history has the same bias.
+- **Confirm the jank fix with real play.** Pixel density is capped and canvas replay capture is off,
+  but FPS could not be measured here (rAF never fires in the hidden pane). `game_perf` reports
+  avg/min FPS ~30s into a session — play on the desktop that was janky and compare to the 16 fps
+  average / 6 fps minimum measured before.
 - **Dependencies** (`npm audit`, 2026-09-12): 1 moderate in shipped code — `fflate@0.4.8` via
   posthog-js (GHSA-px8p-9vwx-vf98, infinite loop in `unzipSync` on malformed ZIP64). Not reachable
   here: posthog-js only *compresses*, never unzips untrusted input. 3 high + 2 others are build-only
