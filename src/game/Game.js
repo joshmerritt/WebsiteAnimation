@@ -69,6 +69,10 @@ export default class Game {
     // First-impact tracking — fires once on initial contact
     this._impactHandler = (event) => this._handleFirstImpacts(event);
     Matter.Events.on(this.engine, 'collisionStart', this._impactHandler);
+
+    // Goal contacts use the goal's own bounciness — see _dampGoalContacts
+    this._goalDampHandler = (event) => this._dampGoalContacts(event);
+    Matter.Events.on(this.engine, 'collisionStart', this._goalDampHandler);
   }
 
   // ── p5 lifecycle ───────────────────────────────────────────────────────
@@ -300,6 +304,7 @@ export default class Game {
     this._unsubs.forEach((fn) => fn());
     Matter.Events.off(this.engine, 'collisionActive', this._collisionHandler);
     Matter.Events.off(this.engine, 'collisionStart', this._impactHandler);
+    Matter.Events.off(this.engine, 'collisionStart', this._goalDampHandler);
     Matter.Engine.clear(this.engine);
   }
 
@@ -534,6 +539,38 @@ export default class Game {
         timestamp:    Date.now(),
       });
     });
+  }
+
+  /**
+   * Make a ball's contact with the goal use the goal's own bounciness.
+   *
+   * Matter.js resolves every contact at Math.max(bodyA.restitution,
+   * bodyB.restitution), so the ball's config.ball.restitution always won. The
+   * posts and side nets (config.goal.restitution) and category bars
+   * (config.menu.restitution) were configured to deaden the ball but never
+   * did — every contact bounced at the ball's value, and shots that clipped a
+   * post or net ricocheted straight back out of the goal.
+   *
+   * Setting pair.restitution here takes effect because collisionStart fires
+   * after the engine computes the pair's restitution and before it solves
+   * velocity, so the rebound uses this value. (collisionActive, where the
+   * scoring handler lives, fires *after* the velocity solve — an override there
+   * would silently do nothing.) Matter 0.20 discards a pair as soon as its
+   * bodies separate, so every fresh impact, including a second ricochet off the
+   * same net, arrives here as a new pair.
+   *
+   * Walls and ball-on-ball contacts are deliberately left at the ball's value.
+   */
+  _dampGoalContacts(event) {
+    for (const pair of event.pairs) {
+      const { bodyA, bodyB } = pair;
+      const other = bodyA.label === 'Ball' ? bodyB : bodyB.label === 'Ball' ? bodyA : null;
+      if (!other) continue;
+      const kind = this._classifyBody(other);
+      if (kind === 'goal' || kind === 'net' || kind === 'menu') {
+        pair.restitution = other.restitution;
+      }
+    }
   }
 
   _classifyBody(body) {

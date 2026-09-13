@@ -2,7 +2,31 @@
 
 All notable changes to this project are documented here. This log covers Claude-assisted development sessions. Version numbers in `package.json` may have been bumped independently between sessions.
 
-Current version: **3.2.1** (as of 2026-09-13)
+Current version: **3.2.2** (as of 2026-09-13)
+
+---
+
+## 3.2.2 — 2026-09-13 — Deadened the goal
+
+### Fixed — balls ricocheting off the goal
+- Matter.js resolves every contact at `max(bodyA.restitution, bodyB.restitution)`, so the ball's 0.66 always
+  won. The goal posts and nets (0.3) and category bars (0.03) were configured to deaden the ball but **never did**
+  — every contact bounced at 0.66, and shots that caught the rim ricocheted away
+- `Game._dampGoalContacts` now forces goal contacts to the goal body's own value, in `collisionStart` (which fires
+  before the velocity solve — `collisionActive`, where scoring lives, fires after it and would do nothing)
+- Walls and ball-on-ball bounce are unchanged. Their configured values are still inert, on purpose
+
+### Measured, not guessed
+- The in-app browser can't run the game loop, so this was tuned with a headless simulation: the real `Game`
+  building the real goal, 1,292 shots per variant across 1280×800, 1920×1080 and a 402×670 phone
+- **Overall makes: 15.3% → 20.0%, 15.6% → 20.8%, 19.7% → 24.4%** (+24–33%)
+- Finding: a ball that gets fully **inside** the chute already scored 99–100% of the time. What looks like bouncing
+  out is catching a post or net at the mouth. The ball is 79–88% as wide as the opening, so rim clips dominate
+- `config.goal.restitution` 0.3 → **0.15**: best on all three screens; 0.05 gained nothing
+- A first version of the measurement falsely showed 66% bounce-outs on phones (it counted misses falling past
+  *below* the goal as entering it). Caught by tracing individual shots before reporting it
+
+**Files changed:** `src/game/Game.js`, `src/game/config.js`, `CLAUDE.md`, `package.json`
 
 ---
 

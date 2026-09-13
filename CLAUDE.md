@@ -59,6 +59,18 @@ Two traps, both of which have burned real time here:
   full-screen, continuously animating canvas reads it back on the main thread; it caused a measured
   194 ms stall. Replays still record DOM, clicks, console and network; where shots land is captured
   by the shot chart's `ball_impact` coordinates instead. Re-enabling it trades smoothness for replays.
+- **Matter.js resolves a contact at `max(bodyA.restitution, bodyB.restitution)`.** So a body can
+  never be *less* bouncy than the ball hitting it: with the ball at 0.66, the goal's and walls'
+  configured values silently did nothing for years. Goal contacts (posts, nets, category bars) are
+  now forced to the goal body's own value in `_dampGoalContacts`. **Walls still resolve at the
+  ball's value** — their config is dead on purpose, to keep the familiar wall bounce.
+- **Override a pair's restitution in `collisionStart`, never `collisionActive`.** `collisionStart`
+  fires before the velocity solve; `collisionActive` (where scoring lives) fires *after* it, so an
+  override there does nothing. Matter 0.20 discards a pair when its bodies separate, so every fresh
+  impact arrives as a new `collisionStart`.
+- **The ball is 79–88% as wide as the goal chute** (e.g. 115px ball, 131px opening at 1280×800), so
+  most failed goal attempts are rim clips, not bounce-outs. A ball that gets fully inside scores
+  ~99–100% of the time. If goals need to be easier, the opening's geometry is the bigger lever.
 - **matter-js**: use `Matter.Composite`, not the deprecated `Matter.World`. Collisions come from
   `event.pairs`.
 - **p5 image masking**: use canvas clipping (`drawingContext.save/clip/restore`), not `img.mask()`,

@@ -32,11 +32,20 @@ const config = {
     restitution: 0.66,
   },
   goal: {
-    restitution: 0.3,
+    // Posts and side nets. Only takes effect because Game._dampGoalContacts
+    // applies it: Matter resolves contacts at max(ball, body), so on its own the
+    // ball's value above always won and this setting did nothing.
+    // 0.15 chosen by simulating shots into the real goal geometry (1280x800,
+    // 1920x1080, 402x670): it scored best on all three, 0.30 was close behind,
+    // and going lower (0.05) gained nothing.
+    restitution: 0.15,
   },
   boundary: {
+    // ⚠ Not currently in effect: walls are not covered by _dampGoalContacts, so
+    // ball-on-wall contacts resolve at max(ball.restitution, this) = the ball's
+    // value. Kept as-is because wall bounce has always played at 0.66.
     restitution: 0.5,
-    leftRestitution: 0.25,     // left wall — 50% less bounce
+    leftRestitution: 0.25,     // left wall — 50% less bounce (see note above)
   },
   menu: {
     restitution: 0.03,         // ~10% of old 0.3 — heavy dampen on category hit
