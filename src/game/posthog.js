@@ -177,9 +177,13 @@ export function initPostHogTracking() {
     }),
   );
 
-  // Detail modal opened
+  // Detail modal opened. The intro demo opens a panel too (payload has
+  // `demo: true`); that is not the visitor opening a project, so it is not
+  // recorded -- and neither is the close that pairs with it.
+  let demoPanelOpen = false;
   unsubs.push(
     bus.on('detail:open', (data) => {
+      if (data.demo) { demoPanelOpen = true; return; }
       capture('detail_open', {
         project_name: data.name || 'unknown',
         project_link: data.link || '',
@@ -188,7 +192,12 @@ export function initPostHogTracking() {
   );
 
   // Detail modal closed
-  unsubs.push(bus.on('detail:close', () => capture('detail_close')));
+  unsubs.push(
+    bus.on('detail:close', () => {
+      if (demoPanelOpen) { demoPanelOpen = false; return; }
+      capture('detail_close');
+    }),
+  );
 
   // CTA clicked
   unsubs.push(

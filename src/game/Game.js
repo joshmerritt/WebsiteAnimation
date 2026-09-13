@@ -89,6 +89,7 @@ export default class Game {
   setup() {
     const p = this.p;
     p.createCanvas(p.windowWidth, p.windowHeight);
+    p.pixelDensity(this._targetPixelDensity());
     this._computeLayout();
     this._buildWorld();
     this._loaded = true;
@@ -157,6 +158,10 @@ export default class Game {
 
   windowResized() {
     const p = this.p;
+    // Re-derive density too: browser zoom and moving between monitors change
+    // devicePixelRatio and fire a resize, but p5 never re-reads it on its own.
+    const density = this._targetPixelDensity();
+    if (p.pixelDensity() !== density) p.pixelDensity(density);
     p.resizeCanvas(p.windowWidth, p.windowHeight);
     this._computeLayout();
 
@@ -257,12 +262,16 @@ export default class Game {
       ball.display = onPage && (this.selectedCategory === 'All' || ball.category === this.selectedCategory);
 
       if (ball.clicked && (Math.abs(ball.xPower) > config.minLaunchPower || Math.abs(ball.yPower) > config.minLaunchPower)) {
+        // Relaunching a ball whose previous shot never scored abandons that
+        // shot, so it counts as a miss now.
+        if (ball._shotPending) this._registerMiss();
         this._launchBall(ball);
         this.totalShots++;
-        this.consecutiveMisses++;
-        if (this.consecutiveMisses >= 3) {
-          bus.emit('miss:hint', true);
-        }
+        // A miss is counted when a shot actually fails (see _onBallExit), not
+        // at launch. Counting at launch showed the "try double-clicking" hint
+        // as the 3rd attempt *started* -- after only 2 real misses -- and it
+        // could appear on a shot that then went in.
+        ball._shotPending = true;
         this._emitStats();
         bus.emit('ball:launched', {
           name: ball.name,
@@ -344,6 +353,7 @@ export default class Game {
         index: i,
       });
       ball.display = isOnPage;
+      ball.onExit = (b) => this._onBallExit(b);
       this.balls.push(ball);
 
       if (isOnPage) {
@@ -436,7 +446,24 @@ export default class Game {
         const ballBody = bodyA.label === 'Ball' ? bodyA : bodyB.label === 'Ball' ? bodyB : null;
         if (ballBody?.ballRef) {
           const ball = ballBody.ballRef;
-          this._openBallDetail(ball);
+
+          // The intro demo shows how to play, so it still opens the panel
+          // exactly as it always has -- but it is not the visitor's shot. It
+          // must not count as a make, a project open, or an analytics event.
+          // Counting it put "1 shot · 2 makes · 200%" on the scoreboard and
+          // logged a fake score + open for "Josh Merritt" on every page load.
+          // The flag stays set until Ball.reset(): one collision event can hold
+          // several pairs for the same ball, and clearing it on the first pair
+          // would let the next one fall through and count as a real make.
+          if (ball._demoShot) {
+            this._openBallDetail(ball, { demo: true });
+            return;
+          }
+
+          // A second pair for a ball whose panel is already open is the same
+          // make, not another one.
+          if (!this._openBallDetail(ball)) return;
+          ball._shotPending = false;
           this.totalMakes++;
           this.consecutiveMisses = 0;
           bus.emit('miss:hint', false);
@@ -475,6 +502,11 @@ export default class Game {
 
       const ball = ballBody.ballRef;
       ball._firstImpactRecorded = true;
+
+      // The intro demo's first contact is not a visitor's shot. (The demo
+      // also leaves launchCount at 0, which the guard above already keys on,
+      // but say it explicitly so a change to that guard can't re-admit it.)
+      if (ball._demoShot) return;
 
       const hitType = this._classifyBody(otherBody);
       const isGoal = hitType === 'goal' &&
@@ -553,16 +585,58 @@ export default class Game {
     Matter.Body.setStatic(ball.body, false);
     Matter.Body.setVelocity(ball.body, { x: vx, y: vy });
     ball._firstImpactRecorded = false;
-    ball.launched();
+    ball.launched({ demo: !!ball._demoShot });
   }
 
-  _openBallDetail(ball) {
-    const data = ball.openDetail();
-    if (!data) return;
-    this.totalOpens++;
+  /**
+   * Open a ball's detail panel. Returns true if the panel actually opened
+   * (false if it was already open).
+   *
+   * `demo` opens the panel visually but keeps it out of every count and every
+   * analytics listener: the detail:open payload carries `demo: true`, which
+   * posthog.js and sessionBridge.js skip. The event itself must still fire,
+   * because App.jsx opens the modal from it.
+   */
+  _openBallDetail(ball, { demo = false } = {}) {
+    const data = ball.openDetail({ countMake: !demo });
+    if (!data) return false;
+    if (!demo) this.totalOpens++;
     this.detailOpen = true;
     this._emitStats();
-    bus.emit('detail:open', data);
+    bus.emit('detail:open', demo ? { ...data, demo: true } : data);
+    return true;
+  }
+
+  /** A shot failed: count it, and show the hint after 3 in a row. */
+  _registerMiss() {
+    this.consecutiveMisses++;
+    if (this.consecutiveMisses >= 3) bus.emit('miss:hint', true);
+  }
+
+  /**
+   * Called by a Ball when it leaves the screen, just before it resets. With no
+   * floor, a shot that misses always ends this way -- which makes this the
+   * moment a miss is known, rather than the moment of launch.
+   */
+  _onBallExit(ball) {
+    if (!ball._shotPending) return;   // demo shot, or already resolved
+    ball._shotPending = false;
+    this._registerMiss();
+  }
+
+  /**
+   * Canvas resolution to render at.
+   *
+   * p5 defaults to Math.ceil(devicePixelRatio), so a common 1.09-1.25 desktop
+   * ratio (Windows display scaling, browser zoom) renders at 2x -- up to 4x the
+   * pixels the screen can show. A real session measured a 4694x2360 canvas
+   * (11M pixels) on a 1.09 display, averaging 16 fps. Using the actual ratio,
+   * capped at 2, keeps it sharp everywhere while cutting that case ~3.4x and
+   * a 3x phone ~2.25x. It also makes every session-replay canvas snapshot
+   * proportionally cheaper, since those read back the whole canvas.
+   */
+  _targetPixelDensity() {
+    return Math.min(window.devicePixelRatio || 1, 2);
   }
 
   _onDetailClosed() {
@@ -743,6 +817,9 @@ export default class Game {
 
     const currentPower = Math.sqrt(ball.xPower * ball.xPower + ball.yPower * ball.yPower);
     if (currentPower > totalPower) {
+      // Tag the auto-launch so nothing downstream counts it as the visitor's
+      // shot. Cleared by Ball.reset() once the demo shot has played out.
+      ball._demoShot = true;
       this._launchBall(ball);
       this.showDemo = false;
       this._demoTarget = null;

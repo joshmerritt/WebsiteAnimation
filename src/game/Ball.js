@@ -71,7 +71,12 @@ export default class Ball {
     this.yPower = 0;
     this.clicked = false;
     this.inOriginalPosition = true;
+    // Counts only the visitor's own launches -- the intro demo's auto-launch
+    // is excluded, because this value is reported as ball_launches.
     this.launchCount = 0;
+    this._demoShot = false;      // set by Game._runDemo; cleared on reset
+    this._shotPending = false;   // launched by the visitor, not yet scored or missed
+    this.onExit = null;          // Game hook: fires when the ball leaves the screen
     this.pageOpen = false;
     this.display = true;
 
@@ -100,9 +105,9 @@ export default class Ball {
     };
   }
 
-  openDetail() {
+  openDetail({ countMake = true } = {}) {
     if (this.pageOpen) return null;
-    this.makes++;
+    if (countMake) this.makes++;
     this.pageOpen = true;
     return this.getDetailData();
   }
@@ -116,7 +121,11 @@ export default class Ball {
   // ── Drawing ────────────────────────────────────────────────────────────
 
   show(viewport) {
-    if (this.launchCount) this._checkReset(viewport);
+    // Gate on being out of position, not on launchCount: the demo shot is
+    // launched without incrementing launchCount, and must still reset if it
+    // misses. (This also stops a ball that was launched once and has since
+    // come home from re-running the check every frame forever.)
+    if (!this.inOriginalPosition) this._checkReset(viewport);
 
     const pos = this.inOriginalPosition ? this.originalPos : this.body.position;
     const angle = this.body.angle;
@@ -125,7 +134,10 @@ export default class Ball {
     const diameter = this.r * 2;
 
     // Pre-render circular image once (or when size/DPR changes)
-    const dpr = window.devicePixelRatio || 1;
+    // Match the canvas's density (capped in Game._targetPixelDensity) rather
+    // than raw devicePixelRatio, so the cached circle isn't rendered larger
+    // than the canvas it is drawn into.
+    const dpr = this.p.pixelDensity();
     if (!this._circleCanvas || this._circleSize !== diameter || this._circleDpr !== dpr) {
       this._renderCircleImage(diameter, dpr);
     }
@@ -317,8 +329,8 @@ export default class Ball {
     p.angleMode(p.RADIANS);
   }
 
-  launched() {
-    this.launchCount++;
+  launched({ demo = false } = {}) {
+    if (!demo) this.launchCount++;
     this.inOriginalPosition = false;
   }
 
@@ -330,6 +342,8 @@ reset() {
     Matter.Composite.remove(this.world, this.body);
     this.inOriginalPosition = true;
     this._firstImpactRecorded = false;
+    this._demoShot = false;
+    this._shotPending = false;
   }
 
   _sensitivity() {
@@ -341,6 +355,7 @@ reset() {
     const { x, y } = this.body.position;
     const r2 = this.r * 2;
     if (x + r2 < 0 || x - r2 > viewport.width || y + r2 < -viewport.height * 4 || y - r2 > viewport.height) {
+      this.onExit?.(this);   // before reset(), which clears _shotPending
       this.reset();
     }
   }

@@ -219,7 +219,8 @@ export function initSessionBridge() {
     }),
   );
 
-  unsubs.push(bus.on('detail:open', () => bridgeStats.addOpen()));
+  // The intro demo's panel (`demo: true`) is not one of the visitor's opens.
+  unsubs.push(bus.on('detail:open', (data) => { if (!data?.demo) bridgeStats.addOpen(); }));
   unsubs.push(bus.on('cta:click',   () => bridgeStats.addCtaClick()));
 
   // First contact — keep the coordinates, but don't trust first-contact goal

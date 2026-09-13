@@ -34,7 +34,10 @@ export default bus;
 /**
  * Event catalog:
  *
- *   'detail:open'    { project }     — Game → React: open the detail modal
+ *   'detail:open'    { project, demo? } — Game → React: open the detail modal.
+ *                     `demo: true` = opened by the intro auto-launch, not the
+ *                     visitor. React still shows it; analytics listeners
+ *                     (posthog.js, sessionBridge.js) must skip it.
  *   'detail:close'   —                React → Game: modal was closed
  *   'game:reset'     —                React → Game: reset all balls
  *                                     ⚠ NO EMITTER: there is no reset control
@@ -48,7 +51,10 @@ export default bus;
  *   'ball:launched'  { name, category, ballLaunches, ballMakes }  — Game → analytics
  *   'ball:scored'    { name, category, ballLaunches, ballMakes }  — Game → analytics
  *   'cta:click'      { name, link, category } — React → analytics
- *   'miss:hint'      boolean         — Game → React: show/hide miss hint
+ *   'miss:hint'      boolean         — Game → React: show/hide miss hint.
+ *                     true after 3 consecutive shots that actually failed
+ *                     (ball left the screen, or was relaunched before scoring)
+ *                     — never at launch time
  *   'impact:first'   { ballId, ballName, ballCategory, hitType, hitLabel,
  *                       isGoal, x, y, px, py, vpWidth, vpHeight,
  *                       shotNumber, timestamp }  — Game → analytics/dashboard
