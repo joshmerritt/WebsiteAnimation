@@ -6,6 +6,26 @@ Current version: **3.2.2** (as of 2026-09-13)
 
 ---
 
+## 2026-10-06 — PostHog self-driving turned on (no site change)
+
+Set up in PostHog, not in the site's code. No version bump: nothing that ships changed.
+
+- **GitHub connected** — the PostHog GitHub App, scoped to `joshmerritt/WebsiteAnimation` only, so
+  self-driving can open pull requests here
+- **Setup wizard run** (`npx @posthog/wizard self-driving`) against the Website project (605146).
+  It found AI data processing already approved, enabled 6 signal sources and 7 of 30 scouts, and
+  wrote two scouts specific to this site: the portfolio interaction journey and canvas playability
+- Verified independently through the PostHog connector, not taken from the wizard's report: the
+  sources, scouts, GitHub integration and repository scope all match it, and no source files changed
+- **Not done:** the two Replay Vision scanners the wizard planned (it couldn't create them), and
+  CSP violation reporting, without which the CSP scout has nothing to read. Both are in CLAUDE.md's
+  open items
+- Context worth knowing: the site gets roughly one visit every few days, so expect few reports
+
+**Files changed:** `CLAUDE.md`, `CHANGELOG.md`, `.gitignore`; added `posthog-self-driving-report.md`
+
+---
+
 ## 3.2.2 — 2026-09-13 — Deadened the goal
 
 ### Fixed — balls ricocheting off the goal

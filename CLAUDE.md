@@ -133,7 +133,8 @@ site was "sending events into the wine project".
 ### If you have the PostHog MCP
 
 ⚠ **It starts in the wrong organization** — the first write 404s, and a query will silently return
-*The Wine You Drink*'s data instead of this site's. Always run first:
+*The Wine You Drink*'s data instead of this site's. The claude.ai PostHog connector does the same
+(2026-10-06: it opened in *TWYD - v1*). Always run first:
 
 ```
 call switch-organization {"orgId": "01a09230-59d0-0000-6f85-ee3d742250f5"}
@@ -148,7 +149,35 @@ the projects that actually belong to the current org.
 Also: `test_account_filters` is a **keep** predicate, not a drop predicate (`$host = dadatadad.com`
 means *include only* that host). And alerts cannot evaluate an insight that has a breakdown.
 
+### Self-driving — turned on 2026-10-06
+
+PostHog's agent loop: scouts and signal sources file reports in the
+[inbox](https://us.posthog.com/project/605146/inbox), and an actionable report becomes a **pull request
+against this repo**. Review those like any other PR — merging to `master` deploys. The wizard's record
+of what it enabled, and why each scout is on or off, is `posthog-self-driving-report.md`.
+
+- **GitHub**: the PostHog GitHub App on `joshmerritt`, with access to `WebsiteAnimation` only.
+- **Signal sources**: error tracking (new, reopened, spiking), health checks, GitHub issues, and
+  support tickets (dormant — no support channel is connected).
+- **Scouts on (7 of 30)**: general, product analytics, web analytics, web vitals, anomaly detection,
+  and two written for this site — `signals-scout-portfolio-interaction-journey` (one stage of
+  load → launch → open → click-out collapsing while the stage before it holds) and
+  `signals-scout-canvas-playability` (frame rate and scoring struggle). Budget is 100 runs/day.
+  To quiet a noisy scout without stopping it, set `emit: false` on its config.
+- **Traffic is tiny** — roughly one visit every few days since launch. Expect few reports, and
+  distrust any rate or "drop" built on a handful of sessions.
+
 ## Open items
+
+- **Self-driving gaps** (see above):
+  - *Nothing reviews replays.* The wizard skipped the session-replay signal source in favour of two
+    Replay Vision scanners (breakage, rage-click frustration), then couldn't create them. The PostHog
+    connector does have `vision-scanners-create`. Cost is negligible here (5 credits per observation
+    against 2,500 free a month), but scanners send visitor recordings, inputs masked, to Google
+    Gemini — decide that deliberately rather than by default.
+  - *The CSP-violations scout is off* because the CSP in `public/.htaccess` has no `report-uri`, so
+    no `$csp_violation` events exist. Adding reporting would let it catch the production-only CSP
+    blocks described in Gotchas.
 
 - **Data before 2026-09-13 is inflated by the intro demo.** Until commit `52dc3b8`, every page load
   logged a fake `ball_score` + `detail_open` for "Josh Merritt" (fixed — see Gotchas). Treat older
@@ -156,7 +185,8 @@ means *include only* that host). And alerts cannot evaluate an insight that has 
 - **Confirm the jank fix with real play.** Pixel density is capped and canvas replay capture is off,
   but FPS could not be measured here (rAF never fires in the hidden pane). `game_perf` reports
   avg/min FPS ~30s into a session — play on the desktop that was janky and compare to the 16 fps
-  average / 6 fps minimum measured before.
+  average / 6 fps minimum measured before. The `canvas-playability` scout is meant to watch for this
+  too, but at current traffic it has little to go on.
 - **Dependencies** (`npm audit`, 2026-09-12): 1 moderate in shipped code — `fflate@0.4.8` via
   posthog-js (GHSA-px8p-9vwx-vf98, infinite loop in `unzipSync` on malformed ZIP64). Not reachable
   here: posthog-js only *compresses*, never unzips untrusted input. 3 high + 2 others are build-only
