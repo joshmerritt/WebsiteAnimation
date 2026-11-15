@@ -2,7 +2,147 @@
 
 All notable changes to this project are documented here. This log covers Claude-assisted development sessions. Version numbers in `package.json` may have been bumped independently between sessions.
 
-Current version: **3.2.2** (as of 2026-09-13)
+Current version: **3.3.0** (as of 2026-11-14) — ⚠ **not yet deployed or verified live**, see below
+
+---
+
+## 3.3.0 — 2026-11-14 — Dashboard v4, the last of Google Analytics, and a broken certificate
+
+### Found, not fixed — the live site's certificate
+- `dadatadad.com` and `www` were serving the host's default certificate (`*.web-hosting.com`), so
+  browsers showed a full-page security error. DNS was correct. PostHog's last recorded visit was
+  2026-11-09, so it broke between then and the 14th
+- Every certificate-validation path (`/.well-known/acme-challenge/…`, `/.well-known/pki-validation/…`,
+  cPanel's `.cpaneldcv` files) was being 301-redirected to HTTPS by `.htaccess` — measured over plain
+  HTTP. Once a certificate has lapsed, that redirect points the renewal at the broken thing.
+  **`.htaccess` now lets those paths through first** (new section 0)
+- **The cause is not confirmed and the certificate still has to be reissued from cPanel.** Whether
+  AutoSSL was failing for this reason, was off, or a paid certificate expired is not knowable from
+  outside. And nothing in this release could be checked on the live domain while it is broken
+
+### Diagnosed and fixed — "the dashboard fails, then works on reload"
+- **Reproduced.** v3's chart returned early *above* a `useMemo`. It rendered mock data first (90 rows,
+  three hooks), then the live response; if that had fewer than two daily rows the early return fired,
+  React counted two hooks where there had been three, and threw **error #300** — the "Dashboard hit a
+  snag" screen. A reload started from the default 90-day range, which still had data
+- The GA4 worker's data ends on 2026-09-11, so it now answers **7 and 30 days with nothing at all** —
+  exactly the response that crashes v3, on either of those two buttons. Its 90-day answer was down to
+  seven rows; from about 2026-12-10 it would have had one, and v3 would have crashed on **every** load.
+  (Reproduced locally with an empty live response. Not clicked through on the live site: see above)
+- Fixed in v3 (hooks above the early return, and a stale hover index can no longer read past the end
+  of a shorter series). v4 is built so the case cannot arise: the daily series is zero-filled, and
+  switching range no longer makes a request
+
+### Added — analytics dashboard v4 (`/analytics-v4.html`)
+- **Loads once, with real data.** The header appears immediately, a loading panel holds the space,
+  and the dashboard is drawn a single time. No mock data first, no swap. A cached answer (5 min, per
+  tab) is instant; otherwise one retry, then clearly labelled sample data with a *Try again* button.
+  *Refresh* never trades live numbers for sample ones: if it fails, what is on screen stays and a
+  notice says so
+- **Contrast, computed rather than eyeballed.** Text is 16:1, 11:1 and 6.9:1 on its surface; v3 set
+  most labels in white at 20–40% opacity, which measures 1.9–3.8:1 (4.5:1 is the accessibility bar).
+  No text under 12px, none in a data colour, status is always an icon and a word. The three chart
+  colours pass colour-blindness and contrast checks as a set
+- **Shot chart on the real court**, opening on **your own session** when you have one. Every mark is a
+  recorded first contact drawn against the playground's actual geometry: the whole screen plus a
+  close-up of the goal. Scored = green dot, missed = ×, so it never relies on red-versus-green.
+  All-visitor shots come from PostHog and are re-drawn from whatever they hit, so a wall hit from a
+  2:1 monitor still lands on the wall. Updates live while you play in another tab
+- **Two heat maps**: shot density on the court (toggle on the shot chart), and visits by weekday and
+  hour in each visitor's own time
+- **Everything is real.** v3's device split, session flow, "% vs last period" and all-time shot
+  scatter were invented. v4 adds a real funnel (built so each step contains the next), real
+  previous-period comparisons that hide themselves when the earlier period predates tracking, real
+  sources / countries / devices, load time, frame rate and Core Web Vitals, and findings written from
+  the numbers — including how many visits look automated and a warning when the sample is small
+- Every chart has a table view; keyboard and reduced-motion support; one request covers 7/30/90 days
+- A second tab explains the pipeline, with physics values read from `config.js` rather than typed in
+
+### Changed — the analytics worker, rewritten (`analytics-worker/`)
+- Renamed `ga4-analytics-api` → **`site-analytics`**. A new worker, so the old one keeps running
+  until it is deleted by hand
+- **3 queries instead of 7.** PostHog allows three API queries at once per project; the previous
+  version — never deployed — would have been rejected on every request. Now: one row per session,
+  one per day × project, one per shot, aggregated in the worker for all three ranges
+- Ignores everything before 2026-09-13 16:15 UTC (the demo-shot fix). Sends totals and shot
+  positions only: no person ids, session ids, timestamps, referring URLs or exact screen sizes
+- Retries once on 429/5xx, never after a timeout, inside a 9-second budget for the whole batch. Keeps
+  its last answer in memory for 2 minutes and serves it if PostHog is down. Responses are `no-store`
+- Split in two: `analytics-worker.js` is the Worker itself and exports only its handler;
+  `aggregate.js` holds the SQL and the aggregation, is pure, and is what the tests and the
+  dashboard's sample data reuse
+- All three queries were run against the live project (the two that changed in review were run
+  again), and the real rows put through the worker locally. **It has not yet run on Cloudflare** —
+  `wrangler` was logged out and it needs a key
+- v1–v3 now read the same document through an adapter and show real data instead of frozen GA4 data
+
+### Added — PostHog on the dashboard pages, and tests
+- The four dashboard pages sent **nothing** to PostHog: no page views, no errors, no replay — which is
+  why the load failure left no trace. They now load PostHog on demand (it stays out of their first
+  paint), v4 reports `dashboard_loaded` with how it went, and render errors reach error tracking.
+  Dashboard traffic is tracked separately and never counted as a visit to the portfolio
+- `npm test` — 50 tests on Node's built-in runner, no new dependencies: the worker end to end against
+  a stubbed PostHog, the court geometry against contacts recorded in real sessions, the reader for
+  the viewer's own session, and the v1–v3 adapter. CI now runs them before building
+
+### Fixed before release — an independent review of all of the above
+A second pass by a reviewer that had not seen the work being built found 15 defects. All are fixed.
+The ones worth remembering:
+- **The worker could hang for everyone.** Simultaneous requests shared one in-flight promise, and on
+  Workers a promise belongs to the request that created it: close that tab mid-load and every other
+  request waiting on it hangs until Cloudflare kills it. Each request now runs its own batch; only
+  the finished answer is shared. Also gone: the Cache API layer (it does nothing on `*.workers.dev`),
+  HTTP caching (it would have made *Refresh* do nothing) and retrying a query that timed out (the
+  first copy may still be running, and a second counts against the limit of three)
+- **Scores were paired with the wrong shot** when two balls were in the air at once. Each impact and
+  score is now tied, inside the query, to the launch it followed for that ball
+- **The dashboard was measuring itself.** Web vitals from the dashboard pages were being averaged
+  into the playground's performance numbers
+- **It sent more than the page claimed.** Every referring site and every exact viewport went to the
+  browser — together, close to a fingerprint. Referrers are now a short list of known sources or
+  "Other sites", and a shot's screen is a shape (aspect ratio, long side rounded up to 100px). That
+  moves a mark by under half a pixel on the real shots. The page's privacy wording was corrected
+- **A failed *Refresh* replaced live numbers with sample data.** See above
+- **"My session" could show last week.** The game only expires its stored shots when its own page
+  loads, so the dashboard now applies the same 24-hour limit as it reads them. A made shot keeps
+  what it touched first, and brushing a category bar is no longer counted as a goal — in v4, and in
+  the older pages' session view, which had the same mistake
+- **v1–v3 averaged over empty days.** With one row per calendar day, a plain mean turned 70 seconds
+  of average visit into 5. They now weight by visits
+- **v3 printed "Infinity%"** — "down Infinity% WoW" on a quiet fortnight, and "converts at
+  Infinity%" for a category. Its insights divide by launches, and live data has projects that were
+  opened and clicked through without one (a double-click opens the panel). A finding with nothing to
+  divide by is now left out, and the v2/v3 funnels scale to their widest step instead of assuming
+  it is the first. Checked in the browser on the real rows for all three ranges; this part has no
+  unit test, because the insight code lives inside the page component
+- Smaller: the shot chart's table view keeps its "whose shots" and layout switches, tooltips stay up
+  on touch screens, the weekday heat map fits a phone, the portrait court draws balls at game size
+
+### Removed — the last of Google Analytics
+- `GA4-SETUP-GUIDE.md`; `codebase_dump.txt` (a March snapshot still carrying the GA4 code and
+  measurement id — regenerate with `bash dump_codebase.sh`, whose file list is now current)
+- `src/dashboard-v3.jsx` and `src/analytics/analytics-v3-main.jsx` — dead, never imported
+- The `VITE_GA4_WORKER_URL` fallback, the GA4 worker from the CSP, and the remaining comments
+- The production build was scanned: no Google Analytics host or code in any bundle
+- **Still to do outside the repo:** delete the `ga4-analytics-api` worker, the GA4 property and its
+  service account
+
+### Not done
+- Certificate reissue, worker deploy, deleting the old worker: all need Josh's cPanel, Cloudflare and
+  PostHog access. Until the worker is deployed the dashboard shows sample data, and says so
+- No live-domain verification of any of this (CSP, PostHog on the dashboards, the worker)
+- v1–v3 still fill gaps with demo data; the owner's own visits are still counted. Both in CLAUDE.md
+- v1–v3's funnels still assume every open follows a make. Live data doesn't, so their "Open" step can
+  read above 100% (333% on the real 90-day rows). v4's funnel is built for it; the old pages are left
+  as built until it is decided whether to keep, fix or retire them
+
+**Files changed:** `analytics-worker/*`, `src/analytics/v4/*` (new), `src/analytics/{data,legacyShape,telemetry}.js`,
+`src/analytics/AnalyticsDashboard{,V2,V3}.jsx`, `src/analytics/{FunnelViz,ShotChart}.jsx`, `src/analytics-{main,v2-main,v3-main,v4-main}.jsx`,
+`src/styles/analytics-v4.css`, `analytics-v4.html`, `src/game/{posthog,sessionBridge}.js`,
+`src/data/projects.js`, `src/AccessiblePortfolio.jsx`, `index.html`, `portfolio.html`, `public/.htaccess`,
+`public/sitemap.xml`, `.env.production`, `.github/workflows/deploy.yml`, `vite.config.js`, `package.json`,
+`dump_codebase.sh`, `V2-INTEGRATION-GUIDE.md`, `CLAUDE.md`, `.claude/launch.json` (new — lets Claude's
+browser pane start `npm run preview`)
 
 ---
 

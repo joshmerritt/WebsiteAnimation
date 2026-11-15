@@ -6,13 +6,15 @@
  *                         later finalised as make/miss) for the shot chart
  *   __dadatadad_bridge  — running counts: shots, makes, opens, cta clicks
  *
- * `AnalyticsDashboardV3` reads both keys directly to render the "your session"
- * view of the shot chart, which no warehouse query can provide: these are the
- * viewer's own interactions, available instantly and without a round trip.
+ * The dashboards read both keys directly (src/analytics/v4/session.js, and
+ * AnalyticsDashboardV3) to render the "my session" view of the shot chart,
+ * which no warehouse query can provide: these are the viewer's own
+ * interactions, available instantly and without a round trip. Nothing imports
+ * this module's stores from there — search for the storage KEYS to find the
+ * readers.
  *
- * This used to live inside ga4.js, but it was never GA4-specific — it is
- * local browser state that happens to be fed by the same EventBus events. It
- * was extracted when GA4 was removed so the shot chart kept working.
+ * This is not analytics and sends nothing anywhere. It is local browser state
+ * that happens to be fed by the same EventBus events the analytics listen to.
  *
  * Everything here is best-effort: storage can be unavailable (private mode,
  * embedded webviews) and every access is guarded.
@@ -225,8 +227,13 @@ export function initSessionBridge() {
 
   // First contact — keep the coordinates, but don't trust first-contact goal
   // classification until shot resolution updates it.
+  //
+  // `firstHit` is a second copy of what the ball touched. A make overwrites
+  // hitType with 'menu' (above), and the dashboard's shot chart still wants to
+  // know the shot banked in off a wall. The merge in impactStore.add() keeps
+  // any field a later update doesn't mention, so this one survives the make.
   unsubs.push(
-    bus.on('impact:first', (data) => impactStore.add({ ...data, isGoal: false })),
+    bus.on('impact:first', (data) => impactStore.add({ ...data, firstHit: data.hitType, isGoal: false })),
   );
 
   // Reset clears the visitor's local session view.

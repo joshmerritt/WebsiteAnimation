@@ -1,43 +1,31 @@
 /**
- * data.js — Analytics data for DaDataDad.com
+ * data.js — Data for the EARLIER dashboards (v1, v2, v3)
  *
- * Fetches live data from the Cloudflare Worker proxy, which queries PostHog
- * Falls back to deterministic mock data if the fetch fails.
+ * Dashboard v4 (src/analytics/v4/) is the current one and does not use this
+ * file. v1–v3 are kept as they were built, and still call
+ * fetchAnalyticsData(days) expecting the shape below. The analytics worker now
+ * returns one document covering every range, so this adapts that document to
+ * the old shape instead of the worker carrying two formats.
  *
- * In production, the worker URL should match your deployed endpoint.
+ * When live data can't be had, fetchAnalyticsData() returns null and those
+ * dashboards show the mock data at the bottom of this file under their "Demo"
+ * badge, as they always have.
  */
 
-// ── Worker endpoint ─────────────────────────────────────────────────────
-const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || import.meta.env.VITE_GA4_WORKER_URL || 'https://ga4-analytics-api.dadatadad-analytics.workers.dev';
+import { loadLive } from './v4/api.js';
+import { toLegacyShape } from './legacyShape.js';
 
 /**
- * Fetch live analytics data from the worker (PostHog-backed).
- * Returns { timeSeries, sources, pages, ballEvents, isLive: true }
- * or null if the fetch fails.
+ * Live data for one range, in the old shape — or null if it can't be had.
+ * Every range is served from one cached request, so switching ranges on the
+ * old dashboards no longer hits the network.
  */
 export async function fetchAnalyticsData(days = 90) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
-
   try {
-    const res = await fetch(`${ANALYTICS_API_URL}?days=${days}`, {
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-    if (!res.ok) throw new Error(`Worker responded ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    return {
-      timeSeries: data.timeSeries || [],
-      sources: data.sources || [],
-      pages: data.pages || [],
-      ballEvents: data.ballEvents || [],
-      geography: data.geography || [],
-      isLive: true,
-    };
+    const { data } = await loadLive();
+    return toLegacyShape(data, days);
   } catch (err) {
-    clearTimeout(timeoutId);
-    console.warn('analytics: live fetch failed, using mock data:', err.message);
+    console.warn('analytics: live data unavailable, using mock data:', err.message);
     return null;
   }
 }

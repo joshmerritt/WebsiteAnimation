@@ -121,6 +121,14 @@ function capture(event, props) {
   if (initialized) posthog.capture(event, props);
 }
 
+/**
+ * Capture a custom event from a page that has no game EventBus — the analytics
+ * dashboards. No-ops until initPostHog() has run on a host allowed to track.
+ */
+export function captureEvent(event, props) {
+  capture(event, props);
+}
+
 /** Report a caught error (React error boundaries etc.) to error tracking. */
 export function captureException(error, props) {
   if (initialized) posthog.captureException(error, props);

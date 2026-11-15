@@ -42,6 +42,7 @@ export default defineConfig({
         analytics: resolve(__dirname, 'analytics-dashboard.html'),
         analyticsV2: resolve(__dirname, 'analytics-v2.html'),
         analyticsV3: resolve(__dirname, 'analytics-v3.html'),
+        analyticsV4: resolve(__dirname, 'analytics-v4.html'),
         portfolio: resolve(__dirname, 'portfolio.html'),
       },
     },

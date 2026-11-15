@@ -1,10 +1,30 @@
 # ============================================================================
 # .htaccess — Security & Performance Hardening for dadatadad.com
-# Drop this file into your dist/ folder (it deploys to public_html via cpanel.yml)
+# Lives in public/, so Vite copies it into dist/ and CI uploads it to
+# public_html on every push to master (.github/workflows/deploy.yml).
 # ============================================================================
 
-# ── 1. FORCE HTTPS ──────────────────────────────────────────────────────────
+# ── 0. LET CERTIFICATE VALIDATION THROUGH ───────────────────────────────────
+# This block must stay FIRST, above every other rewrite.
+#
+# The host renews the site's TLS certificate automatically (cPanel AutoSSL). To
+# prove it controls the domain, the certificate authority fetches a small file
+# over plain HTTP from one of the paths below. Every rule further down would
+# interfere with that: section 1 redirects the request to HTTPS — which, once
+# the certificate has lapsed, is exactly the thing that is broken — and section
+# 8 would answer a missing file with index.html and a 200.
+#
+# On 2026-11-14 the site was found serving the host's default certificate
+# (*.web-hosting.com) instead of its own, and all three paths here were being
+# redirected. cPanel can add exclusions like these to .htaccess on its own, but
+# CI uploads this file whole whenever it changes, which overwrites anything
+# added on the server. So they live here, in the source.
 RewriteEngine On
+RewriteRule ^\.well-known/ - [L]
+RewriteRule ^[0-9]+\..+\.cpaneldcv$ - [L]
+RewriteRule ^[A-F0-9]{32}\.txt$ - [L]
+
+# ── 1. FORCE HTTPS ──────────────────────────────────────────────────────────
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
@@ -43,14 +63,19 @@ RewriteRule ^(.*)$ https://dadatadad.com/$1 [L,R=301]
 
   # Content-Security-Policy
   # Tuned for your stack: React/Vite (inline scripts from build), p5.js canvas,
-  # Google Analytics, Google Fonts, and your own assets.
+  # PostHog (through the e.dadatadad.com proxy), Google Fonts, and your own assets.
+  #
+  # connect-src must list the analytics worker (analytics-worker/wrangler.toml,
+  # VITE_ANALYTICS_API_URL). If the worker is ever renamed and this line is not
+  # updated, the dashboards are blocked in production only — locally there is no
+  # CSP, so it looks fine — and quietly fall back to sample data.
   Header always set Content-Security-Policy "\
     default-src 'self'; \
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://us-assets.i.posthog.com https://e.dadatadad.com; \
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; \
     font-src 'self' https://fonts.gstatic.com; \
     img-src 'self' data: https://us-assets.i.posthog.com https://e.dadatadad.com; \
-    connect-src 'self' https://ga4-analytics-api.dadatadad-analytics.workers.dev https://us.i.posthog.com https://us-assets.i.posthog.com https://e.dadatadad.com; \
+    connect-src 'self' https://site-analytics.dadatadad-analytics.workers.dev https://us.i.posthog.com https://us-assets.i.posthog.com https://e.dadatadad.com; \
     worker-src 'self' blob:; \
     frame-ancestors 'self'; \
     base-uri 'self'; \

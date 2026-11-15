@@ -13,6 +13,7 @@ import {
   PAGE_DATA,
   METRIC_COLORS,
 } from './data.js';
+import { dailyAverage } from './legacyShape.js';
 import StatCard from './StatCard.jsx';
 import AreaChart from './AreaChart.jsx';
 import DonutChart from './DonutChart.jsx';
@@ -68,12 +69,9 @@ export default function AnalyticsDashboard() {
   // Compute KPIs (defensive against empty arrays)
   const totalVisitors      = timeSeriesData.reduce((s, d) => s + (d.visitors || 0), 0);
   const totalPageviews     = timeSeriesData.reduce((s, d) => s + (d.pageviews || 0), 0);
-  const avgBounce          = timeSeriesData.length > 0
-    ? Math.round(timeSeriesData.reduce((s, d) => s + (d.bounceRate || 0), 0) / timeSeriesData.length)
-    : 0;
-  const avgDuration        = timeSeriesData.length > 0
-    ? Math.round(timeSeriesData.reduce((s, d) => s + (d.avgDuration || 0), 0) / timeSeriesData.length)
-    : 0;
+  // Weighted by each day's visits: see dailyAverage().
+  const avgBounce          = dailyAverage(timeSeriesData, 'bounceRate');
+  const avgDuration        = dailyAverage(timeSeriesData, 'avgDuration');
   const totalInteractions  = timeSeriesData.reduce((s, d) => s + (d.ballInteractions || 0), 0);
   const interactionRate    = totalVisitors > 0
     ? Math.round((totalInteractions / totalVisitors) * 100)
@@ -119,6 +117,7 @@ export default function AnalyticsDashboard() {
           <a className="dash-nav-link active" href="/analytics-dashboard.html">V1</a>
           <a className="dash-nav-link" href="/analytics-v2.html">V2</a>
           <a className="dash-nav-link" href="/analytics-v3.html">V3</a>
+          <a className="dash-nav-link" href="/analytics-v4.html">V4</a>
           <a className="dash-nav-link" href="/">Portfolio</a>
         </div>
       </header>

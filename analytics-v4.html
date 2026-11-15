@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Site Analytics — Da Data Dad</title>
+    <meta name="description" content="Live analytics for DaDataDad.com: who visits, how they play the physics playground, and where every shot lands." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0e12" />
+    <link rel="shortcut icon" href="/assets/images/favicon.png" />
+    <link rel="canonical" href="https://dadatadad.com/analytics-v4.html" />
+
+    <!-- Fonts: DM Sans (everything) + Syne (page title) + JetBrains Mono (code identifiers).
+         Only the weights the stylesheet uses. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Syne:wght@800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+
+    <!-- Paint the dark page before the stylesheet arrives: no white flash. -->
+    <style>html, body { margin: 0; background: #0a0e12; }</style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <p style="color:#f1f4f7;font-family:system-ui,sans-serif;padding:2rem">
+        This dashboard needs JavaScript. <a style="color:#7fb2f0" href="/portfolio.html">Read the portfolio without it.</a>
+      </p>
+    </noscript>
+    <script type="module" src="/src/analytics-v4-main.jsx"></script>
+  </body>
+</html>

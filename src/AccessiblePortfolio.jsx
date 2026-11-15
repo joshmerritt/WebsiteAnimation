@@ -188,7 +188,7 @@ export default function AccessiblePortfolio() {
               <span className="port-topnav-link-icon" aria-hidden="true">🎮</span>
               Interactive Version
             </a>
-            <a href="/analytics-dashboard.html" className="port-topnav-link">
+            <a href="/analytics-v4.html" className="port-topnav-link">
               <span className="port-topnav-link-icon" aria-hidden="true">📊</span>
               Analytics
             </a>

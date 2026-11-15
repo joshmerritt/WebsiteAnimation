@@ -12,6 +12,7 @@ FILES=(
   "analytics-dashboard.html"
   "analytics-v2.html"
   "analytics-v3.html"
+  "analytics-v4.html"
   "vite.config.js"
   "package.json"
   ".env.production"
@@ -23,6 +24,7 @@ FILES=(
   "src/analytics-main.jsx"
   "src/analytics-v2-main.jsx"
   "src/analytics-v3-main.jsx"
+  "src/analytics-v4-main.jsx"
 
   # Data
   "src/data/projects.js"
@@ -40,7 +42,8 @@ FILES=(
   "src/game/Menu.js"
   "src/game/config.js"
   "src/game/EventBus.js"
-  "src/game/ga4.js"
+  "src/game/posthog.js"
+  "src/game/sessionBridge.js"
 
   # Components
   "src/components/GameCanvas.jsx"
@@ -54,24 +57,43 @@ FILES=(
   "src/styles/portfolio.css"
   "src/styles/analytics.css"
   "src/styles/analytics-v2.css"
+  "src/styles/analytics-v4.css"
 
   # Analytics
+  "src/analytics/telemetry.js"
   "src/analytics/data.js"
+  "src/analytics/legacyShape.js"
   "src/analytics/hooks.js"
   "src/analytics/StatCard.jsx"
   "src/analytics/Sparkline.jsx"
   "src/analytics/AreaChart.jsx"
   "src/analytics/DonutChart.jsx"
   "src/analytics/FunnelViz.jsx"
+  "src/analytics/ShotChart.jsx"
   "src/analytics/BallEngagement.jsx"
   "src/analytics/BallEngagementV2.jsx"
   "src/analytics/AnalyticsDashboard.jsx"
   "src/analytics/AnalyticsDashboardV2.jsx"
   "src/analytics/AnalyticsDashboardV3.jsx"
 
-  # GA4 Worker
-  "ga4-worker/ga4-worker.js"
-  "ga4-worker/wrangler.toml"
+  # Analytics dashboard v4
+  "src/analytics/v4/DashboardV4.jsx"
+  "src/analytics/v4/ShotChart.jsx"
+  "src/analytics/v4/charts.jsx"
+  "src/analytics/v4/sections.jsx"
+  "src/analytics/v4/HowItWorks.jsx"
+  "src/analytics/v4/ui.jsx"
+  "src/analytics/v4/api.js"
+  "src/analytics/v4/session.js"
+  "src/analytics/v4/court.js"
+  "src/analytics/v4/meta.js"
+  "src/analytics/v4/format.js"
+  "src/analytics/v4/sample.js"
+
+  # Analytics worker (Cloudflare Worker -> PostHog)
+  "analytics-worker/analytics-worker.js"
+  "analytics-worker/aggregate.js"
+  "analytics-worker/wrangler.toml"
 
   # Public
   "public/.htaccess"

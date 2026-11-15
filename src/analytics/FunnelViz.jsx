@@ -24,7 +24,10 @@ export default function FunnelViz({ totals }) {
   const stepH = (h - 50) / STEPS.length;
   const topY = 24;
 
-  const maxVal = totals.launches || 1;
+  // The widest step, which is not always the launches: with live data opens can
+  // outnumber them (a double-click opens a project without a launch), and
+  // scaling to the launches drew the lower steps wider than the box.
+  const maxVal = Math.max(...STEPS.map((s) => totals[s.key] || 0), 1);
   const overallConv = totals.launches > 0
     ? ((totals.ctaClicks / totals.launches) * 100).toFixed(1)
     : '0.0';

@@ -18,6 +18,7 @@ import {
   ARCHITECTURE,
   METRIC_COLORS,
 } from './data.js';
+import { dailyAverage } from './legacyShape.js';
 import ShotChart from './ShotChart.jsx';
 import BallEngagementV1 from './BallEngagement.jsx';
 
@@ -68,46 +69,60 @@ function generateInsights(timeSeriesData, ballDataArg) {
     scores: a.scores + (b.scores || 0), opens: a.opens + (b.opens || 0), ctaClicks: a.ctaClicks + (b.ctaClicks || 0),
   }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
 
-  const byClicks = [...BE].sort((a, b) => (b.clicks || b.launches || 0) - (a.clicks || a.launches || 0));
-  const byConv = [...BE].sort((a, b) => {
-    const aClicks = a.clicks || a.launches || 1;
-    const bClicks = b.clicks || b.launches || 1;
-    return (b.ctaClicks / bClicks) - (a.ctaClicks / aClicks);
-  });
-  const byDropoff = [...BE].sort((a, b) => (1 - (a.opens || 0) / (a.scores || 1)) - (1 - (b.opens || 0) / (b.scores || 1))).reverse();
+  // Every finding below is a ratio, and with live data a zero denominator is
+  // ordinary, not an edge case: a double-click opens a project without a launch,
+  // so a project (or a whole category) can have opens and click-throughs but no
+  // shots. Dividing anyway printed "converts at Infinity%". A finding with
+  // nothing to divide by is left out instead.
+  const clicksOf = (b) => b.clicks || b.launches || 0;
+  const launched = BE.filter(b => clicksOf(b) > 0);
+  const convOf = (b) => (b.ctaClicks || 0) / clicksOf(b);   // launched projects only
+
+  const byClicks = [...launched].sort((a, b) => clicksOf(b) - clicksOf(a));
+  const byConv = [...launched].sort((a, b) => convOf(b) - convOf(a));
 
   const topVol = byClicks[0], topConv = byConv[0];
-  const topVolClicks = topVol.clicks || topVol.launches || 1;
-  const topConvClicks = topConv.clicks || topConv.launches || 1;
-  const topVolConv = ((topVol.ctaClicks / topVolClicks) * 100).toFixed(0);
-  const topConvConv = ((topConv.ctaClicks / topConvClicks) * 100).toFixed(0);
-  if (topVol.id !== topConv.id) {
-    const lost = Math.round(topVolClicks * (topConv.ctaClicks / topConvClicks)) - topVol.ctaClicks;
-    insights.push({ type: "opportunity", icon: "\uD83C\uDFAF", title: "Conversion Efficiency Gap",
-      body: `"${topVol.ball}" gets the most traffic (${topVolClicks} interactions) but converts to CTA at ${topVolConv}%, while "${topConv.ball}" converts at ${topConvConv}%. If the top-volume ball matched that rate, it would generate ~${lost} additional CTA click-throughs.`,
-      recommendation: `Investigate what makes "${topConv.ball}" convert better. Is the CTA more prominent in its detail modal? Apply those patterns to "${topVol.ball}".`,
-      metric: `+${lost} CTAs`, metricColor: "#6B9F6B", severity: "high" });
+  if (topVol && topConv && topVol.id !== topConv.id) {
+    const topVolClicks = clicksOf(topVol);
+    const lost = Math.round(topVolClicks * convOf(topConv)) - (topVol.ctaClicks || 0);
+    // No click-throughs to gain means no gap to report (every rate is 0%, say).
+    if (lost > 0) {
+      insights.push({ type: "opportunity", icon: "\uD83C\uDFAF", title: "Conversion Efficiency Gap",
+        body: `"${topVol.ball}" gets the most traffic (${topVolClicks} interactions) but converts to CTA at ${(convOf(topVol) * 100).toFixed(0)}%, while "${topConv.ball}" converts at ${(convOf(topConv) * 100).toFixed(0)}%. If the top-volume ball matched that rate, it would generate ~${lost} additional CTA click-throughs.`,
+        recommendation: `Investigate what makes "${topConv.ball}" convert better. Is the CTA more prominent in its detail modal? Apply those patterns to "${topVol.ball}".`,
+        metric: `+${lost} CTAs`, metricColor: "#6B9F6B", severity: "high" });
+    }
   }
 
-  const worstLeaker = byDropoff[0];
-  const leakPct = ((1 - (worstLeaker.opens || 0) / (worstLeaker.scores || 1)) * 100).toFixed(0);
-  insights.push({ type: "warning", icon: "\uD83D\uDEA8", title: "Score-to-Open Leakage",
-    body: `"${worstLeaker.ball}" loses ${leakPct}% of users between scoring and viewing the detail page (${worstLeaker.scores - worstLeaker.opens} lost opens). Users score but don't see the project content.`,
-    recommendation: "Add a brief visual celebration on score that naturally transitions into the detail modal, or add a pulsing 'View Project' prompt after a successful score.",
-    metric: `${leakPct}% drop`, metricColor: "#C05050", severity: "high" });
+  // A leak needs makes that were not followed by an open. In live data opens are
+  // normally at least makes (a make opens the panel, and a double-click opens it
+  // with no make at all), so there is usually nothing to report \u2014 this used to
+  // say a project with no makes "loses 100% of users (0 lost opens)".
+  const leakOf = (b) => 1 - (b.opens || 0) / b.scores;
+  const worstLeaker = BE.filter(b => (b.scores || 0) > (b.opens || 0)).sort((a, b) => leakOf(a) - leakOf(b)).reverse()[0];
+  if (worstLeaker) {
+    const leakPct = (leakOf(worstLeaker) * 100).toFixed(0);
+    insights.push({ type: "warning", icon: "\uD83D\uDEA8", title: "Score-to-Open Leakage",
+      body: `"${worstLeaker.ball}" loses ${leakPct}% of users between scoring and viewing the detail page (${worstLeaker.scores - (worstLeaker.opens || 0)} lost opens). Users score but don't see the project content.`,
+      recommendation: "Add a brief visual celebration on score that naturally transitions into the detail modal, or add a pulsing 'View Project' prompt after a successful score.",
+      metric: `${leakPct}% drop`, metricColor: "#C05050", severity: "high" });
+  }
 
   const cats = {};
   BE.forEach(b => {
     if (!cats[b.category]) cats[b.category] = { clicks: 0, ctaClicks: 0, balls: 0 };
     cats[b.category].clicks += (b.clicks || b.launches || 0); cats[b.category].ctaClicks += (b.ctaClicks || 0); cats[b.category].balls += 1;
   });
-  const catArr = Object.entries(cats).map(([n, d]) => ({ name: n, ...d, conv: d.ctaClicks / d.clicks * 100 })).sort((a, b) => b.conv - a.conv);
+  // A category nobody launched has no rate, so it sits the comparison out.
+  const catArr = Object.entries(cats).filter(([, d]) => d.clicks > 0).map(([n, d]) => ({ name: n, ...d, conv: d.ctaClicks / d.clicks * 100 })).sort((a, b) => b.conv - a.conv);
   const bestCat = catArr[0], worstCat = catArr[catArr.length - 1];
-  const catGap = (bestCat.conv - worstCat.conv).toFixed(0);
-  insights.push({ type: "analysis", icon: "\uD83D\uDCCA", title: "Category Performance Disparity",
-    body: `"${bestCat.name}" converts at ${bestCat.conv.toFixed(0)}% vs "${worstCat.name}" at ${worstCat.conv.toFixed(0)}%, a ${catGap}pp gap.`,
-    recommendation: `A/B test moving "${worstCat.name}" balls to more central positions. If conversion stays flat, refresh project descriptions or images for that category.`,
-    metric: `${catGap}pp gap`, metricColor: "#D4A843", severity: "medium" });
+  if (catArr.length >= 2 && bestCat.conv > worstCat.conv) {
+    const catGap = (bestCat.conv - worstCat.conv).toFixed(0);
+    insights.push({ type: "analysis", icon: "\uD83D\uDCCA", title: "Category Performance Disparity",
+      body: `"${bestCat.name}" converts at ${bestCat.conv.toFixed(0)}% vs "${worstCat.name}" at ${worstCat.conv.toFixed(0)}%, a ${catGap}pp gap.`,
+      recommendation: `A/B test moving "${worstCat.name}" balls to more central positions. If conversion stays flat, refresh project descriptions or images for that category.`,
+      metric: `${catGap}pp gap`, metricColor: "#D4A843", severity: "medium" });
+  }
 
   const mob = DEVICE_DATA.find(d => d.device === "Mobile"), desk = DEVICE_DATA.find(d => d.device === "Desktop");
   if (mob && desk) {
@@ -126,37 +141,45 @@ function generateInsights(timeSeriesData, ballDataArg) {
   }
 
   const recent = timeSeriesData.slice(-7), prev = timeSeriesData.slice(-14, -7);
-  if (recent.length === 7 && prev.length === 7) {
+  // Needs traffic in the earlier week: against zero the change is infinite, and
+  // this printed "Traffic down Infinity% WoW" on a quiet fortnight.
+  if (recent.length === 7 && prev.length === 7 && prev.some(d => (d.visitors || 0) > 0)) {
     const rAvg = recent.reduce((s, d) => s + (d.visitors || 0), 0) / 7;
     const pAvg = prev.reduce((s, d) => s + (d.visitors || 0), 0) / 7;
     const delta = ((rAvg - pAvg) / pAvg * 100).toFixed(0);
     const dir = parseInt(delta) >= 0 ? "up" : "down";
+    // One decimal for small averages: at a visit every few days both sides
+    // rounded to 0, and it read "down 50% (0 vs 0 daily avg)".
+    const avg = (n) => n.toFixed(n < 10 ? 1 : 0);
     insights.push({ type: dir === "up" ? "positive" : "warning", icon: dir === "up" ? "\uD83D\uDCC8" : "\uD83D\uDCC9", title: "Week-over-Week Momentum",
-      body: `Traffic ${dir} ${Math.abs(delta)}% WoW (${rAvg.toFixed(0)} vs ${pAvg.toFixed(0)} daily avg).`,
+      body: `Traffic ${dir} ${Math.abs(delta)}% WoW (${avg(rAvg)} vs ${avg(pAvg)} daily avg).`,
       recommendation: parseInt(delta) >= 0 ? "Engagement quality is holding as volume grows. Continue current LinkedIn posting cadence." : "Check if a referral source dropped off. Review LinkedIn posting cadence and consider a content refresh.",
       metric: `${parseInt(delta) >= 0 ? "+" : ""}${delta}% WoW`, metricColor: dir === "up" ? "#6B9F6B" : "#C05050", severity: "medium" });
   }
 
-  const lR = ((totals.launches / totals.clicks) * 100).toFixed(0);
-  const sR = ((totals.scores / totals.launches) * 100).toFixed(0);
-  const oR = ((totals.opens / totals.scores) * 100).toFixed(0);
-  const cR = ((totals.ctaClicks / totals.opens) * 100).toFixed(0);
+  // A step nothing went into has no pass-through rate. It is left out, so a
+  // "NaN%" or "Infinity%" can't be ranked as the biggest drop-off.
   const steps = [
-    { name: "Click \u2192 Shot", rate: parseFloat(lR), label: `${lR}%` },
-    { name: "Shot \u2192 Make", rate: parseFloat(sR), label: `${sR}%` },
-    { name: "Make \u2192 Open", rate: parseFloat(oR), label: `${oR}%` },
-    { name: "Open \u2192 CTA", rate: parseFloat(cR), label: `${cR}%` },
-  ];
-  const worst = steps.reduce((a, b) => a.rate < b.rate ? a : b);
-  const recs = {
-    "Click \u2192 Shot": "Users touch balls but don't drag hard enough. Reduce minimum launch power or add a visual power indicator.",
-    "Shot \u2192 Make": "Balls launched but miss goals. Widen goal hitboxes or add subtle aim guides for first-time visitors.",
-    "Make \u2192 Open": "Users score but don't view details. Try auto-opening the modal with a dismiss option.",
-    "Open \u2192 CTA": "Users view details but don't click through. Strengthen CTA visibility, add preview screenshots, or make project links more prominent.",
-  };
-  insights.push({ type: "analysis", icon: "\uD83D\uDD0D", title: "Primary Funnel Friction",
-    body: `Biggest drop-off at "${worst.name}" (${worst.label} pass-through). This is where the most potential conversions are lost.`,
-    recommendation: recs[worst.name], metric: worst.label, metricColor: "#D4A843", severity: "high" });
+    ["Click \u2192 Shot", totals.launches, totals.clicks],
+    ["Shot \u2192 Make", totals.scores, totals.launches],
+    ["Make \u2192 Open", totals.opens, totals.scores],
+    ["Open \u2192 CTA", totals.ctaClicks, totals.opens],
+  ].filter(([, , into]) => into > 0).map(([name, passed, into]) => {
+    const pct = ((passed / into) * 100).toFixed(0);
+    return { name, rate: parseFloat(pct), label: `${pct}%` };
+  });
+  if (steps.length > 0) {
+    const worst = steps.reduce((a, b) => a.rate < b.rate ? a : b);
+    const recs = {
+      "Click \u2192 Shot": "Users touch balls but don't drag hard enough. Reduce minimum launch power or add a visual power indicator.",
+      "Shot \u2192 Make": "Balls launched but miss goals. Widen goal hitboxes or add subtle aim guides for first-time visitors.",
+      "Make \u2192 Open": "Users score but don't view details. Try auto-opening the modal with a dismiss option.",
+      "Open \u2192 CTA": "Users view details but don't click through. Strengthen CTA visibility, add preview screenshots, or make project links more prominent.",
+    };
+    insights.push({ type: "analysis", icon: "\uD83D\uDD0D", title: "Primary Funnel Friction",
+      body: `Biggest drop-off at "${worst.name}" (${worst.label} pass-through). This is where the most potential conversions are lost.`,
+      recommendation: recs[worst.name], metric: worst.label, metricColor: "#D4A843", severity: "high" });
+  }
 
   return insights;
 }
@@ -207,17 +230,23 @@ function DonutChart({ segments, size = 120, strokeWidth = 18 }) {
 }
 
 function MultiLineChart({ data, metrics, width = 680, height = 220 }) {
-  const [hoverIdx, setHoverIdx] = useState(null);
+  const [hoverState, setHoverIdx] = useState(null);
   const svgRef = useRef(null);
-  if (!data || data.length < 2) return <div style={{ height, display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.25)", fontSize: 12 }}>Loading chart data…</div>;
-  const padL = 44, padR = 12, padT = 16, padB = 28;
-  const chartW = width - padL - padR, chartH = height - padT - padB;
   // Single shared Y scale — all metrics on the same axis so values are visually comparable
   const globalMax = useMemo(() => {
     let mx = 1;
-    metrics.forEach(m => { data.forEach(d => { const v = d[m.key] || 0; if (v > mx) mx = v; }); });
+    metrics.forEach(m => { (data || []).forEach(d => { const v = d[m.key] || 0; if (v > mx) mx = v; }); });
     return mx * 1.15;
   }, [data, metrics]);
+  // This early return MUST stay below every hook above. It used to sit above
+  // useMemo, so when the data went from >= 2 rows (the mock series shown while
+  // loading) to < 2 (an empty live response), React saw fewer hooks than on the
+  // previous render and threw error #300 — the "Dashboard hit a snag" screen.
+  if (!data || data.length < 2) return <div style={{ height, display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)", fontSize: 12 }}>Not enough data to chart for this range.</div>;
+  // A hover index left over from a longer series must not index past the end.
+  const hoverIdx = hoverState !== null && hoverState < data.length ? hoverState : null;
+  const padL = 44, padR = 12, padT = 16, padB = 28;
+  const chartW = width - padL - padR, chartH = height - padT - padB;
   const toX = (i) => padL + (i / (data.length - 1)) * chartW;
   const toY = (val) => { const v = val || 0; return padT + chartH - (v / globalMax) * chartH; };
   const buildPath = (key) => data.map((d, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(d[key] || 0)}`).join(" ");
@@ -455,7 +484,10 @@ function ConversionFunnel({ ballData }) {
     { label: "Opens", val: totals.opens, color: "#D4A843" },
     { label: "CTAs", val: totals.ctaClicks, color: "#D4A843" },
   ];
-  const maxVal = Math.max(steps[0].val, 1);
+  // The widest step, which is not always the first: with live data opens can
+  // outnumber shots (a double-click opens a project without a launch), and
+  // scaling to the shots drew the lower steps wider than the box.
+  const maxVal = Math.max(...steps.map(s => s.val), 1);
   const w = 340, h = 220, padX = 20, padT = 10;
   const rowH = (h - padT - 16) / steps.length;
   const centerX = w / 2;
@@ -470,7 +502,9 @@ function ConversionFunnel({ ballData }) {
           const topHalf = Math.max(maxHalfW * pct, 20);
           const botHalf = Math.max(maxHalfW * nextPct, 16);
           const y = padT + i * rowH;
-          const passRate = i > 0 ? ((step.val / steps[i - 1].val) * 100) : 100;
+          // No rate when nothing reached the step before (it printed "Infinity%").
+          const hasRate = i > 0 && steps[i - 1].val > 0;
+          const passRate = hasRate ? ((step.val / steps[i - 1].val) * 100) : 100;
           const passColor = passRate > 85 ? "#6B9F6B" : passRate > 70 ? "#D4A843" : "#C05050";
 
           // Trapezoid points
@@ -484,7 +518,7 @@ function ConversionFunnel({ ballData }) {
               {/* Value center */}
               <text x={centerX} y={y + rowH / 2 + 1} textAnchor="middle" fill="#fff" fontSize="14" fontFamily="'JetBrains Mono', monospace" fontWeight="700">{step.val.toLocaleString()}</text>
               {/* Pass-through rate right */}
-              {i > 0 && (
+              {hasRate && (
                 <text x={centerX + topHalf + 6} y={y + rowH / 2 + 1} textAnchor="start" fill={passColor} fontSize="10" fontFamily="'JetBrains Mono', monospace" fontWeight="600">{passRate.toFixed(0)}%</text>
               )}
             </g>
@@ -494,7 +528,7 @@ function ConversionFunnel({ ballData }) {
       <div style={{ display: "flex", justifyContent: "center", gap: 20, marginTop: 4 }}>
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 2 }}>Shot-to-CTA</div>
-          <div style={{ fontSize: 18, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: "#D4A843" }}>{maxVal > 0 ? ((totals.ctaClicks / totals.launches) * 100).toFixed(1) : 0}%</div>
+          <div style={{ fontSize: 18, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: "#D4A843" }}>{totals.launches > 0 ? ((totals.ctaClicks / totals.launches) * 100).toFixed(1) : 0}%</div>
         </div>
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 2 }}>Open-to-CTA</div>
@@ -514,7 +548,7 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
   const DEVICE_DATA = deviceData;
   const SESSION_FLOW = sessionFlow;
   const totalVisitors = timeSeriesData.reduce((s, d) => s + (d.visitors || 0), 0);
-  const avgDuration = timeSeriesData.length > 0 ? Math.round(timeSeriesData.reduce((s, d) => s + (d.avgDuration || 0), 0) / timeSeriesData.length) : 0;
+  const avgDuration = dailyAverage(timeSeriesData, 'avgDuration');   // weighted by each day's visits
   const totalInteractions = timeSeriesData.reduce((s, d) => s + (d.ballInteractions || 0), 0);
   const interactionRate = totalVisitors > 0 ? Math.min(100, Math.round((totalInteractions / totalVisitors) * 100)) : 0;
   const totals = BALL_ENGAGEMENT.reduce((a, b) => ({ clicks: a.clicks + (b.clicks || 0), launches: a.launches + (b.launches || 0), scores: a.scores + (b.scores || 0), opens: a.opens + (b.opens || 0), ctaClicks: a.ctaClicks + (b.ctaClicks || 0) }), { clicks: 0, launches: 0, scores: 0, opens: 0, ctaClicks: 0 });
@@ -584,7 +618,9 @@ function AnalyticsTab({ timeSeriesData, rangeDays, ballData, sourcesData, pagesD
               if (!imp.ballId) return;
               const existing = ballStats.get(imp.ballId) || { launches: 0, scores: 0 };
               existing.launches++;
-              if (imp.isGoal || imp.hitType === 'menu') existing.scores++;
+              // isGoal only: a first contact with a category bar is hitType 'menu'
+              // too, and is not a make.
+              if (imp.isGoal) existing.scores++;
               ballStats.set(imp.ballId, existing);
             });
           }
@@ -1029,6 +1065,7 @@ function AnalyticsDashboardV3Inner() {
             <a href="/analytics-dashboard.html" style={SS.navLink}>V1</a>
             <a href="/analytics-v2.html" style={SS.navLink}>V2</a>
             <span style={{ ...SS.navLink, color: "#fff", background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.15)" }}>V3</span>
+            <a href="/analytics-v4.html" style={SS.navLink}>V4</a>
             <a href="/" style={SS.navLink}>Portfolio</a>
           </div>
         </div>

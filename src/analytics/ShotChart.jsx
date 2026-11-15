@@ -53,7 +53,9 @@ function generateDots(balls, seed = 7, impacts) {
       const ball = balls.find(b => b.id === imp.ballId);
       dots.push({
         x: svgX, y: svgY,
-        type: imp.isGoal || imp.hitType === 'menu' ? 'score' : 'miss',
+        // Only isGoal means "scored". hitType is 'menu' on a made shot, but also
+        // on one that touched a category bar first and never scored.
+        type: imp.isGoal ? 'score' : 'miss',
         ballId: imp.ballId,
         color: ball?.color || '#888',
         category: ball?.category || imp.ballCategory || '',

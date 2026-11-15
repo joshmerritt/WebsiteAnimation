@@ -1,336 +1,231 @@
 /**
- * analytics-worker.js — Cloudflare Worker proxy for the PostHog query API
+ * analytics-worker.js — Cloudflare Worker: PostHog → dashboard JSON
  *
- * Replaces the old GA4 Data API worker. Runs HogQL queries against PostHog and
- * returns the same JSON shape the dashboard has always consumed, so
- * src/analytics/*.jsx needed no structural change:
+ * The site's dashboards (analytics-v4.html directly; v1–v3 through the adapter
+ * in src/analytics/data.js) read ONE JSON document from this worker. It runs
+ * three HogQL queries against PostHog, aggregates the rows, and returns only
+ * aggregates: no person ids, session ids or timestamps ever leave the worker.
  *
- *   { timeSeries, sources, pages, ballEvents, geography, fetchedAt, days }
+ * Why a worker at all: reading PostHog needs a *personal* API key, which is a
+ * secret and must never reach the browser. The project key baked into the site
+ * (phc_…) is write-only. So the key lives here.
  *
- * Why a worker at all: the PostHog *personal* API key needed to read data is a
- * secret and must never reach the browser. The project API key baked into the
- * site (phc_…) is write-only. So the key lives here and the browser only ever
- * sees aggregated JSON.
+ * This file is the Worker: the fetch handler, caching, and the calls to
+ * PostHog. The queries and all the aggregation live in aggregate.js, which is
+ * pure and is where the document's shape is described.
+ *
+ * ── Design constraints worth knowing before changing this ───────────────────
+ *
+ * 1. PostHog allows THREE API queries running at once per project. The first
+ *    version of this worker fired seven in parallel, which would have been
+ *    rejected on every single request. There are exactly three queries now, and
+ *    that is a ceiling, not a coincidence: a fourth has to replace one or run
+ *    after the others.
+ *
+ * 2. The /query endpoint is for embedded analytics, not exports. So the rows we
+ *    pull are already rolled up (one per session, one per day × project, one per
+ *    shot) and capped, never raw events.
+ *
+ * 3. One response covers every range the dashboard offers (7/30/90 days). The
+ *    browser switches ranges without another request, so there is no second
+ *    fetch that can fail and no loading state between ranges.
+ *
+ * 4. Nothing from the request reaches the SQL. The only inputs are operator
+ *    config (wrangler.toml), and those are validated before use.
+ *
+ * 5. This module has a default export and nothing else. On Workers, every named
+ *    export of the entry module is treated as a possible entrypoint or Durable
+ *    Object class, so helpers are exported from aggregate.js instead.
  *
  * Secrets (wrangler secret put):
- *   POSTHOG_API_KEY   — personal API key, scope: query:read (project 605146)
+ *   POSTHOG_API_KEY     personal API key, scope: query:read, project 605146
  * Vars (wrangler.toml):
- *   POSTHOG_PROJECT_ID — 605146
- *   POSTHOG_HOST       — https://us.posthog.com
- *   ALLOWED_ORIGINS    — https://dadatadad.com,...
+ *   POSTHOG_PROJECT_ID  605146
+ *   POSTHOG_HOST        https://us.posthog.com
+ *   SITE_HOST           dadatadad.com — only events from this $host are counted
+ *   DATA_EPOCH_UTC      events before this instant are ignored (see aggregate.js)
+ *   ALLOWED_ORIGINS     comma-separated origins allowed to read the JSON
+ *   BATCH_BUDGET_MS     optional: time allowed for the query batch (default 9000)
+ *
+ * Tests: `npm test` (analytics-worker.test.mjs) — stubs fetch, so they run
+ * without a key or a network.
  */
 
+import { SQL, queryConfig, rowsToObjects, buildPayload } from './aggregate.js';
+
+const CACHE_TTL_S = 120;    // PostHog ingestion lags ~1 min anyway
+
+/**
+ * Time allowed for the whole batch of queries, retries included. It has to be
+ * shorter than the dashboard's own request timeout (12 s, src/analytics/v4/api.js)
+ * so that a slow PostHog produces a short error from here rather than the
+ * browser giving up on a worker that is still waiting.
+ */
+const BATCH_BUDGET_MS = 9000;
+const MIN_ATTEMPT_MS  = 2000;   // don't start a retry with less than this left
+
+// ── Entry point ─────────────────────────────────────────────────────────────
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
+    const cors = corsHeaders(env, request);
+
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders(env, request) });
+      return new Response(null, { status: 204, headers: cors });
+    }
+    if (request.method !== 'GET') {
+      return json({ error: 'method_not_allowed' }, 405, cors);
+    }
+    if (!env.POSTHOG_API_KEY || !env.POSTHOG_PROJECT_ID) {
+      // Deployed without `wrangler secret put POSTHOG_API_KEY`. Say so plainly:
+      // the alternative is a 401 from PostHog that reads like an outage.
+      return json({ error: 'not_configured', detail: 'POSTHOG_API_KEY secret is not set on this worker.' }, 500, cors);
     }
 
     try {
-      const url = new URL(request.url);
-      // Clamp: the dashboard offers 7/30/90; anything else is a caller bug.
-      const days = Math.min(Math.max(parseInt(url.searchParams.get('days') || '90', 10) || 90, 1), 365);
-
-      const [daily, sessionsDaily, sources, pagesNow, pagesPrev, ballEvents, geography] =
-        await Promise.all([
-          query(env, SQL.daily(days)),
-          query(env, SQL.sessionsDaily(days)),
-          query(env, SQL.sources(days)),
-          query(env, SQL.pages(days, 0)),
-          query(env, SQL.pages(days, days)),   // previous period, for the trend arrow
-          query(env, SQL.ballEvents(days)),
-          query(env, SQL.geography(days)),
-        ]);
-
-      const body = JSON.stringify({
-        timeSeries: buildTimeSeries(daily, sessionsDaily),
-        sources:    buildSources(sources),
-        pages:      buildPages(pagesNow, pagesPrev),
-        ballEvents: buildBallEvents(ballEvents),
-        geography:  buildGeography(geography),
-        fetchedAt:  new Date().toISOString(),
-        source:     'posthog',
-        days,
-      });
-
+      const { body, cache } = await getPayload(env, ctx);
       return new Response(body, {
         headers: {
-          'Content-Type': 'application/json',
-          // The dashboard polls on range change; a short cache keeps PostHog
-          // query load down without making the numbers feel stale.
-          'Cache-Control': 'public, max-age=300',
-          ...corsHeaders(env, request),
+          'Content-Type': 'application/json; charset=utf-8',
+          // No HTTP caching: the dashboard keeps its own per-tab copy, and a
+          // cached response here would make its Refresh button do nothing.
+          'Cache-Control': 'no-store',
+          'X-Cache': cache,
+          ...cors,
         },
       });
     } catch (err) {
-      return new Response(JSON.stringify({ error: err.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders(env, request) },
-      });
+      // Log the detail for `wrangler tail`; send the browser a short reason.
+      // Never echo SQL or upstream bodies — they describe the project.
+      console.error('site-analytics: upstream failure:', err?.message || err);
+      return json({ error: 'upstream_failed', detail: String(err?.message || err).slice(0, 160) }, 502, cors);
     }
   },
 };
 
-// ── PostHog query API ───────────────────────────────────────────────────
+// ── Caching ─────────────────────────────────────────────────────────────────
+//
+// One layer: the last answer, kept as a string in this isolate's memory. It
+// covers the back-to-back case (v4 → v3 → reload) and is served as a fall-back
+// if PostHog is failing. Traffic here is a visit every few days, so most
+// requests find it empty and query PostHog.
+//
+// Two things are deliberately NOT here:
+//
+//   · A shared in-flight promise, so that simultaneous requests could reuse one
+//     batch. On Workers a promise belongs to the request that created it. If
+//     that request is cancelled — the visitor closes the tab while it loads —
+//     its work stops, the promise never settles, and every later request that
+//     awaits it hangs until Cloudflare kills it with an error page that has no
+//     CORS headers. Each request runs its own batch instead; only the finished
+//     string is shared.
+//
+//   · The Cache API. It does nothing on *.workers.dev, where this is served.
 
-async function query(env, hogql) {
-  const host = (env.POSTHOG_HOST || 'https://us.posthog.com').replace(/\/$/, '');
-  const res = await fetch(`${host}/api/projects/${env.POSTHOG_PROJECT_ID}/query/`, {
+let memo = null;   // { at: epoch ms, body: string }
+
+async function getPayload(env, ctx) {
+  if (memo && Date.now() - memo.at < CACHE_TTL_S * 1000) {
+    return { body: memo.body, cache: 'memory' };
+  }
+
+  const work = loadFromPostHog(env).then((body) => {
+    memo = { at: Date.now(), body };
+    return body;
+  });
+  // Let the batch finish and fill the memo even if this visitor has gone.
+  ctx?.waitUntil?.(work.catch(() => {}));
+
+  try {
+    return { body: await work, cache: 'miss' };
+  } catch (err) {
+    // PostHog hiccup with an older answer still in memory: serve that rather
+    // than an error. The body carries fetchedAt, so the dashboard shows its age.
+    if (memo) return { body: memo.body, cache: 'stale' };
+    throw err;
+  }
+}
+
+async function loadFromPostHog(env) {
+  const started = Date.now();
+  const cfg = queryConfig(env);
+  const budget = Number(env.BATCH_BUDGET_MS) > 0 ? Number(env.BATCH_BUDGET_MS) : BATCH_BUDGET_MS;
+  const deadline = started + budget;
+
+  // Exactly three, all at once — PostHog's concurrency ceiling (constraint 1).
+  const [sessions, ballDays, shots] = await Promise.all([
+    hogql(env, SQL.sessions(cfg), 'site-analytics: sessions', deadline),
+    hogql(env, SQL.ballDays(cfg), 'site-analytics: balls by day', deadline),
+    hogql(env, SQL.shots(cfg),    'site-analytics: shots', deadline),
+  ]);
+
+  const payload = buildPayload({ sessions, ballDays, shots }, { epochUtc: cfg.epoch, siteHost: cfg.host });
+  payload.queryMs = Date.now() - started;
+  return JSON.stringify(payload);
+}
+
+// ── PostHog query API ───────────────────────────────────────────────────────
+
+async function hogql(env, sql, name, deadline) {
+  const host = String(env.POSTHOG_HOST || 'https://us.posthog.com').replace(/\/$/, '');
+  const url = `${host}/api/projects/${encodeURIComponent(env.POSTHOG_PROJECT_ID)}/query/`;
+  const init = {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${env.POSTHOG_API_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ query: { kind: 'HogQLQuery', query: hogql } }),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    // Never echo the response body wholesale — it can contain the query and
-    // hints about the project. Surface the status and a short excerpt.
-    throw new Error(`PostHog query failed (${res.status}): ${text.slice(0, 200)}`);
-  }
-
-  const json = await res.json();
-  const results = json.results || [];
-
-  // The HogQL endpoint returns `results` as positional arrays matching
-  // `columns`. Normalise defensively: if a future version ever returns row
-  // objects instead, re-project them into the same positional order so the
-  // builders below keep working rather than silently producing zeros.
-  if (results.length && !Array.isArray(results[0]) && json.columns) {
-    return results.map((row) => json.columns.map((c) => row[c]));
-  }
-  return results;
-}
-
-// ── Queries ─────────────────────────────────────────────────────────────
-//
-// Every query is scoped to $host = 'dadatadad.com', which is the same rule the
-// project's "filter out internal and test users" setting uses. That keeps
-// localhost and preview traffic out of the dashboard.
-
-const HOST_FILTER = "properties.$host = 'dadatadad.com'";
-
-const SQL = {
-  daily: (days) => `
-    SELECT toString(toDate(timestamp))          AS date,
-           uniqIf(person_id, event = '$pageview') AS visitors,
-           countIf(event = '$pageview')         AS pageviews,
-           countIf(event = 'ball_launch')       AS ballInteractions,
-           countIf(event = 'cta_click')         AS ctaClicks
-    FROM events
-    WHERE timestamp >= now() - INTERVAL ${days} DAY AND ${HOST_FILTER}
-    GROUP BY date ORDER BY date`,
-
-  // Session duration and bounce rate are per-session, so they come from the
-  // sessions table rather than being averaged over events (which would
-  // over-weight sessions that produced more events).
-  sessionsDaily: (days) => `
-    SELECT toString(toDate($start_timestamp))          AS date,
-           round(avg($session_duration))               AS avgDuration,
-           round(100 * avg(if($is_bounce, 1, 0)))      AS bounceRate
-    FROM sessions
-    WHERE $start_timestamp >= now() - INTERVAL ${days} DAY
-      AND $entry_hostname = 'dadatadad.com'
-    GROUP BY date ORDER BY date`,
-
-  sources: (days) => `
-    SELECT if(coalesce(nullIf(properties.$referring_domain, ''), '$direct') = '$direct',
-              'Direct', properties.$referring_domain)  AS source,
-           uniq(properties.$session_id)                AS visits
-    FROM events
-    WHERE event = '$pageview' AND timestamp >= now() - INTERVAL ${days} DAY AND ${HOST_FILTER}
-    GROUP BY source ORDER BY visits DESC LIMIT 8`,
-
-  // offset = 0 for the current window, offset = days for the one before it.
-  pages: (days, offset) => `
-    SELECT coalesce(nullIf(properties.$pathname, ''), '/') AS path,
-           count()                                         AS views,
-           round(avg(session.$session_duration))           AS avgSeconds
-    FROM events
-    WHERE event = '$pageview'
-      AND timestamp >= now() - INTERVAL ${days + offset} DAY
-      AND timestamp <  now() - INTERVAL ${offset} DAY
-      AND ${HOST_FILTER}
-    GROUP BY path ORDER BY views DESC LIMIT 8`,
-
-  ballEvents: (days) => `
-    SELECT properties.project_name              AS ball,
-           countIf(event = 'ball_launch')       AS launches,
-           countIf(event = 'ball_score')        AS scores,
-           countIf(event = 'detail_open')       AS opens,
-           countIf(event = 'cta_click')         AS ctaClicks
-    FROM events
-    WHERE event IN ('ball_launch', 'ball_score', 'detail_open', 'cta_click')
-      AND timestamp >= now() - INTERVAL ${days} DAY AND ${HOST_FILTER}
-      AND coalesce(properties.project_name, '') != ''
-    GROUP BY ball ORDER BY launches DESC, opens DESC LIMIT 20`,
-
-  geography: (days) => `
-    SELECT properties.$geoip_country_name AS country,
-           uniq(person_id)                AS users,
-           uniq(properties.$session_id)   AS sessions
-    FROM events
-    WHERE event = '$pageview' AND timestamp >= now() - INTERVAL ${days} DAY AND ${HOST_FILTER}
-      AND coalesce(properties.$geoip_country_name, '') != ''
-    GROUP BY country ORDER BY users DESC LIMIT 15`,
-};
-
-// ── Shaping ─────────────────────────────────────────────────────────────
-//
-// These builders keep the exact contract the dashboards already expect:
-//   timeSeries[] { date, label, visitors, pageviews, avgDuration, bounceRate,
-//                  ballInteractions, ctaClicks }
-//   sources[]    { source, visits, pct, color }
-//   pages[]      { path, title, views, avgTime, trend }
-//   ballEvents[] { ball, id, clicks, launches, scores, opens, ctaClicks, color, category }
-//   geography[]  { country, users, sessions, pct }
-
-const num = (v) => (v == null || Number.isNaN(Number(v)) ? 0 : Number(v));
-
-function buildTimeSeries(daily, sessionsDaily) {
-  const sessionByDate = new Map(
-    sessionsDaily.map((r) => [r[0], { avgDuration: num(r[1]), bounceRate: num(r[2]) }]),
-  );
-
-  return daily.map((r) => {
-    const date = r[0];
-    const s = sessionByDate.get(date) || { avgDuration: 0, bounceRate: 0 };
-    // Parse as explicit UTC then format in UTC — `new Date('2026-09-11')` in a
-    // negative-offset timezone lands on the previous day.
-    const d = new Date(date + 'T00:00:00Z');
-    return {
-      date,
-      label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }),
-      visitors:         num(r[1]),
-      pageviews:        num(r[2]),
-      avgDuration:      s.avgDuration,
-      bounceRate:       s.bounceRate,
-      ballInteractions: num(r[3]),
-      ctaClicks:        num(r[4]),
-    };
-  });
-}
-
-const SOURCE_COLORS = {
-  'linkedin.com': '#0A66C2',
-  'google.com':   '#4285F4',
-  'direct':       '#6B9F6B',
-  'github.com':   '#C9D1D9',
-  'upwork.com':   '#14A800',
-  'bing.com':     '#008373',
-  't.co':         '#1DA1F2',
-  'facebook.com': '#1877F2',
-};
-
-const SOURCE_NAMES = {
-  'linkedin.com': 'LinkedIn',
-  'google.com':   'Google Search',
-  'github.com':   'GitHub',
-  'upwork.com':   'Upwork',
-  'bing.com':     'Bing',
-  't.co':         'X / Twitter',
-  'facebook.com': 'Facebook',
-};
-
-function buildSources(rows) {
-  const total = rows.reduce((s, r) => s + num(r[1]), 0);
-  const palette = ['#D4A843', '#5985B1', '#6B9F6B', '#5985B1', '#C05050', '#14A800', '#4285F4', '#C9D1D9'];
-
-  return rows.map((r, i) => {
-    const raw = String(r[0] == null ? 'Direct' : r[0]);
-    const bare = raw === 'Direct' ? 'direct' : raw.toLowerCase().replace(/^www\./, '');
-    const visits = num(r[1]);
-    return {
-      source: raw === 'Direct' ? 'Direct' : (SOURCE_NAMES[bare] || bare),
-      visits,
-      pct: total > 0 ? parseFloat(((visits / total) * 100).toFixed(1)) : 0,
-      color: SOURCE_COLORS[bare] || palette[i % palette.length],
-    };
-  });
-}
-
-function friendlyPageTitle(path) {
-  const map = {
-    '/': 'Home (Physics Playground)',
-    '/portfolio.html': 'Portfolio (Accessible)',
-    '/analytics-dashboard.html': 'Site Analytics Dashboard',
-    '/analytics-v2.html': 'Site Analytics Dashboard (V2)',
-    '/analytics-v3.html': 'Site Analytics Dashboard (V3)',
+    // `name` shows up in PostHog's query_log, so these are identifiable there.
+    body: JSON.stringify({ query: { kind: 'HogQLQuery', query: sql }, name }),
   };
-  if (map[path]) return map[path];
-  const slug = String(path).split('/').pop() || path;
-  return slug.replace(/\.html$/, '').replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim();
+  const left = () => deadline - Date.now();
+
+  // At most one retry, and only for answers that came back quickly: 429 (the
+  // concurrency ceiling or the rate limit) and 5xx or network blips.
+  for (let attempt = 0; ; attempt++) {
+    let res;
+    try {
+      res = await fetch(url, { ...init, signal: AbortSignal.timeout(Math.max(left(), 250)) });
+    } catch (err) {
+      // A timeout is never retried. The query may still be running at PostHog,
+      // and a second copy would count against the three-at-once limit.
+      if (err?.name === 'TimeoutError' || err?.name === 'AbortError') throw new Error(`${name}: timed out`);
+      if (attempt < 1 && left() - 400 >= MIN_ATTEMPT_MS) { await sleep(400); continue; }
+      throw new Error(`${name}: network error`);
+    }
+
+    if (res.ok) return rowsToObjects(await res.json());
+
+    const wait = retryDelayMs(res);
+    if ((res.status === 429 || res.status >= 500) && attempt < 1 && left() - wait >= MIN_ATTEMPT_MS) {
+      await sleep(wait);
+      continue;
+    }
+    throw new Error(`${name}: PostHog responded ${res.status}`);
+  }
 }
 
-function buildPages(nowRows, prevRows) {
-  const prevViews = new Map(prevRows.map((r) => [r[0], num(r[1])]));
+function retryDelayMs(res) {
+  const seconds = Number(res.headers.get('Retry-After'));
+  // Honour a short Retry-After; a long one means the hourly budget is spent
+  // and waiting inside a request won't help, so fail fast after a brief pause.
+  return Number.isFinite(seconds) && seconds > 0 ? Math.min(seconds * 1000, 1500) : 600;
+}
 
-  return nowRows.map((r) => {
-    const path = String(r[0]);
-    const views = num(r[1]);
-    const duration = num(r[2]);
-    const prev = prevViews.get(path) || 0;
-    return {
-      path,
-      title: friendlyPageTitle(path),
-      views,
-      avgTime: Math.floor(duration / 60) + ':' + String(duration % 60).padStart(2, '0'),
-      trend: prev > 0 ? Math.round(((views - prev) / prev) * 100) : 0,
-    };
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// ── HTTP helpers ────────────────────────────────────────────────────────────
+
+function json(body, status, headers) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers },
   });
 }
-
-// project_name as the game sends it -> the ball's id, colour and category.
-const BALL_META = {
-  'Josh Merritt':                           { id: 'aboutMe',                      color: '#6B9F6B', category: 'Me' },
-  'Microsoft Power BI':                     { id: 'powerBIMetrics',               color: '#D4A843', category: 'Business' },
-  'The Wine You Drink':                     { id: 'thewineyoudrink',              color: '#8B1A32', category: 'Apps' },
-  'Black Sheep Dart League':                { id: 'dartleague',                   color: '#5985B1', category: 'Apps' },
-  'Smart Chicken Coop':                     { id: 'arduinoCoopDoor',              color: '#BF360C', category: 'Technology' },
-  'Site Analytics':                         { id: 'SiteAnalytics',                color: '#5985B1', category: 'Technology' },
-  'Google Data Studio Streaming Dashboard': { id: 'googleDataStudioServiceTechs', color: '#4285F4', category: 'Business' },
-  'Google Data Studio':                     { id: 'googleDataStudioServiceTechs', color: '#4285F4', category: 'Business' },
-  'Portfolio Website':                      { id: 'thisWebsite',                  color: '#5985B1', category: 'Technology' },
-};
-
-function buildBallEvents(rows) {
-  const palette = ['#D4A843', '#5985B1', '#6B9F6B', '#5985B1', '#C05050', '#BF360C', '#4285F4', '#8B1A32'];
-
-  return rows.map((r, i) => {
-    const ball = String(r[0]);
-    const meta = BALL_META[ball] || { id: ball, color: palette[i % palette.length], category: 'Other' };
-    const launches = num(r[1]);
-    return {
-      ball,
-      id: meta.id,
-      clicks: launches,     // V1 compatibility: clicks === launches
-      launches,
-      scores:    num(r[2]),
-      opens:     num(r[3]),
-      ctaClicks: num(r[4]),
-      color: meta.color,
-      category: meta.category,
-    };
-  });
-}
-
-function buildGeography(rows) {
-  const totalUsers = rows.reduce((s, r) => s + num(r[1]), 0);
-  return rows.map((r) => ({
-    country:  String(r[0]),
-    users:    num(r[1]),
-    sessions: num(r[2]),
-    pct: totalUsers > 0 ? parseFloat(((num(r[1]) / totalUsers) * 100).toFixed(1)) : 0,
-  }));
-}
-
-// ── CORS ────────────────────────────────────────────────────────────────
 
 function parseAllowedOrigins(env) {
   if (env.ALLOWED_ORIGINS) {
-    return env.ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean);
+    return String(env.ALLOWED_ORIGINS).split(',').map((o) => o.trim()).filter(Boolean);
   }
   return ['https://dadatadad.com'];
 }

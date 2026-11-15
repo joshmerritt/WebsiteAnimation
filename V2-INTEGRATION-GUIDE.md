@@ -137,7 +137,7 @@ In the header, AFTER the time-range-group div, add a nav block:
 
 | File | Location | Description |
 |------|----------|-------------|
-| `analytics-v2.html` | root | Vite entry with GA4 snippet |
+| `analytics-v2.html` | root | Vite entry |
 | `src/analytics-v2-main.jsx` | src/ | React entry imports V2 dashboard + V2 CSS |
 | `src/styles/analytics-v2.css` | src/styles/ | 850+ lines — all V2 section styles |
 | `src/analytics/FunnelViz.jsx` | src/analytics/ | Animated SVG funnel (Click→Launch→Score→Open) |
