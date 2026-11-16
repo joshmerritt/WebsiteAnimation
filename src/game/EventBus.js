@@ -38,6 +38,9 @@ export default bus;
  *                     `demo: true` = opened by the intro auto-launch, not the
  *                     visitor. React still shows it; analytics listeners
  *                     (posthog.js, sessionBridge.js) must skip it.
+ *                     After a score it follows 'ball:scored' by
+ *                     config.scorePause ms (the ball is seen to land first);
+ *                     after a double-click it is immediate.
  *   'detail:close'   —                React → Game: modal was closed
  *   'game:reset'     —                React → Game: reset all balls
  *                                     ⚠ NO EMITTER: there is no reset control
@@ -48,8 +51,10 @@ export default bus;
  *   'stats:update'   { shots, makes, opens }  — Game → React: live stats
  *   'load:progress'  number (0–1)   — Game → React: image loading progress
  *   'load:complete'  —               Game → React: all assets loaded, setup done
- *   'ball:launched'  { name, category, ballLaunches, ballMakes }  — Game → analytics
- *   'ball:scored'    { name, category, ballLaunches, ballMakes }  — Game → analytics
+ *   'ball:launched'  { name, category, ballLaunches, ballMakes, shotNumber }  — Game → analytics
+ *   'ball:scored'    { name, category, ballLaunches, ballMakes, shotNumber }  — Game → analytics.
+ *                     Emitted once, the moment the ball lands on its category
+ *                     bar — before the panel opens, not with it.
  *   'cta:click'      { name, link, category } — React → analytics
  *   'miss:hint'      boolean         — Game → React: show/hide miss hint.
  *                     true after 3 consecutive shots that actually failed

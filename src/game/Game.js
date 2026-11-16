@@ -34,6 +34,9 @@ export default class Game {
     this.vp = {};
 
     this.detailOpen       = false;
+    // A ball that has scored and is waiting out config.scorePause before its
+    // panel opens: { ball, demo, at }. See _beginScorePause.
+    this._pendingOpen     = null;
     this.selectedCategory = 'All';
     this.showDemo         = true;
     this.totalShots       = 0;
@@ -106,9 +109,10 @@ export default class Game {
     if (hasActive) {
       Matter.Engine.update(this.engine);
     }
+    this._tickScorePause();
 
     // ── Idle framerate: drop to 15fps when nothing is changing ──
-    const isIdle = !hasActive && !p.mouseIsPressed && !this.showDemo && !this.detailOpen;
+    const isIdle = !hasActive && !p.mouseIsPressed && !this.showDemo && !this.detailOpen && !this._pendingOpen;
     if (isIdle !== this._wasIdle) {
       p.frameRate(isIdle ? 15 : 60);
       this._wasIdle = isIdle;
@@ -167,6 +171,9 @@ export default class Game {
     const density = this._targetPixelDensity();
     if (p.pixelDensity() !== density) p.pixelDensity(density);
     p.resizeCanvas(p.windowWidth, p.windowHeight);
+    // The world is about to be rebuilt with new Ball objects. A ball that is
+    // waiting out its score pause opens its panel now rather than being lost.
+    if (this._pendingOpen) this._endScorePause();
     this._computeLayout();
 
     this.balls.forEach((ball) => {
@@ -183,7 +190,7 @@ export default class Game {
   // ── Input handlers ─────────────────────────────────────────────────────
 
   mousePressed() {
-    if (this.detailOpen) return false;
+    if (this.detailOpen || this._pendingOpen) return false;
     const p = this.p;
 
     // Wake from idle framerate immediately
@@ -258,7 +265,7 @@ export default class Game {
       item.selected = this.selectedCategory === item.category;
     });
 
-    if (this.detailOpen) return false;
+    if (this.detailOpen || this._pendingOpen) return false;
 
     this.balls.forEach((ball) => {
       const onPage = ball.index >= this.currentPage * this.ballsPerPage &&
@@ -443,6 +450,12 @@ export default class Game {
     if (this.detailOpen) return;
 
     event.pairs.forEach(({ bodyA, bodyB }) => {
+      // A ball has already landed and is waiting out its pause before the
+      // panel opens (see _beginScorePause). One collision event can hold
+      // several pairs for the same ball, and the contact repeats every frame
+      // the ball rests on its bar: those are the same make, not more of them.
+      // A second ball does not get to score over the first either.
+      if (this._pendingOpen) return;
       if (
         bodyA.category && bodyB.category &&
         bodyA.category === bodyB.category &&
@@ -461,14 +474,15 @@ export default class Game {
           // several pairs for the same ball, and clearing it on the first pair
           // would let the next one fall through and count as a real make.
           if (ball._demoShot) {
-            this._openBallDetail(ball, { demo: true });
+            this._beginScorePause(ball, { demo: true });
             return;
           }
 
-          // A second pair for a ball whose panel is already open is the same
-          // make, not another one.
-          if (!this._openBallDetail(ball)) return;
+          // The make is counted now, as the ball lands, so the scoreboard
+          // ticks while the visitor is still looking at the shot. The panel
+          // follows after the pause, and does not count the make again.
           ball._shotPending = false;
+          ball.makes++;
           this.totalMakes++;
           this.consecutiveMisses = 0;
           bus.emit('miss:hint', false);
@@ -480,6 +494,7 @@ export default class Game {
             ballMakes: ball.makes,
             shotNumber: this.totalShots,
           });
+          this._beginScorePause(ball);
         }
       }
     });
@@ -633,15 +648,52 @@ export default class Game {
    * analytics listener: the detail:open payload carries `demo: true`, which
    * posthog.js and sessionBridge.js skip. The event itself must still fire,
    * because App.jsx opens the modal from it.
+   *
+   * `countMake: false` is for a ball that scored: its make was counted when it
+   * landed, before the score pause (see _handleCollisions).
    */
-  _openBallDetail(ball, { demo = false } = {}) {
-    const data = ball.openDetail({ countMake: !demo });
+  _openBallDetail(ball, { demo = false, countMake = !demo } = {}) {
+    const data = ball.openDetail({ countMake });
     if (!data) return false;
     if (!demo) this.totalOpens++;
     this.detailOpen = true;
     this._emitStats();
     bus.emit('detail:open', demo ? { ...data, demo: true } : data);
     return true;
+  }
+
+  /**
+   * A ball has landed in the goal: hold its panel back for config.scorePause.
+   *
+   * The panel used to open on the same frame the ball touched its category
+   * bar, covering the playground before the visitor could see the shot land.
+   * The game keeps running during the pause -- the ball settles on its bar,
+   * and the scoreboard has already ticked -- but nothing new can start: input
+   * is ignored and no other ball can score, exactly as if the panel were open.
+   * Any new input path has to check `_pendingOpen` wherever it checks
+   * `detailOpen`.
+   *
+   * It is timed from draw() against a clock, not with setTimeout, so it cannot
+   * fire into a game that has been torn down, and a test can step through it.
+   */
+  _beginScorePause(ball, { demo = false } = {}) {
+    this._pendingOpen = { ball, demo, at: this._now() + config.scorePause };
+  }
+
+  /** Called every frame: open the panel once a held score has waited long enough. */
+  _tickScorePause() {
+    if (this._pendingOpen && this._now() >= this._pendingOpen.at) this._endScorePause();
+  }
+
+  /** The pause is over, or is being cut short by a resize: open the panel. */
+  _endScorePause() {
+    const { ball, demo } = this._pendingOpen;
+    this._pendingOpen = null;
+    this._openBallDetail(ball, { demo, countMake: false });
+  }
+
+  _now() {
+    return performance.now();
   }
 
   /** A shot failed: count it, and show the hint after 3 in a row. */

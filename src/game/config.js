@@ -53,6 +53,11 @@ const config = {
 
   // ── Interaction ───────────────────────────────────────────────────────
   doubleTapWindow: 500,    // ms
+  // How long a ball rests in the goal before its panel opens. The panel used to
+  // cover the playground on the very frame the ball touched its category bar,
+  // so a visitor never saw their shot land. Long enough to take in, short
+  // enough not to read as a hang -- the panel then takes ~0.3s to fade in.
+  scorePause:      450,    // ms
   minLaunchPower:  2,      // minimum xPower or yPower to count as a real launch
   powerScaleDesktop: 33,
   powerScaleMobile:  33 / 5,

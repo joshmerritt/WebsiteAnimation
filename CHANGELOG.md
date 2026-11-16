@@ -2,11 +2,66 @@
 
 All notable changes to this project are documented here. This log covers Claude-assisted development sessions. Version numbers in `package.json` may have been bumped independently between sessions.
 
-Current version: **3.3.0** — deployed 2026-11-16. ⚠ **Visitors still get a certificate error, and nothing has been seen in a browser on the live domain** — see below
+Current version: **3.3.1** (2026-11-16) — ⚠ **its scoring pause has not been seen in a browser.** 3.3.0 is live, with a working certificate, and has been checked on the real domain — see below
+
+---
+
+## 3.3.1 — 2026-11-16 — A beat before the panel opens
+
+### Changed — a ball that scores rests in the goal before its panel opens
+- The project panel used to open on the very frame the ball touched its category bar, covering the
+  playground before the visitor could see the shot land. It now waits **450 ms**
+  (`config.scorePause`); the panel's own fade-in follows
+- **The make is counted as the ball lands**, not when the panel opens, so the scoreboard ticks while
+  the visitor is still looking at the shot. In analytics, `ball_score` now comes just before
+  `detail_open` instead of a couple of milliseconds after it
+- During the pause the game keeps running — the ball settles on its bar — but nothing new can start:
+  presses are ignored and a second ball cannot score, exactly as if the panel were already open. A
+  window resize during the pause opens the panel at once rather than losing the ball
+- The intro demo waits the same beat, and still counts nowhere. Opening a project by double-click is
+  unchanged: immediate
+
+### Added — the first automated tests of the game's rules
+- `src/game/Game.test.mjs`, 9 tests, now part of `npm test` (59 in all) and so of every deploy: one
+  make per score however many contacts the physics engine reports, the pause, the demo, input during
+  the pause, a ball that leaves the screen during it, a resize, and the double-click path. Eight of
+  the nine fail against 3.3.0. They pass on Node 20 (what CI uses) and Node 24
+- The change was also run through the real physics engine, headless, on six screen sizes (three
+  desktop, two portrait phone, one landscape phone) using the demo's own shot. The panel opens
+  450–467 ms after the ball lands — the pause rounded up to the next frame — with the ball at rest
+  on its bar, both for a visitor's shot (1 make, 1 open) and for the demo (0 and 0)
+- **Not seen in a browser.** The in-app browser pane produces no animation frames, so the game cannot
+  run there. Whether 450 ms *feels* right needs a person to play it
+
+### Found while reading the scoring code — not changed
+- Two launched balls of the same category that touch in flight pass the scoring test: both carry the
+  category, and the test never checks that the other body is a category bar. One of them "scores"
+  in mid-air. It needs two same-category balls airborne together, so it is rare, and it is
+  long-standing. A one-line fix, left for a decision because it changes what counts as a make
+
+**Files changed:** `src/game/Game.js`, `src/game/config.js`, `src/game/EventBus.js` (catalog),
+`src/game/Game.test.mjs` (new), `package.json`, `CLAUDE.md`
 
 ---
 
 ## 3.3.0 — 2026-11-14 — Dashboard v4, the last of Google Analytics, and a broken certificate
+
+### Follow-up, 2026-11-16 — the certificate is replaced, and 3.3.0 is checked on the real domain
+- **The outage was a certificate that ran out, not a renewal that was blocked.** Josh bought a
+  replacement and installed it with the host's own tool: cPanel → *Namecheap SSL* → *Ready for
+  installation* → *Install* → `dadatadad.com`. Issued 17:27 UTC, it covers `dadatadad.com` and
+  `www` and **expires 2027-06-02**. The old one was almost certainly the free first-year
+  certificate the host bundles; that is not confirmed, because it was never seen
+- The host's port-80 redirect (below) was on before, during and after, so it does not stop that
+  tool issuing a certificate. Neither it nor `.htaccess` was the cause
+- **Checked in a browser on `https://dadatadad.com`:** `/analytics-v4.html` loads with no
+  security-policy (CSP) errors; PostHog loads on it through `e.dadatadad.com`; the request to the
+  analytics worker leaves the page — so the CSP allows it — and fails only because the worker is not
+  deployed, which puts up the sample-data banner as designed. PostHog received `dashboard_loaded`
+  (`data_mode: sample`, `error_code: network`) and, from real visits that afternoon, page views,
+  launches, a score and project opens
+- One real session reported **56 fps average** (15 minimum) on a 2560×1288 canvas: the large desktop
+  that measured 16 fps before 3.2.1. Four page loads that afternoon took 2.8, 3.7, 6.3 and 11.6 s
 
 ### Found, not fixed — the live site's certificate
 - `dadatadad.com` and `www` were serving the host's default certificate (`*.web-hosting.com`), so

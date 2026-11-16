@@ -13,7 +13,7 @@ and why — **add an entry there when you finish a piece of work.**
 | | |
 |---|---|
 | Build | Vite + React 18, ES modules. `npm run dev` / `npm run build` / `npm run preview` (:4173) |
-| Tests | `npm test` — Node's built-in runner, no dependencies. Covers the analytics worker, the shot chart's court geometry, the reader for the viewer's own session and the v1–v3 data adapter. CI runs it before every deploy. |
+| Tests | `npm test` — Node's built-in runner, no dependencies. Covers the analytics worker, the shot chart's court geometry, the reader for the viewer's own session, the v1–v3 data adapter and the game's scoring rules (`src/game/Game.test.mjs`). CI runs it before every deploy. |
 | Entries | 6 pages in `vite.config.js`: `index.html`, `portfolio.html` (accessible fallback), `analytics-v4.html` (**the** dashboard), and `analytics-{dashboard,v2,v3}.html` (earlier versions, kept as built) |
 | Game | `src/game/` — `Game.js` (sketch, physics, input), `Ball.js`, `config.js`. p5 1.11, matter-js 0.20 |
 | Bridge | `src/game/EventBus.js` — pub/sub between p5 and React. **Event catalog is at the bottom of that file; keep it accurate.** |
@@ -38,13 +38,36 @@ Two traps, both of which have burned real time here:
    host's default certificate (`*.web-hosting.com`) instead of its own, so every browser showed a
    full-page security error — while CI was green and every local check passed. One command:
    `echo | openssl s_client -connect dadatadad.com:443 -servername dadatadad.com 2>/dev/null | openssl x509 -noout -subject -enddate`
-   — the subject must name `dadatadad.com`. See the open item below; the cause is not confirmed.
+   — the subject must name `dadatadad.com`. It had run out, and was replaced on 2026-11-16: see
+   *Hosting and the certificate* below, which also says when the next one is due.
    While it is wrong, a deploy can still be checked without switching TLS verification off (never
    `curl -k`). The certificate being served is valid for the hosting server's *own* name — look up
    the site's IP address in reverse to get it — so ask that name for the site:
    `curl -H "Host: dadatadad.com" https://<server-name>/analytics-v4.html`. That reads the files
    and headers on the server. It is not a browser on the real origin, so it says nothing about
    whether the CSP lets a page run or whether PostHog loads.
+
+## Hosting and the certificate
+
+Namecheap shared hosting: cPanel, on LiteSpeed. DNS is on the host's own name servers, so the zone
+is edited in cPanel.
+
+- **The TLS certificate is a paid, fixed-term one, and nothing in this repo renews it.** The one in
+  place was issued on 2026-11-16 and **expires 2027-06-02** (certificates now last about 200 days
+  at most). It was installed with the host's tool — cPanel → *Namecheap SSL* → *Ready for
+  installation* → *Install* → `dadatadad.com` — which is supposed to install each reissue by
+  itself. That has not been seen to happen yet. **Check in late May 2027** with the command in
+  Deploying, trap 3; if the site is serving `*.web-hosting.com` again, repeat those steps.
+- **This is what took the site down in November 2026.** The previous certificate ran out between
+  the 9th and the 14th, and every visitor got a full-page security error for up to a week, with CI
+  green throughout. It was almost certainly the free first-year certificate the host bundles (not
+  confirmed: it was never seen). Josh bought the replacement.
+- **The host redirects port 80 to HTTPS before `.htaccess` is read** (see Gotchas). It was on
+  before, during and after the new certificate was issued, so it does not stop the host's tool.
+- In the Namecheap account's "choose how to issue" screen, *Web-based automation* is wrong for this
+  site: it puts a proxy in front, needs the domain moved to a different DNS service, and by the
+  host's own guide breaks when the server redirects to HTTPS. If the cPanel tool ever fails, the
+  fallback is *Server-side automation*.
 
 ## Gotchas that are not obvious from the code
 
@@ -53,9 +76,10 @@ Two traps, both of which have burned real time here:
   redirect and SPA fallback can touch it. CI uploads the file whole, so anything cPanel adds on the
   server is overwritten — the exclusions have to live in the source. But measured on 2026-11-16
   with it deployed: those paths answer 404 over HTTPS (correct) and are *still* 301-redirected over
-  plain HTTP. **The server redirects port 80 for this domain before `.htaccess` is read**, so the
-  redirect that stops an HTTP validation is a hosting setting, not this file. The first write-up
-  blamed `.htaccess`: an inference from the rule being in the file, never a measurement.
+  plain HTTP. **The server redirects port 80 for this domain before `.htaccess` is read**, so that
+  redirect is a hosting setting, not this file — and it turned out not to matter: the host's own
+  tool issued a new certificate with it still on. The first write-up blamed `.htaccess` for the
+  outage: an inference from the rule being in the file, never a measurement.
 - **`.htaccess` CSP**: any new third-party domain must be added to the right directive or the browser
   silently blocks it in production only.
 - **The analytics worker's URL lives in three places that must agree**: `name` in
@@ -110,8 +134,13 @@ Two traps, both of which have burned real time here:
   `ball._demoShot`. It still plays and still opens the About Me panel, but adds nothing to
   `launchCount`, makes, opens or `impact:first`, and its `detail:open` carries `demo: true`, which
   every analytics listener must skip. Any **new** listener that counts `detail:open` must skip it too.
-- **One collision event can hold several pairs for the same ball.** Count a make only when
-  `_openBallDetail()` returns true (the panel actually opened), or one make counts several times.
+- **A score is counted when the ball lands; its panel opens `config.scorePause` (450 ms) later.**
+  The visitor needs to see the shot land before the panel covers it. Between the two, `_pendingOpen`
+  is set, and it is the only thing that stops the same make being counted again: one collision
+  event can hold several pairs for the same ball, and the contact repeats on every frame the ball
+  rests on its bar. Treat `_pendingOpen` exactly like `detailOpen` — any new input or scoring path
+  has to check both. The pause is timed from `draw()` against `_now()`, not with `setTimeout`, so
+  it cannot fire into a torn-down game and `src/game/Game.test.mjs` can step through it.
 - **A miss is counted when a shot fails**, not at launch: the ball leaves the screen (there is no
   floor, so every miss ends that way — see `_onBallExit`) or is relaunched before scoring.
 - **Canvas pixel density is capped at `min(devicePixelRatio, 2)`.** p5 defaults to
@@ -284,24 +313,8 @@ of what it enabled, and why each scout is on or off, is `posthog-self-driving-re
 
 ## Open items
 
-- **🔴 The site's TLS certificate (found 2026-11-14, still broken 2026-11-16).** `dadatadad.com`
-  and `www` serve the host's default `*.web-hosting.com` certificate, so every visitor gets a
-  full-page security error. DNS is correct, and the site's own files are served underneath it. The
-  last recorded visit was 2026-11-09, so it broke between then and the 14th. **The cause is not
-  confirmed.** Established on 2026-11-16, with 3.3.0 deployed:
-  - Every plain-HTTP request for the domain is redirected to HTTPS **by the server, before
-    `.htaccess` is read** — including the exact file names cPanel's own redirect is built to
-    exempt. So it is a hosting setting (most likely cPanel → *Domains* → *Force HTTPS Redirect*, or
-    the host's own SSL tool — not seen, cPanel can't be reached from here), not this repo, and
-    `.htaccess` section 0 cannot lift it. While it is on, a validation request over HTTP is sent
-    to HTTPS, which is the broken thing.
-  - The domain's DNS is on the host's own name servers, so validation by DNS record is possible.
-
-  Not established: whether AutoSSL is failing, is off or is not offered on this plan, or whether
-  the old certificate was a fixed-term one that ran out. To do in cPanel: *SSL/TLS Status* →
-  select the domains → **Run AutoSSL**, and read the reason it gives. If it reports a redirect
-  (301) on the validation file, turn the HTTPS redirect off for the domain, run it again, then turn
-  it back on. Then re-run the check in Deploying, trap 3.
+- **The certificate expires 2027-06-02.** See *Hosting and the certificate*: nothing in this repo
+  renews it, and whether the host's tool installs the reissue by itself has not been seen yet.
 - **Deploy `analytics-worker/` — the dashboard has no live data until this is done.** It shows
   sample data under a banner meanwhile. From `analytics-worker/`: `npx wrangler login` (this machine
   was logged out on 2026-11-14), then `npx wrangler secret put POSTHOG_API_KEY` (a PostHog *personal*
@@ -327,15 +340,20 @@ of what it enabled, and why each scout is on or off, is `posthog-self-driving-re
 - **The owner's own visits are counted.** At one real visit every few days, Josh testing the site is
   a visible share of every number. Nothing excludes them yet (an opt-out flag in `shouldTrack()`
   would do it).
-- **3.3.0 is deployed (2026-11-16) but has not been seen in a browser on the live domain** — it
-  cannot be, with the certificate broken. Checked on the server itself (Deploying, trap 3): the new
-  pages and scripts are there with the right content types, the old scripts are gone, no source
-  map is exposed, no script mentions Google Analytics, and the CSP header names the new worker.
-  Not checked, because each needs a real page load on `dadatadad.com`: that the CSP lets the
-  dashboard run, that PostHog loads on the dashboard pages, and anything about the worker. After
-  the certificate and the worker are both fixed: load `/analytics-v4.html`, confirm the pill says
-  *Live* and the console has no CSP errors, and confirm a `dashboard_loaded` event with
-  `$host = dadatadad.com` arrives in PostHog.
+- **3.3.0 was checked on the live domain on 2026-11-16, except for live data.** `/analytics-v4.html`
+  loads with no CSP errors, PostHog loads on it, and `dashboard_loaded` arrives in PostHog — with
+  `data_mode: sample`, because the worker is not deployed. Once it is: load the page again, confirm
+  the pill says *Live*, and confirm `dashboard_loaded` carries `data_mode: live`.
+- **3.3.1's scoring pause has not been seen in a browser.** It is covered by tests and by a
+  headless run of the real physics, but the in-app pane cannot run the game. Play it: whether
+  450 ms feels right is a judgement, and `config.scorePause` is the one number to change.
+- **Two same-category balls touching in flight count as a score.** `_handleCollisions` checks that
+  the two bodies share a category, not that one of them is a category bar. Rare, long-standing, a
+  one-line fix; left for a decision because it changes what counts as a make.
+- **Ordinary play is recorded as "dead clicks".** `capture_dead_clicks` is on in `posthog.js`, and a
+  press on the canvas changes nothing in the page's HTML, so PostHog logs it as a click that did
+  nothing — 4 in one 30-second session on 2026-11-16. It adds noise to any frustration signal.
+  Turning it off for the playground is one line.
 - **Self-driving gaps** (see above):
   - *Nothing reviews replays.* The wizard skipped the session-replay signal source in favour of two
     Replay Vision scanners (breakage, rage-click frustration), then couldn't create them. The PostHog
@@ -350,18 +368,19 @@ of what it enabled, and why each scout is on or off, is `posthog-self-driving-re
   logged a fake `ball_score` + `detail_open` for "Josh Merritt" (fixed — see Gotchas). The site's
   own dashboard ignores everything before then (`DATA_EPOCH_UTC`); inside PostHog, still treat older
   "Top projects opened" rankings and the Engaged cohort as unreliable.
-- **Confirm the jank fix with real play.** Pixel density is capped and canvas replay capture is off,
-  but FPS could not be measured here (rAF never fires in the hidden pane). `game_perf` reports
-  avg/min FPS ~30s into a session — play on the desktop that was janky and compare to the 16 fps
-  average / 6 fps minimum measured before. The `canvas-playability` scout is meant to watch for this
-  too, but at current traffic it has little to go on.
+- **The jank fix held on the one desktop measured.** On 2026-11-16 a real session reported 56 fps
+  average (15 minimum) on a 2560×1288 canvas — a desktop with the same screen as the one that
+  measured 16 / 6 on a 4694×2360 canvas before 3.2.1. One session is not a distribution:
+  `game_perf` reports avg/min FPS ~30s into every session, and the `canvas-playability` scout is
+  meant to watch it, though at current traffic it has little to go on.
 - **Dependencies** (`npm audit`, 2026-09-12): 1 moderate in shipped code — `fflate@0.4.8` via
   posthog-js (GHSA-px8p-9vwx-vf98, infinite loop in `unzipSync` on malformed ZIP64). Not reachable
   here: posthog-js only *compresses*, never unzips untrusted input. 3 high + 2 others are build-only
   (`browserslist`, `nanoid`, `postcss`) and never ship. All have fixes available.
 - **`load_time_ms` is unproven.** The §7 byte cuts are measured; their user-facing effect is not.
   The dashboard's "How it runs" panel now shows it (median 2.2 s over 12 samples on 2026-11-14),
-  but that is too few samples, on too few machines, to call it.
+  but that is too few samples, on too few machines, to call it. Four desktop loads on 2026-11-16
+  took 2.8, 3.7, 6.3 and 11.6 s — all slower than that median, and worth a look.
 - **Largest contentful paint looks poor**: 9.6 s at the 75th percentile — over 6 samples, two of
   them 11–13 s from the same large desktop. Worth a look once there is more than a handful.
 - **`game:reset` has no emitter** — no reset control exists in the UI, so `game_reset` can never

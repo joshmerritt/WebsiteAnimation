@@ -20,7 +20,9 @@
 # 2026-11-16 with this block deployed: over HTTPS they now answer 404, as
 # intended, but over plain HTTP they are still redirected. The server redirects
 # port 80 for this domain BEFORE it reads this file — a hosting setting, which
-# nothing here can lift. See CLAUDE.md, Open items.
+# nothing here can lift. (The outage was the certificate running out; a new one
+# was installed with that redirect still on.) See CLAUDE.md, "Hosting and the
+# certificate".
 #
 # cPanel can add exclusions like these to .htaccess on its own, but CI uploads
 # this file whole whenever it changes, which overwrites anything added on the
