@@ -246,12 +246,25 @@ test('the batch is handed to waitUntil, so it finishes even if the visitor leave
 });
 
 test('a query that times out is not retried, and the worker answers inside its budget', async () => {
-  // PostHog never answers: the stub resolves only when the request is aborted.
+  // PostHog never answers: the stub settles only when the request is aborted.
+  //
+  // It also has to hold Node's event loop open while it waits, the way a real
+  // request's socket does. The worker's AbortSignal.timeout() does not: its
+  // timer is unref'd. With nothing else pending, Node 20 (what CI runs) ends
+  // the process at once and cancels this test and every test after it in the
+  // file — "30 passed, 20 cancelled, 0 failed", which is how the first 3.3.0
+  // deploy failed. Node 24's runner waits for a pending test regardless, so it
+  // passed locally. The timer is the stand-in socket; it lets go by itself
+  // after 5 s so a worker that never aborts fails the test instead of hanging.
   const original = globalThis.fetch;
   let calls = 0;
   globalThis.fetch = (url, init) => new Promise((resolve, reject) => {
     calls++;
-    init.signal.addEventListener('abort', () => reject(init.signal.reason));
+    const inFlight = setTimeout(() => {}, 5000);
+    init.signal.addEventListener('abort', () => {
+      clearTimeout(inFlight);
+      reject(init.signal.reason);
+    });
   });
   try {
     const { default: worker } = await loadWorker();

@@ -84,6 +84,12 @@ Current version: **3.3.0** (as of 2026-11-14) — ⚠ **not yet deployed or veri
 - `npm test` — 50 tests on Node's built-in runner, no new dependencies: the worker end to end against
   a stubbed PostHog, the court geometry against contacts recorded in real sessions, the reader for
   the viewer's own session, and the v1–v3 adapter. CI now runs them before building
+- **The first push (2026-11-16) failed at that new CI step and deployed nothing.** One test stubs a
+  PostHog request that never answers and relies on the worker's timeout to end it. That timer does
+  not keep Node alive by itself — a real request's open socket does — so Node 20 (CI) stopped at
+  once and cancelled that test and the 19 after it: 30 passed, 20 cancelled, none failed. Node 24
+  (used here) waits for a pending test regardless, so it had passed. The stub now holds a timer the
+  way a socket would. Reproduced, then re-run clean, on Node 20 locally; the worker is unchanged
 
 ### Fixed before release — an independent review of all of the above
 A second pass by a reviewer that had not seen the work being built found 15 defects. All are fixed.

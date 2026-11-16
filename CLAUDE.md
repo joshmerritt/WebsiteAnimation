@@ -64,6 +64,14 @@ Two traps, both of which have burned real time here:
   request runs its own batch; only the finished answer is kept (in memory, 2 minutes). The Cache
   API is not used either: it does nothing on `*.workers.dev`. And a query that timed out is never
   retried — the first copy may still be running, and a second counts against the limit of three.
+- **CI runs the tests on Node 20; this machine runs Node 24, and they treat a pending test
+  differently.** Node 24's runner waits for it. Node 20 ends the process as soon as nothing is left
+  on the event loop, and cancels that test *and every test after it in the file* — CI then reports
+  "30 passed, 20 cancelled, 0 failed", with no assertion to read. `AbortSignal.timeout()` does not
+  hold the loop open (its timer is unref'd), so a stubbed `fetch` that never answers has to hold a
+  timer itself, the way a real request holds a socket. This failed the first 3.3.0 deploy. Run a
+  new test on Node 20 before pushing; Node 20 does not expand the globs in `npm test` itself, so
+  on Windows pass the files from a shell that does.
 - **The funnel's steps are not nested, so every rate needs its denominator checked.** A double-click
   opens a project with no launch, so opens outnumber makes (10 to 3 on the real 90-day rows) and a
   project can have opens and click-throughs with zero launches. A click-through from the intro
