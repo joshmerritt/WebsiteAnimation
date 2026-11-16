@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. This log covers Claude-assisted development sessions. Version numbers in `package.json` may have been bumped independently between sessions.
 
-Current version: **3.3.0** (as of 2026-11-14) — ⚠ **not yet deployed or verified live**, see below
+Current version: **3.3.0** — deployed 2026-11-16. ⚠ **Visitors still get a certificate error, and nothing has been seen in a browser on the live domain** — see below
 
 ---
 
@@ -19,6 +19,13 @@ Current version: **3.3.0** (as of 2026-11-14) — ⚠ **not yet deployed or veri
 - **The cause is not confirmed and the certificate still has to be reissued from cPanel.** Whether
   AutoSSL was failing for this reason, was off, or a paid certificate expired is not knowable from
   outside. And nothing in this release could be checked on the live domain while it is broken
+- **Corrected 2026-11-16, after this was deployed: the redirect is not `.htaccess`'s.** With section
+  0 live, the validation paths answer 404 over HTTPS, as intended, and are *still* 301-redirected
+  over plain HTTP — even in the exact shapes cPanel's own redirect exempts. The server redirects
+  port 80 for the domain before `.htaccess` is read. Blaming `.htaccess` above was an inference from
+  the rule being in the file, not a measurement. Section 0 stays (without it this file would do the
+  same thing, and a missing validation file came back as `index.html`), but it does not unblock a
+  renewal: that takes a hosting setting. The certificate is still the host's default
 
 ### Diagnosed and fixed — "the dashboard fails, then works on reload"
 - **Reproduced.** v3's chart returned early *above* a `useMemo`. It rendered mock data first (90 rows,
@@ -136,7 +143,10 @@ The ones worth remembering:
 ### Not done
 - Certificate reissue, worker deploy, deleting the old worker: all need Josh's cPanel, Cloudflare and
   PostHog access. Until the worker is deployed the dashboard shows sample data, and says so
-- No live-domain verification of any of this (CSP, PostHog on the dashboards, the worker)
+- Deployed 2026-11-16 and checked on the server — the new pages and scripts with the right content
+  types, old scripts gone, no source map exposed, no Google Analytics in any script, the new worker
+  in the CSP header. Still not seen in a browser on the live domain, which the certificate error
+  prevents: whether the CSP lets the dashboard run, PostHog on the dashboards, and the worker
 - v1–v3 still fill gaps with demo data; the owner's own visits are still counted. Both in CLAUDE.md
 - v1–v3's funnels still assume every open follows a make. Live data doesn't, so their "Open" step can
   read above 100% (333% on the real 90-day rows). v4's funnel is built for it; the old pages are left

@@ -7,18 +7,24 @@
 # ── 0. LET CERTIFICATE VALIDATION THROUGH ───────────────────────────────────
 # This block must stay FIRST, above every other rewrite.
 #
-# The host renews the site's TLS certificate automatically (cPanel AutoSSL). To
-# prove it controls the domain, the certificate authority fetches a small file
-# over plain HTTP from one of the paths below. Every rule further down would
-# interfere with that: section 1 redirects the request to HTTPS — which, once
-# the certificate has lapsed, is exactly the thing that is broken — and section
-# 8 would answer a missing file with index.html and a 200.
+# To prove the site controls its domain, a certificate authority fetches a
+# small file over plain HTTP from one of the paths below (this is how cPanel's
+# AutoSSL validates). Every rule further down would interfere with that:
+# section 1 redirects the request to HTTPS — which, once the certificate has
+# lapsed, is exactly the thing that is broken — and section 8 would answer a
+# missing file with index.html and a 200.
 #
-# On 2026-11-14 the site was found serving the host's default certificate
-# (*.web-hosting.com) instead of its own, and all three paths here were being
-# redirected. cPanel can add exclusions like these to .htaccess on its own, but
-# CI uploads this file whole whenever it changes, which overwrites anything
-# added on the server. So they live here, in the source.
+# ⚠ Necessary, but it was NOT what was blocking validation. On 2026-11-14 the
+# site was found serving the host's default certificate (*.web-hosting.com)
+# with all of these paths redirected, and this file was blamed. Measured on
+# 2026-11-16 with this block deployed: over HTTPS they now answer 404, as
+# intended, but over plain HTTP they are still redirected. The server redirects
+# port 80 for this domain BEFORE it reads this file — a hosting setting, which
+# nothing here can lift. See CLAUDE.md, Open items.
+#
+# cPanel can add exclusions like these to .htaccess on its own, but CI uploads
+# this file whole whenever it changes, which overwrites anything added on the
+# server. So they live here, in the source.
 RewriteEngine On
 RewriteRule ^\.well-known/ - [L]
 RewriteRule ^[0-9]+\..+\.cpaneldcv$ - [L]

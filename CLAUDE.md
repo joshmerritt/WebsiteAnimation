@@ -39,14 +39,23 @@ Two traps, both of which have burned real time here:
    full-page security error — while CI was green and every local check passed. One command:
    `echo | openssl s_client -connect dadatadad.com:443 -servername dadatadad.com 2>/dev/null | openssl x509 -noout -subject -enddate`
    — the subject must name `dadatadad.com`. See the open item below; the cause is not confirmed.
+   While it is wrong, a deploy can still be checked without switching TLS verification off (never
+   `curl -k`). The certificate being served is valid for the hosting server's *own* name — look up
+   the site's IP address in reverse to get it — so ask that name for the site:
+   `curl -H "Host: dadatadad.com" https://<server-name>/analytics-v4.html`. That reads the files
+   and headers on the server. It is not a browser on the real origin, so it says nothing about
+   whether the CSP lets a page run or whether PostHog loads.
 
 ## Gotchas that are not obvious from the code
 
-- **`.htaccess` section 0 must stay first.** It lets certificate validation (`/.well-known/…` and
-  cPanel's DCV files) through before the force-HTTPS redirect and the SPA fallback can touch it.
-  Without it, a lapsed certificate can't renew over HTTP: the validation request is redirected to
-  HTTPS, which is the broken thing. CI uploads this file whole, so anything cPanel adds on the
-  server is overwritten — the exclusions have to live in the source.
+- **`.htaccess` section 0 must stay first — and it is not enough on its own.** It lets certificate
+  validation (`/.well-known/…` and cPanel's DCV files) through before this file's force-HTTPS
+  redirect and SPA fallback can touch it. CI uploads the file whole, so anything cPanel adds on the
+  server is overwritten — the exclusions have to live in the source. But measured on 2026-11-16
+  with it deployed: those paths answer 404 over HTTPS (correct) and are *still* 301-redirected over
+  plain HTTP. **The server redirects port 80 for this domain before `.htaccess` is read**, so the
+  redirect that stops an HTTP validation is a hosting setting, not this file. The first write-up
+  blamed `.htaccess`: an inference from the rule being in the file, never a measurement.
 - **`.htaccess` CSP**: any new third-party domain must be added to the right directive or the browser
   silently blocks it in production only.
 - **The analytics worker's URL lives in three places that must agree**: `name` in
@@ -275,15 +284,24 @@ of what it enabled, and why each scout is on or off, is `posthog-self-driving-re
 
 ## Open items
 
-- **🔴 The site's TLS certificate (found 2026-11-14).** `dadatadad.com` and `www` were serving the
-  host's default `*.web-hosting.com` certificate; DNS was correct. The last recorded visit was
-  2026-11-09, so it broke between then and the 14th. **Not confirmed fixed, and the cause is not
-  confirmed either.** What is established: every certificate-validation path was being redirected
-  to HTTPS by `.htaccess`, which blocks an HTTP renewal once the certificate has lapsed (section 0
-  now exempts them — that change must be *deployed* to take effect). What is not: whether AutoSSL
-  was failing for that reason, was switched off, or the certificate was a paid one that expired.
-  To do in cPanel: *SSL/TLS Status* → select the domains → **Run AutoSSL**, and read the reason it
-  gives if it fails. Then re-run the check in Deploying, trap 3.
+- **🔴 The site's TLS certificate (found 2026-11-14, still broken 2026-11-16).** `dadatadad.com`
+  and `www` serve the host's default `*.web-hosting.com` certificate, so every visitor gets a
+  full-page security error. DNS is correct, and the site's own files are served underneath it. The
+  last recorded visit was 2026-11-09, so it broke between then and the 14th. **The cause is not
+  confirmed.** Established on 2026-11-16, with 3.3.0 deployed:
+  - Every plain-HTTP request for the domain is redirected to HTTPS **by the server, before
+    `.htaccess` is read** — including the exact file names cPanel's own redirect is built to
+    exempt. So it is a hosting setting (most likely cPanel → *Domains* → *Force HTTPS Redirect*, or
+    the host's own SSL tool — not seen, cPanel can't be reached from here), not this repo, and
+    `.htaccess` section 0 cannot lift it. While it is on, a validation request over HTTP is sent
+    to HTTPS, which is the broken thing.
+  - The domain's DNS is on the host's own name servers, so validation by DNS record is possible.
+
+  Not established: whether AutoSSL is failing, is off or is not offered on this plan, or whether
+  the old certificate was a fixed-term one that ran out. To do in cPanel: *SSL/TLS Status* →
+  select the domains → **Run AutoSSL**, and read the reason it gives. If it reports a redirect
+  (301) on the validation file, turn the HTTPS redirect off for the domain, run it again, then turn
+  it back on. Then re-run the check in Deploying, trap 3.
 - **Deploy `analytics-worker/` — the dashboard has no live data until this is done.** It shows
   sample data under a banner meanwhile. From `analytics-worker/`: `npx wrangler login` (this machine
   was logged out on 2026-11-14), then `npx wrangler secret put POSTHOG_API_KEY` (a PostHog *personal*
@@ -309,10 +327,15 @@ of what it enabled, and why each scout is on or off, is `posthog-self-driving-re
 - **The owner's own visits are counted.** At one real visit every few days, Josh testing the site is
   a visible share of every number. Nothing excludes them yet (an opt-out flag in `shouldTrack()`
   would do it).
-- **Nothing in this release has been verified on the live domain** — it could not be, with the
-  certificate broken. After the certificate and the worker are both fixed: load
-  `/analytics-v4.html`, confirm the pill says *Live* and the console has no CSP errors, and confirm
-  a `dashboard_loaded` event with `$host = dadatadad.com` arrives in PostHog.
+- **3.3.0 is deployed (2026-11-16) but has not been seen in a browser on the live domain** — it
+  cannot be, with the certificate broken. Checked on the server itself (Deploying, trap 3): the new
+  pages and scripts are there with the right content types, the old scripts are gone, no source
+  map is exposed, no script mentions Google Analytics, and the CSP header names the new worker.
+  Not checked, because each needs a real page load on `dadatadad.com`: that the CSP lets the
+  dashboard run, that PostHog loads on the dashboard pages, and anything about the worker. After
+  the certificate and the worker are both fixed: load `/analytics-v4.html`, confirm the pill says
+  *Live* and the console has no CSP errors, and confirm a `dashboard_loaded` event with
+  `$host = dadatadad.com` arrives in PostHog.
 - **Self-driving gaps** (see above):
   - *Nothing reviews replays.* The wizard skipped the session-replay signal source in favour of two
     Replay Vision scanners (breakage, rage-click frustration), then couldn't create them. The PostHog
